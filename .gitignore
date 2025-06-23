@@ -1,0 +1,90 @@
+HELP.md
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+# =============================
+# Java / Spring Boot / Maven
+# =============================
+/target/
+*.class
+*.jar
+*.war
+*.ear
+
+# Maven Wrapper
+.mvn/
+!/.mvn/wrapper/maven-wrapper.jar
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+
+# 로그 및 임시 파일
+*.log
+hs_err_pid*
+replay_pid*
+
+# 환경 파일 (DB 정보, 비밀 키 등)
+.env
+*.env
+application-*.yml
+application-*.properties
+
+# H2 데이터베이스 파일 (로컬 저장형일 경우)
+*.h2.db
+*.mv.db
+
+# =============================
+# React (frontend 폴더 기준)
+# =============================
+frontend/node_modules/
+frontend/build/
+frontend/dist/
+
+# 로그 및 환경 파일
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/.env
+frontend/.env.*.local
+
+# =============================
+# macOS / Windows 시스템 파일
+# =============================
+.DS_Store
+Thumbs.db
+
+
