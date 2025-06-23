@@ -60,8 +60,8 @@ replay_pid*
 # 환경 파일 (DB 정보, 비밀 키 등)
 .env
 *.env
-application-*.yml
-application-*.properties
+application*.yml
+application*.properties
 
 # H2 데이터베이스 파일 (로컬 저장형일 경우)
 *.h2.db
@@ -87,4 +87,7 @@ frontend/.env.*.local
 .DS_Store
 Thumbs.db
 
+src/main/resources/application.properties
 
+ 
+ 
