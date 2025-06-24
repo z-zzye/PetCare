@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>테스트 회원가입</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; background: #f7f7fa; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+        .container { background: #fff; border-radius: 16px; box-shadow: 0 4px 24px #0001; padding: 36px 32px; width: 100%; max-width: 420px; }
+        h2 { text-align: center; margin-bottom: 28px; }
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; margin-bottom: 7px; font-weight: 500; }
+        .form-group input { width: 100%; padding: 11px 14px; border: 1.5px solid #d1d5db; border-radius: 8px; font-size: 15px; }
+        .form-group input:focus { border-color: #ffc107; outline: none; background: #fffbe7; }
+        .btn { width: 100%; padding: 14px 0; background: linear-gradient(135deg, #ffc107, #f9d423); color: #2c3e50; border: none; border-radius: 8px; font-size: 17px; font-weight: 700; cursor: pointer; margin-top: 10px; }
+        .btn:hover { background: linear-gradient(135deg, #f9d423, #ffc107); }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>테스트 회원가입</h2>
+    <form method="post" enctype="multipart/form-data" action="/members/new" th:action="@{/members/new}">
+        <div class="form-group">
+            <label for="member_Email">이메일</label>
+            <input type="email" id="member_Email" name="member_Email" required placeholder="이메일 입력">
+        </div>
+        <div class="form-group">
+            <label for="member_Pw">비밀번호</label>
+            <input type="password" id="member_Pw" name="member_Pw" required placeholder="비밀번호 입력">
+        </div>
+        <div class="form-group">
+            <label for="member_NickName">닉네임</label>
+            <input type="text" id="member_NickName" name="member_NickName" required placeholder="닉네임 입력">
+        </div>
+        <div class="form-group">
+            <label for="member_Phone">연락처</label>
+            <input type="text" id="member_Phone" name="member_Phone" required placeholder="연락처 입력">
+        </div>
+        <div class="form-group">
+            <label for="member_ProfileImg">프로필 이미지</label>
+            <input type="file" id="member_ProfileImg" name="member_ProfileImgFile" accept="image/*">
+        </div>
+        <button type="submit" class="btn">회원가입</button>
+    </form>
+</div>
+</body>
+</html> 

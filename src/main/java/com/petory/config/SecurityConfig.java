@@ -15,8 +15,10 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.authorizeRequests(auth -> auth // 권한 부여
+        http.csrf(csrf -> csrf.disable())
+        .authorizeRequests(auth -> auth // 권한 부여
                 .requestMatchers("/css/**", "/js/**", "/img/**", "/favicon.ico", "/error").permitAll()
                 .requestMatchers("/", "/members/**", "/item/**", "/images/**").permitAll()
                 .requestMatchers("/mail/send", "/map").permitAll()
@@ -25,7 +27,7 @@ public class SecurityConfig {
         ).formLogin(formLogin -> formLogin
                 .loginPage("/members/login")
                 .defaultSuccessUrl("/")
-                .usernameParameter("email")
+                .usernameParameter("member_email")
                 .failureUrl("/members/login/error")
         ).logout(logout-> logout
                 .logoutRequestMatcher(new AntPathRequestMatcher("/members/logout"))

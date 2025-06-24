@@ -1,9 +1,8 @@
+package com.petory.config;
 
-package com.shop.config.oauth;
-
-import com.shop.entity.Member;
-import com.shop.constant.Role;
-import com.shop.repository.MemberRepository;
+import com.petory.entity.Member;
+import com.petory.constant.Role;
+import com.petory.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -34,18 +33,19 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         String email = extractEmail(registrationId, attributes);
         String name = extractName(registrationId, attributes);
 
-        Member member = memberRepository.findByEmail(email);
+        Member member = memberRepository.findByMember_Email(email);
         if (member == null) {
             member = new Member();
-            member.setEmail(email);
-            member.setName(name);
-            member.setRole(Role.USER);
-            member.setPassword("SOCIAL_LOGIN"); // 더미값
+            member.setMember_Email(email);
+            member.setMember_NickName(name);
+            member.setMember_Role(Role.USER);
+            member.setMember_Pw("SOCIAL_LOGIN"); // 더미값
+            member.setMember_Mileage(0);
             memberRepository.save(member);
         }
 
         return new DefaultOAuth2User(
-                Collections.singleton(new SimpleGrantedAuthority(member.getRole().toString())),
+                Collections.singleton(new SimpleGrantedAuthority(member.getMember_Role().toString())),
                 attributes,
                 userNameAttributeName
         );
