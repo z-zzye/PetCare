@@ -39,7 +39,7 @@
             border: 1px solid #eee;
         }
         .header { text-align: center; margin-bottom: 30px; }
-        .logo-img { height: 120px; }
+        .logo-img { height: 200px; }
         .header p { color: var(--text-sub); font-size: 15px; margin-top: 8px; }
         .form-group { margin-bottom: 20px; }
         .form-group label {
@@ -73,7 +73,7 @@
             margin-top: 24px; text-align: center;
         }
         .social-btns {
-            display: flex; gap: 12px; justify-content: center; margin-top: 10px;
+            display: flex; gap: 12px; justify-content: center; margin-top: 10px; flex-direction: column;
         }
         .social-btn {
             flex: 1; padding: 12px 0; border: none; border-radius: 8px; font-size: 15px; font-weight: 600;
@@ -103,17 +103,20 @@
             <input type="password" id="member_pw" name="member_pw" required placeholder="비밀번호를 입력하세요">
         </div>
         <button type="submit" class="login-btn">로그인</button>
-        <div class="find-links">
-            <a href="#" id="findId">아이디 찾기</a>
-            <a href="#" id="findPw">비밀번호 찾기</a>
+        <div class="find-links" style="display:flex; justify-content:space-between; margin:12px 0 18px 0; font-size:14px;">
+            <div style="display:flex; gap:16px;">
+                <a href="#" id="findId">아이디 찾기</a>
+                <a href="#" id="findPw">비밀번호 찾기</a>
+            </div>
+            <a href="memberSignUp.html" id="signUp" style="color:var(--btn-blue); text-decoration:none; font-weight:500;">회원가입</a>
         </div>
     </form>
     <div class="social-login">
-        <span>소셜 계정으로 로그인</span>
-        <div class="social-btns">
-            <button type="button" class="social-btn social-kakao">카카오</button>
-            <button type="button" class="social-btn social-naver">네이버</button>
-            <button type="button" class="social-btn social-google">구글</button>
+        <hr style="margin: 32px 0 18px 0; border: none; border-top: 1.5px solid #eee;">
+        <div class="social-btns" style="flex-direction:column; gap:12px;">
+            <button type="button" class="social-btn social-kakao">Kakao</button>
+            <button type="button" class="social-btn social-naver">NAVER</button>
+            <button type="button" class="social-btn social-google">Google</button>
         </div>
     </div>
 </div>
