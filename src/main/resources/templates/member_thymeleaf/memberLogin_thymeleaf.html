@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>로그인</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            --main-bg: #f7f7fa;
+            --container-bg: #fff;
+            --input-bg: #f9fafb;
+            --input-border: #d1d5db;
+            --text-main: #222;
+            --text-sub: #888;
+            --mustard: #ffc107;
+            --mustard-dark: #e6a800;
+            --btn-blue: #3d5a80;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: var(--main-bg);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: var(--container-bg);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 #0001, 0 1.5px 8px 0 #ffc10722;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid #eee;
+        }
+        .header { text-align: center; margin-bottom: 30px; }
+        .logo-img { height: 200px; }
+        .header p { color: var(--text-sub); font-size: 15px; margin-top: 8px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label {
+            display: block; margin-bottom: 8px; color: var(--text-main); font-weight: 500; font-size: 14px;
+        }
+        .form-group input {
+            width: 100%; padding: 12px 16px; border: 2px solid var(--input-border); border-radius: 10px;
+            font-size: 14px; transition: all 0.3s ease; background: var(--input-bg); color: var(--text-main);
+        }
+        .form-group input::placeholder { color: #b0b8c1; }
+        .form-group input:focus {
+            outline: none; border-color: var(--mustard); box-shadow: 0 0 0 3px #ffe9b733;
+            background: #fff;
+        }
+        .login-btn {
+            width: 100%; padding: 16px 0; background: linear-gradient(135deg, #ffc107, #f9d423);
+            color: #2c3e50; border: none; border-radius: 10px; font-size: 17px; font-weight: 700;
+            cursor: pointer; transition: all 0.3s ease; margin-top: 10px; box-shadow: 0 4px 15px #ffe08255; letter-spacing: 1px;
+        }
+        .login-btn:hover {
+            transform: translateY(-2px); box-shadow: 0 8px 25px #ffe08299;
+        }
+        .find-links {
+            display: flex; justify-content: space-between; margin: 12px 0 18px 0; font-size: 14px;
+        }
+        .find-links a {
+            color: var(--btn-blue); text-decoration: none; font-weight: 500; transition: color 0.2s;
+        }
+        .find-links a:hover { color: var(--mustard-dark); }
+        .social-login {
+            margin-top: 24px; text-align: center;
+        }
+        .social-btns {
+            display: flex; gap: 12px; justify-content: center; margin-top: 10px; flex-direction: column;
+        }
+        .social-btn {
+            flex: 1; padding: 12px 0; border: none; border-radius: 8px; font-size: 15px; font-weight: 600;
+            cursor: pointer; transition: all 0.2s; color: #fff;
+        }
+        .social-kakao { background: #fee500; color: #3c1e1e; }
+        .social-naver { background: #03c75a; }
+        .social-google { background: #4285f4; }
+        .social-btn:hover { filter: brightness(0.95); }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="logo">
+            <img src="../images/logo.png" alt="로고" class="logo-img">
+        </div>
+    </div>
+    <form id="loginForm" th:action="@{/member/login}" th:object="${loginForm}" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <div class="form-group">
+            <label for="member_email">이메일(아이디)</label>
+            <input type="text" id="member_email" th:field="*{member_email}" name="member_email" required placeholder="이메일(아이디)를 입력하세요">
+            <div class="error" id="emailError" style="display:none; color:#e74c3c; font-size:12px; margin-top:5px;"
+                 th:if="${#fields.hasErrors('member_email')}" th:text="${#fields.errors('member_email')}">올바른 이메일 형식으로 입력해 주세요.</div>
+        </div>
+        <div class="form-group">
+            <label for="member_pw">비밀번호</label>
+            <input type="password" id="member_pw" th:field="*{member_pw}" name="member_pw" required placeholder="비밀번호를 입력하세요">
+            <div class="error" style="display:none; color:#e74c3c; font-size:12px; margin-top:5px;"
+                 th:if="${#fields.hasErrors('member_pw')}" th:text="${#fields.errors('member_pw')}"></div>
+        </div>
+        <button type="submit" class="login-btn">로그인</button>
+        <div class="find-links" style="display:flex; justify-content:space-between; margin:12px 0 18px 0; font-size:14px;">
+            <div style="display:flex; gap:16px;">
+                <a href="#" id="findId">아이디 찾기</a>
+                <a href="#" id="findPw">비밀번호 찾기</a>
+            </div>
+            <a href="memberSignUp_thymeleaf.html" id="signUp" style="color:var(--btn-blue); text-decoration:none; font-weight:500;">회원가입</a>
+        </div>
+    </form>
+    <div class="social-login">
+        <hr style="margin: 32px 0 18px 0; border: none; border-top: 1.5px solid #eee;">
+        <div class="social-btns" style="flex-direction:column; gap:12px;">
+            <button type="button" class="social-btn social-kakao">Kakao</button>
+            <button type="button" class="social-btn social-naver">NAVER</button>
+            <button type="button" class="social-btn social-google">Google</button>
+        </div>
+    </div>
+</div>
+<script th:inline="javascript">
+const loginForm = document.getElementById('loginForm');
+const emailInput = document.getElementById('member_email');
+const emailError = document.getElementById('emailError');
+
+loginForm.addEventListener('submit', function(e) {
+    if (!isValidEmail(emailInput.value)) {
+        emailError.style.display = 'block';
+        emailInput.focus();
+        e.preventDefault();
+    } else {
+        emailError.style.display = 'none';
+    }
+});
+
+function isValidEmail(value) {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(value);
+}
+</script>
+</body>
+</html> 
