@@ -14,35 +14,46 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @ToString
 public class Member extends BaseEntity {
     @Id
-    @Column(name = "member_id")
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "user_Id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
-    @Column(unique = true)
+    @Column(name = "user_Pw", nullable = false)
+    private String password;
+
+    @Column(name = "user_Email", nullable = false, unique = true)
     private String email;
 
-    private String password;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "user_Role", nullable = false)
+    private Role role;
+
+    @Column(name = "user_NickName", nullable = false)
+    private String nickname;
+
+    @Column(name = "user_tel")
+    private String userTel;
+
+    @Column(name = "user_ProfileImg")
+    private String profileImg;
+
+    @Column(name = "user_milleage")
+    private Integer milleage;
 
     private String address;
 
-    private String tel;
-
-    @Enumerated(EnumType.STRING)
-    private Role role;
 
     public static Member createMember(MemberFormDto memberFormDto,
                                       PasswordEncoder passwordEncoder) {
         Member member = new Member();
-        member.setName(memberFormDto.getName());
+        member.setNickname(memberFormDto.getNickname());
         member.setEmail(memberFormDto.getEmail());
         member.setAddress(memberFormDto.getAddress());
-        member.setTel(memberFormDto.getTel());
+        member.setUserTel(memberFormDto.getUserTel());
         String password = passwordEncoder.encode(memberFormDto.getPassword());
         member.setPassword(password);
-        member.setRole(Role.ADMIN);
+        member.setRole(Role.USER);
+        member.setMilleage(0);
         return member;
     }
-    }
-
 }
