@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class MemberService {
     private final MemberRepository memberRepository;
+    private final FileService fileService;
 
     public Member saveMember(Member member) {
         validateDuplicateMember(member);
@@ -19,17 +20,17 @@ public class MemberService {
     }
 
     private void validateDuplicateMember(Member member) {
-        Member findMember = memberRepository.findByEmail(member.getEmail());
+        Member findMember = memberRepository.findByEmail(member.getMember_Email());
         if (findMember != null) {
             throw new IllegalStateException("이미 가입된 회원입니다."); // 예외 발생
         }
 
-        findMember = memberRepository.findByUserTel(member.getUserTel());
+        findMember = memberRepository.findByPhone(member.getMember_Phone());
         if (findMember != null) {
             throw new IllegalStateException("이미 가입된 전화번호입니다."); // 예외 발생
         }
 
-        findMember = memberRepository.findByNickname(member.getNickname());
+        findMember = memberRepository.findByNickName(member.getMember_NickName());
         if (findMember != null) {
             throw new IllegalStateException("이미 사용중인 닉네임입니다."); // 예외 발생
         }

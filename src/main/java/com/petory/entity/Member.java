@@ -14,31 +14,31 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @ToString
 public class Member extends BaseEntity {
     @Id
-    @Column(name = "user_Id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "member_Id")
+    private Long member_Id;
 
-    @Column(name = "user_Pw", nullable = false)
-    private String password;
+    @Column(name = "member_Pw", nullable = false)
+    private String member_Pw;
 
-    @Column(name = "user_Email", nullable = false, unique = true)
-    private String email;
+    @Column(name = "member_Email", nullable = false, unique = true)
+    private String member_Email;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "user_Role", nullable = false)
-    private Role role;
+    @Column(name = "member_Role", nullable = false)
+    private Role member_Role;
 
-    @Column(name = "user_NickName", nullable = false)
-    private String nickname;
+    @Column(name = "member_NickName", nullable = false)
+    private String member_NickName;
 
-    @Column(name = "user_tel")
-    private String userTel;
+    @Column(name = "member_Phone", nullable = false)
+    private String member_Phone;
 
-    @Column(name = "user_ProfileImg")
-    private String profileImg;
+    @Column(name = "member_ProfileImg")
+    private String member_ProfileImg;
 
-    @Column(name = "user_milleage")
-    private Integer milleage;
+    @Column(name = "member_Mileage")
+    private Integer member_Mileage;
 
     private String address;
 
@@ -46,14 +46,14 @@ public class Member extends BaseEntity {
     public static Member createMember(MemberFormDto memberFormDto,
                                       PasswordEncoder passwordEncoder) {
         Member member = new Member();
-        member.setNickname(memberFormDto.getNickname());
-        member.setEmail(memberFormDto.getEmail());
+        member.setMember_NickName(memberFormDto.getUser_NickName());
+        member.setMember_Email(memberFormDto.getEmail());
         member.setAddress(memberFormDto.getAddress());
-        member.setUserTel(memberFormDto.getUserTel());
+        member.setMember_Phone(memberFormDto.getUserTel());
         String password = passwordEncoder.encode(memberFormDto.getPassword());
-        member.setPassword(password);
-        member.setRole(Role.USER);
-        member.setMilleage(0);
+        member.setMember_Pw(password);
+        member.setMember_Role(Role.USER);
+        member.setMember_Mileage(0);
         return member;
     }
 }

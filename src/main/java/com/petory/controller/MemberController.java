@@ -34,11 +34,11 @@ public class MemberController {
         try {
             Member member = Member.createMember(memberFormDto, passwordEncoder);
 
-            // 프로필 이미지 처리
-            if (!memberFormDto.getProfileImageFile().isEmpty()) {
-                String savedFileName = fileService.saveProfileImage(memberFormDto.getProfileImageFile());
-                member.setProfileImg(savedFileName);
-            }
+            // // 프로필 이미지 처리 (추후 구현)
+            // if (!memberFormDto.getProfileImageFile().isEmpty()) {
+            //     String savedFileName = fileService.uploadFile(memberFormDto.getProfileImageFile());
+            //     member.setProfileImg(savedFileName);
+            // }
             // 데이터베이스에 저장
             memberService.saveMember(member);
         } catch (IllegalStateException e) {
