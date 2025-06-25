@@ -121,8 +121,30 @@ public class MemberController {
      */
     @PostMapping("/update-phone")
     public String updatePhone(PhoneUpdateDto phoneUpdateDto, RedirectAttributes redirectAttributes) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = null;
+        if (authentication.getPrincipal() instanceof org.springframework.security.oauth2.core.user.OAuth2User) {
+            org.springframework.security.oauth2.core.user.OAuth2User oauth2User = 
+                (org.springframework.security.oauth2.core.user.OAuth2User) authentication.getPrincipal();
+            Map<String, Object> attributes = oauth2User.getAttributes();
+            // registrationId를 세션에서 꺼내거나, provider를 추론해야 함 (여기선 구글/네이버/카카오 모두 지원)
+            String provider = null;
+            Object regAttr = authentication.getAuthorities().stream().findFirst().orElse(null);
+            if (attributes.containsKey("response")) provider = "naver";
+            else if (attributes.containsKey("kakao_account")) provider = "kakao";
+            else provider = "google";
+            email = com.petory.config.CustomOAuth2UserService.extractEmail(provider, attributes);
+        } else {
+            email = authentication.getName();
+        }
+
+        if (email == null) {
+            redirectAttributes.addFlashAttribute("error", "사용자 정보를 찾을 수 없습니다.");
+            return "redirect:/members/memberSocialExtra";
+        }
+
         try {
-            memberService.updatePhone(phoneUpdateDto);
+            memberService.updatePhoneByEmail(email, phoneUpdateDto.getPhone());
             redirectAttributes.addFlashAttribute("message", "전화번호가 성공적으로 업데이트되었습니다.");
             return "redirect:/";
         } catch (IllegalStateException e) {
