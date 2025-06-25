@@ -1,0 +1,11 @@
+# 이 파일은 프로젝트 전체에 일관된 에디터 설정을 강제합니다.
+root = true
+
+# 모든 파일에 대해 아래 설정을 적용
+[*]
+indent_style = space             # 들여쓰기는 space (탭 대신)
+indent_size = 2                  # 들여쓰기 너비는 2칸
+end_of_line = lf                 # 줄바꿈은 LF (유닉스 스타일, Mac/Linux/깃허브 권장)
+charset = utf-8                  # 문자 인코딩은 UTF-8
+trim_trailing_whitespace = true # 줄 끝 공백 자동 제거
+insert_final_newline = true     # 파일 끝에 빈 줄 삽입
