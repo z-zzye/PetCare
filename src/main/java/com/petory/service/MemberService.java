@@ -50,6 +50,14 @@ public class MemberService implements UserDetailsService {
     }
 
     /**
+     * 이메일로 회원을 조회하는 메서드
+     */
+    public Member getMemberByEmail(String email) {
+        return memberRepository.findByMember_Email(email)
+                .orElseThrow(() -> new IllegalStateException("로그인한 사용자를 찾을 수 없습니다."));
+    }
+
+    /**
      * 현재 로그인한 사용자의 전화번호를 업데이트하는 메서드
      */
     public void updatePhone(PhoneUpdateDto phoneUpdateDto) {

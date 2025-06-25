@@ -26,7 +26,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         if (needPhoneInput != null && needPhoneInput) {
             // 플래그를 제거하고 전화번호 입력 페이지로 리다이렉트
             session.removeAttribute("NEED_PHONE_INPUT");
-            response.sendRedirect("/phone-input");
+            response.sendRedirect("/members/memberSocialExtra");
         } else {
             // 일반적인 경우 메인 페이지로 리다이렉트
             response.sendRedirect("/");
