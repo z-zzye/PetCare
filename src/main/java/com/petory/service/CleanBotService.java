@@ -52,23 +52,10 @@ public class CleanBotService {
      */
     public String filter(String text) {
         // 검열할 글자가 없는 경우(null, "   ") 작업 생략
-        if (!StringUtils.hasText(text)) {
-            return text;
+        if (containsProfanity(text)) {
+            return "클린봇이 부적절한 단어를 감지하였습니다.";
         }
-
-        String filteredText = text;
-        for (String badWord : badWords) {
-            // 정규 표현식에서 특수 문자로 취급될 수 있는 문자를 이스케이프 처리합니다.
-            String pattern = Pattern.quote(badWord);
-
-            // 단어의 길이만큼 '*'로 치환합니다.
-            String replacement = "*".repeat(badWord.length());
-
-            // 대소문자를 구분하지 않고 모든 욕설을 찾아 치환합니다.
-            filteredText = filteredText.replaceAll("(?i)" + pattern, replacement);
-        }
-
-        return filteredText;
+        return text;
     }
 
     /**
