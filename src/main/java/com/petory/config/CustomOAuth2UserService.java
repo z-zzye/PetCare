@@ -83,39 +83,48 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         }
     }
 
-    public static String extractEmail(String provider, Map<String, Object> attributes) {
-        if (provider.equals("naver")) {
+    public String extractProvider(Map<String, Object> attributes) {
+        if (attributes.containsKey("response")) return "naver";
+        if (attributes.containsKey("kakao_account")) return "kakao";
+        return "google";
+    }
+
+    public String extractEmail(String provider, Map<String, Object> attributes) {
+        if ("naver".equals(provider)) {
             Map<String, Object> response = (Map<String, Object>) attributes.get("response");
             return (String) response.get("email");
-        } else if (provider.equals("kakao")) {
+        }
+        if ("kakao".equals(provider)) {
             Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
             return (String) kakaoAccount.get("email");
-        } else {
-            return (String) attributes.get("email");
         }
+        // 기본: 구글 등 기타
+        return (String) attributes.get("email");
     }
 
     public String extractName(String provider, Map<String, Object> attributes) {
-        if (provider.equals("naver")) {
+        if ("naver".equals(provider)) {
             Map<String, Object> response = (Map<String, Object>) attributes.get("response");
             return (String) response.get("name");
-        } else if (provider.equals("kakao")) {
+        }
+        if ("kakao".equals(provider)) {
             Map<String, Object> properties = (Map<String, Object>) attributes.get("properties");
             return (String) properties.get("nickname");
-        } else {
-            return (String) attributes.get("name");
         }
+        // 기본: 구글 등 기타
+        return (String) attributes.get("name");
     }
 
     public String extractProfileImage(String provider, Map<String, Object> attributes) {
-        if (provider.equals("naver")) {
-            Map<String, Object> response = (Map<String, Object>) attributes.get("response");
-            return (String) response.get("profile_image");
-        } else if (provider.equals("kakao")) {
-            Map<String, Object> properties = (Map<String, Object>) attributes.get("properties");
-            return (String) properties.get("profile_image");
-        } else {
-            return (String) attributes.get("picture");
+        if ("naver".equals(provider)) {
+            Map<String, Object> naverResponse = (Map<String, Object>) attributes.get("response");
+            return (String) naverResponse.get("profile_image");
         }
+        if ("kakao".equals(provider)) {
+            Map<String, Object> kakaoProperties = (Map<String, Object>) attributes.get("properties");
+            return (String) kakaoProperties.get("profile_image");
+        }
+        // 기본: 구글 등 기타
+        return (String) attributes.get("picture");
     }
 }
