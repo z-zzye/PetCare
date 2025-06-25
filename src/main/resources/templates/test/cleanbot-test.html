@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>클린봇 테스트</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; line-height: 1.6; color: #333; }
+    .container { background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    textarea { width: 100%; box-sizing: border-box; min-height: 150px; padding: 12px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
+    button { display: block; width: 100%; padding: 12px 20px; border: none; background-color: #007bff; color: white; border-radius: 4px; cursor: pointer; font-size: 1.1rem; font-weight: 500; }
+    button:hover { background-color: #0056b3; }
+    .result-box { margin-top: 25px; padding: 20px; background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 4px; }
+    h1, h2 { border-bottom: 2px solid #eee; padding-bottom: 10px; }
+    pre { white-space: pre-wrap; word-wrap: break-word; font-size: 1.1rem; color: #c7254e; background-color: #f9f2f4; padding: 10px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>클린봇 필터링 테스트</h1>
+  <p>아래 텍스트 상자에 문장을 입력하고 '필터링 실행' 버튼을 누르세요. <br>
+    욕설 사전에 등록된 단어 (예: 바보, 멍청이, 씨발)가 '*'로 치환됩니다.</p>
+
+  <form id="filterForm">
+    <textarea id="inputText" placeholder="테스트할 문장을 입력하세요..."></textarea>
+    <button type="submit">필터링 실행</button>
+  </form>
+
+  <div class="result-box">
+    <h2>필터링 결과</h2>
+    <pre id="resultText">결과가 여기에 표시됩니다.</pre>
+  </div>
+</div>
+
+<script>
+  document.getElementById('filterForm').addEventListener('submit', function(event) {
+      event.preventDefault(); // 폼의 기본 제출 동작을 막습니다.
+
+      const inputText = document.getElementById('inputText').value;
+      const resultElement = document.getElementById('resultText');
+
+      resultElement.textContent = '필터링 중...';
+
+      // 서버의 API 엔드포인트로 데이터를 보냅니다.
+      fetch('/api/test/cleanbot', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ "text": inputText }) // JSON 형식으로 전송
+      })
+      .then(response => {
+          if (!response.ok) {
+              throw new Error('서버 응답에 문제가 있습니다. (상태 코드: ' + response.status + ')');
+          }
+          return response.json();
+      })
+      .then(data => {
+          // 서버로부터 받은 필터링된 텍스트를 결과창에 표시합니다.
+          resultElement.textContent = data.filteredText;
+      })
+      .catch(error => {
+          console.error('Error:', error);
+          resultElement.textContent = '오류가 발생했습니다: ' + error.message;
+      });
+  });
+</script>
+</body>
+</html>
