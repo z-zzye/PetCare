@@ -5,15 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0e5c3845-b29e-4548-894e-1e598e901580" name="변경" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/petory/controller/MemberApiController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/templates/member/memberSignUp.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/petory/config/WebMvcConfig.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/petory/config/CustomOAuth2UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/petory/config/CustomOAuth2UserService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/petory/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/petory/config/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/petory/controller/MemberApiController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/petory/controller/MemberApiController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/petory/controller/MemberController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/petory/controller/MemberController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/petory/repository/MemberRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/petory/repository/MemberRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/petory/entity/Member.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/petory/entity/Member.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/petory/service/ImageService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/petory/service/ImageService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/petory/service/MemberService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/petory/service/MemberService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/member/memberLogin.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/member/memberLogin.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/member/memberSignUp.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/member/memberSignUp.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

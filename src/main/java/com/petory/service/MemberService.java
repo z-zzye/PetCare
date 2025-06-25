@@ -10,8 +10,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
+import java.io.IOException;
 
 @Service
 @Transactional
@@ -19,13 +21,29 @@ import lombok.RequiredArgsConstructor;
 public class MemberService implements UserDetailsService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ImageService imageService;
 
     public Member join(MemberFormDto memberFormDto) {
-        validateDuplicateMember(memberFormDto); // DTO로 중복 검사
+        validateDuplicateMember(memberFormDto); // 1. 중복 회원 검사
 
-        Member member = Member.createMember(memberFormDto, passwordEncoder); // Entity 생성
+        String savedProfileImgPath = null; // DB에 저장될 이미지 경로를 담을 변수
 
-        return memberRepository.save(member); // DB 저장
+        try {
+            // 2. ImageService를 사용하여 파일 업로드
+            // 첫 번째 인자는 MultipartFile 객체, 두 번째 인자는 저장할 위치 타입("profile")입니다.
+            savedProfileImgPath = imageService.uploadFile(memberFormDto.getMember_ProfileImgFile(), "profile");
+
+        } catch (Exception e) {
+            // 이미지 업로드 중 에러가 발생하면 런타임 예외를 발생시켜 트랜잭션을 롤백합니다.
+            // 실제 운영 코드에서는 로깅을 추가하는 것이 좋습니다.
+            throw new RuntimeException("프로필 이미지 업로드 중 오류가 발생했습니다.", e);
+        }
+
+        // 3. Member 엔티티 생성 시, 저장된 이미지 경로를 함께 전달
+        Member member = Member.createMember(memberFormDto, passwordEncoder, savedProfileImgPath);
+
+        // 4. DB에 최종 저장
+        return memberRepository.save(member);
     }
 
     private void validateDuplicateMember(MemberFormDto memberFormDto) {

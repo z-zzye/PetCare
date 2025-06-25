@@ -132,7 +132,7 @@
             <p>새로운 계정을 만들어보세요</p>
         </div>
 
-        <form id="joinForm">
+        <form id="joinForm" enctype="multipart/form-data">
             <!-- 이메일(아이디) -->
             <div class="form-group">
                 <label for="member_email">이메일(아이디) *</label>
@@ -186,6 +186,21 @@
                 <div class="error" id="phoneError">올바른 연락처 형식을 입력해주세요.</div>
             </div>
 
+            <!-- 프로필 이미지 업로드 -->
+            <div class="form-group">
+                <label for="member_profile_img">프로필 이미지 (선택사항)</label>
+                <input type="file" id="member_profile_img" name="member_ProfileImgFile" 
+                       accept="image/*" style="padding: 8px;">
+                <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                    지원 형식: JPG, JPEG, PNG, GIF (최대 5MB)
+                </div>
+                <div class="error" id="profileImgError"></div>
+                <!-- 이미지 미리보기 영역 -->
+                <div id="imagePreview" style="margin-top: 10px; display: none;">
+                    <img id="previewImg" style="max-width: 200px; max-height: 200px; border-radius: 10px; border: 2px solid #ddd;">
+                </div>
+            </div>
+
             <!-- 약관동의 -->
             <div class="form-group">
                 <div class="checkbox-row">
@@ -214,6 +229,9 @@
         const confirmPassword = document.getElementById('confirmPassword');
         const email = document.getElementById('member_email');
         const phone = document.getElementById('member_number');
+        const profileImgFile = document.getElementById('member_profile_img');
+        const imagePreview = document.getElementById('imagePreview');
+        const previewImg = document.getElementById('previewImg');
 
         // 이메일 인증 버튼 클릭 이벤트
         verifyEmailBtn.addEventListener('click', function() {
@@ -289,6 +307,40 @@
             }
         });
 
+        // 프로필 이미지 미리보기
+        profileImgFile.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                // 파일 크기 검증
+                if (file.size > 5 * 1024 * 1024) { // 5MB
+                    showError('profileImgError', '파일 크기는 5MB를 초과할 수 없습니다.');
+                    this.value = '';
+                    imagePreview.style.display = 'none';
+                    return;
+                }
+
+                // 파일 형식 검증
+                const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                if (!validTypes.includes(file.type)) {
+                    showError('profileImgError', '지원하지 않는 이미지 형식입니다. (JPG, JPEG, PNG, GIF만 허용)');
+                    this.value = '';
+                    imagePreview.style.display = 'none';
+                    return;
+                }
+
+                // 미리보기 표시
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                    hideError('profileImgError');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                imagePreview.style.display = 'none';
+            }
+        });
+
         // 폼 제출 이벤트
         form.addEventListener('submit', function(e) {
         e.preventDefault(); // 기본 폼 제출 동작을 막습니다.
@@ -296,15 +348,18 @@
         if (validateForm()) { // 프론트엔드 유효성 검사 (이 코드는 원래 파일에 존재)
 
             const formData = new FormData(form);
-            const data = Object.fromEntries(formData.entries());
+            
+            // 파일 크기 검증
+            const profileImgFile = formData.get('member_ProfileImgFile');
+            if (profileImgFile && profileImgFile.size > 5 * 1024 * 1024) { // 5MB
+                showError('profileImgError', '파일 크기는 5MB를 초과할 수 없습니다.');
+                return;
+            }
 
             // fetch API를 사용해 새로 만든 API 컨트롤러로 데이터 전송
             fetch('/api/members/join', { // MemberApiController의 경로와 일치
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
+                body: formData // FormData를 직접 전송 (Content-Type은 브라우저가 자동으로 설정)
             })
             .then(response => {
                 // response.ok는 상태 코드가 200~299 범위일 때 true가 됩니다.
