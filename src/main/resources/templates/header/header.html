@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetCare</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+
+        :root {
+            --main-bg: #f7f7fa;
+            --container-bg: #fff;
+            --input-bg: #f9fafb;
+            --input-border: #d1d5db;
+            --text-main: #222;
+            --text-sub: #888;
+            --mustard: #ffc107;
+            --mustard-dark: #e6a800;
+            --btn-blue: #3d5a80;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        .navbar {
+            background: var(--container-bg) !important;
+            box-shadow: 0 2px 20px 0 #0001, 0 1px 8px 0 #ffc10722;
+            border-bottom: 1px solid #eee;
+            padding: 15px 0;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--text-main) !important;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand:hover {
+            transform: translateY(-1px);
+        }
+
+        .logo {
+            width: 200px;
+            height: auto;
+        }
+
+        .navbar-nav .nav-link {
+            color: var(--text-main) !important;
+            font-weight: 500;
+            font-size: 17px;
+            padding: 15px 20px !important;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            margin: 0 6px;
+            text-align: center;
+            min-width: 100px;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: var(--mustard) !important;
+            background: linear-gradient(135deg, #ffc10722, #ffe08233);
+            transform: translateY(-1px);
+        }
+
+        .navbar-nav .nav-link.active {
+            color: var(--mustard) !important;
+            background: linear-gradient(135deg, #ffc107, #ffe082);
+            box-shadow: 0 4px 15px #ffe08255;
+            font-weight: 600;
+        }
+
+        /* 드롭다운 호버 효과 */
+        .nav-item.dropdown {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px 0 #0001, 0 1.5px 8px 0 #ffc10722;
+            padding: 12px 0;
+            margin-top: 8px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            display: block !important;
+            min-width: 200px;
+        }
+
+        .nav-item.dropdown:hover .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        /* 가로 배치를 위한 스타일 */
+        .dropdown-menu.horizontal {
+            display: flex !important;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            min-width: 800px;
+            padding: 20px;
+            gap: 8px;
+            justify-content: space-between;
+        }
+
+        /* 쇼핑과 서비스는 항목이 적으므로 더 좁게 */
+        .nav-item.dropdown:nth-child(2) .dropdown-menu.horizontal,
+        .nav-item.dropdown:nth-child(3) .dropdown-menu.horizontal {
+            min-width: 300px;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .dropdown-menu.horizontal .dropdown-item {
+            flex: 1;
+            min-width: 120px;
+            max-width: none;
+            text-align: center;
+            margin: 0;
+            padding: 15px 12px;
+            border-radius: 10px;
+            white-space: nowrap;
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        /* 쇼핑과 서비스의 드롭다운 아이템은 더 넓게 */
+        .nav-item.dropdown:nth-child(2) .dropdown-menu.horizontal .dropdown-item,
+        .nav-item.dropdown:nth-child(3) .dropdown-menu.horizontal .dropdown-item {
+            min-width: 140px;
+            padding: 15px 20px;
+        }
+
+        .dropdown-menu.horizontal .dropdown-divider {
+            display: none;
+        }
+
+        .dropdown-item {
+            color: var(--text-main);
+            font-weight: 500;
+            padding: 12px 20px;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            margin: 2px 8px;
+            text-decoration: none;
+            display: block;
+        }
+
+        .dropdown-item:hover {
+            background: linear-gradient(135deg, #ffc10722, #ffe08233);
+            color: var(--mustard-dark);
+            transform: translateX(4px);
+            text-decoration: none;
+        }
+
+        .dropdown-divider {
+            margin: 8px 16px;
+            border-color: #eee;
+        }
+
+        .navbar-toggler {
+            border: none;
+            border-radius: 10px;
+            padding: 8px 12px;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-toggler:focus {
+            box-shadow: 0 0 0 3px #ffe9b733;
+        }
+
+        .navbar-toggler:hover {
+            background: var(--input-bg);
+        }
+
+        .search-form {
+            position: relative;
+        }
+
+        .search-input {
+            width: 250px;
+            padding: 12px 16px;
+            border: 2px solid var(--input-border);
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: var(--input-bg);
+            color: var(--text-main);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--mustard);
+            box-shadow: 0 0 0 3px #ffe9b733;
+            background: #fff;
+        }
+
+        .search-btn {
+            padding: 12px 16px;
+            background: linear-gradient(135deg, var(--btn-blue), #4a6a94);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-left: 8px;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px #3d5a8044;
+        }
+
+        /* 프로필 영역 */
+        .profile-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .profile-avatar {
+            width: 48px;
+            height: 48px;
+            min-width: 48px;
+            min-height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--btn-blue), #4a6a94);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .notification-icon {
+            position: static;
+            padding: 2px 8px;
+            border-radius: 50%;
+            background: #fff;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 1px 4px #0001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notification-icon i {
+            font-size: 26px;
+            color: var(--btn-blue);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 10px;
+            font-weight: 700;
+            min-width: 16px;
+            text-align: center;
+            z-index: 3;
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .profile-avatar i {
+            font-size: 18px;
+        }
+
+        .profile-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+        }
+
+        .profile-menu {
+            position: absolute;
+            top: 110%; /* 프로필 영역 바로 아래 */
+            right: 0;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 16px #0000001a;
+            padding: 8px;
+            min-width: 140px;
+            z-index: 100;
+            border: 1px solid #f0f0f0;
+        }
+
+        .profile-logout-btn {
+            display: block;
+            background: none;
+            border: none;
+            color: var(--text-main);
+            font-size: 15px;
+            padding: 4px 15px;
+            text-align: left;
+            cursor: pointer;
+            width: 100%;
+            border-radius: 6px;
+            transition: background 0.2s;
+            text-decoration: none;
+        }
+
+        .profile-logout-btn:hover {
+            background: #f5f5f5;
+            text-decoration: none;
+            color: var(--text-main);
+        }
+
+        .profile-login-btn {
+            background: linear-gradient(135deg, var(--btn-blue), #4a6a94);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 28px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px #3d5a8033;
+        }
+
+        .profile-login-btn:hover {
+            background: linear-gradient(135deg, #4a6a94, var(--btn-blue));
+            box-shadow: 0 4px 16px #3d5a8044;
+        }
+
+        @media (max-width: 768px) {
+            .navbar-nav {
+                text-align: center;
+                margin-top: 20px;
+            }
+
+            .navbar-nav .nav-link {
+                font-size: 16px;
+                padding: 12px 16px !important;
+                margin: 0 4px;
+                min-width: auto;
+            }
+
+            .dropdown-menu {
+                text-align: center;
+                margin-top: 10px;
+                opacity: 1;
+                visibility: visible;
+                transform: none;
+                display: block !important;
+                flex-direction: column;
+                min-width: auto;
+            }
+
+            .dropdown-menu.horizontal {
+                flex-direction: column;
+                min-width: auto;
+                padding: 15px;
+            }
+
+            .dropdown-menu.horizontal .dropdown-item {
+                flex: none;
+                min-width: auto;
+                max-width: none;
+                text-align: center;
+                padding: 12px 16px;
+            }
+
+            .search-input {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            .search-btn {
+                width: 100%;
+                margin-left: 0;
+            }
+
+            .logo {
+                width: 150px;
+            }
+
+            .profile-section {
+                gap: 10px;
+                margin-top: 15px;
+                justify-content: center;
+            }
+
+            .notification-icon {
+                padding: 12px;
+            }
+
+            .profile-avatar {
+                width: 50px;
+                height: 50px;
+            }
+        }
+
+        @media (max-width: 991px) {
+            .dropdown-divider-hr {
+                display: none !important;
+            }
+        }
+
+        .profile-section.new-layout {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            justify-content: flex-end;
+        }
+        .profile-nickname {
+            font-size: 16px;
+            color: #222;
+            font-weight: 500;
+            margin-right: 6px;
+            white-space: nowrap;
+        }
+        .chat-icon {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #f5f5f5;
+            cursor: pointer;
+            font-size: 19px;
+            color: #3d5a80;
+            transition: background 0.2s;
+        }
+        .chat-icon:hover {
+            background: #e0e7ef;
+        }
+        .notification-icon {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #f5f5f5;
+            cursor: pointer;
+            font-size: 19px;
+            color: #3d5a80;
+            transition: background 0.2s;
+        }
+        .notification-icon:hover {
+            background: #e0e7ef;
+        }
+        .notification-icon i {
+            font-size: 20px;
+            color: #3d5a80;
+        }
+        .notification-badge.green-badge {
+            position: absolute;
+            top: -7px;
+            right: -7px;
+            background: #16c60c;
+            color: #fff;
+            border-radius: 12px;
+            padding: 1px 7px 1px 7px;
+            font-size: 13px;
+            font-weight: 700;
+            min-width: 22px;
+            text-align: center;
+            z-index: 3;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 8px #0001;
+            line-height: 1.5;
+        }
+        .container {
+            max-width: 1440px;
+            margin-left: auto;
+            margin-right: auto;
+            padding-left: 24px;
+            padding-right: 24px;
+            width: 100%;
+        }
+
+        .navbar-nav .nav-item.dropdown > .nav-link[tabindex="-1"] {
+            cursor: default !important;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Header Component -->
+    <nav id="header" class="navbar navbar-expand-lg">
+        <div class="container">
+            <!-- 로고 -->
+            <a class="navbar-brand" href="/">
+                <img src="../images/logo.png" alt="로고" class="logo">
+            </a>
+            
+            <!-- 모바일 토글 버튼 -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <!-- 네비게이션 메뉴 -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <!-- 커뮤니티 -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link" href="#" role="button">
+                            커뮤니티
+                        </a>
+                        <ul class="dropdown-menu horizontal">
+                            <hr class="dropdown-divider-hr" />
+                            <li><a class="dropdown-item" href="/community/infoboard">정보게시판</a></li>
+                            <li><a class="dropdown-item" href="/community/board">자유게시판</a></li>
+                            <li><a class="dropdown-item" href="/community/qna">Q&A</a></li>
+                            <li><a class="dropdown-item" href="/community/walkwith">산책동행</a></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- 쇼핑 -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link" href="/shoppingmain" role="button">
+                            쇼핑
+                        </a>
+                        <ul class="dropdown-menu horizontal">
+                            <hr class="dropdown-divider-hr" />
+                            <li><a class="dropdown-item" href="/shop/shoppingmall">쇼핑</a></li>
+                            <li><a class="dropdown-item" href="/shop/auction">Auction</a></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- 서비스 -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link" href="javascript:void(0);" role="button" tabindex="-1">
+                            서비스
+                        </a>
+                        <ul class="dropdown-menu horizontal">
+                            <hr class="dropdown-divider-hr" />
+                            <li><a class="dropdown-item" href="/service/place">동물병원&편의시설</a></li>
+                            <li><a class="dropdown-item" href="/service/walking">산책로</a></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- 마이페이지 -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="/mypage">
+                            마이페이지
+                        </a>
+                    </li>
+                </ul>
+                
+                <!-- 우측 메뉴 -->
+                <ul class="navbar-nav">
+                    <!-- 프로필 영역 -->
+                    <li class="nav-item" id="profileArea">
+                        <!-- 로그인 상태에 따라 동적으로 변경됨 -->
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Header JavaScript -->
+    <script>
+
+        class Header {
+            constructor() {
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.setActiveMenu();
+                this.loadNotificationCount();
+                this.checkAuthStatus();
+            }
+
+            setupEventListeners() {
+                // 검색 폼 이벤트
+                const searchForm = document.getElementById('searchForm');
+                if (searchForm) {
+                    searchForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.handleSearch();
+                    });
+                }
+
+                // 로그아웃 이벤트
+                const logoutBtn = document.getElementById('logoutBtn');
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.handleLogout();
+                    });
+                }
+
+                // 알림 아이콘 이벤트
+                const notificationIcon = document.getElementById('notificationIcon');
+                if (notificationIcon) {
+                    notificationIcon.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.handleNotification();
+                    });
+                }
+
+                // 프로필 아바타 이벤트
+                const profileAvatar = document.getElementById('profileAvatar');
+                const profileMenu = document.getElementById('profileMenu');
+                if (profileAvatar && profileMenu) {
+                    profileAvatar.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        profileMenu.style.display = profileMenu.style.display === 'block' ? 'none' : 'block';
+                    });
+                    document.addEventListener('click', (e) => {
+                        if (!profileAvatar.contains(e.target)) {
+                            profileMenu.style.display = 'none';
+                        }
+                    });
+                }
+                const logoutDropdownBtn = document.getElementById('logoutDropdownBtn');
+                if (logoutDropdownBtn) {
+                    logoutDropdownBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.handleLogout();
+                    });
+                }
+
+                // 네비게이션 링크 이벤트
+                const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+                navLinks.forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        if (link.getAttribute('href') && link.getAttribute('href') !== '#') {
+                            this.setActiveMenu();
+                        }
+                    });
+                });
+            }
+
+            setActiveMenu() {
+                const currentPath = window.location.pathname;
+                const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') && currentPath.startsWith(link.getAttribute('href'))) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+
+            handleSearch() {
+                const searchInput = document.getElementById('searchInput');
+                const query = searchInput.value.trim();
+
+                if (query) {
+                    // 검색 로직 구현
+                    console.log('검색어:', query);
+                    // window.location.href = `/search?q=${encodeURIComponent(query)}`;
+                }
+            }
+
+            handleLogout() {
+                // 로그아웃 로직 구현
+                console.log('로그아웃 처리');
+                // localStorage.removeItem('token');
+                // window.location.href = '/login';
+            }
+
+            handleNotification() {
+                // 알림 처리 로직
+                console.log('알림 클릭');
+                // window.location.href = '/notifications';
+            }
+
+            loadNotificationCount() {
+                // 알림 개수 로드 로직
+                const notificationCount = localStorage.getItem('notificationCount') || 0;
+                const notificationCountElement = document.getElementById('notificationCount');
+                if (notificationCountElement) {
+                    if (notificationCount > 0) {
+                        notificationCountElement.textContent = notificationCount;
+                        notificationCountElement.style.display = 'inline-block';
+                    } else {
+                        notificationCountElement.style.display = 'none';
+                    }
+                }
+            }
+
+            checkAuthStatus() {
+                // 인증 상태 확인
+                const token = localStorage.getItem('token');
+                const profileArea = document.getElementById('profileArea');
+                if (profileArea) {
+                    if (token) {
+                        // 로그인된 상태: 채팅 → 알림 → 프로필(사진+로그아웃 버튼) 순서로 표시
+                        const member_profileImg = localStorage.getItem('member_profileImg');
+                        profileArea.innerHTML = `
+                            <div class="profile-section new-layout">
+                                <div class="chat-icon" id="chatIcon">
+                                    <i class="fas fa-comment-dots"></i>
+                                </div>
+                                <div class="notification-icon" id="notificationIcon">
+                                    <i class="fas fa-bell"></i>
+                                    <span class="notification-badge green-badge" id="notificationCount" style="display:none;">0</span>
+                                </div>
+                                <div class="profile-container" id="profileContainer" style="flex-direction:column; align-items:center; gap:4px;">
+                                    <div class="profile-avatar" id="profileAvatar" style="cursor:pointer;">
+                                        ${member_profileImg
+                                            ? `<img src="${member_profileImg}" alt="프로필">`
+                                            : `<i class="fas fa-user"></i>`
+                                        }
+                                    </div>
+                                    <a class="profile-logout-btn" id="logoutDropdownBtn" style="margin-top:4px; width:100%; text-decoration:none;">Logout</a>
+                                </div>
+                            </div>
+                        `;
+                        this.loadNotificationCount();
+                        // 프로필 사진 클릭 시 모달 오픈 이벤트
+                        const profileAvatar = document.getElementById('profileAvatar');
+                        if (profileAvatar && member_profileImg) {
+                            profileAvatar.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                const modalImg = document.getElementById('modalProfileImg');
+                                if (modalImg) modalImg.src = member_profileImg;
+                                const modal = new bootstrap.Modal(document.getElementById('profileImageModal'));
+                                modal.show();
+                            });
+                        }
+                        // 로그아웃 이벤트
+                        const logoutDropdownBtn = document.getElementById('logoutDropdownBtn');
+                        if (logoutDropdownBtn) {
+                            logoutDropdownBtn.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                this.handleLogout();
+                            });
+                        }
+                        // 알림 아이콘 이벤트
+                        const notificationIcon = document.getElementById('notificationIcon');
+                        if (notificationIcon) {
+                            notificationIcon.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                this.handleNotification();
+                            });
+                        }
+                    } else {
+                        // 비로그인 상태: 로그인 버튼 표시
+                        profileArea.innerHTML = `
+                            <button class="profile-login-btn" id="loginBtn">로그인</button>
+                        `;
+                        const loginBtn = document.getElementById('loginBtn');
+                        if (loginBtn) {
+                            loginBtn.addEventListener('click', () => {
+                                window.location.href = '/user/userLogin';
+                            });
+                        }
+                    }
+                }
+            }
+
+            setupProfileEvents() {
+                // 프로필 드롭다운 및 알림 이벤트 재설정
+                const profileContainer = document.getElementById('profileContainer');
+                const profileMenu = document.getElementById('profileMenu');
+                if (profileContainer && profileMenu) {
+                    profileContainer.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        profileMenu.style.display = profileMenu.style.display === 'block' ? 'none' : 'block';
+                    });
+
+                    document.addEventListener('click', (e) => {
+                        if (!profileContainer.contains(e.target)) {
+                            profileMenu.style.display = 'none';
+                        }
+                    });
+                }
+                const logoutDropdownBtn = document.getElementById('logoutDropdownBtn');
+                if (logoutDropdownBtn) {
+                    logoutDropdownBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.handleLogout();
+                    });
+                }
+                if (notificationIcon) {
+                    notificationIcon.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.handleNotification();
+                    });
+                }
+            }
+
+            loadUserProfile() {
+                // 이 함수는 checkAuthStatus에서 직접 처리하므로 중복 로직 제거
+            }
+
+            // React 마이그레이션을 위한 메서드들
+            updateNotificationCount(count) {
+                const notificationCountElement = document.getElementById('notificationCount');
+                if (notificationCountElement) {
+                    notificationCountElement.textContent = count;
+                    localStorage.setItem('notificationCount', count);
+                }
+            }
+
+            setUserProfile(imageUrl) {
+                const profileAvatar = document.getElementById('profileAvatar');
+                if (profileAvatar && imageUrl) {
+                    profileAvatar.innerHTML = `<img src="${imageUrl}" alt="프로필">`;
+                    localStorage.setItem('member_profileImg', imageUrl);
+                } else if (profileAvatar) {
+                    profileAvatar.innerHTML = '<i class="fas fa-user"></i>';
+                }
+            }
+        }
+
+        // 헤더 초기화
+        document.addEventListener('DOMContentLoaded', () => {
+            window.header = new Header();
+        });
+
+    </script>
+    
+    <!-- 프로필 사진 확대 모달 -->
+    <div class="modal fade" id="profileImageModal" tabindex="-1" aria-labelledby="profileImageModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background:transparent; border:none; box-shadow:none;">
+                <div class="modal-body d-flex justify-content-center align-items-center p-0">
+                    <img id="modalProfileImg" src="" alt="프로필 확대" style="max-width:400px; max-height:400px; border-radius:50%; box-shadow:0 4px 32px #0003; background:#fff;" />
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 
