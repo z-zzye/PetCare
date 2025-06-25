@@ -102,7 +102,18 @@ public class ImageService {
         }
 
         UUID uuid = UUID.randomUUID();
-        String extension = originalFileName.substring(originalFileName.lastIndexOf("."));
+
+        String extension;
+        int dotIndex = originalFileName.lastIndexOf(".");
+
+        // 파일 이름에 '.'이 있고, 그 위치가 파일 이름의 마지막이 아닌 경우에만 확장자로 인정합니다.
+        if (dotIndex > -1 && dotIndex < originalFileName.length() - 1) {
+            extension = originalFileName.substring(dotIndex);
+        } else {
+            // 확장자가 없는 경우, 기본적으로 .jpg를 붙여줍니다. (소셜 프로필 사진은 대부분 jpg 또는 png)
+            extension = ".jpg";
+        }
+
         String savedFileName = uuid.toString() + extension;
         String fileUploadFullUrl = uploadPath + savedFileName;
 
