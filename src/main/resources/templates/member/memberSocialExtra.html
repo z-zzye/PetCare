@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>추가 정보 입력</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            --main-bg: #f7f7fa;
+            --container-bg: #fff;
+            --input-bg: #f9fafb;
+            --input-border: #d1d5db;
+            --text-main: #222;
+            --text-sub: #888;
+            --mustard: #ffc107;
+            --mustard-dark: #e6a800;
+            --btn-blue: #3d5a80;
+            --navy: #2c3e50;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: var(--main-bg);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: var(--container-bg);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 #0001, 0 1.5px 8px 0 #ffc10722;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid #eee;
+        }
+        .header { display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 30px; }
+        .profile-img-wrapper {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .profile-img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2.5px solid var(--navy);
+            margin-bottom: 6px;
+            background: #f7f7fa;
+            display: none;
+        }
+        .user-info { text-align: center; margin-bottom: 18px; }
+        .user-nickname {
+            font-size: 18px; font-weight: 700; color: var(--text-main); margin-bottom: 2px; margin-top: 0;
+        }
+        .user-email {
+            font-size: 14px; color: var(--text-sub); margin-bottom: 2px;
+        }
+        .form-group { margin-bottom: 20px; }
+        .form-group label {
+            display: block; margin-bottom: 8px; color: var(--text-main); font-weight: 500; font-size: 14px;
+        }
+        .form-group input {
+            width: 100%; padding: 12px 16px; border: 2px solid var(--input-border); border-radius: 10px;
+            font-size: 14px; transition: all 0.3s ease; background: var(--input-bg); color: var(--text-main);
+        }
+        .form-group input:focus {
+            outline: none; border-color: var(--mustard); box-shadow: 0 0 0 3px #ffe9b733;
+            background: #fff;
+        }
+        .form-group input[readonly] {
+            background: #f0f1f5; color: #888; cursor: not-allowed;
+        }
+        .submit-btn {
+            width: 100%; padding: 16px 0; background: linear-gradient(135deg, #ffc107, #f9d423);
+            color: #2c3e50; border: none; border-radius: 10px; font-size: 17px; font-weight: 700;
+            cursor: pointer; transition: all 0.3s ease; margin-top: 10px; box-shadow: 0 4px 15px #ffe08255; letter-spacing: 1px;
+        }
+        .submit-btn:hover {
+            transform: translateY(-2px); box-shadow: 0 8px 25px #ffe08299;
+        }
+        .verify-btn, .verify-code-btn {
+            padding: 12px 20px;
+            background: var(--btn-blue);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        .verify-btn:hover:not(:disabled), .verify-code-btn:hover:not(:disabled) {
+            background: #4a6a94;
+            transform: translateY(-2px);
+        }
+        .verify-btn:disabled, .verify-code-btn:disabled {
+            background: #bbb; color: #fff; cursor: not-allowed; transform: none;
+        }
+        .error { color: #e74c3c; font-size: 12px; margin-top: 5px; display: none; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div style="font-size:17px; color:var(--text-main); font-weight:500; margin-bottom:36px;">추가 정보 입력</div>
+        <div class="profile-img-wrapper" style="position:relative; width:100px; height:100px; display:flex; align-items:center; justify-content:center;">
+            <img src="" alt="프로필 이미지" class="profile-img" id="profileImg" style="margin-bottom:6px; display:none;"
+                 onerror="this.style.display='none'; document.getElementById('defaultProfileIcon').style.display='flex';">
+            <div id="defaultProfileIcon" style="width:100px; height:100px; display:flex; align-items:center; justify-content:center; background:#f7f7fa; border-radius:50%; border:2.5px solid var(--navy); position:absolute; top:0; left:0;">
+                <svg width="100" height="100" viewBox="0 0 48 48" fill="none">
+                    <circle cx="24" cy="24" r="24" fill="#e0e4ea"/>
+                    <ellipse cx="24" cy="20" rx="8" ry="8" fill="#b0b8c1"/>
+                    <ellipse cx="24" cy="36" rx="14" ry="8" fill="#b0b8c1"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+    <div class="user-info">
+        <div class="user-nickname" id="userNickname"></div>
+        <div class="user-email" id="userEmail"></div>
+    </div>
+    <form id="extraForm">
+        <div class="form-group" style="display:flex; gap:8px; align-items:flex-end;">
+            <div style="flex:1;">
+                <label for="member_number">연락처 *</label>
+                <input type="tel" id="member_number" name="member_number" required placeholder="연락처를 입력하세요 (예: 010-1234-5678)">
+                <div class="error" id="phoneError">올바른 연락처 형식으로 입력해 주세요.</div>
+            </div>
+            <button type="button" class="verify-btn" id="sendCodeBtn" style="width:auto; padding:12px 18px; font-size:15px; margin-top:0; margin-bottom:0;">인증</button>
+        </div>
+        <div class="form-group" id="codeSection" style="display:none;">
+            <label for="verifyCode">인증코드 *</label>
+            <div style="display:flex; gap:8px; align-items:flex-end;">
+                <input type="text" id="verifyCode" name="verifyCode" placeholder="인증코드를 입력하세요" style="flex:1;">
+                <button type="button" class="verify-code-btn" id="verifyCodeBtn" style="width:auto; padding:12px 18px; font-size:15px; margin-top:0; margin-bottom:0;">확인</button>
+            </div>
+            <div style="margin-top:6px; color:#888; font-size:13px;" id="timer">03:00</div>
+            <div class="error" id="codeError">인증코드를 입력해 주세요.</div>
+            <div class="error" id="codeExpired" style="color:#e74c3c; display:none;">인증 시간이 만료되었습니다. 다시 시도해 주세요.</div>
+        </div>
+        <button type="submit" class="submit-btn">가입하기</button>
+    </form>
+</div>
+<script>
+// 소셜에서 받아온 정보 예시 (실제 연동 시 서버에서 렌더링 또는 JS로 주입)
+const socialData = {
+    nickname: '소셜닉네임',
+    email: 'social@example.com',
+    profileImg: 'https://via.placeholder.com/80x80.png?text=Profile'
+};
+
+document.getElementById('userNickname').textContent = socialData.nickname;
+document.getElementById('userEmail').textContent = socialData.email;
+
+const profileImg = document.getElementById('profileImg');
+const defaultIcon = document.getElementById('defaultProfileIcon');
+if (socialData.profileImg) {
+    profileImg.src = socialData.profileImg;
+    profileImg.style.display = 'block';
+    defaultIcon.style.display = 'none';
+} else {
+    profileImg.removeAttribute('src');
+    profileImg.style.display = 'none';
+    defaultIcon.style.display = 'flex';
+}
+
+const sendCodeBtn = document.getElementById('sendCodeBtn');
+const codeSection = document.getElementById('codeSection');
+const timerEl = document.getElementById('timer');
+const codeError = document.getElementById('codeError');
+const codeExpired = document.getElementById('codeExpired');
+let timerInterval;
+let timeLeft = 180;
+
+sendCodeBtn.addEventListener('click', function() {
+    const phone = document.getElementById('member_number').value.trim();
+    const phoneError = document.getElementById('phoneError');
+    const phoneRegex = /^01[0-9]-[0-9]{3,4}-[0-9]{4}$/;
+    if (!phoneRegex.test(phone)) {
+        phoneError.style.display = 'block';
+        return;
+    } else {
+        phoneError.style.display = 'none';
+    }
+    // 인증코드 발송 시뮬레이션
+    codeSection.style.display = 'block';
+    codeError.style.display = 'none';
+    codeExpired.style.display = 'none';
+    document.getElementById('verifyCode').value = '';
+    timeLeft = 180;
+    updateTimer();
+    clearInterval(timerInterval);
+    timerInterval = setInterval(function() {
+        timeLeft--;
+        updateTimer();
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            codeExpired.style.display = 'block';
+        }
+    }, 1000);
+});
+
+function updateTimer() {
+    const min = String(Math.floor(timeLeft / 60)).padStart(2, '0');
+    const sec = String(timeLeft % 60).padStart(2, '0');
+    timerEl.textContent = `${min}:${sec}`;
+}
+
+// 인증코드 확인 버튼 이벤트 (실제 구현 시 서버 검증 필요)
+document.getElementById('verifyCodeBtn').addEventListener('click', function() {
+    const code = document.getElementById('verifyCode').value.trim();
+    if (!code) {
+        codeError.textContent = '인증코드를 입력해 주세요.';
+        codeError.style.display = 'block';
+        return;
+    }
+    if (timeLeft <= 0) {
+        codeExpired.style.display = 'block';
+        codeError.style.display = 'none';
+        return;
+    }
+    // 실제로는 서버에 코드 검증 요청 필요
+    // 여기서는 4자리 이상이면 성공 처리
+    if (code.length >= 4) {
+        codeError.style.display = 'none';
+        codeExpired.style.display = 'none';
+        alert('인증이 완료되었습니다!');
+        // 인증 완료 후 추가 처리(예: 인증 상태 저장 등)
+    } else {
+        codeError.textContent = '올바른 인증코드를 입력해 주세요.';
+        codeError.style.display = 'block';
+    }
+});
+</script>
+</body>
+</html> 
