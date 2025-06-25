@@ -83,7 +83,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         }
     }
 
-    public String extractEmail(String provider, Map<String, Object> attributes) {
+    public static String extractEmail(String provider, Map<String, Object> attributes) {
         if (provider.equals("naver")) {
             Map<String, Object> response = (Map<String, Object>) attributes.get("response");
             return (String) response.get("email");

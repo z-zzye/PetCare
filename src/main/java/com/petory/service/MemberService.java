@@ -143,4 +143,12 @@ public class MemberService implements UserDetailsService {
                 .build();
     }
 
+    /**
+     * 이메일로 회원의 전화번호를 업데이트하는 메서드
+     */
+    public void updatePhoneByEmail(String email, String phone) {
+        Member member = getMemberByEmail(email);
+        member.setMember_Phone(phone);
+    }
+
 }
