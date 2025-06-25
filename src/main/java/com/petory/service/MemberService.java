@@ -1,9 +1,12 @@
 package com.petory.service;
 
 import com.petory.dto.MemberFormDto;
+import com.petory.dto.PhoneUpdateDto;
 import com.petory.entity.Member;
 import com.petory.repository.MemberRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -44,6 +47,57 @@ public class MemberService implements UserDetailsService {
 
         // 4. DB에 최종 저장
         return memberRepository.save(member);
+    }
+
+    /**
+     * 현재 로그인한 사용자의 전화번호를 업데이트하는 메서드
+     */
+    public void updatePhone(PhoneUpdateDto phoneUpdateDto) {
+        // 현재 로그인한 사용자의 이메일을 가져옵니다
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        
+        // 이메일로 회원을 찾습니다
+        Member member = memberRepository.findByMember_Email(email)
+                .orElseThrow(() -> new IllegalStateException("로그인한 사용자를 찾을 수 없습니다."));
+        
+        // 전화번호 중복 검사 (자신의 전화번호는 제외)
+        memberRepository.findByMember_Phone(phoneUpdateDto.getPhone())
+                .ifPresent(m -> {
+                    if (!m.getMember_Id().equals(member.getMember_Id())) {
+                        throw new IllegalStateException("이미 사용 중인 전화번호입니다.");
+                    }
+                });
+        
+        // 전화번호를 업데이트합니다
+        member.setMember_Phone(phoneUpdateDto.getPhone());
+    }
+
+    /**
+     * 현재 로그인한 사용자가 소셜 로그인 사용자인지 확인하는 메서드
+     */
+    public boolean isSocialLoginUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        
+        Member member = memberRepository.findByMember_Email(email)
+                .orElseThrow(() -> new IllegalStateException("로그인한 사용자를 찾을 수 없습니다."));
+        
+        // 소셜 로그인 사용자는 비밀번호가 "SOCIAL_LOGIN"으로 설정되어 있습니다
+        return "SOCIAL_LOGIN".equals(member.getMember_Pw());
+    }
+
+    /**
+     * 현재 로그인한 사용자의 전화번호가 기본값인지 확인하는 메서드
+     */
+    public boolean hasDefaultPhone() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        
+        Member member = memberRepository.findByMember_Email(email)
+                .orElseThrow(() -> new IllegalStateException("로그인한 사용자를 찾을 수 없습니다."));
+        
+        return "000-0000-0000".equals(member.getMember_Phone());
     }
 
     private void validateDuplicateMember(MemberFormDto memberFormDto) {

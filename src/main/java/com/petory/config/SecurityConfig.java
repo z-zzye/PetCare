@@ -16,6 +16,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 public class SecurityConfig {
 
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -54,7 +55,7 @@ public class SecurityConfig {
                 // 3. 소셜 로그인(OAuth2) 설정
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/members/login") // 소셜 로그인을 시도할 때도 이 페이지를 거치도록 설정
-                        .defaultSuccessUrl("/")      // 소셜 로그인 성공 시 이동할 경로
+                        .successHandler(customAuthenticationSuccessHandler) // 커스텀 성공 핸들러 사용
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService) // 사용자 정보를 가져온 후 처리할 서비스
                         )
