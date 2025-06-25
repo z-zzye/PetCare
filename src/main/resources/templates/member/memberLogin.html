@@ -92,7 +92,7 @@
             <img src="../images/logo.png" alt="로고" class="logo-img">
         </div>
     </div>
-    <form id="loginForm">
+    <form id="loginForm" action="/members/login/process" method="post">
         <div class="form-group">
             <label for="member_email">이메일(아이디)</label>
             <input type="text" id="member_email" name="member_email" required placeholder="이메일(아이디)를 입력하세요">
@@ -108,15 +108,15 @@
                 <a href="#" id="findId">아이디 찾기</a>
                 <a href="#" id="findPw">비밀번호 찾기</a>
             </div>
-            <a href="memberSignUp.html" id="signUp" style="color:var(--btn-blue); text-decoration:none; font-weight:500;">회원가입</a>
+            <a href="/members/new" id="signUp" style="color:var(--btn-blue); text-decoration:none; font-weight:500;">회원가입</a>
         </div>
     </form>
     <div class="social-login">
         <hr style="margin: 32px 0 18px 0; border: none; border-top: 1.5px solid #eee;">
         <div class="social-btns" style="flex-direction:column; gap:12px;">
-            <button type="button" class="social-btn social-kakao">Kakao</button>
-            <button type="button" class="social-btn social-naver">NAVER</button>
-            <button type="button" class="social-btn social-google">Google</button>
+            <a href="/oauth2/authorization/kakao" class="social-btn social-kakao" style="text-decoration:none; text-align:center;">Kakao로 로그인</a>
+            <a href="/oauth2/authorization/naver" class="social-btn social-naver" style="text-decoration:none; text-align:center;">NAVER로 로그인</a>
+            <a href="/oauth2/authorization/google" class="social-btn social-google" style="text-decoration:none; text-align:center;">Google로 로그인</a>
         </div>
     </div>
 </div>
