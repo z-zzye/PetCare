@@ -34,7 +34,10 @@ public class SecurityConfig {
                                 "/members/login",     // 로그인 페이지
                                 "/members/login/process",
                                 "/members/new",       // 회원가입 페이지
-                                "/api/members/join"   // 회원가입 API (이전 단계에서 만듦)
+                                "/api/members/join",   // 회원가입 API (이전 단계에서 만듦)
+                                // 테스트용 경로 지정 (추후 삭제 예정)
+                                "/test/cleanbot",      // 테스트 페이지 경로 허용
+                                "/api/test/cleanbot"   // 테스트 API 경로 허용
                         ).permitAll()
                         // "/admin/**" 경로는 "ADMIN" 역할을 가진 사용자만 접근 가능
                         .requestMatchers("/admin/**").hasRole("ADMIN")
