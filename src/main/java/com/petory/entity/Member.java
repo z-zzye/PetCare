@@ -34,7 +34,7 @@ public class Member extends BaseEntity {
     @Column(name = "member_Phone", nullable = false)
     private String member_Phone;
 
-    @Column(name = "member_ProfileImg")
+    @Column(name = "member_ProfileImg", length = 500)
     private String member_ProfileImg;
 
     @Column(name = "member_Mileage")
@@ -44,7 +44,8 @@ public class Member extends BaseEntity {
 
 
     public static Member createMember(MemberFormDto memberFormDto,
-                                      PasswordEncoder passwordEncoder) {
+                                      PasswordEncoder passwordEncoder,
+                                      String profileImageName) {
         Member member = new Member();
         member.setMember_NickName(memberFormDto.getMember_NickName());
         member.setMember_Email(memberFormDto.getMember_Email());
@@ -52,6 +53,7 @@ public class Member extends BaseEntity {
         member.setMember_Phone(memberFormDto.getMember_Phone());
         member.setMember_Role(Role.USER);
         member.setMember_Mileage(0);
+        member.setMember_ProfileImg(profileImageName);
         return member;
     }
 }
