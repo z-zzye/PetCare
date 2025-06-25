@@ -39,7 +39,7 @@
             border: 1px solid #eee;
         }
         .header { text-align: center; margin-bottom: 30px; }
-        .logo-img { height: 120px; }
+        .logo-img { height: 200px; }
         .header p { color: var(--text-sub); font-size: 15px; margin-top: 8px; }
         .form-group { margin-bottom: 20px; }
         .form-group label {
@@ -73,7 +73,7 @@
             margin-top: 24px; text-align: center;
         }
         .social-btns {
-            display: flex; gap: 12px; justify-content: center; margin-top: 10px;
+            display: flex; gap: 12px; justify-content: center; margin-top: 10px; flex-direction: column;
         }
         .social-btn {
             flex: 1; padding: 12px 0; border: none; border-radius: 8px; font-size: 15px; font-weight: 600;
@@ -92,32 +92,54 @@
             <img src="../images/logo.png" alt="로고" class="logo-img">
         </div>
     </div>
-    <form id="loginForm" action="/members/login" role="form" method="post">
+    <form id="loginForm" action="/members/login/process" method="post">
         <div class="form-group">
-            <label for="member_Id">아이디</label>
-            <input type="text" id="member_Id" name="member_Id" required placeholder="아이디를 입력하세요">
+            <label for="member_email">이메일(아이디)</label>
+            <input type="text" id="member_email" name="member_email" required placeholder="이메일(아이디)를 입력하세요">
+            <div class="error" id="emailError" style="display:none; color:#e74c3c; font-size:12px; margin-top:5px;">올바른 이메일 형식으로 입력해 주세요.</div>
         </div>
         <div class="form-group">
-            <label for="member_Pw">비밀번호</label>
-            <input type="password" id="member_Pw" name="member_Pw" required placeholder="비밀번호를 입력하세요">
+            <label for="member_pw">비밀번호</label>
+            <input type="password" id="member_pw" name="member_pw" required placeholder="비밀번호를 입력하세요">
         </div>
         <button type="submit" class="login-btn">로그인</button>
-        <div class="find-links">
-            <a href="#" id="findId">아이디 찾기</a>
-            <a href="#" id="findPw">비밀번호 찾기</a>
+        <div class="find-links" style="display:flex; justify-content:space-between; margin:12px 0 18px 0; font-size:14px;">
+            <div style="display:flex; gap:16px;">
+                <a href="#" id="findId">아이디 찾기</a>
+                <a href="#" id="findPw">비밀번호 찾기</a>
+            </div>
+            <a href="/members/new" id="signUp" style="color:var(--btn-blue); text-decoration:none; font-weight:500;">회원가입</a>
         </div>
-        <button type="button" class="login-btn" style="background: #eee; color: #222; margin-top: 8px;" onclick="window.location.href='/members/test-register'">회원가입</button>
     </form>
     <div class="social-login">
-        <span>소셜 계정으로 로그인</span>
-        <div class="social-btns">
-            <button type="button" class="social-btn social-kakao">카카오</button>
-            <button type="button" class="social-btn social-naver">네이버</button>
-            <button type="button" class="social-btn social-google">구글</button>
+        <hr style="margin: 32px 0 18px 0; border: none; border-top: 1.5px solid #eee;">
+        <div class="social-btns" style="flex-direction:column; gap:12px;">
+            <a href="/oauth2/authorization/kakao" class="social-btn social-kakao" style="text-decoration:none; text-align:center;">Kakao로 로그인</a>
+            <a href="/oauth2/authorization/naver" class="social-btn social-naver" style="text-decoration:none; text-align:center;">NAVER로 로그인</a>
+            <a href="/oauth2/authorization/google" class="social-btn social-google" style="text-decoration:none; text-align:center;">Google로 로그인</a>
         </div>
     </div>
 </div>
 <script>
+const loginForm = document.getElementById('loginForm');
+const emailInput = document.getElementById('member_email');
+const emailError = document.getElementById('emailError');
+
+loginForm.addEventListener('submit', function(e) {
+    if (!isValidEmail(emailInput.value)) {
+        emailError.style.display = 'block';
+        emailInput.focus();
+        e.preventDefault();
+    } else {
+        emailError.style.display = 'none';
+    }
+});
+
+function isValidEmail(value) {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(value);
+}
+
 // 추후 실제 연동 시 각 소셜 버튼에 이벤트 추가 필요
 // 아이디/비밀번호 찾기 클릭 시 모달 또는 별도 페이지 이동 구현 가능
 </script>

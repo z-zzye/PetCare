@@ -18,34 +18,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequiredArgsConstructor
 public class MemberController {
     private final MemberService memberService;
-    private final PasswordEncoder passwordEncoder;
 
-    @GetMapping(value = "/new")
-    private String memberForm(Model model) {
-        model.addAttribute("memberFormDto", new MemberFormDto());
-        return "member/memberForm";
-    }
-
-    @PostMapping(value = "/new")
-    public String memberForm(@Valid MemberFormDto memberFormDto, BindingResult bindingResult, Model model) {
-        if (bindingResult.hasErrors()) {
-            return "member/memberForm";
-        }
-        try {
-            Member member = Member.createMember(memberFormDto, passwordEncoder);
-
-            // 데이터베이스에 저장
-            memberService.saveMember(member);
-        } catch (IllegalStateException e) {
-            model.addAttribute("errorMessage", e.getMessage());
-            return "member/memberForm";
-        }
-        return "redirect:/";
-    }
-
-    @GetMapping("/test-register")
-    public String testRegisterForm() {
-        return "member/memberTestRegister";
+    @GetMapping("/new")
+    public String memberSignUpForm() {
+        return "member/memberSignUp";
     }
 
     @GetMapping("/login")
