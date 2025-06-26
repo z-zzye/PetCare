@@ -94,4 +94,16 @@ public class MemberApiController {
             return ResponseEntity.status(401).body("인증 실패: " + e.getMessage());
         }
     }
+
+    // 휴대폰 번호로 아이디 조회
+    @PostMapping("/find-id")
+    public ResponseEntity<String> findIdByPhone(@RequestBody Map<String, String> payload) {
+      String phone = payload.get("phone");
+      Member member = memberService.getMemberByPhone(phone);
+      if (member != null) {
+        return ResponseEntity.ok(member.getMember_Email());
+      } else {
+        return ResponseEntity.status(404).body("해당 번호로 등록된 계정이 없습니다.");
+      }
+    }
 }

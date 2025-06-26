@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // 화면 전환용 훅
 
 const CARRIERS = [
   { value: 'SKT', label: 'SKT' },
@@ -21,6 +22,7 @@ const FindId = () => {
   const [showGuide, setShowGuide] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const timerRef = useRef();
+  const navigate = useNavigate();
 
   // 타이머 동작
   useEffect(() => {
@@ -64,30 +66,83 @@ const FindId = () => {
   };
 
   // 인증 버튼 클릭
-  const handleSendCode = () => {
+  const handleSendCode = async () => {
     if (!isValidPhone(phone)) {
       setPhoneError('올바른 휴대폰 번호 형식으로 입력하세요. (예: 010-1234-5678)');
       return;
     }
+
     setPhoneError('');
     setCodeSent(true);
     setTimer(180);
     setTimerActive(true);
     setCode('');
     setCodeVerified(false);
-    setToastMessage('인증코드가 전송되었습니다.');
+
+    // 여기에 실제 API 호출 추가
+    try {
+      const response = await fetch("/api/sms/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone })
+      });
+
+      if (response.ok) {
+        setToastMessage("인증코드가 전송되었습니다.");
+      } else {
+        setToastMessage("문자 전송 실패 (서버 오류)");
+      }
+    } catch (error) {
+      console.error("SMS 전송 실패:", error);
+      setToastMessage("네트워크 오류로 전송 실패");
+    }
+
     setTimeout(() => setToastMessage(''), 2000);
   };
 
   // 인증코드 확인
-  const handleVerifyCode = () => {
+  const handleVerifyCode = async () => {
     if (code.length < 4) {
-      setCodeError('인증코드가 일치하지 않습니다.');
+      setCodeError('인증코드를 입력해주세요.');
       return;
     }
-    setCodeError('');
-    setCodeVerified(true);
-    setTimerActive(false);
+
+    try {
+      const response = await fetch("/api/sms/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code })
+      });
+
+      if (response.ok) {
+        // 인증 성공 시, 아이디 조회 요청
+        const findIdRes = await fetch("/api/members/find-id", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phone }) // 인증된 전화번호 전송
+        });
+
+        if (findIdRes.ok) {
+          const memberEmail = await findIdRes.text(); // 서버가 이메일을 텍스트로 응답
+          setCodeVerified(true);
+          setToastMessage("인증이 완료되었습니다.");
+
+          // 여기에서 로그인 페이지로 이동 + 아이디(state) 전달
+          navigate("/members/login", { state: { userId: memberEmail } });
+
+        } else {
+          const msg = await findIdRes.text();
+          setCodeError("아이디 조회 실패: " + msg);
+        }
+      } else {
+        const msg = await response.text();
+        setCodeError(msg);
+      }
+    } catch (err) {
+      setCodeError("서버 오류로 인증에 실패했습니다.");
+    }
+
+    setTimeout(() => setToastMessage(''), 2000);
   };
 
   // 인증코드 재전송

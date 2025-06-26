@@ -39,9 +39,12 @@ public class SecurityConfig {
                     "/members/new",
                     "/api/members/signup",
                     "/api/members/login",
+                    "/api/members/**",
                     "/api/test/cleanbot",
                     "/auth/send-code",
-                    "/auth/verify-code"
+                    "/auth/verify-code",
+                    "/api/sms/**",
+                    "/api/members/find-id"
                 ).permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
@@ -54,6 +57,7 @@ public class SecurityConfig {
                 .passwordParameter("member_pw")
                 .defaultSuccessUrl("/")
                 .failureUrl("/members/login?error=true")
+                .permitAll()
             )
             .oauth2Login(oauth2 -> oauth2
                 .loginPage("/members/login")
