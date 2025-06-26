@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 
 function MemberLogin() {
-  const [email, setEmail] = useState('');
+  const location = useLocation();
+  const userIdFromState = location.state?.userId || ""; // 인증된 이메일
+  const [email, setEmail] = useState(userIdFromState); // 여기 초기값에 반영
   const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);

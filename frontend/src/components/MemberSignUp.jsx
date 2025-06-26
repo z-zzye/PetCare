@@ -201,6 +201,20 @@ const MemberSignUp = () => {
     }
   };
 
+  // 연락처 하이픈 자동 입력
+  const handlePhoneChange = (e) => {
+    let value = e.target.value.replace(/[^0-9]/g, '');
+    if (value.length > 11) value = value.slice(0, 11);
+    let formatted = value;
+    if (value.length >= 7) {
+      formatted = value.replace(/(\d{3})(\d{4})(\d{0,4})/, '$1-$2-$3').replace(/-$/, '');
+    } else if (value.length >= 4) {
+      formatted = value.replace(/(\d{3})(\d{0,4})/, '$1-$2');
+    }
+    setForm(f => ({ ...f, phone: formatted }));
+    setErrors(err => ({ ...err, phone: undefined }));
+  };
+
   // 입력값 변경 핸들러
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -798,7 +812,7 @@ const MemberSignUp = () => {
               required
               placeholder="연락처를 입력하세요 (예: 010-1234-5678)"
               value={form.phone}
-              onChange={handleChange}
+              onChange={handlePhoneChange}
             />
             {errors.phone && <div className="error">{errors.phone}</div>}
           </div>
