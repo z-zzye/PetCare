@@ -41,7 +41,8 @@ public class SecurityConfig {
                     "/api/members/login",
                     "/api/test/cleanbot",
                     "/auth/send-code",
-                    "/auth/verify-code"
+                    "/auth/verify-code",
+                    "/api/boards/**"
                 ).permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()

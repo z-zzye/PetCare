@@ -21,54 +21,18 @@ public class BoardController {
   private final BoardService boardService;
 
   // 게시글 생성 API
+  // 게시판 테스트로 인한 변경 사항 있음
+  // 정상 작동 원할 시 두 주석처리된 코드 복구 후 테스트용 코드 삭제
   @PostMapping
-  public ResponseEntity<?> createBoard(
-    @Valid @RequestBody BoardCreateDto requestDto,
-    @AuthenticationPrincipal UserDetails userDetails) {
+  public ResponseEntity<Long> createBoard(
+    @Valid @RequestBody BoardCreateDto requestDto/*,
+    @AuthenticationPrincipal UserDetails userDetails*/) {
 
-    // --- 디버깅을 위한 코드 시작 ---
-    try {
-      // 1. 로그인 상태를 명시적으로 확인합니다.
-      if (userDetails == null) {
-        // 이 에러가 보인다면, API 호출 시 로그인이 되어있지 않다는 뜻입니다.
-        System.err.println("CRITICAL ERROR: userDetails is null. User is not authenticated.");
-        return ResponseEntity
-          .status(HttpStatus.UNAUTHORIZED) // 401 Unauthorized
-          .body("로그인이 필요합니다. API 테스트 전에 먼저 웹사이트에 로그인해주세요.");
-      }
-
-      // 로그인 성공 시, 콘솔에 사용자 이메일을 출력합니다.
-      System.out.println("User authenticated. Email: " + userDetails.getUsername());
-
-      // 2. 실제 서비스 로직을 호출합니다.
-      Long savedBoardId = boardService.createBoard(requestDto, userDetails.getUsername());
-
-      System.out.println("Board created successfully. Board ID: " + savedBoardId);
-
-      // 3. 성공 응답을 반환합니다.
-      return ResponseEntity.status(HttpStatus.CREATED).body(savedBoardId);
-
-    } catch (Exception e) {
-      // 4. 어떤 종류의 예외가 발생하든, 콘솔에 강제로 전체 에러 내용을 출력합니다.
-      System.err.println("An exception occurred in createBoard controller: " + e.getMessage());
-      e.printStackTrace(); // 전체 스택 트레이스를 콘솔에 출력합니다.
-
-      // 5. API 테스트 폼에도 상세한 에러 메시지를 전달합니다.
-      return ResponseEntity
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .body("서버 내부 오류 발생: " + e.getMessage());
-    }
-    // --- 디버깅을 위한 코드 끝 ---
+    System.out.println("################## BOARD CONTROLLER /createBoard METHOD CALLED! ##################"); // 테스트용 코드
+//    Long savedBoardId = boardService.createBoard(requestDto, userDetails.getUsername());
+    Long savedBoardId = boardService.createBoardForTest(requestDto); // 테스트용 코드
+    return ResponseEntity.status(HttpStatus.CREATED).body(savedBoardId);
   }
-//  @PostMapping
-//  public ResponseEntity<Long> createBoard (
-//        @Valid @RequestBody BoardCreateDto boardCreateDto,
-//        @AuthenticationPrincipal UserDetails userDetails) { // 현재 로그인한 사용자 정보 받아옴
-//
-//    Long savedBoardId = boardService.createBoard(boardCreateDto, userDetails.getUsername());
-//
-//    return ResponseEntity.status(HttpStatus.CREATED).body(savedBoardId);
-//  }
 
   // 게시글 목록 조회 API (페이징, 수정 예정)
   @GetMapping

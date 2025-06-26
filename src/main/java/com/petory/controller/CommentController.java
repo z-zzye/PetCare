@@ -2,6 +2,7 @@ package com.petory.controller;
 
 import com.petory.dto.CommentCreateDto;
 import com.petory.service.CommentService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,7 @@ public class CommentController {
   @PostMapping
   public ResponseEntity<Long> createComment(
             @PathVariable Long boardId,
-            @RequestBody CommentCreateDto createDto,
+            @Valid @RequestBody CommentCreateDto createDto,
             @AuthenticationPrincipal UserDetails userDetails) {
 
     Long savedCommentId = commentService.createComment(boardId, createDto, userDetails.getUsername());
@@ -29,6 +30,7 @@ public class CommentController {
   // 댓글 삭제 API
   @DeleteMapping("/{commentId}")
   public ResponseEntity<Void> deleteComment(
+    @PathVariable Long boardId,
     @PathVariable Long commentId,
     @AuthenticationPrincipal UserDetails userDetails) {
 

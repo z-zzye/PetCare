@@ -43,6 +43,22 @@ public class BoardService {
   }
 
   /**
+   * (테스트용) 사용자 정보 없이 새 게시글 생성
+   */
+  public Long createBoardForTest(BoardCreateDto requestDto) {
+    // Member 정보 없이 게시글을 생성합니다.
+    Board board = new Board();
+    board.setTitle(requestDto.getTitle());
+    board.setContent(requestDto.getContent());
+    board.setBoardKind(requestDto.getBoardKind());
+    board.setHashTag(requestDto.getHashTag());
+    // board.setMember(member) 로직을 생략합니다.
+
+    Board savedBoard = boardRepository.save(board);
+    return savedBoard.getId();
+  }
+
+  /**
    * 게시글 목록 조회 (페이징 처리)
    */
   @Transactional(readOnly = true)
