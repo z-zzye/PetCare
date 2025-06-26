@@ -40,7 +40,7 @@ public class SecurityConfig {
                                 "/api/test/cleanbot"   // 테스트 API 경로 허용
                         ).permitAll()
                         // "/admin/**" 경로는 "ADMIN" 역할을 가진 사용자만 접근 가능
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/admin/**", "/api/admin/**").hasRole("ADMIN")
                         // 그 외 모든 요청은 인증 필요
                         .anyRequest().authenticated()
                 )

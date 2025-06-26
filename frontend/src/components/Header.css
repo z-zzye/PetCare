@@ -1,0 +1,346 @@
+/* Header 컴포넌트 스타일 */
+.header {
+  background: #ffffff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  padding: 0;
+}
+
+.header-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 70px;
+}
+
+/* 로고 스타일 */
+.logo a {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: #333;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.logo i {
+  color: #ff6b6b;
+  margin-right: 8px;
+  font-size: 28px;
+}
+
+/* 검색바 스타일 */
+.search-container {
+  flex: 1;
+  max-width: 400px;
+  margin: 0 20px;
+}
+
+.search-container form {
+  display: flex;
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 50px 12px 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 25px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.search-input:focus {
+  border-color: #ff6b6b;
+}
+
+.search-btn {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
+}
+
+.search-btn:hover {
+  background: #ff5252;
+}
+
+/* 네비게이션 메뉴 */
+.nav-menu {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.nav-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: #666;
+  font-size: 12px;
+  transition: color 0.3s ease;
+}
+
+.nav-link i {
+  font-size: 18px;
+  margin-bottom: 4px;
+}
+
+.nav-link:hover {
+  color: #ff6b6b;
+}
+
+.nav-link span {
+  font-weight: 500;
+}
+
+/* 사용자 메뉴 */
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* 장바구니 아이콘 */
+.cart-icon {
+  position: relative;
+  color: #666;
+  font-size: 20px;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.cart-icon:hover {
+  color: #ff6b6b;
+}
+
+.cart-count {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #ff6b6b;
+  color: white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+/* 사용자 드롭다운 */
+.user-dropdown {
+  position: relative;
+}
+
+.user-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 20px;
+  transition: background-color 0.3s ease;
+}
+
+.user-btn:hover {
+  background: #f5f5f5;
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  min-width: 150px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+}
+
+.user-dropdown:hover .dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.dropdown-menu a,
+.dropdown-menu button {
+  display: block;
+  width: 100%;
+  padding: 12px 16px;
+  text-decoration: none;
+  color: #333;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.dropdown-menu a:hover,
+.dropdown-menu button:hover {
+  background: #f5f5f5;
+}
+
+/* 인증 버튼 */
+.auth-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-login,
+.btn-signup {
+  padding: 8px 16px;
+  border-radius: 20px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-login {
+  color: #ff6b6b;
+  border: 2px solid #ff6b6b;
+}
+
+.btn-login:hover {
+  background: #ff6b6b;
+  color: white;
+}
+
+.btn-signup {
+  background: #ff6b6b;
+  color: white;
+  border: 2px solid #ff6b6b;
+}
+
+.btn-signup:hover {
+  background: #ff5252;
+  border-color: #ff5252;
+}
+
+/* 모바일 메뉴 버튼 */
+.mobile-menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #666;
+  cursor: pointer;
+  padding: 8px;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .header-container {
+    padding: 0 15px;
+    height: 60px;
+  }
+
+  .logo a {
+    font-size: 20px;
+  }
+
+  .logo i {
+    font-size: 24px;
+  }
+
+  .search-container {
+    display: none;
+  }
+
+  .nav-menu {
+    position: fixed;
+    top: 60px;
+    left: 0;
+    right: 0;
+    background: white;
+    flex-direction: column;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transform: translateY(-100%);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    gap: 20px;
+  }
+
+  .nav-menu.open {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .nav-link {
+    flex-direction: row;
+    gap: 10px;
+    font-size: 16px;
+  }
+
+  .nav-link i {
+    margin-bottom: 0;
+  }
+
+  .mobile-menu-btn {
+    display: block;
+  }
+
+  .user-menu {
+    gap: 10px;
+  }
+
+  .auth-buttons {
+    display: none;
+  }
+
+  .user-dropdown {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-container {
+    padding: 0 10px;
+  }
+
+  .logo a {
+    font-size: 18px;
+  }
+
+  .logo i {
+    font-size: 20px;
+  }
+} 
