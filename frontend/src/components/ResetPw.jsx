@@ -73,7 +73,7 @@ const ResetPw = () => {
           box-shadow: 0 0.8vh 3.2vh 0 #0001, 0 0.15vh 0.8vh 0 #ffc10722;
           padding: 4vh;
           width: 100%;
-          max-width: 50vh;
+          max-width: 100vh;
           border: 0.1vh solid #eee;
           position: relative;
           min-height: 48vh;
@@ -82,13 +82,23 @@ const ResetPw = () => {
         .logo { display: flex; justify-content: center; align-items: center; margin-bottom: 0vh; width: 100%; }
         .logo-img { height: 18vh; display: block; }
         .resetpw-guide { color: var(--text-sub); font-size: 1.5vh; margin-top: 0.8vh; text-align: center; min-height: 2.2vh; }
-        .form-group { margin-bottom: 1.6vh; min-height: 7vh; }
+        .form-group {
+          margin-bottom: 1.6vh; min-height: 7vh;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+        }
         .form-group:last-of-type { margin-bottom: 3.6vh; }
         .form-group label {
           display: block; margin-bottom: 0.8vh; color: var(--text-main); font-weight: 500; font-size: 1.4vh;
+          text-align: center;
         }
         .form-group input {
-          width: 100%; padding: 1.2vh 1.6vh; border: 0.2vh solid var(--input-border); border-radius: 1vh;
+          width: 80%; max-width: 420px; min-width: 180px;
+          margin: 0 auto;
+          padding: 1.2vh 1.6vh; border: 0.2vh solid var(--input-border); border-radius: 1vh;
           font-size: 1.4vh; transition: all 0.3s ease; background: var(--input-bg); color: var(--text-main);
         }
         .form-group input::placeholder { color: #b0b8c1; }
