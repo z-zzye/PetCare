@@ -1,28 +1,28 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Header from './components/Header';
-import Home from './pages/Home';
-import './App.css';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import MemberLogin from './components/MemberLogin.jsx';
+import MemberSignUp from './components/MemberSignUp.jsx';
+import MemberSocialExtra from './components/MemberSocialExtra.jsx';
+import OAuth2RedirectHandler from './components/OAuth2RedirectHandler.jsx';
+import MainPage from './components/MainPage.jsx';
+import FindId from './components/FindId.jsx';
+import FindPw from './components/FindPw.jsx';
+import ResetPw from './components/ResetPw.jsx';
 
 function App() {
+  // 소셜 추가정보 페이지는 실제로는 사용자 정보를 prop으로 받아야 하지만, 예시로 빈 객체 전달
   return (
     <Router>
-      <div className="App">
-        <Header />
-        <main className="main-content">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/community" element={<div className="page-placeholder">커뮤니티 페이지</div>} />
-            <Route path="/shop" element={<div className="page-placeholder">쇼핑 페이지</div>} />
-            <Route path="/service" element={<div className="page-placeholder">서비스 페이지</div>} />
-            <Route path="/mypage" element={<div className="page-placeholder">마이페이지</div>} />
-            <Route path="/cart" element={<div className="page-placeholder">장바구니</div>} />
-            <Route path="/login" element={<div className="page-placeholder">로그인</div>} />
-            <Route path="/signup" element={<div className="page-placeholder">회원가입</div>} />
-            <Route path="/search" element={<div className="page-placeholder">검색 결과</div>} />
-          </Routes>
-        </main>
-      </div>
+      <Routes>
+        <Route path="/members/login" element={<MemberLogin />} />
+        <Route path="/members/new" element={<MemberSignUp />} />
+        <Route path="/members/social-extra" element={<MemberSocialExtra />} />
+        <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
+        <Route path="/find-id" element={<FindId />} />
+        <Route path="/find-pw" element={<FindPw />} />
+        <Route path="/reset-pw" element={<ResetPw />} />
+        <Route path="/" element={<MainPage />} />
+      </Routes>
     </Router>
   );
 }
