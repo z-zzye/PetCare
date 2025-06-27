@@ -9,6 +9,9 @@ import FindId from './components/FindId.jsx';
 import FindPw from './components/FindPw.jsx';
 import ResetPw from './components/ResetPw.jsx';
 
+// 문제 생기면 이 두줄이 문제일수있음
+import MapServicePage from './pages/MapServicePage'; // 지도 서비스 페이지
+
 import BoardMain from './components/BoardMain';
 import BoardDetail from './components/BoardDetail';
 import BoardWrite from './components/BoardWrite';
@@ -27,6 +30,8 @@ function App() {
         <Route path="/find-pw" element={<FindPw />} />
         <Route path="/reset-pw" element={<ResetPw />} />
         <Route path="/" element={<MainPage />} />
+
+        <Route path="/place" element={<MapServicePage />} />
 
         <Route path="/board" element={<BoardMain />} />
         <Route path="/board/:id" element={<BoardDetail />} />
