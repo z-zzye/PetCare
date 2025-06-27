@@ -19,6 +19,7 @@ public class CommentService {
   private final CommentRepository commentRepository;
   private final MemberRepository memberRepository;
   private final BoardRepository boardRepository;
+  private final CleanBotService cleanBotService;
 
   /**
    * 새 댓글 생성
@@ -32,7 +33,7 @@ public class CommentService {
 
     // 새 Comment 엔티티를 생성하고 정보를 설정합니다.
     Comment comment = new Comment();
-    comment.setContent(requestDto.getContent());
+    comment.setContent(cleanBotService.filter(requestDto.getContent()));
     comment.setBoard(board); // 연관된 게시글 설정
     comment.setMember(member); // 연관된 작성자 설정
 

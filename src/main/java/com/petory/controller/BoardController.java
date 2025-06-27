@@ -25,12 +25,10 @@ public class BoardController {
   // 정상 작동 원할 시 두 주석처리된 코드 복구 후 테스트용 코드 삭제
   @PostMapping
   public ResponseEntity<Long> createBoard(
-    @Valid @RequestBody BoardCreateDto requestDto/*,
-    @AuthenticationPrincipal UserDetails userDetails*/) {
+    @Valid @RequestBody BoardCreateDto requestDto,
+    @AuthenticationPrincipal UserDetails userDetails) {
 
-    System.out.println("################## BOARD CONTROLLER /createBoard METHOD CALLED! ##################"); // 테스트용 코드
-//    Long savedBoardId = boardService.createBoard(requestDto, userDetails.getUsername());
-    Long savedBoardId = boardService.createBoardForTest(requestDto); // 테스트용 코드
+    Long savedBoardId = boardService.createBoard(requestDto, userDetails.getUsername());
     return ResponseEntity.status(HttpStatus.CREATED).body(savedBoardId);
   }
 

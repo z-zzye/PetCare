@@ -23,6 +23,7 @@ public class BoardService {
   private final BoardRepository boardRepository;
   private final MemberRepository memberRepository;
   private final CommentRepository commentRepository;
+  private final CleanBotService cleanBotService;
 
   /**
    * 새 게시글 생성
@@ -32,27 +33,11 @@ public class BoardService {
       .orElseThrow(() -> new IllegalArgumentException("해당 회원을 찾을 수 없습니다."));
 
     Board board = new Board();
-    board.setTitle(requestDto.getTitle());
-    board.setContent(requestDto.getContent());
+    board.setTitle(cleanBotService.filter(requestDto.getTitle()));
+    board.setContent(cleanBotService.filter(requestDto.getContent()));
     board.setBoardKind(requestDto.getBoardKind());
     board.setHashTag(requestDto.getHashTag());
     board.setMember(member);
-
-    Board savedBoard = boardRepository.save(board);
-    return savedBoard.getId();
-  }
-
-  /**
-   * (테스트용) 사용자 정보 없이 새 게시글 생성
-   */
-  public Long createBoardForTest(BoardCreateDto requestDto) {
-    // Member 정보 없이 게시글을 생성합니다.
-    Board board = new Board();
-    board.setTitle(requestDto.getTitle());
-    board.setContent(requestDto.getContent());
-    board.setBoardKind(requestDto.getBoardKind());
-    board.setHashTag(requestDto.getHashTag());
-    // board.setMember(member) 로직을 생략합니다.
 
     Board savedBoard = boardRepository.save(board);
     return savedBoard.getId();
@@ -94,8 +79,8 @@ public class BoardService {
     }
 
     // DTO에 내용이 있을 경우에만 필드 업데이트
-    if (requestDto.getTitle() != null) board.setTitle(requestDto.getTitle());
-    if (requestDto.getContent() != null) board.setContent(requestDto.getContent());
+    if (requestDto.getTitle() != null) board.setTitle(cleanBotService.filter(requestDto.getTitle()));
+    if (requestDto.getContent() != null) board.setContent(cleanBotService.filter(requestDto.getContent()));
     if (requestDto.getBoardKind() != null) board.setBoardKind(requestDto.getBoardKind());
     if (requestDto.getHashTag() != null) board.setHashTag(requestDto.getHashTag());
 

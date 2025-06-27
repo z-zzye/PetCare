@@ -1,16 +1,13 @@
 import React, { useState, useEffect } from 'react';
-
-// import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 const BoardEdit = () => {
-  // const { id } = useParams();
-  const id = window.location.pathname.split('/')[2]; // 임시로 URL에서 ID 파싱
-
+  const { id } = useParams();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
 
   useEffect(() => {
-    // 수정할 게시글의 기존 데이터를 불러옵니다.
+    // 수정할 게시글의 기존 데이터를 불러옵니다. (인증 필요 없음)
     fetch(`/api/boards/${id}`)
       .then(res => res.json())
       .then(data => {
@@ -24,21 +21,37 @@ const BoardEdit = () => {
     e.preventDefault();
     const updatedData = { title, content };
 
+    // 1. localStorage에서 토큰을 가져옵니다.
+    const token = localStorage.getItem('jwtToken');
+
+    if (!token) {
+      alert('로그인이 필요합니다.');
+      window.location.href = '/members/login';
+      return;
+    }
+
     fetch(`/api/boards/${id}`, {
-      method: 'PATCH', // 부분 수정이므로 PATCH를 사용합니다.
+      method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
-        // 'Authorization': 'Bearer ' + 실제_JWT_토큰,
+        // 2. Authorization 헤더에 토큰을 담아 보냅니다.
+        'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify(updatedData),
     })
     .then(res => {
       if (res.ok) {
         alert('게시글이 수정되었습니다.');
-        // 성공 시 해당 게시글 상세 페이지로 이동
         window.location.href = `/board/${id}`;
       } else {
-        alert('게시글 수정에 실패했습니다.');
+        // 3. 토큰 만료 등 권한 오류 처리
+        if (res.status === 401 || res.status === 403) {
+            alert('세션이 만료되었거나 권한이 없습니다. 다시 로그인해주세요.');
+            localStorage.removeItem('jwtToken');
+            window.location.href = '/members/login';
+        } else {
+            alert('게시글 수정에 실패했습니다.');
+        }
       }
     });
   };

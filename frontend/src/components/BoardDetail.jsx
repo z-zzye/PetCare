@@ -1,18 +1,13 @@
 import React, { useState, useEffect } from 'react';
-
-// react-router-dom의 useParams로 URL의 파라미터(id)를 가져옵니다.
-// import { useParams, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 
 const BoardDetail = () => {
-  // const { id } = useParams(); // URL에서 게시글 ID를 가져옵니다.
-  const id = window.location.pathname.split('/')[2]; // 임시로 URL에서 ID 파싱
-
+  const { id } = useParams();
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
 
   useEffect(() => {
-    // 게시글 상세 정보와 댓글 목록을 가져옵니다.
     fetch(`/api/boards/${id}`)
       .then(res => res.json())
       .then(data => {
@@ -29,42 +24,67 @@ const BoardDetail = () => {
       return;
     }
 
+    const token = localStorage.getItem('jwtToken');
+    if (!token) {
+      alert('댓글을 작성하려면 로그인이 필요합니다.');
+      window.location.href = '/members/login';
+      return;
+    }
+
     fetch(`/api/boards/${id}/comments`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        // 'Authorization': 'Bearer ' + 실제_JWT_토큰, // 실제 토큰을 헤더에 담아 보내야 합니다.
+        'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify({ content: newComment }),
     })
     .then(res => {
       if (res.ok) {
         alert('댓글이 등록되었습니다.');
-        window.location.reload(); // 간단하게 페이지 새로고침으로 댓글 목록 갱신
+        window.location.reload();
       } else {
-        alert('댓글 등록에 실패했습니다.');
+         if (res.status === 401 || res.status === 403) {
+            alert('세션이 만료되었거나 권한이 없습니다. 다시 로그인해주세요.');
+            localStorage.removeItem('jwtToken');
+            window.location.href = '/members/login';
+        } else {
+            alert('댓글 등록에 실패했습니다.');
+        }
       }
     });
   };
 
   const handleDeletePost = () => {
+    const token = localStorage.getItem('jwtToken');
+    if (!token) {
+      alert('게시글을 삭제하려면 로그인이 필요합니다.');
+      window.location.href = '/members/login';
+      return;
+    }
+
     if (window.confirm('정말 이 게시글을 삭제하시겠습니까?')) {
         fetch(`/api/boards/${id}`, {
             method: 'DELETE',
             headers: {
-                // 'Authorization': 'Bearer ' + 실제_JWT_토큰,
+                'Authorization': `Bearer ${token}`,
             }
         }).then(res => {
             if (res.ok) {
                 alert('게시글이 삭제되었습니다.');
-                window.location.href = '/board'; // 메인 페이지로 이동
+                window.location.href = '/board';
             } else {
-                alert('게시글 삭제에 실패했습니다. 권한을 확인해주세요.');
+                if (res.status === 401 || res.status === 403) {
+                    alert('세션이 만료되었거나 권한이 없습니다. 다시 로그인해주세요.');
+                    localStorage.removeItem('jwtToken');
+                    window.location.href = '/members/login';
+                } else {
+                    alert('게시글 삭제에 실패했습니다. 권한을 확인해주세요.');
+                }
             }
         });
     }
   };
-
 
   if (!post) {
     return <div>로딩 중...</div>;
@@ -82,7 +102,6 @@ const BoardDetail = () => {
       </div>
       <hr />
       <div>
-        {/* <Link to={`/edit/${id}`}>수정</Link> */}
         <a href={`/board/edit/${id}`}>수정하기</a>
         <button onClick={handleDeletePost} style={{ marginLeft: '10px' }}>삭제</button>
       </div>
