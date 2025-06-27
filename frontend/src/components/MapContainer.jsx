@@ -1,32 +1,76 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import '../components/css/MapContainer.css';
+import Header from '../components/Header';
 
-// 카카오 맵 SDK가 전역 window 객체에 등록되므로, window.kakao로 접근합니다.
 const { kakao } = window;
 
-const MapContainer = ({ center }) => {
+const MapContainer = ({ center, places }) => {
+  const [map, setMap] = useState(null);
+  const [markers, setMarkers] = useState([]);
+  const [infowindow, setInfowindow] = useState(null);
+
+  // 1. 지도 생성
   useEffect(() => {
-    const container = document.getElementById('map'); // 지도를 담을 영역의 DOM 레퍼런스
-    const options = { // 지도를 생성할 때 필요한 기본 옵션
-      center: new kakao.maps.LatLng(center.lat, center.lng), // 지도의 중심좌표.
-      level: 4 // 지도의 레벨(확대, 축소 정도)
+    const container = document.getElementById('map');
+    const options = {
+      center: new kakao.maps.LatLng(center.lat, center.lng),
+      level: 3,
     };
+    const newMap = new kakao.maps.Map(container, options);
+    const newInfowindow = new kakao.maps.InfoWindow({ zIndex: 1 });
 
-    // 지도 객체를 생성합니다.
-    const map = new kakao.maps.Map(container, options);
+    setMap(newMap);
+    setInfowindow(newInfowindow);
+  }, []); // 이 useEffect는 처음 한 번만 실행됩니다.
 
-    // 이 부분은 지도가 리렌더링될 때 기존 지도를 제거하는 로직이지만,
-    // 여기서는 간단하게 한 번만 생성되도록 구성했습니다.
-    // 복잡한 상호작용이 필요할 경우, 지도를 state로 관리하는 등의 추가 작업이 필요합니다.
+  // 2. 검색된 장소 목록(places)이 변경될 때마다 마커를 새로 그립니다.
+  useEffect(() => {
+    if (!map) return;
 
-  }, [center]); // center 값이 바뀔 때마다 지도를 다시 그립니다.
+    // 기존 마커들을 지도에서 제거합니다.
+    markers.forEach(marker => marker.setMap(null));
+
+    const newMarkers = places.map(place => {
+      // 새로운 마커를 생성합니다.
+      const marker = new kakao.maps.Marker({
+        map: map,
+        position: new kakao.maps.LatLng(place.y, place.x),
+      });
+
+      // 마커에 클릭 이벤트를 등록합니다.
+      kakao.maps.event.addListener(marker, 'click', function () {
+              // 인포윈도우에 표시할 내용입니다.
+              // 상세보기 링크를 포함하도록 HTML 내용을 구성합니다.
+              const content = `
+                <div style="padding:10px;width:280px;font-size:13px;line-height:1.6;">
+                  <div style="font-weight:bold;color:#333;margin-bottom:5px;">${place.place_name}</div>
+                  <div style="color:#666;">${place.road_address_name || place.address_name}</div>
+                  ${place.phone ? `<div style="color:#007bff;">${place.phone}</div>` : ''}
+                  <a href="https://place.map.kakao.com/${place.id}" target="_blank" rel="noopener noreferrer" style="display:block;margin-top:8px;color:#2a74e8;text-decoration:none;">카카오맵에서 상세보기</a>
+                </div>`;
+
+              infowindow.setContent(content);
+              infowindow.open(map, marker);
+            });
+
+      return marker;
+    });
+
+    // 새로운 마커들로 상태를 업데이트합니다.
+    setMarkers(newMarkers);
+
+    // 검색된 장소가 있다면, 첫 번째 장소를 중심으로 지도를 이동시킵니다.
+    if (places.length > 0) {
+      const newCenter = new kakao.maps.LatLng(places[0].y, places[0].x);
+      map.setCenter(newCenter);
+    }
+
+  }, [places, map, infowindow]); // places, map, infowindow 상태가 변경될 때 실행됩니다.
 
   return (
     <div
       id="map"
-      style={{
-        width: '100%',
-        height: '500px' // 지도 영역의 크기를 지정합니다.
-      }}
+      className="map-container"
     ></div>
   );
 };
