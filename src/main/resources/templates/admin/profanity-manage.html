@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>금지어 관리</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: sans-serif; max-width: 900px; margin: 40px auto; padding: 20px; }
+        .container { background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        textarea { width: 100%; box-sizing: border-box; min-height: 400px; padding: 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
+        button { padding: 12px 20px; border: none; background-color: #dc3545; color: white; border-radius: 4px; cursor: pointer; font-size: 1.1rem; }
+        .status { margin-top: 10px; padding: 10px; border-radius: 4px; display: none; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>금지어 관리</h1>
+    <p>한 줄에 한 단어씩 입력해 주세요. 저장 버튼을 누르면 즉시 필터링에 적용됩니다.</p>
+
+    <form id="profanityForm">
+        <textarea id="profanityText" th:text="${profanityList}"></textarea>
+        <button type="submit">저장하기</button>
+    </form>
+    <div id="statusMessage" class="status"></div>
+</div>
+
+<script>
+    document.getElementById('profanityForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const list = document.getElementById('profanityText').value;
+        const statusEl = document.getElementById('statusMessage');
+
+        fetch('/api/admin/profanity/update', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ "list": list })
+        })
+        .then(response => {
+            statusEl.style.display = 'block';
+            if (response.ok) {
+                statusEl.className = 'status success';
+                return response.text();
+            } else {
+                statusEl.className = 'status error';
+                return response.text().then(text => { throw new Error(text) });
+            }
+        })
+        .then(data => {
+            statusEl.textContent = data;
+        })
+        .catch(error => {
+            statusEl.textContent = '저장 실패: ' + error.message;
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,4 +1,9 @@
-body {
+/*//////////////////////////////////////////////////////////////////////
+/                                                                    /
+/        헤더나 바디 구조가 이상해지면 주석처리한 코드 이용해주세요!           /
+/                                                                    /
+//////////////////////////////////////////////////////////////////////*/
+/*body {
   margin: 0;
   font-family: 'Noto Sans KR', sans-serif;
   background: #f7f7fa;
@@ -9,7 +14,18 @@ body {
   padding: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}*/
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Noto Sans KR', sans-serif;
+  background: #f7f7fa;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',

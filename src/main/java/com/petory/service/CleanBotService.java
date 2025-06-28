@@ -1,77 +1,119 @@
-package com.petory.service; // 사용자님의 서비스 패키지 경로
+package com.petory.service;
 
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 @Service
-@Slf4j // 로그 출력을 위한 어노테이션
+@Slf4j
 public class CleanBotService {
 
-    // 욕설 단어를 저장할 Set. 중복을 허용하지 않고 검색 속도가 빠릅니다.
-    private final Set<String> badWords = new HashSet<>();
+    private final Set<String> badWords = Collections.synchronizedSet(new HashSet<>());
+
+    // application.properties에서 외부 파일 경로를 주입받습니다.
+    @Value("${profanity.list.path}")
+    private String profanityFilePath;
+
+    private Path filePath;
 
     /**
-     * Bean이 생성된 후, 욕설 사전을 로드하기 위해 딱 한 번 실행되는 메서드입니다.
+     * 서버 시작 시 파일 경로를 초기화하고, 파일이 없으면 생성합니다.
      */
     @PostConstruct
     private void init() {
+        this.filePath = Paths.get(profanityFilePath);
         try {
-            // resources/profanity/bad-words.txt 파일을 읽어옵니다.
-            Resource resource = new ClassPathResource("profanity/bad-words.txt");
-
-            // 파일을 한 줄씩 읽어 badWords Set에 추가합니다.
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(resource.getInputStream(), "UTF-8"))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    if (StringUtils.hasText(line)) {
-                        badWords.add(line.trim());
-                    }
-                }
+            // 파일이 위치할 디렉토리가 없으면 생성합니다.
+            if (!Files.exists(filePath.getParent())) {
+                Files.createDirectories(filePath.getParent());
             }
-            log.info("클린봇 서비스: 욕설 사전 로드 완료 (총 {}개 단어)", badWords.size());
+            // 파일 자체가 없으면 빈 파일을 생성합니다.
+            if (!Files.exists(filePath)) {
+                Files.createFile(filePath);
+                log.info("금지어 파일이 존재하지 않아 새로 생성했습니다: {}", filePath);
+            }
         } catch (IOException e) {
-            log.error("클린봇 서비스: 욕설 사전 파일 로드에 실패했습니다.", e);
+            log.error("금지어 파일을 초기화하는 중 오류 발생", e);
+        }
+        // 초기 금지어 목록을 로드합니다.
+        loadProfanityList();
+    }
+
+    /**
+     * 현재 금지어 목록을 파일에서 읽어와 한 줄씩 포함된 문자열로 반환합니다.
+     */
+    public String getProfanityListAsString() {
+        try {
+            return Files.readString(filePath);
+        } catch (IOException e) {
+            log.error("금지어 목록 파일을 읽는 중 오류 발생", e);
+            return "오류: 금지어 목록을 불러올 수 없습니다.";
         }
     }
 
     /**
-     * 입력된 텍스트에 포함된 욕설을 필터링하여 반환합니다.
-     * @param text 필터링할 원본 텍스트
-     * @return 필터링된 텍스트
+     * 새로운 금지어 목록으로 파일을 갱신하고, 메모리의 목록도 다시 로드합니다.
+     */
+    public void updateProfanityList(String fullTextOfProfanityList) {
+        try {
+            // 새로운 내용으로 파일을 완전히 덮어씁니다.
+            Files.writeString(filePath, fullTextOfProfanityList);
+            // 파일 내용이 변경되었으므로, 메모리에 로드된 목록을 다시 로드합니다.
+            loadProfanityList();
+        } catch (IOException e) {
+            log.error("금지어 목록 파일을 저장하는 중 오류 발생", e);
+            throw new RuntimeException("금지어 목록을 저장하는 데 실패했습니다.", e);
+        }
+    }
+
+    /**
+     * 욕설이 포함되어 있으면 전체를 경고 문구로 치환합니다.
      */
     public String filter(String text) {
-        // 검열할 글자가 없는 경우(null, "   ") 작업 생략
         if (containsProfanity(text)) {
-            return "클린봇이 부적절한 단어를 감지하였습니다.";
+            return "클린봇이 부적절한 단어를 감지하였습니다";
         }
         return text;
     }
 
     /**
-     * 입력된 텍스트에 욕설이 포함되어 있는지 여부만 확인합니다.
-     * @param text 검사할 원본 텍스트
-     * @return 욕설 포함 시 true, 아니면 false
+     * 텍스트에 욕설이 포함되어 있는지 확인합니다.
      */
     public boolean containsProfanity(String text) {
-        if (!StringUtils.hasText(text)) {
-            return false;
-        }
-        for (String badWord : badWords) {
-            if (text.toLowerCase().contains(badWord)) {
-                return true;
+        if (!StringUtils.hasText(text)) return false;
+        String lowerCaseText = text.toLowerCase();
+        return badWords.stream().anyMatch(lowerCaseText::contains);
+    }
+
+    /**
+     * 파일에서 금지어 목록을 읽어와 메모리의 Set을 갱신하는 내부 메서드
+     */
+    private void loadProfanityList() {
+        try {
+            badWords.clear(); // 기존 목록을 비웁니다.
+            try (BufferedReader reader = Files.newBufferedReader(filePath)) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (StringUtils.hasText(line)) {
+                        badWords.add(line.trim().toLowerCase());
+                    }
+                }
             }
+            log.info("클린봇 서비스: 욕설 사전 갱신 완료 (총 {}개 단어)", badWords.size());
+        } catch (IOException e) {
+            log.error("클린봇 서비스: 욕설 사전 파일 로드에 실패했습니다.", e);
         }
-        return false;
     }
 }

@@ -9,6 +9,14 @@ import FindId from './components/FindId.jsx';
 import FindPw from './components/FindPw.jsx';
 import ResetPw from './components/ResetPw.jsx';
 
+// 문제 생기면 이 두줄이 문제일수있음
+import MapServicePage from './pages/MapServicePage'; // 지도 서비스 페이지
+
+import BoardMain from './components/BoardMain';
+import BoardDetail from './components/BoardDetail';
+import BoardWrite from './components/BoardWrite';
+import BoardEdit from './components/BoardEdit';
+
 function App() {
   // 소셜 추가정보 페이지는 실제로는 사용자 정보를 prop으로 받아야 하지만, 예시로 빈 객체 전달
   return (
@@ -22,6 +30,13 @@ function App() {
         <Route path="/find-pw" element={<FindPw />} />
         <Route path="/reset-pw" element={<ResetPw />} />
         <Route path="/" element={<MainPage />} />
+
+        <Route path="/place" element={<MapServicePage />} />
+
+        <Route path="/board" element={<BoardMain />} />
+        <Route path="/board/:id" element={<BoardDetail />} />
+        <Route path="/board/write" element={<BoardWrite />} />
+        <Route path="/board/edit/:id" element={<BoardEdit />} />
       </Routes>
     </Router>
   );
