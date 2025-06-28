@@ -19,6 +19,7 @@ import com.petory.config.JwtTokenProvider;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import com.petory.dto.ResetPasswordDto;
 
 @RestController
 @RequestMapping("/api/members")
@@ -71,6 +72,10 @@ public class MemberApiController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginDto loginDto) {
         try {
+            Member member = memberService.getMemberByEmail(loginDto.getEmail());
+            if ("SOCIAL_LOGIN".equals(member.getMember_Pw())) {
+              return ResponseEntity.status(401).body("소셜 로그인 사용자입니다.");
+            }
             UserDetails userDetails = userDetailsService.loadUserByUsername(loginDto.getEmail());
             if (!passwordEncoder.matches(loginDto.getPassword(), userDetails.getPassword())) {
                 return ResponseEntity.status(401).body("비밀번호가 일치하지 않습니다.");
@@ -105,5 +110,17 @@ public class MemberApiController {
       } else {
         return ResponseEntity.status(404).body("해당 번호로 등록된 계정이 없습니다.");
       }
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordDto dto) {
+        try {
+            memberService.resetPassword(dto.getEmail(), dto.getNewPassword());
+            return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("비밀번호 변경 중 오류가 발생했습니다.");
+        }
     }
 }

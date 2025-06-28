@@ -42,7 +42,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
         // 기존 회원인지 확인
         Optional<Member> existingMember = memberRepository.findByMember_Email(email);
-        
+
         if (existingMember.isPresent()) {
             // 기존 회원인 경우 바로 로그인 처리
             Member member = existingMember.get();
@@ -56,6 +56,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
             Member newMember = new Member();
             // 2. ImageService를 사용해 이미지를 우리 서버에 다운로드하고, 저장된 경로를 받아옵니다.
             String savedProfileImgPath = imageService.downloadAndSaveImage(originalProfileImageUrl, "profile");
+          System.out.println("카카오 로그인 attributes: " + attributes);
             // 3. Member 객체에 '저장된 경로'를 설정합니다.
             newMember.setMember_ProfileImg(savedProfileImgPath);
             newMember.setMember_Email(email);
@@ -66,14 +67,14 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
             newMember.setMember_Mileage(0);
 
             memberRepository.save(newMember);
-            
+
             // 세션에 전화번호 입력 필요 플래그 설정
             ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             if (requestAttributes != null) {
                 HttpSession session = requestAttributes.getRequest().getSession();
                 session.setAttribute("NEED_PHONE_INPUT", true);
             }
-            
+
             // 임시 OAuth2User 반환 (실제로는 인증 성공 핸들러에서 처리됨)
             return new DefaultOAuth2User(
                     Collections.singleton(new SimpleGrantedAuthority(Role.USER.toString())),

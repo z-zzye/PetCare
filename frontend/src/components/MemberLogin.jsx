@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useLocation,  } from 'react-router-dom';
 
 function MemberLogin() {
   const location = useLocation();
+  const toast = location.state?.toast;
   const userIdFromState = location.state?.userId || ""; // 인증된 이메일
   const [email, setEmail] = useState(userIdFromState); // 여기 초기값에 반영
   const [password, setPassword] = useState('');
@@ -10,6 +11,12 @@ function MemberLogin() {
   const [passwordError, setPasswordError] = useState(false);
   const [loginError, setLoginError] = useState('');
 
+  useEffect(() => {
+    if (toast) {
+      // 예: 토스트 메시지 띄우기
+      alert(toast); // 또는 setToastMessage(toast) 등
+    }
+  }, [toast]);
   const isValidEmail = (value) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(value);
@@ -56,6 +63,7 @@ function MemberLogin() {
 
   const handleSocialLogin = (provider) => {
     window.location.href = `http://localhost/oauth2/authorization/${provider}`;
+
   };
 
   return (

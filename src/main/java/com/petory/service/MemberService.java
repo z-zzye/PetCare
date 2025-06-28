@@ -154,4 +154,18 @@ public class MemberService implements UserDetailsService {
     public Member getMemberByPhone(String phone) {
       return memberRepository.findByMember_Phone(phone).orElse(null);
     }
+
+    /**
+     * 이메일로 비밀번호를 재설정하는 메서드 (JPA save 방식)
+     */
+    public void resetPassword(String email, String newPassword) {
+        Member member = memberRepository.findByMember_Email(email)
+            .orElseThrow(() -> new IllegalStateException("해당 이메일의 사용자를 찾을 수 없습니다."));
+        System.out.println("비밀번호 변경 대상 이메일: " + email);
+        String encodedPw = passwordEncoder.encode(newPassword);
+        System.out.println("변경 전 비밀번호: " + member.getMember_Pw());
+        member.setMember_Pw(encodedPw);
+        memberRepository.save(member);
+        System.out.println("변경 후 비밀번호: " + member.getMember_Pw());
+    }
 }

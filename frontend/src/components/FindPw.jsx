@@ -31,31 +31,67 @@ const FindPw = () => {
   const isValidEmail = (value) => /^[^\s@]+@[^\\s@]+\.[^\s@]+$/.test(value);
 
   // 코드 발송
-  const handleSendCode = () => {
+  const handleSendCode = async () => {
     if (!isValidEmail(email)) {
       setEmailError('올바른 이메일 형식으로 입력하세요.');
       return;
     }
     setEmailError('');
-    setCodeSent(true);
-    setTimer(180);
-    setTimerActive(true);
-    setCode('');
-    setCodeVerified(false);
-    setToastMessage('인증코드가 전송되었습니다.');
-    setTimeout(() => setToastMessage(''), 2000);
+    setCodeError('');
+    setLoading(true);
+    try {
+      const res = await fetch('/auth/send-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ email })
+      });
+      if (res.ok) {
+        setCodeSent(true);
+        setTimer(180);
+        setTimerActive(true);
+        setCode('');
+        setCodeVerified(false);
+        setToastMessage('인증코드가 전송되었습니다.');
+        setTimeout(() => setToastMessage(''), 2000);
+      } else {
+        const errorMsg = await res.text();
+        setEmailError(errorMsg || '인증코드 전송에 실패했습니다.');
+
+      }
+    } catch (e) {
+      setEmailError('네트워크 오류가 발생했습니다.');
+    }
+    setLoading(false);
   };
 
   // 인증코드 확인
-  const handleVerifyCode = () => {
-    if (code.length < 4) {
+  const handleVerifyCode = async () => {
+    console.log("인증코드 확인 시점 email:", email);
+    if (code.length < 6) {
       setCodeError('인증코드를 올바르게 입력하세요.');
       return;
     }
     setCodeError('');
-    setCodeVerified(true);
-    setTimerActive(false);
-    navigate('/reset-pw');
+    setCodeLoading(true);
+    try {
+      const res = await fetch('/auth/verify-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ email, code })
+      });
+      if (res.ok) {
+        setCodeVerified(true);
+        setTimerActive(false);
+        setToastMessage('인증이 완료되었습니다!');
+        setTimeout(() => setToastMessage(''), 1000);
+        navigate('/reset-pw', { state: { email } });
+      } else {
+        setCodeError('인증코드가 올바르지 않거나 만료되었습니다.');
+      }
+    } catch (e) {
+      setCodeError('네트워크 오류가 발생했습니다.');
+    }
+    setCodeLoading(false);
   };
 
   // 인증코드 재전송
