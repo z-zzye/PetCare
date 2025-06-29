@@ -52,7 +52,8 @@ public class SecurityConfig {
                     "/auth/send-code",
                     "/auth/verify-code",
                     "/api/sms/**",
-                    "/api/members/find-id"
+                    "/api/members/find-id",
+                    "/api/members/reset-password"
                 ).permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/boards", "/api/boards/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
