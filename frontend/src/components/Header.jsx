@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import './Header.css';
 import { FaBell, FaComments, FaBars, FaTimes } from 'react-icons/fa';
+import { useAuth } from '../contexts/AuthContext';
 import { Link } from 'react-router-dom';
 
 const menu = [
@@ -18,8 +19,8 @@ const menu = [
     name: '쇼핑',
     link: '/shop',
     submenu: [
-      { name: '쇼핑', link: '/shopping' },
-      { name: 'Auction', link: '/auction' },
+      { name: '쇼핑', link: '/shop/shopping' },
+      { name: 'Auction', link: '/shop/auction' },
     ],
   },
   {
@@ -42,10 +43,35 @@ const Header = () => {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [accordionOpen, setAccordionOpen] = useState(null);
   const [hoveredIdx, setHoveredIdx] = useState(null);
+  const { isLoggedIn, profileImg, nickname, logout } = useAuth();
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef();
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    }
+    if (showDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showDropdown]);
 
   // 모바일 아코디언 토글
   const handleAccordion = idx => {
     setAccordionOpen(accordionOpen === idx ? null : idx);
+  };
+
+  // 로그아웃 처리
+  const handleLogout = () => {
+    logout(); //Contexts에서 제공하는 logout호출
+    // 로그인 페이지로 리다이렉트
+    window.location.href = '/';
   };
 
   // 알림 여부(임시, 실제로는 props/state로 관리)
@@ -88,19 +114,41 @@ const Header = () => {
             </li>
           ))}
         </ul>
-        {/* 우측 아이콘/프로필 */}
-        <div className="main-navbar-right desktop-menu">
-          <button className="main-navbar-icon-btn" title="채팅방">
-            <FaComments size={22} />
-          </button>
-          <button className="main-navbar-icon-btn" title="알림">
-            <FaBell size={22} />
-            {hasNewNotification && <span className="main-navbar-badge-dot" />}
-          </button>
-          <div className="main-navbar-profile">
-            <img src="/images/profile-default.png" alt="프로필" />
+        {/* 우측 아이콘/프로필 (로그인 상태) */}
+        {isLoggedIn ? (
+          <div className="main-navbar-right desktop-menu">
+            <button className="main-navbar-icon-btn"><FaComments size={26} color="#223A5E" /></button>
+            <button className="main-navbar-icon-btn"><FaBell size={26} color="#223A5E" />{hasNewNotification && <span className="main-navbar-badge-dot" />}</button>
+            <div className="main-navbar-profile-container">
+              <div
+                className="main-navbar-profile"
+                style={{ cursor: 'pointer' }}
+                onClick={() => setShowProfileModal(true)}
+              >
+                <img src={profileImg} alt="프로필" onError={(e) => e.target.src = '/images/profile-default.png'} />
+              </div>
+              {nickname && (
+                <div className="profile-nickname-dropdown" ref={dropdownRef}>
+                  <span
+                    className="profile-nickname clickable"
+                    onClick={() => setShowDropdown((prev) => !prev)}
+                  >
+                    {nickname}&nbsp;님
+                  </span>
+                  {showDropdown && (
+                    <div className="profile-dropdown-menu">
+                      <button onClick={handleLogout} className="logout-btn">Logout</button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="main-navbar-right desktop-menu">
+            <Link to="/members/login" className="main-navbar-login-btn">Login</Link>
+          </div>
+        )}
         {/* 햄버거 버튼 (모바일) */}
         <button className="main-navbar-hamburger mobile-menu" onClick={() => setMobileNavOpen(true)}>
           <FaBars size={28} />
@@ -147,20 +195,45 @@ const Header = () => {
           ))}
         </ul>
         <div className="mobile-nav-bottom">
-          <button className="main-navbar-icon-btn">
-            <FaComments size={22} />
-          </button>
-          <button className="main-navbar-icon-btn">
-            <FaBell size={22} />
-            {hasNewNotification && <span className="main-navbar-badge-dot" />}
-          </button>
-          <span className="main-navbar-profile">
-            <img src="/images/profile-default.png" alt="프로필" />
-          </span>
+          {isLoggedIn ? (
+            <>
+              <button className="main-navbar-icon-btn">
+                <FaComments size={26} color="#223A5E" />
+              </button>
+              <button className="main-navbar-icon-btn">
+                <FaBell size={26} color="#223A5E" />
+                {hasNewNotification && <span className="main-navbar-badge-dot" />}
+              </button>
+              <div className="mobile-profile-section">
+                <span className="main-navbar-profile">
+                  <img
+                        src={profileImg}
+                        alt="프로필"
+                        onError={(e) => e.target.src = '/images/profile-default.png'} // 이미지 에러 대비
+                      />
+                </span>
+                <button onClick={handleLogout} className="mobile-logout-btn">
+                  Logout
+                </button>
+              </div>
+            </>
+          ) : (
+            <Link to="/members/login" className="main-navbar-login-btn">Login</Link>
+          )}
         </div>
       </div>
+      {showProfileModal && (
+        <div className="profile-modal-overlay" onClick={() => setShowProfileModal(false)}>
+          <div className="profile-modal-content" onClick={e => e.stopPropagation()}>
+            <button className="profile-modal-close" onClick={() => setShowProfileModal(false)} aria-label="닫기">
+              &times;
+            </button>
+            <img src={profileImg} alt="프로필 확대" className="profile-modal-img" />
+          </div>
+        </div>
+      )}
     </nav>
   );
 };
 
-export default Header; 
+export default Header;

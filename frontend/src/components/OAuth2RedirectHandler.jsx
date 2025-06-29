@@ -1,5 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+
 
 function getQueryParams(search) {
   return Object.fromEntries(new URLSearchParams(search));
@@ -8,18 +10,27 @@ function getQueryParams(search) {
 const OAuth2RedirectHandler = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { login } = useAuth(); //Context 상태 갱신을 위한 login
 
   useEffect(() => {
     const params = getQueryParams(location.search);
-    const { token, needPhoneInput } = params;
-    if (token) {
+    const { token, role, profileImg, nickname, needPhoneInput } = params;
+    /*if (token) {
       localStorage.setItem('jwtToken', token);
-    }
+    }*/
+
+    if (!token) return; // token 없으면 아무것도 하지 않음
+
+      // 로그인 이미 되어 있으면 재로그인 방지
+      if (!localStorage.getItem('token')) {
+        login(token, role || 'USER', profileImg || '/images/profile-default.png', nickname || '');
+      }
+
     if (needPhoneInput === 'true') {
       fetchMemberInfo(token).then(memberInfo => {
-        navigate('/members/social-extra', { 
+        navigate('/members/social-extra', {
           state: { member: memberInfo },
-          replace: true 
+          replace: true
         });
       }).catch(error => {
         console.error('회원 정보 가져오기 실패:', error);
@@ -28,7 +39,7 @@ const OAuth2RedirectHandler = () => {
     } else {
       navigate('/', { replace: true });
     }
-  }, [location, navigate]);
+  }, [location, navigate, login]);
 
   const fetchMemberInfo = async (token) => {
     try {
@@ -50,4 +61,4 @@ const OAuth2RedirectHandler = () => {
   return <div>로그인 처리 중입니다...</div>;
 };
 
-export default OAuth2RedirectHandler; 
+export default OAuth2RedirectHandler;

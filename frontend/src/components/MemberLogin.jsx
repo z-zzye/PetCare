@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 function MemberLogin() {
   const location = useLocation();
@@ -9,6 +10,9 @@ function MemberLogin() {
   const [emailError, setEmailError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
   const [loginError, setLoginError] = useState('');
+  const [toastMessage, setToastMessage] = useState(''); // 커스텀 토스트용
+  const navigate = useNavigate();
+  const {login} = useAuth();
 
   const isValidEmail = (value) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -47,16 +51,49 @@ function MemberLogin() {
         return;
       }
       const data = await res.json();
-      localStorage.setItem('token', data.token);
-      window.location.href = '/';
+      console.log('로그인 응답 데이터:', data); // 디버깅용
+      // profileImg가 빈 문자열이면 기본 이미지 사용
+      const profileImgUrl = data.profileImg && data.profileImg.trim() !== '' 
+        ? data.profileImg 
+        : '/images/profile-default.png';
+      console.log('설정할 프로필 이미지 URL:', profileImgUrl); // 디버깅용
+      login(data.token, data.role, profileImgUrl, data.nickname);
+      //localStorage.setItem('token', data.token);
+      //localStorage.setItem('member_Role', data.role);  // 사용자 권한(ADMIN/USER 등) 저장 → 관리자 기능 제한에 사용
+      navigate('/');
     } catch (err) {
       setLoginError('로그인 중 오류가 발생했습니다.');
     }
   };
 
   const handleSocialLogin = (provider) => {
-    window.location.href = `http://localhost/oauth2/authorization/${provider}`;
+    window.location.href = `${process.env.REACT_APP_API_BASE}/oauth2/authorization/${provider}`;
   };
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const errorMsg = params.get('error');
+    if (errorMsg) {
+      if (decodeURIComponent(errorMsg).includes('이미 해당 이메일로 가입된 계정이 있습니다')) {
+        setToastMessage('이미 사용중인 이메일 입니다.');
+      } else {
+        setToastMessage(decodeURIComponent(errorMsg));
+      }
+      params.delete('error');
+      navigate({
+        pathname: location.pathname,
+        search: params.toString()
+      }, { replace: true });
+    }
+  }, [location, navigate]);
+
+  // 토스트 메시지 자동 제거 (2초 후)
+  useEffect(() => {
+    if (toastMessage) {
+      const timer = setTimeout(() => setToastMessage(''), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastMessage]);
 
   return (
     <div style={{
@@ -296,6 +333,40 @@ function MemberLogin() {
             height: 140px;
           }
         }
+
+        .toast-message {
+          position: fixed;
+          top: 1rem;
+          left: 50%;
+          transform: translateX(-50%);
+          background: #223A5E;
+          color: #fff;
+          padding: 0.75rem 1.5rem;
+          border-radius: 0.5rem;
+          font-size: 0.875rem;
+          font-weight: 500;
+          z-index: 9999;
+          box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.2);
+          animation: fadeInOut 2s ease-in-out;
+        }
+        @keyframes fadeInOut {
+          0% {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-1rem);
+          }
+          15% {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+          }
+          85% {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+          }
+          100% {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-1rem);
+          }
+        }
       `}</style>
       <div className="login-container">
         <div className="login-header">
@@ -353,6 +424,9 @@ function MemberLogin() {
           </div>
         </div>
       </div>
+      {toastMessage && (
+        <div className="toast-message">{toastMessage}</div>
+      )}
     </div>
   );
 }
