@@ -73,17 +73,17 @@ public class MemberApiController {
     public ResponseEntity<?> login(@RequestBody LoginDto loginDto) {
         Member member = null;
         try {
-            Member member = memberService.getMemberByEmail(loginDto.getEmail());
+            member = memberService.getMemberByEmail(loginDto.getEmail());
             if ("SOCIAL_LOGIN".equals(member.getMember_Pw())) {
               return ResponseEntity.status(401).body("소셜 로그인 사용자입니다.");
             }
             UserDetails userDetails = userDetailsService.loadUserByUsername(loginDto.getEmail());
-            
+
             // 소셜 로그인 회원인지 확인
             if ("SOCIAL_LOGIN".equals(userDetails.getPassword())) {
                 return ResponseEntity.status(401).body("소셜 로그인으로 가입된 계정입니다. 소셜 로그인을 이용해 주세요.");
             }
-            
+
             if (!passwordEncoder.matches(loginDto.getPassword(), userDetails.getPassword())) {
                 return ResponseEntity.status(401).body("비밀번호가 일치하지 않습니다.");
             }
