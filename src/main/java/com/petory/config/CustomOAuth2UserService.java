@@ -10,6 +10,7 @@ import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserServ
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
@@ -44,8 +45,14 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         Optional<Member> existingMember = memberRepository.findByMember_Email(email);
 
         if (existingMember.isPresent()) {
-            // 기존 회원인 경우 바로 로그인 처리
             Member member = existingMember.get();
+            if (!"SOCIAL_LOGIN".equals(member.getMember_Pw())) {
+                // 일반 가입자(로컬 회원)라면 소셜 로그인 차단
+                throw new OAuth2AuthenticationException(
+                    new OAuth2Error("email_exists", "이미 해당 이메일로 가입된 계정이 있습니다. 일반 로그인을 이용해 주세요.", null)
+                );
+            }
+            // SOCIAL_LOGIN이면 소셜 로그인 허용
             return new DefaultOAuth2User(
                     Collections.singleton(new SimpleGrantedAuthority(member.getMember_Role().toString())),
                     attributes,

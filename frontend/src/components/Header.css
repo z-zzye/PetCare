@@ -131,6 +131,10 @@ span.main-navbar-link:focus,
   padding-right: 18px;
 }
 
+.main-navbar-right > *:not(:last-child) {
+  margin-right: 10px;
+}
+
 .main-navbar-icon-btn {
   background: none;
   border: none;
@@ -164,8 +168,8 @@ span.main-navbar-link:focus,
 }
 
 .main-navbar-profile {
-  width: 38px;
-  height: 38px;
+  width: 54px;
+  height: 54px;
   aspect-ratio: 1/1;
   border-radius: 50%;
   overflow: hidden;
@@ -182,6 +186,40 @@ span.main-navbar-link:focus,
   height: 100%;
   object-fit: cover;
   border-radius: 50%;
+}
+
+/* 프로필 컨테이너 */
+.main-navbar-profile-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  margin-left: 10px;
+}
+
+.profile-info-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.logout-btn {
+  padding: 4px 8px;
+  background: none;
+  border: none;
+  color: #223A5E;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 0.2s;
+  margin-top: 0;
+  display: block;
+  text-align: center;
+}
+
+.logout-btn:hover {
+  color: #ffc107;
 }
 
 /* 반응형 */
@@ -470,4 +508,158 @@ span.main-navbar-link,
   content: '';
   display: block;
   z-index: 2;
+}
+
+/* 모바일 프로필 섹션 */
+.mobile-profile-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.mobile-logout-btn {
+  padding: 8px 16px;
+  background: #ff6b6b;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.mobile-logout-btn:hover {
+  background: #ff5252;
+}
+
+/* 프로필 팝업(모달) 스타일 */
+.profile-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.profile-modal-content {
+  background: #16213e; /* 어두운 네이비 */
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  padding: 32px 32px 24px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+}
+
+.profile-modal-img {
+  width: 300px;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid #ffc107;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+.profile-modal-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #888;
+  cursor: pointer;
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: color 0.2s;
+}
+
+.profile-modal-close:hover {
+  background: none;
+  color: #ffc107; /* X만 머스터드 색상 */
+}
+
+.profile-nickname {
+  font-size: 0.85rem;
+  color: #223A5E;
+  margin-bottom: 2px;
+  text-align: center;
+  width: 100%;
+  word-break: break-all;
+  transition: color 0.2s;
+}
+
+.profile-info-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.profile-nickname-dropdown {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.profile-nickname.clickable {
+  cursor: pointer;
+  color: #223A5E;
+  transition: color 0.2s;
+}
+
+.profile-nickname.clickable:hover {
+  color: #ffc107;
+}
+
+.profile-dropdown-menu {
+  position: absolute;
+  top: 120%;
+  left: 0;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px #0001;
+  padding: 8px 0;
+  min-width: 90px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.main-navbar-login-btn {
+  padding: 4px 8px;
+  background: none;
+  border: none;
+  color: #223A5E;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 0.2s;
+  display: block;
+  text-align: center;
+  text-decoration: none;
+}
+
+.main-navbar-login-btn:hover {
+  color: #ffc107;
 } 

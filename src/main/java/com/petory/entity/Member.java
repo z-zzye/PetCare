@@ -3,15 +3,16 @@ package com.petory.entity;
 import com.petory.constant.Role;
 import com.petory.dto.MemberFormDto;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Entity
 @Getter
 @Setter
 @ToString
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Member extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,7 +41,7 @@ public class Member extends BaseEntity {
     @Column(name = "member_Mileage")
     private Integer member_Mileage;
 
-    private String address;
+    private String member_Address;
 
 
     public static Member createMember(MemberFormDto memberFormDto,
