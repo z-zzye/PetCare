@@ -59,6 +59,7 @@ public class SecurityConfig {
                     "/api/categories"
                 ).permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/boards", "/api/boards/**").permitAll()
+                .requestMatchers("/api/calendar/**").authenticated()
                 .requestMatchers("/api/items/**").authenticated()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
