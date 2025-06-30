@@ -1,5 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+
+import { AuthProvider } from './contexts/AuthContext';
 import MemberLogin from './components/MemberLogin.jsx';
 import MemberSignUp from './components/MemberSignUp.jsx';
 import MemberSocialExtra from './components/MemberSocialExtra.jsx';
@@ -8,6 +10,9 @@ import MainPage from './components/MainPage.jsx';
 import FindId from './components/FindId.jsx';
 import FindPw from './components/FindPw.jsx';
 import ResetPw from './components/ResetPw.jsx';
+import ShoppingPage from './components/Shop/Shopping.jsx';
+import AuctionPage from './components/Shop/Auction.jsx';
+
 
 // 문제 생기면 이 두줄이 문제일수있음
 import MapServicePage from './pages/MapServicePage'; // 지도 서비스 페이지
@@ -20,6 +25,7 @@ import BoardEdit from './components/BoardEdit';
 function App() {
   // 소셜 추가정보 페이지는 실제로는 사용자 정보를 prop으로 받아야 하지만, 예시로 빈 객체 전달
   return (
+   <AuthProvider>
     <Router>
       <Routes>
         <Route path="/members/login" element={<MemberLogin />} />
@@ -39,8 +45,13 @@ function App() {
         <Route path="/board/:id" element={<BoardDetail />} />
         <Route path="/board/write" element={<BoardWrite />} />
         <Route path="/board/edit/:id" element={<BoardEdit />} />
+
+        {/* 쇼핑 관련 라우팅 */}
+        <Route path="/shop/shopping" element={<ShoppingPage />} />
+        <Route path="/shop/auction" element={<AuctionPage />} />
       </Routes>
     </Router>
+   </AuthProvider>
   );
 }
 

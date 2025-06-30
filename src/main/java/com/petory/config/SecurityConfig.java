@@ -26,6 +26,7 @@ public class SecurityConfig {
 
     private final CustomOAuth2UserService customOAuth2UserService;
     private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
+    private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
     private final JwtTokenProvider jwtTokenProvider;
     private final UserDetailsService userDetailsService;
 
@@ -51,7 +52,8 @@ public class SecurityConfig {
                     "/auth/send-code",
                     "/auth/verify-code",
                     "/api/sms/**",
-                    "/api/members/find-id"
+                    "/api/members/find-id",
+                    "/api/members/reset-password"
                 ).permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/boards", "/api/boards/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
@@ -70,6 +72,7 @@ public class SecurityConfig {
             .oauth2Login(oauth2 -> oauth2
                 .loginPage("/members/login")
                 .successHandler(customAuthenticationSuccessHandler)
+                .failureHandler(customAuthenticationFailureHandler)
                 .userInfoEndpoint(userInfo -> userInfo
                     .userService(customOAuth2UserService)
                 )

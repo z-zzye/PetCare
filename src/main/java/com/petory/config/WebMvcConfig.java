@@ -17,6 +17,18 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Value("${resource.handler}")
     String resourceHandler;
 
+    @Value("${profile.resource.handler}")
+    String profileResourceHandler;
+
+    @Value("${profile.resource.location}")
+    String profileResourceLocation;
+
+    @Value("${item.resource.handler}")
+    String itemResourceHandler;
+
+    @Value("${item.resource.location}")
+    String itemResourceLocation;
+
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
@@ -36,10 +48,16 @@ public class WebMvcConfig implements WebMvcConfigurer {
         // uploadPath 경로에서 파일을 찾아 제공하도록 설정합니다.
         registry.addResourceHandler(resourceHandler)
                 .addResourceLocations(uploadPath);
+        
+        // 프로필 이미지 전용 핸들러
+        registry.addResourceHandler(profileResourceHandler)
+                .addResourceLocations(profileResourceLocation);
+        
+        // 상품 이미지 전용 핸들러
+        registry.addResourceHandler(itemResourceHandler)
+                .addResourceLocations(itemResourceLocation);
     }
 
-  @Configuration
-  public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
       registry.addViewController("/{spring:\\w+}")
@@ -47,5 +65,4 @@ public class WebMvcConfig implements WebMvcConfigurer {
       registry.addViewController("/**/{spring:[\\w\\-]+}") // 경로에 하이픈(-) 포함 가능
         .setViewName("forward:/index.html");
     }
-  }
 }
