@@ -14,12 +14,19 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.security.core.GrantedAuthority;
 import java.util.Map;
+import com.petory.repository.MemberRepository;
+import com.petory.entity.Member;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 @Component
 public class CustomAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
+
+    @Autowired
+    private MemberRepository memberRepository;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, 
@@ -53,7 +60,22 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
         String token = jwtTokenProvider.createToken(email, roles);
-        String redirectUrl = "http://localhost:3000/oauth2/redirect?token=" + token;
+        //프로필 이미지 경로 추가
+        Member member = memberRepository.findByMember_Email(email).orElse(null);
+        String profileImg = (member != null && member.getMember_ProfileImg() != null)
+            ? member.getMember_ProfileImg()
+            : "";
+        String encodedProfileImg = URLEncoder.encode(profileImg, StandardCharsets.UTF_8);
+
+        String nickname = (member != null && member.getMember_NickName() != null)
+            ? member.getMember_NickName()
+            : "";
+        String encodedNickname = URLEncoder.encode(nickname, StandardCharsets.UTF_8);
+
+        String redirectUrl = "http://localhost:3000/oauth2/redirect?token=" + token
+            + "&profileImg=" + encodedProfileImg
+            + "&nickname=" + encodedNickname;
+
         if (needPhoneInput != null && needPhoneInput) {
             session.removeAttribute("NEED_PHONE_INPUT");
             redirectUrl += "&needPhoneInput=true";

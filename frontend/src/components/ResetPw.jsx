@@ -1,20 +1,25 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+
 
 const ResetPw = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const email = location.state?.email;
   const [password, setPassword] = useState('');
   const [password2, setPassword2] = useState('');
   const [pwError, setPwError] = useState('');
   const [pw2Error, setPw2Error] = useState('');
   const [success, setSuccess] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
-  const navigate = useNavigate();
+
+
 
   // 비밀번호 유효성 검사 (예: 8자 이상, 영문/숫자/특수문자 조합)
   const isValidPassword = (pw) =>
     /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/.test(pw);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setPwError('');
     setPw2Error('');
@@ -27,9 +32,22 @@ const ResetPw = () => {
       setPw2Error('비밀번호가 일치하지 않습니다.');
       return;
     }
-    // 실제로는 서버에 비밀번호 변경 요청
-    setSuccess(true);
-    navigate('/login', { state: { toast: '비밀번호가 성공적으로 재설정되었습니다.' } });
+    // 서버에 비밀번호 변경 요청
+    try {
+      const response = await fetch('/api/members/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, newPassword: password }),
+      });
+      if (response.ok) {
+        setSuccess(true);
+        navigate('/members/login', { state: { toast: '비밀번호가 성공적으로 재설정되었습니다.' } });
+      } else {
+        setPwError('비밀번호 변경에 실패했습니다.');
+      }
+    } catch (e) {
+      setPwError('서버 오류가 발생했습니다.');
+    }
     setPassword('');
     setPassword2('');
   };
@@ -44,6 +62,11 @@ const ResetPw = () => {
       setPw2Error('');
     }
   };
+
+  // 이메일 콘솔 출력 (마운트 시 1회)
+  useEffect(() => {
+    console.log("ResetPw에서 받은 이메일:", email);
+  }, [email]);
 
   return (
     <div style={{

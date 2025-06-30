@@ -19,6 +19,7 @@ import com.petory.config.JwtTokenProvider;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import com.petory.dto.ResetPasswordDto;
 
 @RestController
 @RequestMapping("/api/members")
@@ -70,14 +71,41 @@ public class MemberApiController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginDto loginDto) {
+        Member member = null;
         try {
+            member = memberService.getMemberByEmail(loginDto.getEmail());
+            if ("SOCIAL_LOGIN".equals(member.getMember_Pw())) {
+              return ResponseEntity.status(401).body("소셜 로그인 사용자입니다.");
+            }
             UserDetails userDetails = userDetailsService.loadUserByUsername(loginDto.getEmail());
+
+            // 소셜 로그인 회원인지 확인
+            if ("SOCIAL_LOGIN".equals(userDetails.getPassword())) {
+                return ResponseEntity.status(401).body("소셜 로그인으로 가입된 계정입니다. 소셜 로그인을 이용해 주세요.");
+            }
+
             if (!passwordEncoder.matches(loginDto.getPassword(), userDetails.getPassword())) {
                 return ResponseEntity.status(401).body("비밀번호가 일치하지 않습니다.");
             }
             String token = jwtTokenProvider.createToken(userDetails.getUsername(), userDetails.getAuthorities().stream().map(a -> a.getAuthority()).toList());
-            return ResponseEntity.ok(Map.of("token", token));
+
+            //로그인 한 사용자 정보 조회
+            member = memberService.getMemberByEmail(loginDto.getEmail());
+            System.out.println("로그인 시도 이메일: " + loginDto.getEmail());
+            if (member != null) {
+                System.out.println("가져온 member_ProfileImg: " + member.getMember_ProfileImg());
+            } else {
+                System.out.println("Member 객체가 null입니다!");
+            }
+
+            return ResponseEntity.ok(Map.of(
+                "token", token,
+                "role", member.getMember_Role().name(),
+                "profileImg", member.getMember_ProfileImg() != null ? member.getMember_ProfileImg() : "",
+                "nickname", member.getMember_NickName()
+            ));
         } catch (Exception e) {
+            System.out.println("로그인 실패 예외: " + e.getMessage());
             return ResponseEntity.status(401).body("로그인 실패: " + e.getMessage());
         }
     }
@@ -105,5 +133,17 @@ public class MemberApiController {
       } else {
         return ResponseEntity.status(404).body("해당 번호로 등록된 계정이 없습니다.");
       }
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordDto dto) {
+        try {
+            memberService.resetPassword(dto.getEmail(), dto.getNewPassword());
+            return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(404).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("비밀번호 변경 중 오류가 발생했습니다.");
+        }
     }
 }

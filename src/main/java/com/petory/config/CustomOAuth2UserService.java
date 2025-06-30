@@ -10,6 +10,7 @@ import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserServ
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
@@ -42,10 +43,16 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
         // 기존 회원인지 확인
         Optional<Member> existingMember = memberRepository.findByMember_Email(email);
-        
+
         if (existingMember.isPresent()) {
-            // 기존 회원인 경우 바로 로그인 처리
             Member member = existingMember.get();
+            if (!"SOCIAL_LOGIN".equals(member.getMember_Pw())) {
+                // 일반 가입자(로컬 회원)라면 소셜 로그인 차단
+                throw new OAuth2AuthenticationException(
+                    new OAuth2Error("email_exists", "이미 해당 이메일로 가입된 계정이 있습니다. 일반 로그인을 이용해 주세요.", null)
+                );
+            }
+            // SOCIAL_LOGIN이면 소셜 로그인 허용
             return new DefaultOAuth2User(
                     Collections.singleton(new SimpleGrantedAuthority(member.getMember_Role().toString())),
                     attributes,
@@ -56,6 +63,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
             Member newMember = new Member();
             // 2. ImageService를 사용해 이미지를 우리 서버에 다운로드하고, 저장된 경로를 받아옵니다.
             String savedProfileImgPath = imageService.downloadAndSaveImage(originalProfileImageUrl, "profile");
+          System.out.println("카카오 로그인 attributes: " + attributes);
             // 3. Member 객체에 '저장된 경로'를 설정합니다.
             newMember.setMember_ProfileImg(savedProfileImgPath);
             newMember.setMember_Email(email);
@@ -66,14 +74,14 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
             newMember.setMember_Mileage(0);
 
             memberRepository.save(newMember);
-            
+
             // 세션에 전화번호 입력 필요 플래그 설정
             ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             if (requestAttributes != null) {
                 HttpSession session = requestAttributes.getRequest().getSession();
                 session.setAttribute("NEED_PHONE_INPUT", true);
             }
-            
+
             // 임시 OAuth2User 반환 (실제로는 인증 성공 핸들러에서 처리됨)
             return new DefaultOAuth2User(
                     Collections.singleton(new SimpleGrantedAuthority(Role.USER.toString())),
@@ -92,6 +100,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     public String extractEmail(String provider, Map<String, Object> attributes) {
         if ("naver".equals(provider)) {
             Map<String, Object> response = (Map<String, Object>) attributes.get("response");
+            System.out.println(response.toString());
             return (String) response.get("email");
         }
         if ("kakao".equals(provider)) {
