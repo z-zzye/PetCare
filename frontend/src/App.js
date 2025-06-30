@@ -10,9 +10,9 @@ import MainPage from './components/MainPage.jsx';
 import FindId from './components/FindId.jsx';
 import FindPw from './components/FindPw.jsx';
 import ResetPw from './components/ResetPw.jsx';
-import ShoppingPage from './components/Shop/Shopping.jsx';
-import AuctionPage from './components/Shop/Auction.jsx';
-
+import ShoppingPage from './components/shop/Shopping.jsx';
+import AuctionPage from './components/shop/Auction.jsx';
+import ItemRegister from './components/shop/ItemRegister.jsx';
 
 // 문제 생기면 이 두줄이 문제일수있음
 import MapServicePage from './pages/MapServicePage'; // 지도 서비스 페이지
@@ -47,6 +47,7 @@ function App() {
         {/* 쇼핑 관련 라우팅 */}
         <Route path="/shop/shopping" element={<ShoppingPage />} />
         <Route path="/shop/auction" element={<AuctionPage />} />
+        <Route path="/shop/item/register" element={<ItemRegister />} />
       </Routes>
     </Router>
    </AuthProvider>
