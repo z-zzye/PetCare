@@ -1,9 +1,11 @@
 package com.petory.service;
 
 import com.petory.dto.*;
+import com.petory.entity.CleanBotLog;
 import com.petory.entity.Member;
 import com.petory.entity.WalkingTrail;
 import com.petory.entity.WalkingTrailComment;
+import com.petory.repository.CleanBotLogRepository;
 import com.petory.repository.MemberRepository;
 import com.petory.repository.WalkingTrailCommentRepository;
 import com.petory.repository.WalkingTrailRepository;
@@ -24,6 +26,8 @@ public class WalkingTrailServiceImpl implements WalkingTrailService {
   private final WalkingTrailRepository walkingTrailRepository;
   private final WalkingTrailCommentRepository walkingTrailCommentRepository;
   private final MemberRepository memberRepository; // 사용자 정보를 가져오기 위함
+  private final CleanBotService cleanBotService; // CleanBotService 주입
+  private final CleanBotLogRepository cleanBotLogRepository;
 
   @Override
   @Transactional // 쓰기 작업이므로 readOnly=false 트랜잭션 적용
@@ -82,20 +86,41 @@ public class WalkingTrailServiceImpl implements WalkingTrailService {
   @Override
   @Transactional
   public Long addCommentToTrail(Long trailId, CommentCreateDto commentCreateDto, String userEmail) {
-    // 산책로와 사용자 엔티티 조회
     WalkingTrail trail = walkingTrailRepository.findById(trailId)
-      .orElseThrow(() -> new EntityNotFoundException("해당 ID의 산책로를 찾을 수 없습니다: " + trailId));
-    Member member = memberRepository.findByMember_Email(userEmail) // MemberRepository에 이 메서드가 있다고 가정
-      .orElseThrow(() -> new EntityNotFoundException("해당 이메일의 사용자를 찾을 수 없습니다: " + userEmail));
+            .orElseThrow(() -> new EntityNotFoundException("해당 ID의 산책로를 찾을 수 없습니다: " + trailId));
+    Member member = memberRepository.findByMember_Email(userEmail)
+            .orElseThrow(() -> new EntityNotFoundException("해당 이메일의 사용자를 찾을 수 없습니다: " + userEmail));
 
-    // 새로운 댓글 엔티티 생성 및 연관관계 설정
+    String originalContent = commentCreateDto.getContent();
     WalkingTrailComment newComment = new WalkingTrailComment();
-    newComment.setContent(commentCreateDto.getContent());
+
+    // 1. 클린봇으로 비속어 검사 실행
+    if (cleanBotService.containsProfanity(originalContent)) {
+      // 비속어 포함 시: 블라인드 처리
+      newComment.setBlinded(true);
+      newComment.setOriginalContent(originalContent);
+      newComment.setContent(cleanBotService.filter(originalContent)); // 필터링된 메시지로 내용 설정
+    } else {
+      // 정상 댓글
+      newComment.setBlinded(false);
+      newComment.setContent(originalContent);
+    }
+
     newComment.setWalkingTrail(trail);
     newComment.setMember(member);
 
-    // 댓글 저장
+    // 2. 댓글을 먼저 저장하여 ID 할당
     WalkingTrailComment savedComment = walkingTrailCommentRepository.save(newComment);
+
+    // 3. 비속어가 감지되었다면, 로그 기록
+    if (savedComment.isBlinded()) {
+      CleanBotLog log = new CleanBotLog();
+      log.setTargetId(savedComment.getId());
+      log.setTargetType("WALKING_TRAIL_COMMENT");
+      log.setOriginalContent(savedComment.getOriginalContent());
+      cleanBotLogRepository.save(log);
+    }
+
     return savedComment.getId();
   }
 

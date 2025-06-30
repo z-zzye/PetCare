@@ -67,8 +67,8 @@ function App() {
         <Route path="/board/write" element={<BoardWrite />} />
         <Route path="/board/edit/:id" element={<BoardEdit />} />
 
-        <Route path="/walking" element={<WalkingTrailListPage />} />
-        <Route path="/walking/:trailId" element={<WalkingTrailDetailPage />} />
+        <Route path="/trails" element={<WalkingTrailListPage />} />
+        <Route path="/trails/:trailId" element={<WalkingTrailDetailPage />} />
         <Route path="/create-trail" element={<WalkingTrailCreatePage />} />
 
         <Route

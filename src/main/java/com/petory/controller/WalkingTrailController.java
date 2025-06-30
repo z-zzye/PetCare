@@ -1,11 +1,12 @@
 package com.petory.controller;
 
-import com.petory.dto.AmenityDto;
-import com.petory.dto.WalkingTrailDetailResponseDto;
-import com.petory.dto.WalkingTrailListResponseDto;
+import com.petory.dto.*;
 import com.petory.service.WalkingTrailService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,6 +20,17 @@ import java.util.List;
 public class WalkingTrailController {
 
   private final WalkingTrailService walkingTrailService;
+
+  /**
+   * 새로운 산책로를 생성하는 API 입니다.
+   * @param createDto 프론트엔드에서 보낸 산책로 생성 데이터 (JSON)
+   * @return 생성된 산책로의 ID
+   */
+  @PostMapping
+  public ResponseEntity<Long> createTrail(@RequestBody WalkingTrailCreateDto createDto) {
+    Long savedTrailId = walkingTrailService.createTrail(createDto);
+    return ResponseEntity.status(HttpStatus.CREATED).body(savedTrailId);
+  }
 
   /**
    * 산책로 목록을 조회하는 API 입니다.
@@ -95,5 +107,24 @@ public class WalkingTrailController {
       );
     }
     return List.of(); // 결과가 없으면 빈 리스트 반환
+  }
+
+  /**
+   * 특정 산책로에 새로운 댓글을 작성합니다.
+   */
+  @PostMapping("/{trailId}/comments")
+  public ResponseEntity<?> addComment(
+          @PathVariable Long trailId,
+          @RequestBody CommentCreateDto createDto,
+          @AuthenticationPrincipal UserDetails userDetails) {
+
+    if (userDetails == null) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("댓글을 작성하려면 로그인이 필요합니다.");
+    }
+    String userEmail = userDetails.getUsername();
+
+    Long savedCommentId = walkingTrailService.addCommentToTrail(trailId, createDto, userEmail);
+
+    return ResponseEntity.status(HttpStatus.CREATED).body(savedCommentId);
   }
 }

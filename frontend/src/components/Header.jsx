@@ -26,7 +26,7 @@ const menu = [
     name: '서비스',
     submenu: [
       { name: '동물병원&편의시설', link: '/place' },
-      { name: '산책로', link: '/walking' },
+      { name: '산책로', link: '/trails' },
     ],
     disabled: true,
   },
@@ -163,4 +163,4 @@ const Header = () => {
   );
 };
 
-export default Header; 
+export default Header;
