@@ -20,7 +20,7 @@ public interface WalkingTrailService {
    * 모든 산책로 목록을 조회합니다. (목록용 DTO로 변환하여 반환)
    * @return 산책로 목록
    */
-  List<WalkingTrailListResponseDto> getAllTrails();
+  List<WalkingTrailListResponseDto> getAllTrails(String keyword, String sortBy);
 
   /**
    * 특정 산책로의 상세 정보를 조회합니다.

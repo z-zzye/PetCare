@@ -1,4 +1,3 @@
-/*
 package com.petory.service;
 
 import com.petory.dto.*;
@@ -9,17 +8,13 @@ import com.petory.repository.MemberRepository;
 import com.petory.repository.WalkingTrailCommentRepository;
 import com.petory.repository.WalkingTrailRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.stream.Collectors;
-
-*/
-/**
- * WalkingTrailService의 구현 클래스입니다.
- *//*
 
 @Service
 @RequiredArgsConstructor // final 필드에 대한 생성자를 자동으로 생성 (의존성 주입)
@@ -48,20 +43,28 @@ public class WalkingTrailServiceImpl implements WalkingTrailService {
   }
 
   @Override
-  public List<WalkingTrailListResponseDto> getAllTrails() {
-    return walkingTrailRepository.findAll().stream()
-      .map(WalkingTrailListResponseDto::from) // 정적 팩토리 메서드 사용
+  public List<WalkingTrailListResponseDto> getAllTrails(String keyword, String sortBy) {
+    // 1. 정렬 기준(sortBy)에 따라 Sort 객체 생성
+    Sort sort = Sort.by(Sort.Direction.DESC, sortBy);
+
+    // 2. 키워드 유무에 따라 다른 리포지토리 메서드 호출
+    List<WalkingTrail> trails;
+    if (keyword != null && !keyword.isEmpty()) {
+      trails = walkingTrailRepository.findByNameContaining(keyword, sort);
+    } else {
+      trails = walkingTrailRepository.findAll(sort);
+    }
+
+    // 3. 결과를 DTO로 변환하여 반환
+    return trails.stream()
+      .map(WalkingTrailListResponseDto::from)
       .collect(Collectors.toList());
   }
-
   @Override
-  @Transactional // 조회수(views)가 변경되므로 쓰기 트랜잭션 필요
+  // @Transactional // 조회수(views)를 사용하게 된다면 활성화
   public WalkingTrailDetailResponseDto getTrailDetail(Long trailId) {
     WalkingTrail trail = walkingTrailRepository.findById(trailId)
       .orElseThrow(() -> new EntityNotFoundException("해당 ID의 산책로를 찾을 수 없습니다: " + trailId));
-
-    // 조회수 1 증가
-    trail.setViews(trail.getViews() + 1);
 
     return WalkingTrailDetailResponseDto.from(trail);
   }
@@ -82,7 +85,7 @@ public class WalkingTrailServiceImpl implements WalkingTrailService {
     // 산책로와 사용자 엔티티 조회
     WalkingTrail trail = walkingTrailRepository.findById(trailId)
       .orElseThrow(() -> new EntityNotFoundException("해당 ID의 산책로를 찾을 수 없습니다: " + trailId));
-    Member member = memberRepository.findByMemberEmail(userEmail) // MemberRepository에 이 메서드가 있다고 가정
+    Member member = memberRepository.findByMember_Email(userEmail) // MemberRepository에 이 메서드가 있다고 가정
       .orElseThrow(() -> new EntityNotFoundException("해당 이메일의 사용자를 찾을 수 없습니다: " + userEmail));
 
     // 새로운 댓글 엔티티 생성 및 연관관계 설정
@@ -103,11 +106,10 @@ public class WalkingTrailServiceImpl implements WalkingTrailService {
       .orElseThrow(() -> new EntityNotFoundException("해당 ID의 댓글을 찾을 수 없습니다: " + commentId));
 
     // 본인 확인 로직
-    if (!comment.getMember().getMemberEmail().equals(userEmail)) {
+    if (!comment.getMember().getMember_Email().equals(userEmail)) {
       throw new SecurityException("댓글을 삭제할 권한이 없습니다.");
     }
 
     walkingTrailCommentRepository.delete(comment);
   }
 }
-*/

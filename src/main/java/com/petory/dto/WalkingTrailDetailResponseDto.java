@@ -17,7 +17,6 @@ public class WalkingTrailDetailResponseDto {
   private int distance;
   private int time;
   private String mainImage;
-  private int views;
   private int recommends;
   private List<CommentDto> comments;
 
@@ -31,7 +30,6 @@ public class WalkingTrailDetailResponseDto {
     dto.setDistance(walkingTrail.getDistance());
     dto.setTime(walkingTrail.getTime());
     dto.setMainImage(walkingTrail.getMainImage());
-    dto.setViews(walkingTrail.getViews());
     dto.setRecommends(walkingTrail.getRecommends());
 
     dto.setComments(walkingTrail.getComments().stream()

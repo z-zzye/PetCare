@@ -36,9 +36,6 @@ public class WalkingTrail extends BaseEntity{
   @Column(name = "mainImageUrl")
   private String mainImage;
 
-  @Column(name = "trailViews", nullable = false)
-  private int views = 0;
-
   @Column(name = "trailRecommends", nullable = false)
   private int recommends = 0;
 

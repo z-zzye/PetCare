@@ -12,7 +12,6 @@ public class WalkingTrailListResponseDto {
   private String mainImage;
   private int distance;
   private int time;
-  private int views;
   private int recommends;
 
   // 엔티티를 DTO로 변환하는 정적 팩토리 메서드 (서비스 로직에서 사용)
@@ -23,7 +22,6 @@ public class WalkingTrailListResponseDto {
     dto.setMainImage(walkingTrail.getMainImage());
     dto.setDistance(walkingTrail.getDistance());
     dto.setTime(walkingTrail.getTime());
-    dto.setViews(walkingTrail.getViews());
     dto.setRecommends(walkingTrail.getRecommends());
     return dto;
   }

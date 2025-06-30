@@ -15,6 +15,10 @@ import BoardDetail from './components/BoardDetail';
 import BoardWrite from './components/BoardWrite';
 import BoardEdit from './components/BoardEdit';
 
+import WalkingTrailListPage from './components/WalkingTrailListPage';
+import WalkingTrailDetailPage from './components/WalkingTrailDetailPage';
+import WalkingTrailCreatePage from './components/WalkingTrailCreatePage';
+
 function App() {
   // 지도를 그릴 준비가 되었는지 여부를 관리하는 상태
   const [isMapReady, setIsMapReady] = useState(false);
@@ -62,6 +66,10 @@ function App() {
         <Route path="/board/:id" element={<BoardDetail />} />
         <Route path="/board/write" element={<BoardWrite />} />
         <Route path="/board/edit/:id" element={<BoardEdit />} />
+
+        <Route path="/walking" element={<WalkingTrailListPage />} />
+        <Route path="/walking/:trailId" element={<WalkingTrailDetailPage />} />
+        <Route path="/create-trail" element={<WalkingTrailCreatePage />} />
 
         <Route
           path="/place"
