@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import Header from './Header';
 
 const { kakao } = window; // 카카오맵 API 사용
 
@@ -10,6 +11,10 @@ const WalkingTrailDetailPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const mapContainer = useRef(null);
   const [newComment, setNewComment] = useState('');
+  const [map, setMap] = useState(null);
+  const [markers, setMarkers] = useState([]);
+  const [currentInfoWindow, setCurrentInfoWindow] = useState(null);
+  const mapRef = useRef();
 
   // ★★★★★ 1. 데이터 불러오기 로직을 재사용 가능한 함수로 분리합니다. ★★★★★
   const fetchTrailData = () => {
@@ -30,37 +35,72 @@ const WalkingTrailDetailPage = () => {
     fetchTrailData();
   }, [trailId]);
 
-  // 카카오맵 그리기 (변경 없음)
+  // 지도 및 산책로 경로 표시 useEffect
   useEffect(() => {
     if (!trail || !trail.pathData) return;
-
-    const options = {
-      center: new kakao.maps.LatLng(37.4562557, 126.7052062),
-      level: 5,
-    };
-    const map = new kakao.maps.Map(mapContainer.current, options);
-
-    try {
-      const linePath = JSON.parse(trail.pathData).map(
-        coord => new kakao.maps.LatLng(coord.lat, coord.lng)
-      );
-
-      const polyline = new kakao.maps.Polyline({
-        path: linePath,
-        strokeWeight: 5,
-        strokeColor: '#FF0000',
-        strokeOpacity: 0.7,
-        strokeStyle: 'solid'
-      });
-      polyline.setMap(map);
-
-      if(linePath.length > 0) {
-        map.setCenter(linePath[0]);
-      }
-    } catch (e) {
-      console.error("경로 데이터(pathData) 파싱 오류:", e);
+    if (!mapRef.current) {
+      console.warn('mapRef.current is null!');
+      return;
     }
+    const kakao = window.kakao;
+    const path = JSON.parse(trail.pathData);
+    const linePath = path.map(p => new kakao.maps.LatLng(p.lat, p.lng));
+    const mapInstance = new kakao.maps.Map(mapRef.current, {
+      center: linePath[0],
+      level: 4,
+    });
+    new kakao.maps.Polyline({
+      map: mapInstance,
+      path: linePath,
+      strokeWeight: 5,
+      strokeColor: '#FF6600',
+    });
+    setMap(mapInstance);
   }, [trail]);
+
+  // 편의시설 마커 표시 useEffect
+  useEffect(() => {
+    if (!map || !Array.isArray(amenities)) return;
+    // 기존 마커/인포윈도우 제거
+    markers.forEach(marker => marker.setMap(null));
+    if (currentInfoWindow) currentInfoWindow.close();
+
+    const kakao = window.kakao;
+    const newMarkers = [];
+    let infoWindowRef = null;
+
+    amenities.forEach((amenity) => {
+      try {
+        if (
+          typeof amenity.lat !== 'number' ||
+          typeof amenity.lng !== 'number' ||
+          isNaN(amenity.lat) ||
+          isNaN(amenity.lng)
+        ) {
+          console.warn('잘못된 lat/lng:', amenity);
+          return;
+        }
+        const marker = new kakao.maps.Marker({
+          map,
+          position: new kakao.maps.LatLng(amenity.lat, amenity.lng),
+        });
+        const iw = new kakao.maps.InfoWindow({
+          content: `<div style="padding:8px;font-size:14px;font-weight:bold;">${amenity.name}</div>`,
+        });
+        kakao.maps.event.addListener(marker, 'click', () => {
+          if (infoWindowRef) infoWindowRef.close();
+          iw.open(map, marker);
+          setCurrentInfoWindow(iw);
+          infoWindowRef = iw;
+        });
+        newMarkers.push(marker);
+      } catch (e) {
+        console.error('마커 생성 중 에러:', e, amenity);
+      }
+    });
+    setMarkers(newMarkers);
+    // eslint-disable-next-line
+  }, [amenities, map]);
 
   // 주변 편의시설 검색 함수 (변경 없음)
   const handleAmenitySearch = (category) => {
@@ -106,6 +146,38 @@ const WalkingTrailDetailPage = () => {
         .catch(error => console.error("댓글 작성 중 오류 발생:", error));
     };
 
+  // 추천 버튼 클릭 핸들러 추가
+  const handleRecommend = () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('로그인이 필요합니다.');
+      return;
+    }
+    fetch(`/api/trails/${trailId}/recommend`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+      .then(async res => {
+        if (res.ok) {
+          alert('추천이 완료되었습니다!');
+          fetchTrailData(); // 추천수 갱신
+        } else if (res.status === 409) {
+          const msg = await res.text();
+          alert(msg || '이미 추천하셨습니다.');
+        } else if (res.status === 401) {
+          alert('로그인이 필요합니다.');
+        } else {
+          alert('추천 처리 중 오류가 발생했습니다.');
+        }
+      })
+      .catch(err => {
+        alert('네트워크 오류로 추천에 실패했습니다.');
+        console.error(err);
+      });
+  };
+
   // ... (return 문은 기존과 동일)
   if (isLoading) {
     return <div>상세 정보를 불러오는 중입니다...</div>;
@@ -116,51 +188,54 @@ const WalkingTrailDetailPage = () => {
   }
 
   return (
-    <div style={{ padding: '20px' }}>
-      <Link to="/trails">{'< 목록으로 돌아가기'}</Link>
-      <hr/>
-      <h3>산책로 경로</h3>
-      <div ref={mapContainer} style={{ width: '100%', height: '400px', border: '1px solid black' }}></div>
-      <h1>{trail.name}</h1>
-      <p>{trail.description}</p>
-      <hr/>
-      <h3>주변 편의시설 검색</h3>
-      <button onClick={() => handleAmenitySearch('동물병원')}>동물병원</button>
-      <button onClick={() => handleAmenitySearch('카페')}>카페</button>
-      <button onClick={() => handleAmenitySearch('편의점')}>편의점</button>
-      <ul>
-        {amenities.map(place => (
-          <li key={place.name + place.address}>
-            <strong>{place.name}</strong> ({place.distance})<br/>
-            <span>{place.address}</span> <a href={place.placeUrl} target="_blank" rel="noopener noreferrer">상세보기</a>
-          </li>
-        ))}
-      </ul>
-      <hr/>
-      <p>❤️ 추천수: {trail.recommends}</p>
-      <button>추천하기</button>
-      <hr/>
-      <h3>댓글 ({trail.comments.length})</h3>
-      <div>
-        {trail.comments.map(comment => (
-          <div key={comment.id} style={{borderBottom: '1px solid #eee', padding: '5px 0'}}>
-            <strong>{comment.authorNickName}: </strong>
-            <span>{comment.content}</span>
-          </div>
-        ))}
+    <>
+      <Header />
+      <div className="common-container trail-list-container">
+        <Link to="/trails" className="trail-list-link" style={{ color: '#223A5E', fontWeight: 600 }}>{'< 목록으로 돌아가기'}</Link>
+        <h1 className="common-title">산책로 상세 정보</h1>
+        <h3 className="trail-list-title" style={{ color: '#223A5E' }}>산책로 경로</h3>
+        <div ref={mapRef} style={{ width: '100%', height: '400px', border: '1.5px solid #e9ecef', borderRadius: '14px', marginBottom: '16px' }}></div>
+        <h2 className="trail-list-title" style={{ color: '#223A5E', marginTop: '18px' }}>{trail.name}</h2>
+        <p className="trail-list-info">{trail.description}</p>
+        <h3 className="trail-list-title" style={{ color: '#223A5E', marginTop: '24px' }}>주변 편의시설 검색</h3>
+        <div style={{ display: 'flex', gap: '10px', marginBottom: '12px' }}>
+          <button className="common-btn trail-search-btn" onClick={() => handleAmenitySearch('동물병원')}>동물병원</button>
+          <button className="common-btn trail-search-btn" onClick={() => handleAmenitySearch('카페')}>카페</button>
+          <button className="common-btn trail-search-btn" onClick={() => handleAmenitySearch('편의점')}>편의점</button>
+        </div>
+        <ul className="trail-list-ul">
+          {Array.isArray(amenities) && amenities.map(place => (
+            <li key={place.name + place.address} className="trail-list-card">
+              <strong className="trail-list-title">{place.name}</strong> <span className="trail-list-info">({place.distance})</span><br/>
+              <span className="trail-list-info">{place.address}</span> <a href={place.placeUrl} target="_blank" rel="noopener noreferrer">상세보기</a>
+            </li>
+          ))}
+        </ul>
+        <p className="trail-list-recommend" style={{ color: '#223A5E', marginTop: '18px' }}>❤️ 추천수: {trail.recommends}</p>
+        <button className="common-btn trail-create-btn" onClick={handleRecommend}>추천하기</button>
+        <h3 className="trail-list-title" style={{ color: '#223A5E', marginTop: '24px' }}>댓글 ({trail.comments.length})</h3>
+        <div style={{ marginBottom: '10px' }}>
+          {trail.comments.map(comment => (
+            <div key={comment.id} className="trail-list-info" style={{borderBottom: '1px solid #eee', padding: '5px 0'}}>
+              <strong style={{ color: '#223A5E' }}>{comment.authorNickName}: </strong>
+              <span>{comment.content}</span>
+            </div>
+          ))}
+        </div>
+        <div style={{marginTop: '10px', display: 'flex', gap: '8px'}}>
+          <input
+              type="text"
+              placeholder="댓글을 입력하세요"
+              className="trail-search-input"
+              style={{width: '80%'}}
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleCommentSubmit()}
+          />
+          <button className="common-btn trail-search-btn" onClick={handleCommentSubmit}>작성</button>
+        </div>
       </div>
-      <div style={{marginTop: '10px'}}>
-        <input
-            type="text"
-            placeholder="댓글을 입력하세요"
-            style={{width: '80%'}}
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleCommentSubmit()}
-        />
-        <button onClick={handleCommentSubmit}>작성</button>
-      </div>
-    </div>
+    </>
   );
 };
 

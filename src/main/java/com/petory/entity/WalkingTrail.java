@@ -24,7 +24,7 @@ public class WalkingTrail extends BaseEntity{
   private String description;
 
   @Lob
-  @Column(name = "trailPathData")
+  @Column(name = "trailPathData", columnDefinition = "LONGTEXT")
   private String pathData;
 
   @Column(name = "trailDistance")

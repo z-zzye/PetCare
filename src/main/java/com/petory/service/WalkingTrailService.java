@@ -4,6 +4,7 @@ import com.petory.dto.CommentCreateDto;
 import com.petory.dto.WalkingTrailCreateDto;
 import com.petory.dto.WalkingTrailDetailResponseDto;
 import com.petory.dto.WalkingTrailListResponseDto;
+import com.petory.dto.AmenityDto;
 
 import java.util.List;
 
@@ -18,9 +19,15 @@ public interface WalkingTrailService {
 
   /**
    * 모든 산책로 목록을 조회합니다. (목록용 DTO로 변환하여 반환)
+   * @param keyword 제목 키워드
+   * @param minTime 예상 시간 최소
+   * @param maxTime 예상 시간 최대
+   * @param minDistance 거리 최소
+   * @param maxDistance 거리 최대
+   * @param sortBy 정렬 기준
    * @return 산책로 목록
    */
-  List<WalkingTrailListResponseDto> getAllTrails(String keyword, String sortBy);
+  List<WalkingTrailListResponseDto> getAllTrails(String keyword, Integer minTime, Integer maxTime, Integer minDistance, Integer maxDistance, String sortBy);
 
   /**
    * 특정 산책로의 상세 정보를 조회합니다.
@@ -30,10 +37,11 @@ public interface WalkingTrailService {
   WalkingTrailDetailResponseDto getTrailDetail(Long trailId);
 
   /**
-   * 특정 산책로의 추천수를 1 증가시킵니다.
+   * 특정 산책로의 추천수를 1 증가시킵니다. (한 명당 한 번만 가능)
    * @param trailId 추천할 산책로의 ID
+   * @param userEmail 추천하는 사용자의 이메일
    */
-  void addRecommendation(Long trailId);
+  void addRecommendation(Long trailId, String userEmail);
 
   /**
    * 특정 산책로에 댓글을 추가합니다.
@@ -50,4 +58,12 @@ public interface WalkingTrailService {
    * @param userEmail 삭제를 요청한 사용자의 이메일 (본인 확인용)
    */
   void deleteComment(Long commentId, String userEmail);
+
+  /**
+   * 산책로 경로 전체 주변의 편의시설을 추천합니다.
+   * @param trailId 산책로 ID
+   * @param category 편의시설 카테고리
+   * @return 경로 근처의 편의시설 목록
+   */
+  List<AmenityDto> searchAmenitiesNearTrail(Long trailId, String category);
 }

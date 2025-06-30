@@ -105,34 +105,34 @@ const WalkingTrailCreatePage = () => {
     };
 
     return (
-        <div style={{ padding: '20px', display: 'flex', gap: '20px' }}>
-            <div style={{ flex: 2 }}>
-                <Link to="/trails">{'< 목록으로 돌아가기'}</Link>
-                <h2>지도에 클릭하여 경로를 그려주세요</h2>
-                <div ref={mapContainer} style={{ width: '100%', height: '500px', border: '1px solid black' }}></div>
-                <div style={{ marginTop: '10px' }}>
-                    <button onClick={handleUndo}>마지막 지점 취소</button>
-                    <button onClick={handleClear} style={{ marginLeft: '10px' }}>전체 삭제</button>
+        <div className="common-container trail-list-container" style={{ display: 'flex', gap: '32px', flexWrap: 'wrap' }}>
+            <div style={{ flex: 2, minWidth: 0 }}>
+                <Link to="/trails" className="trail-list-link" style={{ color: '#223A5E', fontWeight: 600 }}>{'< 목록으로 돌아가기'}</Link>
+                <h1 className="common-title" style={{ marginBottom: '18px' }}>지도에 클릭하여 경로를 그려주세요</h1>
+                <div ref={mapContainer} style={{ width: '100%', height: '400px', border: '1.5px solid #e9ecef', borderRadius: '14px', marginBottom: '16px' }}></div>
+                <div style={{ marginBottom: '18px', display: 'flex', gap: '10px' }}>
+                    <button className="common-btn" onClick={handleUndo}>마지막 지점 취소</button>
+                    <button className="common-btn" onClick={handleClear}>전체 삭제</button>
                 </div>
-                <h3 style={{ marginTop: '20px' }}>경로 정보</h3>
-                <p><strong>총 거리:</strong> {distance} m | <strong>총 지점 수:</strong> {path.length} 개</p>
+                <h3 className="trail-list-title" style={{ color: '#223A5E', marginTop: '20px' }}>경로 정보</h3>
+                <p className="trail-list-info"><strong>총 거리:</strong> {distance} m | <strong>총 지점 수:</strong> {path.length} 개</p>
             </div>
-            <div style={{ flex: 1 }}>
-                <h2>산책로 정보 입력</h2>
-                <form onSubmit={handleSubmit}>
-                    <div style={{ marginBottom: '10px' }}>
-                        <label>산책로 이름:</label><br />
-                        <input type="text" name="name" value={formData.name} onChange={handleChange} required style={{ width: '100%' }} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+                <h2 className="common-title" style={{ fontSize: '1.3rem', marginBottom: '18px' }}>산책로 정보 입력</h2>
+                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                    <div>
+                        <label className="trail-list-info" style={{ color: '#223A5E', fontWeight: 600 }}>산책로 이름</label>
+                        <input type="text" name="name" value={formData.name} onChange={handleChange} required className="trail-search-input" style={{ width: '100%' }} />
                     </div>
-                    <div style={{ marginBottom: '10px' }}>
-                        <label>부가 설명:</label><br />
-                        <textarea name="description" value={formData.description} onChange={handleChange} required style={{ width: '100%', height: '100px' }} />
+                    <div>
+                        <label className="trail-list-info" style={{ color: '#223A5E', fontWeight: 600 }}>부가 설명</label>
+                        <textarea name="description" value={formData.description} onChange={handleChange} required className="trail-search-input" style={{ width: '100%', height: '80px', resize: 'vertical' }} />
                     </div>
-                    <div style={{ marginBottom: '10px' }}>
-                        <label>예상 소요 시간(분):</label><br />
-                        <input type="number" name="time" value={formData.time} onChange={handleChange} style={{ width: '100%' }} />
+                    <div>
+                        <label className="trail-list-info" style={{ color: '#223A5E', fontWeight: 600 }}>예상 소요 시간(분)</label>
+                        <input type="number" name="time" value={formData.time} onChange={handleChange} className="trail-search-input" style={{ width: '100%' }} />
                     </div>
-                    <button type="submit" style={{ width: '100%', padding: '10px' }}>산책로 저장하기</button>
+                    <button type="submit" className="common-btn trail-create-btn" style={{ width: '100%' }}>산책로 저장하기</button>
                 </form>
             </div>
         </div>

@@ -53,7 +53,7 @@ public class SecurityConfig {
                     "/auth/verify-code",
                     "/api/sms/**",
                     "/api/members/find-id",
-                    "/api/trails/**"
+                    "/api/trails/**",
                     "/api/members/reset-password"
                 ).permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/boards", "/api/boards/**").permitAll()

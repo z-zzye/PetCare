@@ -37,17 +37,25 @@ public class WalkingTrailController {
    * 검색 및 정렬 기능을 포함합니다.
    *
    * @param keyword 검색어 (선택 사항)
+   * @param minTime 최소 시간 (선택 사항, 초 단위)
+   * @param maxTime 최대 시간 (선택 사항, 초 단위)
+   * @param minDistance 최소 거리 (선택 사항, 미터 단위)
+   * @param maxDistance 최대 거리 (선택 사항, 미터 단위)
    * @param sortBy 정렬 기준 (선택 사항, 예: "recommends", "time")
    * @return 산책로 목록 (List<WalkingTrailListResponseDto>)
    */
   @GetMapping
   public ResponseEntity<List<WalkingTrailListResponseDto>> getTrailList(
     @RequestParam(required = false) String keyword,
-    @RequestParam(required = false, defaultValue = "recommends") String sortBy) {
+    @RequestParam(required = false) Integer minTime,
+    @RequestParam(required = false) Integer maxTime,
+    @RequestParam(required = false) Integer minDistance,
+    @RequestParam(required = false) Integer maxDistance,
+    @RequestParam(required = false, defaultValue = "regDate") String sortBy) {
 
-    // TODO: 서비스 레이어에서 keyword와 sortBy 파라미터를 사용하여
-    // 검색 및 정렬 로직을 구현해야 합니다.
-    List<WalkingTrailListResponseDto> trailList = walkingTrailService.getAllTrails(keyword, sortBy);
+    List<WalkingTrailListResponseDto> trailList = walkingTrailService.getAllTrails(
+      keyword, minTime, maxTime, minDistance, maxDistance, sortBy
+    );
     return ResponseEntity.ok(trailList);
   }
 
@@ -74,15 +82,7 @@ public class WalkingTrailController {
   public ResponseEntity<List<AmenityDto>> getNearbyAmenities(
     @PathVariable Long trailId,
     @RequestParam String category) {
-
-    // 1. trailId로 산책로 정보를 조회하여 위치 기준점(이름, 주소, 좌표 등)을 얻습니다.
-    WalkingTrailDetailResponseDto trail = walkingTrailService.getTrailDetail(trailId);
-    String locationQuery = trail.getName(); // 산책로 이름으로 주변을 검색
-
-    // 2. maps_local 도구를 사용하여 주변 편의 시설을 검색합니다.
-    // (실제 코드에서는 Maps API 클라이언트를 주입받아 사용하게 됩니다)
-    List<AmenityDto> amenities = findAmenitiesWithMapsTool(locationQuery, category);
-
+    List<AmenityDto> amenities = walkingTrailService.searchAmenitiesNearTrail(trailId, category);
     return ResponseEntity.ok(amenities);
   }
 
@@ -126,5 +126,19 @@ public class WalkingTrailController {
     Long savedCommentId = walkingTrailService.addCommentToTrail(trailId, createDto, userEmail);
 
     return ResponseEntity.status(HttpStatus.CREATED).body(savedCommentId);
+  }
+
+  @PostMapping("/{trailId}/recommend")
+  public ResponseEntity<?> recommendTrail(@PathVariable Long trailId, @AuthenticationPrincipal UserDetails userDetails) {
+    if (userDetails == null) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("추천하려면 로그인이 필요합니다.");
+    }
+    String userEmail = userDetails.getUsername();
+    try {
+      walkingTrailService.addRecommendation(trailId, userEmail);
+      return ResponseEntity.ok().build();
+    } catch (IllegalStateException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+    }
   }
 }
