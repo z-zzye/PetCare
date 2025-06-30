@@ -33,7 +33,7 @@ const menu = [
   },
   {
     name: '마이페이지',
-    link: '/mypage',
+    link: '/members/mypage',
     submenu: [],
   },
 ];

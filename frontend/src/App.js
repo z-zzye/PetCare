@@ -12,7 +12,8 @@ import FindPw from './components/FindPw.jsx';
 import ResetPw from './components/ResetPw.jsx';
 import ShoppingPage from './components/shop/Shopping.jsx';
 import AuctionPage from './components/shop/Auction.jsx';
-import ItemRegister from './components/shop/ItemRegister.jsx';
+import MyPage from './components/mypage/Mypage.jsx';
+
 
 // 문제 생기면 이 두줄이 문제일수있음
 import MapServicePage from './pages/MapServicePage'; // 지도 서비스 페이지
@@ -37,6 +38,8 @@ function App() {
         <Route path="/reset-pw" element={<ResetPw />} />
         <Route path="/" element={<MainPage />} />
 
+        <Route path="/members/mypage" element={<MyPage />} />
+
         <Route path="/place" element={<MapServicePage />} />
 
         <Route path="/board" element={<BoardMain />} />
@@ -47,7 +50,6 @@ function App() {
         {/* 쇼핑 관련 라우팅 */}
         <Route path="/shop/shopping" element={<ShoppingPage />} />
         <Route path="/shop/auction" element={<AuctionPage />} />
-        <Route path="/shop/item/register" element={<ItemRegister />} />
       </Routes>
     </Router>
    </AuthProvider>

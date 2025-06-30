@@ -1,0 +1,28 @@
+.calendar-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1rem;
+}
+
+.calendar-form {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.calendar-form input {
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.5rem;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+.calendar-form button {
+  background-color: #ffcc00;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: bold;
+}

@@ -1,0 +1,63 @@
+.react-datepicker__header {
+  background-color: #ffd600 !important;
+  color: #002f6c;
+  border-radius: 0.75rem;
+  padding: 0.5rem 1.5rem;
+  flex-direction: column;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.react-datepicker__current-month {
+  display: block;
+  margin-bottom: 0.4rem; /* 요일과 간격 */
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #002f6c;
+  text-align: center;
+}
+
+/* 🔹 요일 줄 */
+.react-datepicker__day-names {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 0.5rem;
+  font-weight: 500;
+}
+
+/* ◀️ 왼쪽 네비게이션 버튼 */
+.react-datepicker__navigation--previous {
+  position: absolute;
+  left: 0.5rem;
+  top: 60%;
+  transform: translateY(-50%);
+}
+
+/* ▶️ 오른쪽 네비게이션 버튼 */
+.react-datepicker__navigation--next {
+  position: absolute;
+  right: 0.5rem;
+  top: 60%;
+  transform: translateY(-50%);
+}
+
+/* 🟤 네비게이션 아이콘 스타일 (화살표) */
+.react-datepicker__navigation-icon::before {
+  border-color: #002f6c !important;
+}
+
+/* 버튼 배경, 테두리 제거 */
+.react-datepicker__navigation {
+  background: transparent !important;
+  border: none !important;
+  width: 2rem;
+  height: 2rem;
+}
+
+/* ⬜️ 달력 전체 반응형 둥근 테두리 */
+.react-datepicker {
+  border-radius: 0.75rem;
+  box-shadow: 0 0.2rem 0.5rem rgba(0,0,0,0.15);
+}

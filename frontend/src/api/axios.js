@@ -10,7 +10,7 @@ const axiosInstance = axios.create({
 
 // 요청 시 토큰 자동 추가 (옵션: 로그인 구현된 경우)
 axiosInstance.interceptors.request.use((config) => {
-  const token = localStorage.getItem('accessToken');
+  const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
   if (token) {
     if (config.headers && typeof config.headers.set === 'function') {
       // AxiosHeaders 객체일 때
@@ -48,14 +48,14 @@ axiosInstance.interceptors.response.use(
   },
   err => {
     console.error('[Axios Error]', err.response || err);
-    
+
     // 서버에서 보낸 에러 메시지가 있으면 그걸 사용
     if (err.response?.data?.message) {
       alert(err.response.data.message);
     } else {
       alert('요청 처리 중 오류가 발생했습니다.');
     }
-    
+
     return Promise.reject(err);
   }
 );
