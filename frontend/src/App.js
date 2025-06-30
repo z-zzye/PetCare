@@ -10,8 +10,11 @@ import MainPage from './components/MainPage.jsx';
 import FindId from './components/FindId.jsx';
 import FindPw from './components/FindPw.jsx';
 import ResetPw from './components/ResetPw.jsx';
-import ShoppingPage from './components/shop/Shopping.jsx';
-import AuctionPage from './components/shop/Auction.jsx';
+import ShoppingPage from './components/Shop/Shopping.jsx';
+import AuctionPage from './components/Shop/Auction.jsx';
+import WalkingTrailListPage from './components/WalkingTrailListPage';
+import WalkingTrailDetailPage from './components/WalkingTrailDetailPage';
+import WalkingTrailCreatePage from './components/WalkingTrailCreatePage';
 import MyPage from './components/mypage/Mypage.jsx';
 
 
@@ -50,6 +53,10 @@ function App() {
         {/* 쇼핑 관련 라우팅 */}
         <Route path="/shop/shopping" element={<ShoppingPage />} />
         <Route path="/shop/auction" element={<AuctionPage />} />
+
+        <Route path="/trails" element={<WalkingTrailListPage />} />
+        <Route path="/trails/:trailId" element={<WalkingTrailDetailPage />} />
+        <Route path="/create-trail" element={<WalkingTrailCreatePage />} />
       </Routes>
     </Router>
    </AuthProvider>
