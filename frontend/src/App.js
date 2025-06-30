@@ -31,6 +31,8 @@ function App() {
         <Route path="/reset-pw" element={<ResetPw />} />
         <Route path="/" element={<MainPage />} />
 
+        <Route path="/members/mypage" element={<MyPage />} />
+
         <Route path="/place" element={<MapServicePage />} />
 
         <Route path="/board" element={<BoardMain />} />

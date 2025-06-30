@@ -4,7 +4,6 @@ import Header from '../components/Header';
 import '../components/css/CommonBoard.css';
 import '../components/css/MapServicePage.css';
 
-const { kakao } = window;
 
 const MapServicePage = () => {
   // 상태 관리
@@ -37,6 +36,9 @@ const MapServicePage = () => {
 
   // 2. 장소 검색을 실행하는 핵심 함수
   const searchPlaces = (category, center) => {
+    const kakao = window.kakao;
+    if (!kakao || !kakao.maps) return; // ✅ 방어적 체크
+
     const ps = new kakao.maps.services.Places();
     const searchOptions = {
       location: new kakao.maps.LatLng(center.lat, center.lng),
@@ -56,23 +58,19 @@ const MapServicePage = () => {
 
   // 3. 지역 검색 버튼 클릭 시 실행될 핸들러
   const handleRegionSearch = () => {
-    if (!regionKeyword.trim()) {
-      alert('지역명을 입력해주세요.');
-      return;
-    }
+    const kakao = window.kakao;
+    if (!kakao || !kakao.maps) return; // ✅ 방어적 체크
 
-    // 주소-좌표 변환 객체를 생성합니다.
     const geocoder = new kakao.maps.services.Geocoder();
 
-    // 주소로 좌표를 검색합니다.
     geocoder.addressSearch(regionKeyword, (result, status) => {
       if (status === kakao.maps.services.Status.OK) {
         const newCoords = {
           lat: result[0].y,
           lng: result[0].x,
         };
-        setMapCenter(newCoords); // 지도의 중심을 검색된 지역으로 이동
-        searchPlaces(selectedCategory, newCoords); // 검색된 지역 기준으로 장소 검색 실행
+        setMapCenter(newCoords);
+        searchPlaces(selectedCategory, newCoords);
       } else {
         alert('지역 검색에 실패했습니다. 더 자세한 주소를 입력해주세요.');
       }
