@@ -20,4 +20,5 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     // 반환 타입을 Member에서 Optional<Member>로 수정
     @Query("SELECT m FROM Member m WHERE m.member_NickName = :nickname")
     Optional<Member> findByMember_NickName(@Param("nickname") String member_NickName);
+
 }
