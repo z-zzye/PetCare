@@ -10,8 +10,9 @@ import MainPage from './components/MainPage.jsx';
 import FindId from './components/FindId.jsx';
 import FindPw from './components/FindPw.jsx';
 import ResetPw from './components/ResetPw.jsx';
-import ShoppingPage from './components/Shop/Shopping.jsx';
-import AuctionPage from './components/Shop/Auction.jsx';
+import ShoppingPage from './components/shop/Shopping.jsx';
+import AuctionPage from './components/shop/Auction.jsx';
+import MyPage from './components/mypage/Mypage.jsx';
 
 
 // 문제 생기면 이 두줄이 문제일수있음
