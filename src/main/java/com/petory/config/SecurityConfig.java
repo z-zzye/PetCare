@@ -16,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.util.Arrays;
 
@@ -53,9 +54,11 @@ public class SecurityConfig {
                     "/auth/verify-code",
                     "/api/sms/**",
                     "/api/members/find-id",
-                    "/api/members/reset-password"
+                    "/api/members/reset-password",
+                    "/api/categories"
                 ).permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/boards", "/api/boards/**").permitAll()
+                .requestMatchers("/api/items/**").authenticated()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
@@ -81,6 +84,18 @@ public class SecurityConfig {
                 .logoutRequestMatcher(new AntPathRequestMatcher("/members/logout"))
                 .logoutSuccessUrl("/")
                 .invalidateHttpSession(true)
+            )
+            .exceptionHandling(exception -> exception
+                .authenticationEntryPoint((request, response, authException) -> {
+                    String uri = request.getRequestURI();
+                    if (uri.startsWith("/api/")) {
+                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        response.setContentType("application/json;charset=UTF-8");
+                        response.getWriter().write("{\"message\":\"인증이 필요합니다.\"}");
+                    } else {
+                        response.sendRedirect("/members/login");
+                    }
+                })
             );
         return http.build();
     }

@@ -65,8 +65,11 @@ function MemberLogin() {
         : '/images/profile-default.png';
       console.log('설정할 프로필 이미지 URL:', profileImgUrl); // 디버깅용
       login(data.token, data.role, profileImgUrl, data.nickname);
-      //localStorage.setItem('token', data.token);
-      //localStorage.setItem('member_Role', data.role);  // 사용자 권한(ADMIN/USER 등) 저장 → 관리자 기능 제한에 사용
+      // 토큰 저장 및 콘솔 출력
+      if (data.token) {
+        localStorage.setItem('accessToken', data.token);
+        console.log('localStorage에 저장된 토큰:', localStorage.getItem('accessToken'));
+      }
       navigate('/');
     } catch (err) {
       setLoginError('로그인 중 오류가 발생했습니다.');
