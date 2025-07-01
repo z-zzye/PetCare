@@ -8,6 +8,8 @@ import com.petory.entity.Member;
 import com.petory.repository.BoardRepository;
 import com.petory.repository.CommentRepository;
 import com.petory.repository.MemberRepository;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +27,7 @@ public class BoardService {
   private final MemberRepository memberRepository;
   private final CommentRepository commentRepository;
   private final CleanBotService cleanBotService;
+  private final HttpServletRequest httpServletRequest;
 
   /**
    * 새 게시글 생성
@@ -70,14 +73,23 @@ public class BoardService {
   /**
    * 게시글 상세 조회
    */
-  @Transactional(readOnly = true)
+  @Transactional
   public BoardDetailDto getBoardDetail(Long boardId) {
     Board board = boardRepository.findById(boardId)
       .orElseThrow(() -> new IllegalArgumentException("해당 게시글을 찾을 수 없습니다."));
 
+    HttpSession session = httpServletRequest.getSession();
+    String sessionKey = "viewed_board_" + boardId;
+
+    /* 현재로서는 리액트 개발 환경의 엄격 모드(StrictMode) 때문에 조회수가 2씩 증가
+    * 추후 배포단계로 넘어갈 시 자연스럽게 해결될 예정*/
+    if (httpServletRequest.getAttribute(sessionKey) == null) {
+      board.setViewCount(board.getViewCount() + 1);
+      session.setAttribute(sessionKey, true);
+    }
+
     // 해당 게시글의 댓글 목록도 함께 조회
     List<Comment> comments = commentRepository.findByBoardIdOrderByRegDateAsc(boardId);
-
     return BoardDetailDto.from(board, comments);
   }
 

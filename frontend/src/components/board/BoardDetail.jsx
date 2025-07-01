@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import './BoardCommon.css';
 import Header from '../Header';
 
