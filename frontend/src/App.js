@@ -14,7 +14,7 @@ import ShoppingPage from './components/shop/Shopping.jsx';
 import AuctionPage from './components/shop/Auction.jsx';
 import ItemRegister from './components/shop/ItemRegister.jsx';
 import MyPage from './components/mypage/Mypage.jsx';
-
+import OAuthRedirect from './components/OAuthRedirect.jsx';
 
 // 문제 생기면 이 두줄이 문제일수있음
 import MapServicePage from './pages/MapServicePage'; // 지도 서비스 페이지
@@ -38,7 +38,10 @@ function App() {
         <Route path="/find-pw" element={<FindPw />} />
         <Route path="/reset-pw" element={<ResetPw />} />
         <Route path="/" element={<MainPage />} />
+        /*소셜로그인 리다이렉트용*/
+        <Route path="/oauth2/redirect" element={<OAuthRedirect />} />
 
+        /* 마이페이지*/
         <Route path="/members/mypage" element={<MyPage />} />
 
         <Route path="/place" element={<MapServicePage />} />

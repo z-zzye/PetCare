@@ -12,6 +12,7 @@ export const AuthProvider = ({ children }) => {
   const [nickname, setNickname] = useState(localStorage.getItem('member_Nickname') || '');
 
   const login = (token, role, profileImg, nickname) => {
+    localStorage.setItem("accessToken", token);
     console.log('AuthContext login 호출:', { token, role, profileImg, nickname });
     localStorage.setItem('token', token);
     localStorage.setItem('member_Role', role);
@@ -27,6 +28,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('accessToken');
     localStorage.removeItem('member_Role');
     localStorage.removeItem('member_ProfileImg');
     localStorage.removeItem('member_Nickname');
