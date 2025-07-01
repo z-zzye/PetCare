@@ -1,10 +1,39 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import './Sidebar.css';
-import { useAuth } from '../../contexts/AuthContext'; // Header와 동일한 AuthContext 사용
+import { jwtDecode } from 'jwt-decode';
+import axios from '../../api/axios'; // axios 인스턴스
+import { useAuth } from '../../contexts/AuthContext';
 
 const Sidebar = ({ onTabChange }) => {
-  const { profileImg, nickname, pets, isCreator, member_pw} = useAuth();
-  const isSocialUser = member_pw === "SOCIAL_LOGIN";
+  const { profileImg, nickname, pets, isCreator } = useAuth();
+
+  const [isSocialUser, setIsSocialUser] = useState(false);
+
+  // ✅ 토큰 디코딩 + 이메일 기반 API 요청
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    try {
+      const decoded = jwtDecode(token);
+      const email = decoded.sub || decoded.email;
+
+      axios.get(`/members/check-social/${email}`)
+        .then((res) => {
+          console.log("✅ 응답 전체:", res.data);
+          console.log("✅ isSocial 값:", res.data.social);
+          if (res.data.social) {
+            setIsSocialUser(true);
+          }
+        })
+        .catch((err) => {
+          console.error("소셜 여부 조회 실패:", err);
+        });
+    } catch (err) {
+      console.error("JWT 디코딩 실패:", err);
+    }
+  }, []);
+
   return (
     <div className="sidebar-wrapper">
       {/* 사이드바 본체 */}
@@ -32,7 +61,9 @@ const Sidebar = ({ onTabChange }) => {
           )}
         </div>
 
-        <button className="info-btn" onClick={() => (window.location.href = '/pet-register')}>펫 등록</button>
+        <button className="info-btn" onClick={() => (window.location.href = '/members/pet-register')}>
+          펫 등록
+        </button>
         <button
           className="info-btn"
           disabled={isSocialUser}
