@@ -67,8 +67,8 @@ function MemberLogin() {
       login(data.token, data.role, profileImgUrl, data.nickname);
       // 토큰 저장 및 콘솔 출력
       if (data.token) {
-        localStorage.setItem('accessToken', data.token);
-        console.log('localStorage에 저장된 토큰:', localStorage.getItem('accessToken'));
+        localStorage.setItem('token', data.token);
+        console.log('localStorage에 저장된 토큰:', localStorage.getItem('token'));
       }
       navigate('/');
     } catch (err) {

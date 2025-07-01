@@ -37,18 +37,19 @@ const WalkingTrailDetailPage = () => {
 
   // 지도 및 산책로 경로 표시 useEffect
   useEffect(() => {
-    if (!trail || !trail.pathData) return;
-    if (!mapRef.current) {
-      console.warn('mapRef.current is null!');
-      return;
+    if (!trail || !trail.pathData || !mapRef.current || !window.kakao) {
+      return; // 셋 중 하나라도 준비되지 않았다면 함수를 즉시 종료
     }
     const kakao = window.kakao;
     const path = JSON.parse(trail.pathData);
     const linePath = path.map(p => new kakao.maps.LatLng(p.lat, p.lng));
+    //const mapCenter = linePath.length > 0 ? linePath[0] : new kakao.maps.LatLng(37.5665, 126.9780); // 경로가 없을 경우 기본 위치(서울시청)
+
     const mapInstance = new kakao.maps.Map(mapRef.current, {
       center: linePath[0],
       level: 4,
     });
+
     new kakao.maps.Polyline({
       map: mapInstance,
       path: linePath,
@@ -102,7 +103,7 @@ const WalkingTrailDetailPage = () => {
     // eslint-disable-next-line
   }, [amenities, map]);
 
-  // 주변 편의시설 검색 함수 (변경 없음)
+  // 주변 편의시설 검색 함수
   const handleAmenitySearch = (category) => {
     fetch(`/api/trails/${trailId}/amenities?category=${category}`)
       .then(res => res.json())

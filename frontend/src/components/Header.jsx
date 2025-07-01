@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 const menu = [
   {
     name: '커뮤니티',
-    link: '/community',
+    link: '/board',
     submenu: [
       { name: '정보게시판', link: '/infoboard' },
       { name: '자유게시판', link: '/board' },

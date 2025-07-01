@@ -27,21 +27,11 @@ public class KakaoMapService {
     public List<AmenityDto> searchInBounds(String category, double minLat, double maxLat, double minLng, double maxLng) {
         String rect = String.format("%f,%f,%f,%f", minLng, minLat, maxLng, maxLat);
         String url;
-        if ("동물병원".equals(category)) {
-            // 동물병원 카테고리 코드(PM9)로 category API 사용
-            url = UriComponentsBuilder.fromHttpUrl("https://dapi.kakao.com/v2/local/search/category.json")
-                .queryParam("category_group_code", "PM9")
-                .queryParam("rect", rect)
-                .queryParam("size", 15)
-                .build().toUriString();
-        } else {
-            // 기존 keyword API 사용
-            url = UriComponentsBuilder.fromHttpUrl("https://dapi.kakao.com/v2/local/search/keyword.json")
-                .queryParam("query", category)
-                .queryParam("rect", rect)
-                .queryParam("size", 15)
-                .build().toUriString();
-        }
+        url = UriComponentsBuilder.fromHttpUrl("https://dapi.kakao.com/v2/local/search/keyword.json")
+          .queryParam("query", category)
+          .queryParam("rect", rect)
+          .queryParam("size", 15)
+          .build().toUriString();
 
         System.out.println("카카오맵 API 요청 URL: " + url);
 
@@ -72,4 +62,4 @@ public class KakaoMapService {
 }
 
 // application.properties 예시:
-// kakao.rest.api.key=KakaoAK xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 
+// kakao.rest.api.key=KakaoAK xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx

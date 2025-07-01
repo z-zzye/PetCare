@@ -1,11 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-
-const { kakao } = window;
+import KakaoMapsScriptContext from '../contexts/KakaoMapsScriptContext';
 
 const WalkingTrailCreatePage = () => {
+    const { isLoaded } = useContext(KakaoMapsScriptContext);
     const navigate = useNavigate();
     const mapContainer = useRef(null);
+
+    // State 선언
     const [map, setMap] = useState(null);
     const [polyline, setPolyline] = useState(null);
     const [path, setPath] = useState([]);
@@ -14,26 +16,57 @@ const WalkingTrailCreatePage = () => {
         name: '',
         description: '',
         time: 0,
-        mainImage: ''
     });
+    // ▼▼▼ 1. 검색어 입력을 위한 state 추가 ▼▼▼
+    const [searchKeyword, setSearchKeyword] = useState('');
 
-    // 지도 생성 로직
+    // 지도와 폴리라인 초기화
     useEffect(() => {
-        const options = {
-            center: new kakao.maps.LatLng(37.566826, 126.9786567), // 초기 중심: 서울시청
-            level: 5,
-        };
-        const mapInstance = new kakao.maps.Map(mapContainer.current, options);
-        setMap(mapInstance);
+        if (!isLoaded || !mapContainer.current) {
+            return;
+        }
+        const kakao = window.kakao;
+        kakao.maps.load(() => {
+            const options = {
+                center: new kakao.maps.LatLng(37.566826, 126.9786567),
+                level: 5,
+            };
+            const mapInstance = new kakao.maps.Map(mapContainer.current, options);
+            setMap(mapInstance);
 
-        const polylineInstance = new kakao.maps.Polyline({
-            strokeWeight: 6,
-            strokeColor: '#FF0000',
-            strokeOpacity: 0.8,
-            strokeStyle: 'solid'
+            const polylineInstance = new kakao.maps.Polyline({
+                strokeWeight: 6,
+                strokeColor: '#FF0000',
+                strokeOpacity: 0.8,
+                strokeStyle: 'solid'
+            });
+            setPolyline(polylineInstance);
         });
-        setPolyline(polylineInstance);
     }, []);
+
+    // ▼▼▼ 2. 장소 검색을 처리하는 함수 추가 ▼▼▼
+    const handleSearch = () => {
+        if (!searchKeyword.trim() || !window.kakao || !map) {
+            return;
+        }
+
+        const kakao = window.kakao;
+        const ps = new kakao.maps.services.Places(); // 장소 검색 객체 생성
+
+        // 키워드로 장소를 검색
+        ps.keywordSearch(searchKeyword, (data, status) => {
+            if (status === kakao.maps.services.Status.OK) {
+                const firstPlace = data[0];
+                const moveLatLng = new kakao.maps.LatLng(firstPlace.y, firstPlace.x);
+                map.panTo(moveLatLng); // 검색된 위치로 지도 중심을 부드럽게 이동
+            } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
+                alert('검색 결과가 존재하지 않습니다.');
+            } else {
+                alert('검색 중 오류가 발생했습니다.');
+            }
+        });
+    };
+
 
     // 지도 클릭 이벤트 로직
     useEffect(() => {
@@ -41,6 +74,7 @@ const WalkingTrailCreatePage = () => {
         const handleClick = (mouseEvent) => {
             setPath(prevPath => [...prevPath, mouseEvent.latLng]);
         };
+        const kakao = window.kakao;
         kakao.maps.event.addListener(map, 'click', handleClick);
         return () => kakao.maps.event.removeListener(map, 'click', handleClick);
     }, [map]);
@@ -68,25 +102,18 @@ const WalkingTrailCreatePage = () => {
             alert('경로를 2개 지점 이상 그려주세요.');
             return;
         }
-
         const pathDataForBackend = JSON.stringify(
             path.map(point => ({ lat: point.getLat(), lng: point.getLng() }))
         );
-
-        const finalFormData = {
-            ...formData,
-            distance: distance,
-            pathData: pathDataForBackend,
-        };
-
-        // API 호출
+        const finalFormData = { ...formData, distance, pathData: pathDataForBackend };
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('산책로를 생성하려면 로그인이 필요합니다.');
+            return;
+        }
         fetch('/api/trails', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                // 만약 로그인이 필요한 기능이라면 아래 주석을 해제하세요.
-                // 'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify(finalFormData),
         })
         .then(res => {
@@ -94,30 +121,44 @@ const WalkingTrailCreatePage = () => {
                 alert('산책로가 성공적으로 생성되었습니다.');
                 navigate('/trails');
             } else {
-                // 서버에서 온 에러 메시지를 보여주면 더 좋습니다.
-                alert('생성에 실패했습니다. 서버 상태를 확인해주세요.');
+                alert('생성에 실패했습니다. 입력 내용을 확인해주세요.');
             }
         })
         .catch(error => {
             console.error("산책로 생성 오류:", error);
-            alert("요청에 실패했습니다. 네트워크 연결 또는 서버 설정을 확인해주세요.");
+            alert("요청에 실패했습니다.");
         });
     };
 
     return (
         <div className="common-container trail-list-container" style={{ display: 'flex', gap: '32px', flexWrap: 'wrap' }}>
-            <div style={{ flex: 2, minWidth: 0 }}>
+            <div style={{ flex: 2, minWidth: '400px' }}>
                 <Link to="/trails" className="trail-list-link" style={{ color: '#223A5E', fontWeight: 600 }}>{'< 목록으로 돌아가기'}</Link>
                 <h1 className="common-title" style={{ marginBottom: '18px' }}>지도에 클릭하여 경로를 그려주세요</h1>
+
+                {/* ▼▼▼ 3. 검색창 UI 추가 ▼▼▼ */}
+                <div style={{ marginBottom: '10px', display: 'flex', gap: '8px' }}>
+                    <input
+                        type="text"
+                        placeholder="지역 입력 ex) 서울숲, 강남역"
+                        className="trail-search-input"
+                        style={{ flex: 1 }}
+                        value={searchKeyword}
+                        onChange={(e) => setSearchKeyword(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
+                    />
+                    <button type="button" className="common-btn" onClick={handleSearch}>검색</button>
+                </div>
+
                 <div ref={mapContainer} style={{ width: '100%', height: '400px', border: '1.5px solid #e9ecef', borderRadius: '14px', marginBottom: '16px' }}></div>
                 <div style={{ marginBottom: '18px', display: 'flex', gap: '10px' }}>
-                    <button className="common-btn" onClick={handleUndo}>마지막 지점 취소</button>
-                    <button className="common-btn" onClick={handleClear}>전체 삭제</button>
+                    <button type="button" className="common-btn" onClick={handleUndo}>마지막 지점 취소</button>
+                    <button type="button" className="common-btn" onClick={handleClear}>전체 삭제</button>
                 </div>
                 <h3 className="trail-list-title" style={{ color: '#223A5E', marginTop: '20px' }}>경로 정보</h3>
                 <p className="trail-list-info"><strong>총 거리:</strong> {distance} m | <strong>총 지점 수:</strong> {path.length} 개</p>
             </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ flex: 1, minWidth: '300px' }}>
                 <h2 className="common-title" style={{ fontSize: '1.3rem', marginBottom: '18px' }}>산책로 정보 입력</h2>
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                     <div>
