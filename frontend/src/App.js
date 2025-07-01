@@ -12,6 +12,7 @@ import FindPw from './components/FindPw.jsx';
 import ResetPw from './components/ResetPw.jsx';
 import ShoppingPage from './components/shop/Shopping.jsx';
 import AuctionPage from './components/shop/Auction.jsx';
+import ItemRegister from './components/shop/ItemRegister.jsx';
 import MyPage from './components/mypage/Mypage.jsx';
 
 
@@ -50,6 +51,7 @@ function App() {
         {/* 쇼핑 관련 라우팅 */}
         <Route path="/shop/shopping" element={<ShoppingPage />} />
         <Route path="/shop/auction" element={<AuctionPage />} />
+        <Route path="/shop/item/register" element={<ItemRegister />} />
       </Routes>
     </Router>
    </AuthProvider>
