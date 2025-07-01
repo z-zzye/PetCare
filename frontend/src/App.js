@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react'; // useEffect를 React에서 임포트해야 합니다.
 import { BrowserRouter, Routes, Route } from 'react-router-dom'; // BrowserRouter를 직접 사용합니다.
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { KakaoMapsScriptProvider } from './contexts/KakaoMapsScriptContext';
 import MemberLogin from './components/MemberLogin.jsx';

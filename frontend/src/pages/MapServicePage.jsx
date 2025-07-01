@@ -132,7 +132,7 @@ const MapServicePage = () => {
                         {places.map(place => (
                             <li key={place.id} className="map-list-li">
                                 <div className="map-list-item-header">
-                                  <span className="map-list-place">{place.place_name}</span>
+                                  <span className="map-list-place">{place.place_name}&nbsp;&nbsp;</span>
                                   <a href={`https://place.map.kakao.com/${place.id}`} target="_blank" rel="noopener noreferrer" className="map-list-detail-link">
                                       상세보기
                                   </a>
