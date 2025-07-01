@@ -3,8 +3,8 @@ import './Sidebar.css';
 import { useAuth } from '../../contexts/AuthContext'; // Header와 동일한 AuthContext 사용
 
 const Sidebar = ({ onTabChange }) => {
-  const { profileImg, nickname, pets, isCreator } = useAuth();
-
+  const { profileImg, nickname, pets, isCreator, member_pw} = useAuth();
+  const isSocialUser = member_pw === "SOCIAL_LOGIN";
   return (
     <div className="sidebar-wrapper">
       {/* 사이드바 본체 */}
@@ -33,7 +33,14 @@ const Sidebar = ({ onTabChange }) => {
         </div>
 
         <button className="info-btn" onClick={() => (window.location.href = '/pet-register')}>펫 등록</button>
-        <button className="info-btn" onClick={() => (window.location.href = '/myinfo')}>회원정보 수정</button>
+        <button
+          className="info-btn"
+          disabled={isSocialUser}
+          style={isSocialUser ? { backgroundColor: '#ccc', cursor: 'not-allowed' } : {}}
+          onClick={() => (window.location.href = '/myinfo')}
+        >
+          {isSocialUser ? '소셜로그인 회원입니다' : '회원정보 수정'}
+        </button>
 
         <div className="creator-section">
           {!isCreator ? (

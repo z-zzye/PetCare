@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react'; // useEffect를 React에서 임포트해야 합니다.
 import { BrowserRouter, Routes, Route } from 'react-router-dom'; // BrowserRouter를 직접 사용합니다.
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { KakaoMapsScriptProvider } from './contexts/KakaoMapsScriptContext';
 import MemberLogin from './components/MemberLogin.jsx';
@@ -16,7 +17,7 @@ import WalkingTrailListPage from './components/WalkingTrailListPage';
 import WalkingTrailDetailPage from './components/WalkingTrailDetailPage';
 import WalkingTrailCreatePage from './components/WalkingTrailCreatePage';
 import MyPage from './components/mypage/Mypage.jsx';
-
+import OAuthRedirect from './components/OAuthRedirect.jsx';
 import MapServicePage from './pages/MapServicePage'; // 경로 확인 필요 (src/pages/MapServicePage.jsx)
 
 import { BoardMain, BoardDetail, BoardWrite, BoardEdit, BoardList } from './components/board';
@@ -35,7 +36,10 @@ function App() {
         <Route path="/find-pw" element={<FindPw />} />
         <Route path="/reset-pw" element={<ResetPw />} />
         <Route path="/" element={<MainPage />} />
+        /*소셜로그인 리다이렉트용*/
+        <Route path="/oauth2/redirect" element={<OAuthRedirect />} />
 
+        /* 마이페이지*/
         <Route path="/members/mypage" element={<MyPage />} />
 
         <Route path="/place" element={<MapServicePage />} />
