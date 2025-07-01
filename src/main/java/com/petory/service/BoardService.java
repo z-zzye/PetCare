@@ -1,5 +1,6 @@
 package com.petory.service;
 
+import com.petory.constant.BoardKind;
 import com.petory.dto.*;
 import com.petory.entity.Board;
 import com.petory.entity.Comment;
@@ -50,6 +51,20 @@ public class BoardService {
   public Page<BoardListDto> getBoardList(Pageable pageable) {
     // Board 엔티티 페이지를 BoardListResponseDto 페이지로 변환하여 반환
     return boardRepository.findAll(pageable).map(BoardListDto::from);
+  }
+
+  /**
+   * 게시글 목록 조회 (카테고리별 페이징 처리)
+   */
+  @Transactional(readOnly = true)
+  // ▼▼▼ String category 파라미터 추가 ▼▼▼
+  public Page<BoardListDto> getBoardList(String category, Pageable pageable) {
+    // 1. 문자열로 받은 category를 BoardKind Enum으로 변환
+    BoardKind boardKind = BoardKind.valueOf(category.toUpperCase());
+
+    // 2. Repository에 미리 정의해둔 findByBoardKind 메서드를 사용
+    return boardRepository.findByBoardKind(boardKind, pageable)
+      .map(BoardListDto::from);
   }
 
   /**

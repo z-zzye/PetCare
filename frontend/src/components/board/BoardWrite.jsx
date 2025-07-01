@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { boardConfig } from './boardConfig';
 import './BoardCommon.css';
+import Header from '../Header';
 
 const BoardWrite = () => {
   const { role } = useAuth();
@@ -29,7 +30,7 @@ const BoardWrite = () => {
       navigate('/members/login');
       return;
     }
-    fetch(config.apiPath, {
+    fetch('/api/boards', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -48,47 +49,50 @@ const BoardWrite = () => {
   };
 
   return (
-    <div className="board-container">
-      <h1 className="board-title">글 작성</h1>
-      <form onSubmit={handleSubmit} className="board-form">
-        <div className="board-form-group">
-          <label className="board-form-label">게시판 카테고리</label>
-          <select
-            className="board-form-input"
-            value={category}
-            onChange={e => setCategory(e.target.value)}
-            required
-          >
-            <option value="">카테고리 선택</option>
-            {availableCategories.map(([key, config]) => (
-              <option key={key} value={key}>{config.name}</option>
-            ))}
-          </select>
-        </div>
-        <div className="board-form-group">
-          <label htmlFor="title" className="board-form-label">제목</label>
-          <input
-            type="text"
-            id="title"
-            value={title}
-            onChange={e => setTitle(e.target.value)}
-            className="board-form-input"
-            required
-          />
-        </div>
-        <div className="board-form-group">
-          <label htmlFor="content" className="board-form-label">내용</label>
-          <textarea
-            id="content"
-            value={content}
-            onChange={e => setContent(e.target.value)}
-            className="board-form-textarea"
-            required
-          />
-        </div>
-        <button type="submit" className="board-btn">저장</button>
-      </form>
-    </div>
+    <>
+      <Header />
+      <div className="board-container">
+        <h1 className="board-title">글 작성</h1>
+        <form onSubmit={handleSubmit} className="board-form">
+          <div className="board-form-group">
+            <label className="board-form-label">게시판 카테고리</label>
+            <select
+              className="board-form-input"
+              value={category}
+              onChange={e => setCategory(e.target.value)}
+              required
+            >
+              <option value="">카테고리 선택</option>
+              {availableCategories.map(([key, config]) => (
+                <option key={key} value={key}>{config.name}</option>
+              ))}
+            </select>
+          </div>
+          <div className="board-form-group">
+            <label htmlFor="title" className="board-form-label">제목</label>
+            <input
+              type="text"
+              id="title"
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+              className="board-form-input"
+              required
+            />
+          </div>
+          <div className="board-form-group">
+            <label htmlFor="content" className="board-form-label">내용</label>
+            <textarea
+              id="content"
+              value={content}
+              onChange={e => setContent(e.target.value)}
+              className="board-form-textarea"
+              required
+            />
+          </div>
+          <button type="submit" className="board-btn">저장</button>
+        </form>
+      </div>
+    </>
   );
 };
 

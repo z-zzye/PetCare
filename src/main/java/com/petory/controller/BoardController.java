@@ -1,3 +1,5 @@
+// BoardController.java (수정 완료)
+
 package com.petory.controller;
 
 import com.petory.dto.*;
@@ -21,51 +23,52 @@ public class BoardController {
   private final BoardService boardService;
 
   // 게시글 생성 API
-  // 게시판 테스트로 인한 변경 사항 있음
-  // 정상 작동 원할 시 두 주석처리된 코드 복구 후 테스트용 코드 삭제
   @PostMapping
   public ResponseEntity<Long> createBoard(
     @Valid @RequestBody BoardCreateDto requestDto,
     @AuthenticationPrincipal UserDetails userDetails) {
-
     Long savedBoardId = boardService.createBoard(requestDto, userDetails.getUsername());
     return ResponseEntity.status(HttpStatus.CREATED).body(savedBoardId);
   }
 
-  // 게시글 목록 조회 API (페이징, 수정 예정)
-  @GetMapping
+  // 게시글 목록 조회 API
+  @GetMapping("/{category}")
   public ResponseEntity<Page<BoardListDto>> getBoardList(
-        // id의 내림차순으로 10개씩 조회
-        @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC)Pageable pageable) {
-
-    Page<BoardListDto> boardList = boardService.getBoardList(pageable);
+    @PathVariable String category,
+    @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+    Page<BoardListDto> boardList = boardService.getBoardList(category, pageable);
     return ResponseEntity.ok(boardList);
   }
 
+  // ▼▼▼ 경로 충돌을 해결하기 위해 아래 API들의 URL을 수정합니다. ▼▼▼
+
   // 게시글 상세 조회 API
-  @GetMapping("/{boardId}")
-  public ResponseEntity<BoardDetailDto> getBoardDetail(@PathVariable Long boardId) {
+  @GetMapping("/{category}/{boardId}") // 경로를 더 명확하게 변경
+  public ResponseEntity<BoardDetailDto> getBoardDetail(
+    @PathVariable String category, // category 변수 추가 (현재 로직에서는 사용되지 않지만 경로 구분을 위해 필요)
+    @PathVariable Long boardId) {
     BoardDetailDto boardDetail = boardService.getBoardDetail(boardId);
     return ResponseEntity.ok(boardDetail);
   }
 
   // 게시글 수정 API
-  @PatchMapping("/{boardId}")
+  @PatchMapping("/{category}/{boardId}") // 경로를 더 명확하게 변경
   public ResponseEntity<Void> updateBoard (
-        @PathVariable Long boardId,
-        @RequestBody BoardUpdateDto updateDto,
-        @AuthenticationPrincipal UserDetails userDetails) {
-
+    @PathVariable String category,
+    @PathVariable Long boardId,
+    @RequestBody BoardUpdateDto updateDto,
+    @AuthenticationPrincipal UserDetails userDetails) {
     boardService.updateBoard(boardId, updateDto, userDetails.getUsername());
     return ResponseEntity.ok().build();
   }
 
   // 게시글 삭제 API
-  @DeleteMapping("/{boardId}")
+  @DeleteMapping("/{category}/{boardId}") // 경로를 더 명확하게 변경
   public ResponseEntity<Void> deleteBoard(
-            @PathVariable Long boardId,
-            @AuthenticationPrincipal UserDetails userDetails) {
-   boardService.deleteBoard(boardId, userDetails.getUsername());
-   return ResponseEntity.noContent().build();
+    @PathVariable String category,
+    @PathVariable Long boardId,
+    @AuthenticationPrincipal UserDetails userDetails) {
+    boardService.deleteBoard(boardId, userDetails.getUsername());
+    return ResponseEntity.noContent().build();
   }
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import './BoardCommon.css';
+import Header from '../Header';
 
 const BoardDetail = () => {
   const { category, id } = useParams();
@@ -32,7 +33,7 @@ const BoardDetail = () => {
       return;
     }
 
-    fetch(`/api/boards/${category}/${id}/comments`, {
+    fetch(`/api/boards/${id}/comments`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -92,46 +93,49 @@ const BoardDetail = () => {
   }
 
   return (
-    <div className="board-container">
-      <div className="board-content">
-        <h1 className="board-title">{post.title}</h1>
-        <div className="board-meta">
-          <p>작성자: {post.authorNickName}</p>
-          <p>작성일: {new Date(post.createdAt).toLocaleString()}</p>
+    <>
+      <Header />
+      <div className="board-container">
+        <div className="board-content">
+          <h1 className="board-title">{post.title}</h1>
+          <div className="board-meta">
+            <p>작성자: {post.authorNickName}</p>
+            <p>작성일: {new Date(post.createdAt).toLocaleString()}</p>
+          </div>
+          <div style={{ minHeight: '200px', whiteSpace: 'pre-wrap' }}>
+            {post.content}
+          </div>
+          <div className="board-actions">
+            <a href={`/board/edit/${category}/${id}`} className="board-btn board-btn-secondary">수정하기</a>
+            <button onClick={handleDeletePost} className="board-btn board-btn-danger">삭제</button>
+          </div>
         </div>
-        <div style={{ minHeight: '200px', whiteSpace: 'pre-wrap' }}>
-          {post.content}
-        </div>
-        <div className="board-actions">
-          <a href={`/board/edit/${category}/${id}`} className="board-btn board-btn-secondary">수정하기</a>
-          <button onClick={handleDeletePost} className="board-btn board-btn-danger">삭제</button>
-        </div>
-      </div>
 
-      {/* 댓글 목록 */}
-      <div className="board-comments">
-        <h3>댓글 ({comments.length})</h3>
-        <form onSubmit={handleCommentSubmit} className="board-comment-form">
-          <textarea
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            placeholder="댓글을 입력하세요"
-            className="board-form-textarea"
-            style={{ minHeight: '60px' }}
-          />
-          <button type="submit" className="board-btn">등록</button>
-        </form>
-        <ul className="board-comment-list">
-          {comments.map(comment => (
-            <li key={comment.id} className="board-comment-item">
-              <div className="board-comment-author">{comment.authorNickName}</div>
-              <div className="board-comment-content">{comment.content}</div>
-              <div className="board-comment-date">{new Date(comment.createdAt).toLocaleString()}</div>
-            </li>
-          ))}
-        </ul>
+        {/* 댓글 목록 */}
+        <div className="board-comments">
+          <h3>댓글 ({comments.length})</h3>
+          <form onSubmit={handleCommentSubmit} className="board-comment-form">
+            <textarea
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              placeholder="댓글을 입력하세요"
+              className="board-form-textarea"
+              style={{ minHeight: '60px' }}
+            />
+            <button type="submit" className="board-btn">등록</button>
+          </form>
+          <ul className="board-comment-list">
+            {comments.map(comment => (
+              <li key={comment.id} className="board-comment-item">
+                <div className="board-comment-author">{comment.authorNickName}</div>
+                <div className="board-comment-content">{comment.content}</div>
+                <div className="board-comment-date">{new Date(comment.createdAt).toLocaleString()}</div>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
