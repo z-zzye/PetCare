@@ -3,6 +3,7 @@ package com.petory.config;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.SignatureException;
 import org.springframework.stereotype.Component;
 import java.util.*;
 import javax.crypto.SecretKey;
@@ -36,7 +37,7 @@ public class JwtTokenProvider {
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getSubject();
     }
 
-    public boolean validateToken(String token) {
+    /*public boolean validateToken(String token) {
         try {
             SecretKey key = getSigningKey();
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
@@ -44,5 +45,24 @@ public class JwtTokenProvider {
         } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
+    }*/
+
+  public boolean validateToken(String token) {
+    try {
+      SecretKey key = getSigningKey();
+      Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+      return true;
+    } catch (ExpiredJwtException e) {
+      System.out.println("[JWT] 만료된 토큰입니다.");
+    } catch (UnsupportedJwtException e) {
+      System.out.println("[JWT] 지원하지 않는 토큰입니다.");
+    } catch (MalformedJwtException e) {
+      System.out.println("[JWT] 잘못된 형식의 토큰입니다.");
+    } catch (SignatureException e) {
+      System.out.println("[JWT] 서명이 올바르지 않습니다.");
+    } catch (IllegalArgumentException e) {
+      System.out.println("[JWT] 잘못된 토큰입니다.");
     }
-} 
+    return false;
+  }
+}

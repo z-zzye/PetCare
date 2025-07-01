@@ -67,8 +67,9 @@ function MemberLogin() {
       login(data.token, data.role, profileImgUrl, data.nickname);
       // 토큰 저장 및 콘솔 출력
       if (data.token) {
-        localStorage.setItem('accessToken', data.token);
-        console.log('localStorage에 저장된 토큰:', localStorage.getItem('accessToken'));
+        localStorage.removeItem('accessToken'); // ✅ 기존 토큰 제거
+        localStorage.setItem('accessToken', data.token); // ✅ 새 토큰 저장
+        console.log('새 accessToken 저장됨:', data.token);
       }
       navigate('/');
     } catch (err) {
@@ -104,6 +105,22 @@ function MemberLogin() {
       return () => clearTimeout(timer);
     }
   }, [toastMessage]);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
+    const profileImg = params.get("profileImg");
+    const nickname = params.get("nickname");
+
+    if (token) {
+      localStorage.removeItem("accessToken"); // 기존 토큰 제거
+      localStorage.setItem("accessToken", token); // 새 토큰 저장
+      localStorage.setItem("member_ProfileImg", profileImg || "");
+      localStorage.setItem("member_Nickname", nickname || "");
+
+      console.log("소셜 로그인 토큰 저장 완료:", token);
+      window.location.href = "/"; // 또는 navigate("/") 사용 가능
+    }
+  }, []);
 
 
   return (

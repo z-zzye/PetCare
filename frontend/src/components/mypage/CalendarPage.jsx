@@ -67,11 +67,17 @@ const CalendarPage = () => {
       });
   };
 
-  const handleEventClick = (clickInfo) => {
+  const handleEventClick = async (clickInfo) => {
     const confirmed = window.confirm(`"${clickInfo.event.title}" 일정을 삭제하시겠습니까?`);
     if (confirmed) {
-      clickInfo.event.remove();
-      setEvents((prev) => prev.filter((e) => e.id !== clickInfo.event.id));
+      try {
+        await axios.delete(`/calendar/${clickInfo.event.id}`);
+        clickInfo.event.remove(); // 캘린더에서 제거
+        setEvents((prev) => prev.filter((e) => e.id !== clickInfo.event.id)); // 상태에서도 제거
+      } catch (error) {
+        alert('삭제 중 오류가 발생했습니다.');
+        console.error(error);
+      }
     }
   };
 
