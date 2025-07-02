@@ -1,0 +1,269 @@
+:root {
+  --main-bg: #f7f7fa;
+  --container-bg: #fff;
+  --input-bg: #f9fafb;
+  --input-border: #d1d5db;
+  --text-main: #222;
+  --text-sub: #888;
+  --mustard: #ffc107;
+  --mustard-dark: #e6a800;
+  --btn-blue: #3d5a80;
+}
+
+.pet-register-container {
+  min-height: 100vh;
+  background: var(--main-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Noto Sans KR', sans-serif;
+  padding: 1rem;
+}
+
+.pet-register-form {
+  background: var(--container-bg);
+  border-radius: 1rem;
+  box-shadow: 0 0.25rem 1rem 0 rgba(0, 0, 0, 0.1), 0 0.05rem 0.25rem 0 rgba(255, 193, 7, 0.2);
+  padding: 2rem;
+  width: 100%;
+  max-width: 500px;
+  border: 0.05rem solid #eee;
+  margin: 0 auto;
+}
+
+.pet-register-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  width: 100%;
+}
+
+.logo-img {
+  height: 8.5rem;
+  display: block;
+  margin: 0 auto;
+}
+
+.pet-register-header p {
+  color: var(--text-sub);
+  font-size: 1rem;
+  margin-top: 0.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.2rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--text-main);
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 0.125rem solid var(--input-border);
+  border-radius: 0.5rem;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  background: var(--input-bg);
+  color: var(--text-main);
+  box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--mustard);
+  box-shadow: 0 0 0 0.125rem rgba(255, 233, 183, 0.3);
+  background: #fff;
+}
+
+.profile-img-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.profile-img-input {
+  display: none !important;
+}
+
+.profile-img-label {
+  display: inline-block;
+  background: var(--btn-blue);
+  color: #fff !important;
+  padding: 0.4375rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  border: none;
+  margin-top: 0.5rem;
+}
+
+.profile-img-label:hover {
+  background: #4a6a94;
+  color: #fff !important;
+}
+
+.profile-img-info {
+  font-size: 0.75rem;
+  color: #666;
+  margin-top: 0.4375rem;
+  text-align: center;
+}
+
+.profile-img-preview {
+  width: 8rem;
+  height: 8rem;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 0.125rem solid #ddd;
+  background: #f7f7fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-img-preview.default {
+  background: #e0e7ef;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 1rem 0;
+  background: linear-gradient(135deg, #ffc107, #f9d423);
+  color: #2c3e50;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 2rem;
+  box-shadow: 0 0.125rem 0.5rem rgba(255, 224, 130, 0.4);
+  letter-spacing: 0.05rem;
+}
+
+.submit-btn:hover {
+  transform: translateY(-0.125rem);
+  box-shadow: 0 0.25rem 1rem rgba(255, 224, 130, 0.6);
+}
+
+@media (max-width: 480px) {
+  .pet-register-form {
+    padding: 1.5rem;
+    margin: 0 1rem;
+  }
+  .logo-img {
+    height: 4rem;
+  }
+  .form-group input,
+  .form-group select {
+    padding: 0.625rem 0.875rem;
+    font-size: 0.8rem;
+  }
+  .submit-btn {
+    padding: 0.875rem 0;
+    font-size: 0.9rem;
+  }
+  .profile-img-preview {
+    width: 4rem;
+    height: 4rem;
+  }
+}
+
+.pet-type-selector {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 3rem;
+  margin-bottom: 2.5rem;
+}
+
+.pet-type-circle {
+  width: 6.75rem;
+  height: 6.75rem;
+  border-radius: 50%;
+  background: #f7f7fa;
+  border: 0.18rem solid #d1d5db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 0.1rem 0.3rem rgba(0,0,0,0.04);
+}
+
+.pet-type-circle:hover,
+.pet-type-circle:focus {
+  border-color: var(--mustard);
+  box-shadow: 0 0 0 0.15rem rgba(255, 233, 183, 0.3);
+  outline: none;
+}
+
+.pet-type-selected {
+  border-color: var(--btn-blue);
+  box-shadow: 0 0 0 0.18rem rgba(61, 90, 128, 0.15);
+}
+
+.pet-type-img {
+  width: 4.125rem;
+  height: 4.125rem;
+  object-fit: contain;
+  border-radius: 50%;
+  background: #fff;
+}
+
+@media (max-width: 768px) {
+  .pet-type-selector {
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .pet-type-circle {
+    width: 5.25rem;
+    height: 5.25rem;
+  }
+  .pet-type-img {
+    width: 3.25rem;
+    height: 3.25rem;
+  }
+  .profile-img-preview {
+    width: 5.5rem;
+    height: 5.5rem;
+  }
+  .logo-img {
+    height: 5.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .pet-type-selector {
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .pet-type-circle {
+    width: 3.75rem;
+    height: 3.75rem;
+  }
+  .pet-type-img {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+}
