@@ -143,7 +143,7 @@ public class MemberApiController {
             return ResponseEntity.status(500).body("비밀번호 변경 중 오류가 발생했습니다.");
         }
     }
-
+    /*이메일로 소셜로그인 유저인지 체크*/
     @GetMapping("/check-social/{email}")
     public ResponseEntity<?> checkIfSocialUser(@PathVariable String email) {
       try {
@@ -152,5 +152,13 @@ public class MemberApiController {
       } catch (IllegalStateException e) {
         return ResponseEntity.status(404).body("회원 정보를 찾을 수 없습니다.");
       }
+    }
+
+    /*이메일로 유저아이디 조회*/
+    @GetMapping("/id-by-email") // 중복 매핑 방지: /api/members 경로는 @RequestMapping 에 이미 있음
+    public ResponseEntity<Long> getMemberIdByEmail(@RequestParam String email) {
+      System.out.println("⭐이메일로 아이디 찾기 :: 넘어온 이메일"+email);
+      Member member = memberService.getMemberByEmail(email); // ✅ Service를 통해 조회
+      return ResponseEntity.ok(member.getMember_Id()); // 정확한 필드명
     }
 }
