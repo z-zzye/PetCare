@@ -24,6 +24,8 @@ public class ImageService {
     @Value("${itemImg.location}")
     private String itemImgLocation;
 
+    @Value("${petProfileImg.location}")
+    private String petProfileImgLocation;
     /**
      * MultipartFile을 서버에 업로드하고 웹 경로를 반환합니다.
      * @param multipartFile 업로드할 이미지 파일
@@ -44,6 +46,8 @@ public class ImageService {
             return "/images/profile/" + savedFileName;
         } else if ("item".equals(locationType)) {
             return "/images/item/" + savedFileName;
+        } else if("petprofile".equals(locationType)){
+            return "/images/petprofile/" + savedFileName;
         }
         return null;
     }
@@ -79,6 +83,8 @@ public class ImageService {
                 return "/images/profile/" + savedFileName;
             } else if ("item".equals(locationType)) {
                 return "/images/item/" + savedFileName;
+            } else if("petprofile".equals(locationType)){
+              return "/images/petprofile/" + savedFileName;
             }
             return null;
 
@@ -97,7 +103,9 @@ public class ImageService {
             uploadPath = profileImgLocation;
         } else if ("item".equals(locationType)) {
             uploadPath = itemImgLocation;
-        } else {
+        } else if ("petprofile".equals(locationType)){
+            uploadPath = petProfileImgLocation;
+        }else {
             throw new IllegalArgumentException("Invalid location type: " + locationType);
         }
 
