@@ -30,11 +30,12 @@ const BoardList = () => {
         <table className="board-table">
           <thead>
             <tr>
-              <th>번호</th>
-              <th>제목</th>
-              <th>작성자</th>
-              <th>작성일</th>
-              <th>조회수</th>
+              <th className="th-id">번호</th>
+              <th className="th-title">제목</th>
+              <th className="th-author">작성자</th>
+              <th className="th-date">작성일</th>
+              <th className="th-views">조회수</th>
+              <th className="th-likes">추천수</th>
             </tr>
           </thead>
           <tbody>
@@ -49,6 +50,7 @@ const BoardList = () => {
                 <td>{post.authorNickName}</td>
                 <td>{new Date(post.createdAt).toLocaleDateString()}</td>
                 <td>{post.viewCount}</td>
+                <td>{post.likeCount}</td>
               </tr>
             )) : (
               <tr>

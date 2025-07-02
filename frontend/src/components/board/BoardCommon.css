@@ -211,4 +211,26 @@
   text-align: center;
   color: #6c757d;
   padding: 40px;
-} 
+}
+
+.comment-count {
+  color: #2a74e8;
+  font-size: 0.9em;
+  font-weight: bold;
+  margin-left: 5px;
+}
+
+.board-recommend-section {
+  text-align: center;
+  margin: 40px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px; /* 추천수와 버튼 사이의 간격 */
+}
+
+.recommend-count {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+}

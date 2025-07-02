@@ -71,4 +71,18 @@ public class BoardController {
     boardService.deleteBoard(boardId, userDetails.getUsername());
     return ResponseEntity.noContent().build();
   }
+
+  // 게시물 추천 API
+  @PostMapping("/{category}/{boardId}/recommend")
+  public ResponseEntity<Void> addRecommendation(
+          @PathVariable Long boardId,
+          @AuthenticationPrincipal UserDetails userDetails) {
+    try {
+      boardService.addRecommendation(boardId, userDetails.getUsername());
+      return ResponseEntity.ok().build();
+    } catch (IllegalStateException e) {
+      // 이미 추천한 경우 409 Conflict 상태 코드 반환
+      return ResponseEntity.status(HttpStatus.CONFLICT).build();
+    }
+  }
 }

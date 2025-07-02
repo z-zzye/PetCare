@@ -3,8 +3,10 @@ package com.petory.service;
 import com.petory.constant.BoardKind;
 import com.petory.dto.*;
 import com.petory.entity.Board;
+import com.petory.entity.BoardRecommend;
 import com.petory.entity.Comment;
 import com.petory.entity.Member;
+import com.petory.repository.BoardRecommendRepository;
 import com.petory.repository.BoardRepository;
 import com.petory.repository.CommentRepository;
 import com.petory.repository.MemberRepository;
@@ -28,6 +30,7 @@ public class BoardService {
   private final CommentRepository commentRepository;
   private final CleanBotService cleanBotService;
   private final HttpServletRequest httpServletRequest;
+  private final BoardRecommendRepository boardRecommendRepository;
 
   /**
    * 새 게시글 생성
@@ -125,5 +128,29 @@ public class BoardService {
       throw new IllegalStateException("게시글을 삭제할 권한이 없습니다.");
     }
     boardRepository.delete(board);
+  }
+
+  /**
+  * 게시물 추천
+  */
+  public void addRecommendation(Long boardId, String email) {
+    Member member = memberRepository.findByMember_Email(email)
+      .orElseThrow(() -> new IllegalArgumentException("해당 회원을 찾을 수 없습니다."));
+    Board board = boardRepository.findById(boardId)
+      .orElseThrow(() -> new IllegalArgumentException("해당 게시글을 찾을 수 없습니다."));
+
+    // 중복 추천 확인
+    if (boardRecommendRepository.existsByMemberAndBoard(member, board)) {
+      throw new IllegalStateException("이미 추천한 게시글입니다.");
+    }
+
+    // 추천 기록 생성 및 저장
+    BoardRecommend boardRecommend = new BoardRecommend();
+    boardRecommend.setMember(member);
+    boardRecommend.setBoard(board);
+    boardRecommendRepository.save(boardRecommend);
+
+    // 해당 게시물 추천수 1 증가
+    board.setLikeCount(board.getLikeCount() + 1);
   }
 }

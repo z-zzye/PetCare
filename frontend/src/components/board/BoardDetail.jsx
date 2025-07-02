@@ -1,25 +1,65 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React, { useCallback, useEffect, useState } from 'react'; // useCallback 임포트
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import './BoardCommon.css';
 import Header from '../Header';
+import './BoardCommon.css';
 
 const BoardDetail = () => {
   const { category, id } = useParams();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
 
-  useEffect(() => {
+  // ▼▼▼ 1. 누락되었던 fetchPostDetails 함수를 정의합니다. ▼▼▼
+  // useCallback을 사용하여 category나 id가 변경될 때만 함수가 새로 생성되도록 최적화합니다.
+  const fetchPostDetails = useCallback(() => {
     fetch(`/api/boards/${category}/${id}`)
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         setPost(data);
         setComments(data.comments || []);
       })
-      .catch(error => console.error("게시글 상세 정보를 불러오는 중 에러 발생:", error));
+      .catch((error) =>
+        console.error('게시글 상세 정보를 불러오는 중 에러 발생:', error)
+      );
   }, [category, id]);
 
+  // ▼▼▼ 2. useEffect가 이제 새로 정의된 fetchPostDetails 함수를 호출합니다. ▼▼▼
+  useEffect(() => {
+    fetchPostDetails();
+  }, [fetchPostDetails]); // 의존성 배열에 함수 자체를 넣습니다.
+
+  // 추천 처리 핸들러
+  const handleRecommend = () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('추천하려면 로그인이 필요합니다.');
+      navigate('/members/login');
+      return;
+    }
+
+    fetch(`/api/boards/${category}/${id}/recommend`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        if (res.ok) {
+          alert('게시글을 추천했습니다.');
+          fetchPostDetails(); // 추천수 갱신을 위해 데이터 다시 불러오기
+        } else if (res.status === 409) {
+          alert('이미 추천한 게시글입니다.');
+        } else {
+          alert('추천 처리 중 오류가 발생했습니다.');
+        }
+      })
+      .catch((error) => console.error('추천 요청 오류:', error));
+  };
+
+  // 댓글 작성 핸들러
   const handleCommentSubmit = (e) => {
     e.preventDefault();
     if (!newComment.trim()) {
@@ -30,7 +70,7 @@ const BoardDetail = () => {
     const token = localStorage.getItem('token');
     if (!token) {
       alert('댓글을 작성하려면 로그인이 필요합니다.');
-      window.location.href = '/members/login';
+      navigate('/members/login'); // window.location.href 대신 navigate 사용
       return;
     }
 
@@ -38,59 +78,65 @@ const BoardDetail = () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ content: newComment }),
-    })
-    .then(res => {
+    }).then((res) => {
       if (res.ok) {
         alert('댓글이 등록되었습니다.');
-        window.location.reload();
+        setNewComment(''); // 입력창 초기화
+        fetchPostDetails(); // ▼▼▼ 3. 페이지 새로고침 대신 데이터만 다시 불러오도록 개선 ▼▼▼
       } else {
-         if (res.status === 401 || res.status === 403) {
-            alert('세션이 만료되었거나 권한이 없습니다. 다시 로그인해주세요.');
-            localStorage.removeItem('token');
-            window.location.href = '/members/login';
+        if (res.status === 401 || res.status === 403) {
+          alert('세션이 만료되었거나 권한이 없습니다. 다시 로그인해주세요.');
+          localStorage.removeItem('token');
+          navigate('/members/login');
         } else {
-            alert('댓글 등록에 실패했습니다.');
+          alert('댓글 등록에 실패했습니다.');
         }
       }
     });
   };
 
+  // 게시글 삭제 핸들러
   const handleDeletePost = () => {
     const token = localStorage.getItem('token');
     if (!token) {
       alert('게시글을 삭제하려면 로그인이 필요합니다.');
-      window.location.href = '/members/login';
+      navigate('/members/login');
       return;
     }
 
     if (window.confirm('정말 이 게시글을 삭제하시겠습니까?')) {
-        fetch(`/api/boards/${category}/${id}`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-            }
-        }).then(res => {
-            if (res.ok) {
-                alert('게시글이 삭제되었습니다.');
-                window.location.href = '/board';
-            } else {
-                if (res.status === 401 || res.status === 403) {
-                    alert('세션이 만료되었거나 권한이 없습니다. 다시 로그인해주세요.');
-                    localStorage.removeItem('token');
-                    window.location.href = '/members/login';
-                } else {
-                    alert('게시글 삭제에 실패했습니다. 권한을 확인해주세요.');
-                }
-            }
-        });
+      fetch(`/api/boards/${category}/${id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }).then((res) => {
+        if (res.ok) {
+          alert('게시글이 삭제되었습니다.');
+          navigate(`/board/${category}`); // 삭제 후 해당 카테고리 목록으로 이동
+        } else {
+          if (res.status === 401 || res.status === 403) {
+            alert('세션이 만료되었거나 권한이 없습니다. 다시 로그인해주세요.');
+            localStorage.removeItem('token');
+            navigate('/members/login');
+          } else {
+            alert('게시글 삭제에 실패했습니다. 권한을 확인해주세요.');
+          }
+        }
+      });
     }
   };
 
   if (!post) {
-    return <div className="board-loading">로딩 중...</div>;
+    return (
+      <>
+        <Header />
+        <div className="board-loading">로딩 중...</div>
+      </>
+    );
   }
 
   return (
@@ -100,16 +146,40 @@ const BoardDetail = () => {
         <div className="board-content">
           <h1 className="board-title">{post.title}</h1>
           <div className="board-meta">
-            <p>작성자: {post.authorNickName}</p>
-            <p>작성일: {new Date(post.createdAt).toLocaleString()}</p>
+            {/* likeCount가 존재할 경우에만 추천수를 표시하도록 수정 */}
+            <p>
+              작성자: {post.authorNickName} | 작성일:{' '}
+              {new Date(post.createdAt).toLocaleString()} | 조회수:{' '}
+              {post.viewCount}
+            </p>
           </div>
           <div style={{ minHeight: '200px', whiteSpace: 'pre-wrap' }}>
             {post.content}
           </div>
-          <div className="board-actions">
-            <a href={`/board/edit/${category}/${id}`} className="board-btn board-btn-secondary">수정하기</a>
-            <button onClick={handleDeletePost} className="board-btn board-btn-danger">삭제</button>
+          <div className="board-recommend-section">
+            <span className="recommend-count">
+              👍 {post.likeCount !== undefined ? post.likeCount : 0}
+            </span>
+            <button onClick={handleRecommend} className="board-btn">
+              추천하기
+            </button>
           </div>
+
+
+            <div className="board-actions">
+              <Link
+                to={`/board/edit/${category}/${id}`}
+                className="board-btn board-btn-secondary"
+              >
+                수정
+              </Link>
+              <button
+                onClick={handleDeletePost}
+                className="board-btn board-btn-danger"
+              >
+                삭제
+              </button>
+            </div>
         </div>
 
         {/* 댓글 목록 */}
@@ -123,14 +193,20 @@ const BoardDetail = () => {
               className="board-form-textarea"
               style={{ minHeight: '60px' }}
             />
-            <button type="submit" className="board-btn">등록</button>
+            <button type="submit" className="board-btn">
+              등록
+            </button>
           </form>
           <ul className="board-comment-list">
-            {comments.map(comment => (
+            {comments.map((comment) => (
               <li key={comment.id} className="board-comment-item">
-                <div className="board-comment-author">{comment.authorNickName}</div>
+                <div className="board-comment-author">
+                  {comment.authorNickName}
+                </div>
                 <div className="board-comment-content">{comment.content}</div>
-                <div className="board-comment-date">{new Date(comment.createdAt).toLocaleString()}</div>
+                <div className="board-comment-date">
+                  {new Date(comment.createdAt).toLocaleString()}
+                </div>
               </li>
             ))}
           </ul>
