@@ -1,7 +1,6 @@
 package com.petory.controller;
 
-import com.petory.dto.MemberFormDto;
-import com.petory.dto.PhoneUpdateDto;
+import com.petory.dto.*;
 import com.petory.entity.Member;
 import com.petory.service.MemberService;
 import jakarta.validation.Valid;
@@ -11,7 +10,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import com.petory.dto.LoginDto;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +17,6 @@ import com.petory.config.JwtTokenProvider;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import com.petory.dto.ResetPasswordDto;
 
 @RestController
 @RequestMapping("/api/members")
@@ -145,5 +142,15 @@ public class MemberApiController {
         } catch (Exception e) {
             return ResponseEntity.status(500).body("비밀번호 변경 중 오류가 발생했습니다.");
         }
+    }
+
+    @GetMapping("/check-social/{email}")
+    public ResponseEntity<?> checkIfSocialUser(@PathVariable String email) {
+      try {
+        Member member = memberService.getMemberByEmail(email);
+        return ResponseEntity.ok(new SocialCheckDto(member));
+      } catch (IllegalStateException e) {
+        return ResponseEntity.status(404).body("회원 정보를 찾을 수 없습니다.");
+      }
     }
 }

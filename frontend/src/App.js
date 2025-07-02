@@ -12,6 +12,7 @@ import FindPw from './components/FindPw.jsx';
 import ResetPw from './components/ResetPw.jsx';
 import MyPage from './components/mypage/Mypage.jsx';
 import OAuthRedirect from './components/OAuthRedirect.jsx';
+import PetRegister from './components/mypage/PetRegister.jsx';
 
 
 //쇼핑
@@ -48,6 +49,7 @@ function App() {
 
         /* 마이페이지*/
         <Route path="/members/mypage" element={<MyPage />} />
+        <Route path="/members/pet-register" element={<PetRegister />} />
 
         <Route path="/place" element={<MapServicePage />} />
 
