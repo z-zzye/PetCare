@@ -35,7 +35,7 @@ const PetRegister = () => {
       });
       formData.append('userId', userId);
 
-      const response = await axios.post('/api/pets/register', formData, {
+      const response = await axios.post('/pets/register', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
@@ -59,9 +59,9 @@ const PetRegister = () => {
         {/* 반려동물 종류 선택 (DOG, CAT, ETC) */}
         <div className="pet-type-selector">
           {[
-            { type: 'DOG', img: '/images/pet-dog.png', label: '강아지' },
-            { type: 'CAT', img: '/images/pet-cat.png', label: '고양이' },
-            { type: 'ETC', img: '/images/pet-etc.png', label: '기타' },
+            { type: 'DOG', img: '/images/dog.png', label: '강아지' },
+            { type: 'CAT', img: '/images/cat.png', label: '고양이' },
+            { type: 'ETC', img: '/images/etc.png', label: '기타' },
           ].map((pet, idx) => (
             <div
               key={pet.type}
@@ -75,6 +75,9 @@ const PetRegister = () => {
               <img src={pet.img} alt={pet.label} className="pet-type-img" />
             </div>
           ))}
+        </div>
+        <div className="pet-register-header">
+        <p>반려동물 종류를 선택해 주세요</p>
         </div>
 
         <div className="form-group">

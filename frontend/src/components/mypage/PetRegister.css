@@ -209,6 +209,7 @@
   cursor: pointer;
   transition: border-color 0.2s, box-shadow 0.2s;
   box-shadow: 0 0.1rem 0.3rem rgba(0,0,0,0.04);
+  overflow: hidden;
 }
 
 .pet-type-circle:hover,
@@ -224,11 +225,11 @@
 }
 
 .pet-type-img {
-  width: 4.125rem;
-  height: 4.125rem;
-  object-fit: contain;
+  width: 7.3rem;
+  height: 7.3rem;
   border-radius: 50%;
   background: #fff;
+  object-fit: cover;
 }
 
 @media (max-width: 768px) {
@@ -241,8 +242,8 @@
     height: 5.25rem;
   }
   .pet-type-img {
-    width: 3.25rem;
-    height: 3.25rem;
+    width: 5.5rem;
+    height: 5.5rem;
   }
   .profile-img-preview {
     width: 5.5rem;
