@@ -31,6 +31,44 @@ const BoardDetail = () => {
     fetchPostDetails();
   }, [fetchPostDetails]); // 의존성 배열에 함수 자체를 넣습니다.
 
+  // JWT 파싱 함수 추가
+  function parseJwt(token) {
+    if (!token) return null;
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
+      );
+      return JSON.parse(jsonPayload);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // 내 이메일 추출 및 작성자 비교
+  let isWriter = false;
+  let tokenExpiredOrInvalid = false;
+  try {
+    const token = localStorage.getItem('accessToken');
+    const payload = parseJwt(token);
+    // JWT의 sub(이메일)과 게시글 작성자 이메일 비교
+    if (payload && post && post.authorEmail) {
+      isWriter = payload.sub === post.authorEmail;
+    }
+    // 토큰 만료 확인 (exp: 초 단위)
+    if (payload && payload.exp) {
+      const now = Math.floor(Date.now() / 1000);
+      if (payload.exp < now) tokenExpiredOrInvalid = true;
+    }
+    if (!payload) tokenExpiredOrInvalid = true;
+  } catch (e) {
+    tokenExpiredOrInvalid = true;
+  }
+
   // 추천 처리 핸들러
   const handleRecommend = () => {
     const token = localStorage.getItem('token');
@@ -145,13 +183,11 @@ const BoardDetail = () => {
       <div className="board-container">
         <div className="board-content">
           <h1 className="board-title">{post.title}</h1>
-          <div className="board-meta">
-            {/* likeCount가 존재할 경우에만 추천수를 표시하도록 수정 */}
-            <p>
-              작성자: {post.authorNickName} | 작성일:{' '}
-              {new Date(post.createdAt).toLocaleString()} | 조회수:{' '}
-              {post.viewCount}
-            </p>
+          <div className="board-meta improved-meta">
+            <span className="board-author">작성자: {post.authorNickName}</span>
+            <span className="board-date">
+              {new Date(post.createdAt).toLocaleString()}
+            </span>
           </div>
           <div style={{ minHeight: '200px', whiteSpace: 'pre-wrap' }}>
             {post.content}
@@ -165,13 +201,14 @@ const BoardDetail = () => {
             </button>
           </div>
 
-
-            <div className="board-actions">
+          {/* 작성자만 수정/삭제 버튼 노출, 토큰 만료/변조 시 숨김 */}
+          {isWriter && !tokenExpiredOrInvalid && (
+            <div className="board-actions improved-actions">
               <Link
                 to={`/board/edit/${category}/${id}`}
                 className="board-btn board-btn-secondary"
               >
-                수정
+                수정하기
               </Link>
               <button
                 onClick={handleDeletePost}
@@ -180,6 +217,7 @@ const BoardDetail = () => {
                 삭제
               </button>
             </div>
+          )}
         </div>
 
         {/* 댓글 목록 */}
