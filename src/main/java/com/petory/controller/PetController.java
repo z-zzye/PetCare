@@ -1,5 +1,6 @@
 package com.petory.controller;
 
+import com.petory.dto.PetDto;
 import com.petory.dto.PetRegisterDto;
 import com.petory.entity.Pet;
 import com.petory.service.PetService;
@@ -44,7 +45,45 @@ public class PetController {
 
 
   @GetMapping("/member/{memberId}")
-  public ResponseEntity<List<Pet>> getPets(@PathVariable Long memberId) {
-    return ResponseEntity.ok(petService.getPetsByMember(memberId));
+  public ResponseEntity<List<PetDto>> getPets(@PathVariable Long memberId) {
+    List<Pet> pets = petService.getPetsByMember(memberId);
+    List<PetDto> result = pets.stream()
+      .map(PetDto::from)
+      .toList();
+    return ResponseEntity.ok(result);
   }
+
+  // ✅ 특정 펫 1마리 조회 (수정 폼용)
+  @GetMapping("/{petId}")
+  public ResponseEntity<PetDto> getPetById(@PathVariable Long petId) {
+    Pet pet = petService.findById(petId);
+    PetDto dto = PetDto.from(pet);
+    return ResponseEntity.ok(dto);
+  }
+
+  // ✅ 펫 수정 후 업데이트
+  @PutMapping(value = "/{petId}", consumes = {"multipart/form-data"})
+  public ResponseEntity<?> updatePet(
+    @PathVariable Long petId,
+    @RequestPart("data") @Valid PetRegisterDto dto,
+    @RequestPart(value = "pet_ProfileImgFile", required = false) MultipartFile pet_ProfileImgFile,
+    BindingResult bindingResult
+  ) {
+    if (bindingResult.hasErrors()) {
+      String errorMsg = bindingResult.getFieldErrors().stream()
+        .map(FieldError::getDefaultMessage)
+        .collect(Collectors.joining("\n"));
+      return ResponseEntity.badRequest().body(errorMsg);
+    }
+
+    try {
+      dto.setPet_ProfileImg(pet_ProfileImgFile);
+      petService.updatePet(petId, dto); // 서비스 로직에서 처리
+      return ResponseEntity.ok("펫 정보 수정 완료!");
+    } catch (Exception e) {
+      return ResponseEntity.status(500).body("펫 정보 수정 중 오류 발생: " + e.getMessage());
+    }
+  }
+
+
 }

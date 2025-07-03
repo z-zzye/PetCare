@@ -3,7 +3,7 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import DatePicker from 'react-datepicker';
-import axios from '../../api/axios'; // ← ✅ 수정 필요
+import axios from '../../api/axios'; //
 import 'react-datepicker/dist/react-datepicker.css';
 import './DatePicker.css';
 import './CalendarPage.css';

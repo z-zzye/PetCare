@@ -6,7 +6,7 @@ import './BoardCommon.css';
 
 const BoardDetail = () => {
   const { category, id } = useParams();
-  const { user } = useAuth();
+  const { isLoggedIn, email, nickname } = useAuth();
   const navigate = useNavigate();
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);

@@ -18,8 +18,26 @@ const WalkingTrailDetailPage = () => {
 
   // ★★★★★ 1. 데이터 불러오기 로직을 재사용 가능한 함수로 분리합니다. ★★★★★
   const fetchTrailData = () => {
-    fetch(`/api/trails/${trailId}`)
-      .then(res => res.json())
+    // ✅ 1. localStorage에서 토큰을 가져옵니다.
+    const token = localStorage.getItem('token');
+    const headers = {
+        'Content-Type': 'application/json',
+    };
+
+    // ✅ 2. 토큰이 존재하면 Authorization 헤더에 추가합니다.
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    // ✅ 3. 헤더를 fetch 요청에 포함합니다.
+    fetch(`/api/trails/${trailId}`, { headers })
+      .then(res => {
+        // ✅ 4. 응답이 실패(예: 401)했을 경우 에러를 발생시킵니다.
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+      })
       .then(data => {
         setTrail(data);
         setIsLoading(false);
@@ -105,8 +123,25 @@ const WalkingTrailDetailPage = () => {
 
   // 주변 편의시설 검색 함수
   const handleAmenitySearch = (category) => {
-    fetch(`/api/trails/${trailId}/amenities?category=${category}`)
-      .then(res => res.json())
+    // ✅ 1. localStorage에서 토큰을 가져옵니다.
+    const token = localStorage.getItem('token');
+    const headers = {
+        'Content-Type': 'application/json',
+    };
+
+    // ✅ 2. 토큰이 존재하면 Authorization 헤더에 추가합니다.
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    // ✅ 3. 헤더를 fetch 요청에 포함합니다.
+    fetch(`/api/trails/${trailId}/amenities?category=${category}`, { headers })
+      .then(res => {
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+      })
       .then(data => setAmenities(data))
       .catch(error => console.error("주변 시설 검색 오류:", error));
   };
