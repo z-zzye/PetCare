@@ -1,14 +1,12 @@
-import React, { useRef, useState, useEffect } from 'react';
-import './PetRegister.css';
-import { jwtDecode } from 'jwt-decode';
+import React, { useEffect, useRef, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from '../../api/axios';
-import { useAuth } from '../../contexts/AuthContext';
+import './PetRegister.css'; // ✅ CSS는 기존 등록 컴포넌트 스타일 그대로 사용
+import Swal from 'sweetalert2';
 
-const PetRegister = () => {
-  const [memberId, setMemberId] = useState(null);
-  const [profileImgPreview, setProfileImgPreview] = useState(null);
-  const [errors, setErrors] = useState({});
-  const fileInputRef = useRef(null);
+const PetUpdate = () => {
+  const { petId } = useParams();
+  const navigate = useNavigate();
 
   const [form, setForm] = useState({
     pet_Name: '',
@@ -19,21 +17,37 @@ const PetRegister = () => {
     profileImgFile: null,
   });
 
-  // ✅ 토큰에서 사용자 이메일로 memberId 조회
-   useEffect(() => {
-      const token = localStorage.getItem('token');
-      if (token) {
-        const decoded = jwtDecode(token);
-        console.log(decoded); // sub, email 등 실제 어떤 값이 있는지 확인
-        const email = decoded.sub || decoded.email;
-        console.log("디코딩된 이메일:", email);
-        axios.get(`/members/id-by-email?email=${email}`)
-          .then((res) => setMemberId(res.data))
-          .catch((err) => console.error('멤버 ID 조회 실패:', err));
-      }
-    }, []);
+  const [profileImgPreview, setProfileImgPreview] = useState(null);
+  const [errors, setErrors] = useState({});
+  const fileInputRef = useRef(null);
 
-  // ✅ 이미지 파일 변경 핸들러 (미리보기 + 유효성 체크)
+  // ✅ 기존 펫 정보 불러오기
+  useEffect(() => {
+    if (!petId || petId === 'undefined') return;
+
+      axios.get(`/pets/${petId}`)
+        .then((res) => {
+          const data = res.data;
+          setForm({
+            pet_Name: data.petName || '',
+            pet_Gender: data.petGender || 'MALE',
+            pet_Birth: data.petBirth || '',
+            isNeutered: data.isNeutered || 'NO',
+            pet_Type: data.petCategory || '',
+            profileImgFile: null,
+          });
+
+          if (data.petProfileImg) {
+            setProfileImgPreview(`${data.petProfileImg}`);
+          }
+        })
+        .catch((err) => {
+          console.error('펫 정보 불러오기 실패:', err);
+          alert('펫 정보를 불러오지 못했습니다.');
+          navigate('/members/mypage');
+        });
+    }, [petId]);
+
   const handleProfileImgChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -44,7 +58,7 @@ const PetRegister = () => {
       }
       const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
       if (!validTypes.includes(file.type)) {
-        setErrors((e) => ({ ...e, profileImg: '지원하지 않는 이미지 형식입니다. (JPG, JPEG, PNG, GIF만 허용)' }));
+        setErrors((e) => ({ ...e, profileImg: '지원하지 않는 이미지 형식입니다.' }));
         setProfileImgPreview(null);
         return;
       }
@@ -63,48 +77,57 @@ const PetRegister = () => {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // ✅ 등록 요청
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!memberId) {
-          alert('사용자 정보가 로드되지 않았습니다.');
-          return;
-        }
+    if (!petId) {
+      alert('펫 정보가 올바르지 않습니다.');
+      return;
+    }
 
-        try {
-          const formData = new FormData();
-          const petData = {
-            pet_Name: form.pet_Name,
-            pet_Gender: form.pet_Gender,
-            pet_Birth: form.pet_Birth,
-            isNeutered: form.isNeutered,
-            pet_Category: form.pet_Type,
-            memberId: memberId,
-          };
-
-          formData.append('data', new Blob([JSON.stringify(petData)], { type: 'application/json' }));
-          if (form.profileImgFile) {
-            formData.append('pet_ProfileImgFile', form.profileImgFile);
-          }
-
-          await axios.post('/pets/register', formData);
-          alert('펫 등록이 완료되었습니다!');
-          window.location.href = '/members/mypage';
-        } catch (error) {
-          console.error('펫 등록 오류:', error);
-          const errMsg = error.response?.data?.message || '펫 등록 중 문제가 발생했습니다.';
-          alert('펫 등록 실패: ' + errMsg);
-        }
+    try {
+      const formData = new FormData();
+      const petData = {
+        pet_Name: form.pet_Name,
+        pet_Gender: form.pet_Gender,
+        pet_Birth: form.pet_Birth,
+        isNeutered: form.isNeutered,
+        pet_Category: form.pet_Type,
       };
+
+      formData.append('data', new Blob([JSON.stringify(petData)], { type: 'application/json' }));
+      if (form.profileImgFile) {
+        formData.append('pet_ProfileImgFile', form.profileImgFile);
+      }
+
+      await axios.put(`/pets/${petId}`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+          });
+
+      // ✅ SweetAlert2로 1초 알림 후 이동
+          Swal.fire({
+            icon: 'success',
+            title: '펫 정보가 수정되었습니다!',
+            showConfirmButton: false,
+            timer: 1000,
+            timerProgressBar: true,
+          }).then(() => {
+            navigate('/members/mypage');
+          });
+    } catch (err) {
+      console.error('펫 수정 오류:', err);
+      const errMsg = err.response?.data?.message || '펫 정보 수정 중 문제가 발생했습니다.';
+      alert('수정 실패: ' + errMsg);
+    }
+  };
 
   return (
     <div className="pet-register-container">
       <form className="pet-register-form" onSubmit={handleSubmit}>
         <div className="pet-register-header">
-          <div className="logo" style={{ cursor: 'pointer' }} onClick={() => (window.location.href = '/')}>
+          <div className="logo" style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>
             <img src="/petorylogo.png" alt="로고" className="logo-img" />
           </div>
-          <p>반려동물 정보를 등록해 주세요</p>
+          <p>반려동물 정보를 수정해 주세요</p>
         </div>
 
         <div className="pet-type-selector">
@@ -195,11 +218,11 @@ const PetRegister = () => {
         </div>
 
         <button type="submit" className="submit-btn">
-          등록하기
+          수정하기
         </button>
       </form>
     </div>
   );
 };
 
-export default PetRegister;
+export default PetUpdate;

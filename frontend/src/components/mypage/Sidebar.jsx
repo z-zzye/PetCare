@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import './Sidebar.css';
 import { jwtDecode } from 'jwt-decode';
 import axios from '../../api/axios'; // axios 인스턴스
 import { useAuth } from '../../contexts/AuthContext';
 
 const Sidebar = ({ onTabChange }) => {
-  const { profileImg, nickname, pets, isCreator } = useAuth();
+  const { profileImg, nickname, isCreator } = useAuth();
 
   const [isSocialUser, setIsSocialUser] = useState(false);
+
+  const [memberId, setMemberId] = useState(null);
 
   // ✅ 토큰 디코딩 + 이메일 기반 API 요청
   useEffect(() => {
@@ -29,10 +32,30 @@ const Sidebar = ({ onTabChange }) => {
         .catch((err) => {
           console.error("소셜 여부 조회 실패:", err);
         });
+      axios.get(`/members/id-by-email?email=${email}`)
+            .then((res) => {
+              setMemberId(res.data);
+              console.log("✅ 조회한 멤버ID:", res.data);
+            })
+            .catch((err) => console.error('멤버 ID 조회 실패:', err));
     } catch (err) {
       console.error("JWT 디코딩 실패:", err);
     }
   }, []);
+  const [pets, setPets] = useState([]);
+
+  useEffect(() => {
+    if (memberId === null) return;
+
+    axios.get(`/pets/member/${memberId}`)
+      .then((res) => {
+        console.log("🐾 펫 리스트:", res.data);
+        setPets(res.data);
+      })
+      .catch((err) => {
+        console.error("펫 리스트 조회 실패:", err);
+      });
+  }, [memberId]);
 
   return (
     <div className="sidebar-wrapper">
@@ -52,8 +75,10 @@ const Sidebar = ({ onTabChange }) => {
           {pets && pets.length > 0 ? (
             pets.map((pet, i) => (
               <div key={i} className="pet-item">
-                <img src={pet.image || '/default-pet.png'} alt="펫" className="pet-img" />
-                <p className="pet-name">{pet.name}</p>
+                <img src={pet.petProfileImg} alt="펫" className="pet-img" />
+                <Link to={`/members/pet-edit/${pet.petNum}`}>
+                  <p className="pet-name">{pet.petName}</p>
+                </Link>
               </div>
             ))
           ) : (

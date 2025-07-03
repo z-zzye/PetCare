@@ -46,8 +46,8 @@ public class ImageService {
             return "/images/profile/" + savedFileName;
         } else if ("item".equals(locationType)) {
             return "/images/item/" + savedFileName;
-        } else if("petprofile".equals(locationType)){
-            return "/images/petprofile/" + savedFileName;
+        } else if("petProfile".equals(locationType)){
+            return "/images/petProfile/" + savedFileName;
         }
         return null;
     }
@@ -83,8 +83,8 @@ public class ImageService {
                 return "/images/profile/" + savedFileName;
             } else if ("item".equals(locationType)) {
                 return "/images/item/" + savedFileName;
-            } else if("petprofile".equals(locationType)){
-              return "/images/petprofile/" + savedFileName;
+            } else if("petProfile".equals(locationType)){
+              return "/images/petProfile/" + savedFileName;
             }
             return null;
 
@@ -103,7 +103,7 @@ public class ImageService {
             uploadPath = profileImgLocation;
         } else if ("item".equals(locationType)) {
             uploadPath = itemImgLocation;
-        } else if ("petprofile".equals(locationType)){
+        } else if ("petProfile".equals(locationType)){
             uploadPath = petProfileImgLocation;
         }else {
             throw new IllegalArgumentException("Invalid location type: " + locationType);

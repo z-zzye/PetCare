@@ -40,32 +40,14 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(
-                    "/",
-                    "/error",
-                    "/favicon.ico",
-                    "/css/**", "/js/**", "/img/**", "/images/**",
-                    "/members/login",
-                    "/members/login/process",
-                    "/members/new",
-                    "/oauth2/**", // 소셜 로그인 관련
-                    "/api/members/signup",
-                    "/api/members/login",
-                    "/api/test/cleanbot",
-                    "/auth/send-code",
-                    "/auth/verify-code",
-                    "/api/sms/**",
-                    "/api/members/find-id",
-                    "/api/members/reset-password",
-                    "/api/categories"
-                ).permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/boards", "/api/boards/**").permitAll()
-                .requestMatchers("/api/calendar/**").authenticated()
-                .requestMatchers("/api/items/**").authenticated()
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                .anyRequest().authenticated()
-            )
+          .authorizeHttpRequests(auth -> auth
+            .requestMatchers(
+              "/", "/favicon.ico", "/css/**", "/js/**", "/img/**", "/images/**", "/profile/**"
+            ).permitAll()
+            .requestMatchers("/api/members/login", "/api/members/new", "/oauth2/**").permitAll()
+            .requestMatchers("/api/**").authenticated() // ✅ API만 인증
+            .anyRequest().permitAll() // ✅ 그 외 정적 요청은 React가 처리
+          )
             .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService), UsernamePasswordAuthenticationFilter.class)
             .formLogin(form -> form
                 .loginPage("/members/login")

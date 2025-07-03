@@ -51,9 +51,9 @@ axiosInstance.interceptors.response.use(
 
     // 서버에서 보낸 에러 메시지가 있으면 그걸 사용
     if (err.response?.data?.message) {
-      alert(err.response.data.message);
+      console.error(err.response.data.message);
     } else {
-      alert('요청 처리 중 오류가 발생했습니다.');
+      console.error('요청 처리 중 오류가 발생했습니다.');
     }
 
     return Promise.reject(err);

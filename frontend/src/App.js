@@ -15,6 +15,7 @@ import AuctionPage from './components/shop/Auction.jsx';
 import MyPage from './components/mypage/Mypage.jsx';
 import OAuthRedirect from './components/OAuthRedirect.jsx';
 import PetRegister from './components/mypage/PetRegister.jsx';
+import PetUpdate from './components/mypage/PetUpdate.jsx';
 
 // 문제 생기면 이 두줄이 문제일수있음
 import MapServicePage from './pages/MapServicePage'; // 지도 서비스 페이지
@@ -44,6 +45,7 @@ function App() {
         /* 마이페이지*/
         <Route path="/members/mypage" element={<MyPage />} />
         <Route path="/members/pet-register" element={<PetRegister />} />
+        <Route path="/members/pet-edit/:petId" element={<PetUpdate />} />
 
         <Route path="/place" element={<MapServicePage />} />
 
