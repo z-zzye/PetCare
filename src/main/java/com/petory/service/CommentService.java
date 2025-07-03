@@ -37,6 +37,9 @@ public class CommentService {
     comment.setBoard(board); // 연관된 게시글 설정
     comment.setMember(member); // 연관된 작성자 설정
 
+    board.setCommentCount(board.getCommentCount() + 1);
+
+
     Comment savedComment = commentRepository.save(comment);
     return savedComment.getId();
   }
@@ -52,6 +55,11 @@ public class CommentService {
     // 현재 로그인한 사용자가 댓글 작성자인지 확인합니다.
     if (!comment.getMember().getMember_Email().equals(email)) {
       throw new IllegalStateException("댓글을 삭제할 권한이 없습니다.");
+    }
+
+    Board board = comment.getBoard();
+    if (board != null) {
+      board.setCommentCount(Math.max(0, board.getCommentCount() - 1)); // 음수가 되지 않도록 보장
     }
 
     commentRepository.delete(comment);

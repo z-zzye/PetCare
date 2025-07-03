@@ -42,14 +42,21 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
           .authorizeHttpRequests(auth -> auth
             .requestMatchers(
-              "/", "/favicon.ico", "/css/**", "/js/**", "/img/**", "/images/**", "/profile/**"
+              "/", "/favicon.ico", "/css/**", "/js/**", "/img/**", "/images/**", "/profile/**",
+              "/api/members/signup",
+              "/api/members/login",
+              "/oauth2/**",
+              "/auth/**",
+              "/api/sms/**",
+              "/api/members/find-id",
+              "/api/members/reset-password"
             ).permitAll()
-            .requestMatchers("/api/members/login", "/api/members/new", "/oauth2/**").permitAll()
-            .requestMatchers("/api/**").authenticated() // ✅ API만 인증
-            .anyRequest().permitAll() // ✅ 그 외 정적 요청은 React가 처리
+            .requestMatchers(HttpMethod.GET, "/api/boards", "/api/boards/**").permitAll()
+            .requestMatchers("/admin/**").hasRole("ADMIN")
+            .anyRequest().authenticated()
           )
             .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService), UsernamePasswordAuthenticationFilter.class)
-            .formLogin(form -> form
+/*            .formLogin(form -> form
                 .loginPage("/members/login")
                 .loginProcessingUrl("/members/login/process")
                 .usernameParameter("member_email")
@@ -57,7 +64,7 @@ public class SecurityConfig {
                 .defaultSuccessUrl("/")
                 .failureUrl("/members/login?error=true")
                 .permitAll()
-            )
+            )*/
             .oauth2Login(oauth2 -> oauth2
                 .loginPage("/members/login")
                 .successHandler(customAuthenticationSuccessHandler)
