@@ -1,0 +1,345 @@
+/* Board 컴포넌트 공통 스타일 */
+
+.board-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+
+.board-title {
+  color: #223a5e;
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.board-form {
+  background: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.board-form-group {
+  margin-bottom: 20px;
+}
+
+.board-form-label {
+  display: block;
+  color: #223a5e;
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 1rem;
+}
+
+.board-form-input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.board-form-input:focus {
+  outline: none;
+  border-color: #223a5e;
+}
+
+.board-form-textarea {
+  width: 100%;
+  min-height: 200px;
+  padding: 12px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 1rem;
+  resize: vertical;
+  transition: border-color 0.3s ease;
+}
+
+.board-form-textarea:focus {
+  outline: none;
+  border-color: #223a5e;
+}
+
+.board-btn {
+  background: #223a5e;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.board-btn:hover {
+  background: #1a2d4a;
+}
+
+.board-btn-secondary {
+  background: #6c757d;
+  margin-left: 10px;
+}
+
+.board-btn-secondary:hover {
+  background: #5a6268;
+}
+
+.board-btn-danger {
+  background: #dc3545;
+}
+
+.board-btn-danger:hover {
+  background: #c82333;
+}
+
+.board-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.board-table th,
+.board-table td {
+  text-align: center;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.th-id,
+.th-views,
+.th-likes {
+  width: 70px;
+  min-width: 70px;
+  max-width: 90px;
+}
+
+.th-author,
+.board-table td.th-author {
+  text-align: center;
+}
+
+.th-date {
+  width: 130px;
+  min-width: 110px;
+  max-width: 150px;
+}
+
+.th-title,
+.board-table td.th-title {
+  text-align: left;
+}
+
+.board-table th {
+  background: #223a5e;
+  color: white;
+  padding: 15px;
+  text-align: left;
+  font-weight: 600;
+}
+
+.board-table td {
+  padding: 15px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.board-table tr:hover {
+  background: #f8f9fa;
+}
+
+.board-link {
+  color: #223a5e;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.board-link:hover {
+  color: #1a2d4a;
+  text-decoration: underline;
+}
+
+.board-content {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.board-meta {
+  color: #6c757d;
+  font-size: 0.9rem;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.board-actions {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e9ecef;
+}
+
+.board-comments {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.board-comment-form {
+  margin-bottom: 30px;
+}
+
+.board-comment-list {
+  list-style: none;
+  padding: 0;
+}
+
+.board-comment-item {
+  padding: 15px 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.board-comment-item:last-child {
+  border-bottom: none;
+}
+
+.board-comment-author {
+  font-weight: 600;
+  color: #223a5e;
+  margin-bottom: 5px;
+}
+
+.board-comment-content {
+  margin-bottom: 5px;
+  line-height: 1.5;
+}
+
+.board-comment-date {
+  color: #6c757d;
+  font-size: 0.8rem;
+}
+
+.board-empty {
+  text-align: center;
+  color: #6c757d;
+  font-style: italic;
+  padding: 40px;
+}
+
+.board-loading {
+  text-align: center;
+  color: #6c757d;
+  padding: 40px;
+}
+
+.comment-count {
+  color: #2a74e8;
+  font-size: 0.9em;
+  font-weight: bold;
+  margin-left: 5px;
+}
+
+.board-recommend-section {
+  text-align: center;
+  margin: 40px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px; /* 추천수와 버튼 사이의 간격 */
+}
+
+.recommend-count {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+}
+
+/* --- UI 피드백 반영: BoardDetail 개선 --- */
+.improved-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px; /* 작성자/작성일 간격 최소화 */
+  margin-bottom: 8px;
+  align-items: flex-start; /* 세로 기준선 통일 */
+}
+
+.board-author,
+.board-date {
+  font-size: 0.98rem;
+  color: #666;
+  line-height: 1.2;
+}
+
+.improved-actions {
+  display: flex;
+  gap: 12px; /* 버튼 사이 최소 12px */
+  margin-top: 18px;
+  align-items: center;
+  padding-left: 0; /* 세로 기준선 통일 */
+}
+
+.board-btn {
+  min-width: 90px;
+  font-size: 1rem;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+  box-sizing: border-box;
+}
+
+.board-btn-secondary {
+  background: #5a6473;
+  color: #fff;
+  border: none;
+}
+
+.board-btn-danger {
+  background: #e74c3c;
+  color: #fff;
+  border: none;
+}
+
+.board-btn-secondary:active,
+.board-btn-danger:active {
+  opacity: 0.85;
+}
+
+/* 조회수, 추천수 th 한 줄 표시 */
+.th-views,
+.th-likes {
+  white-space: nowrap;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+/* 각 항목별 정렬 */
+.board-table th {
+  text-align: center;
+}
+.th-title,
+.th-author,
+.th-date {
+  text-align: left;
+}
+
+.board-table td {
+  text-align: left;
+}
+.board-table td.th-id,
+.board-table td.th-date,
+.board-table td.th-views,
+.board-table td.th-likes {
+  text-align: center;
+}

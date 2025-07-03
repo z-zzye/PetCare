@@ -7,12 +7,12 @@ import { Link } from 'react-router-dom';
 const menu = [
   {
     name: '커뮤니티',
-    link: '/community',
+    link: '/board',
     submenu: [
-      { name: '정보게시판', link: '/infoboard' },
-      { name: '자유게시판', link: '/board' },
-      { name: 'Q&A', link: '/qna' },
-      { name: '산책동행', link: '/walkwith' },
+      { name: '정보게시판', link: '/board/info' },
+      { name: '자유게시판', link: '/board/free' },
+      { name: 'Q&A', link: '/board/qna' },
+      { name: '산책동행', link: '/board/walkwith' },
     ],
   },
   {
@@ -27,7 +27,7 @@ const menu = [
     name: '서비스',
     submenu: [
       { name: '동물병원&편의시설', link: '/place' },
-      { name: '산책로', link: '/walking' },
+      { name: '산책로', link: '/trails' },
     ],
     disabled: true,
   },

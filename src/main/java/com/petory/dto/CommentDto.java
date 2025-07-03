@@ -2,6 +2,7 @@ package com.petory.dto;
 
 import com.petory.entity.Comment;
 import com.petory.entity.Member;
+import com.petory.entity.WalkingTrailComment;
 import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDateTime;
@@ -32,6 +33,24 @@ public class CommentDto {
     }
 
     dto.setCreatedAt(comment.getRegDate());
+    return dto;
+  }
+
+  public static CommentDto from(WalkingTrailComment trailComment) {
+    CommentDto dto = new CommentDto();
+    dto.setId(trailComment.getId());
+    dto.setContent(trailComment.getContent());
+
+    Member author = trailComment.getMember();
+    if (author != null) {
+      dto.setAuthorNickName(author.getMember_NickName());
+      dto.setAuthorProfileImg(author.getMember_ProfileImg());
+    } else {
+      dto.setAuthorNickName("알 수 없는 사용자");
+      dto.setAuthorProfileImg(null); // 혹은 기본 이미지 경로
+    }
+
+    dto.setCreatedAt(trailComment.getRegDate());
     return dto;
   }
 }
