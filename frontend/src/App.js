@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './contexts/AuthContext';
 import MemberLogin from './components/MemberLogin.jsx';
 import MemberSignUp from './components/MemberSignUp.jsx';
+import MemberUpdate from './components/MemberUpdate.jsx';
 import MemberSocialExtra from './components/MemberSocialExtra.jsx';
 import OAuth2RedirectHandler from './components/OAuth2RedirectHandler.jsx';
 import MainPage from './components/MainPage.jsx';
@@ -33,6 +34,7 @@ function App() {
       <Routes>
         <Route path="/members/login" element={<MemberLogin />} />
         <Route path="/members/new" element={<MemberSignUp />} />
+        <Route path="/members/update" element={<MemberUpdate />} />
         <Route path="/members/social-extra" element={<MemberSocialExtra />} />
         <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
         <Route path="/find-id" element={<FindId />} />
