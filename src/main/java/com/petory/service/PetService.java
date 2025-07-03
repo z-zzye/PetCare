@@ -8,6 +8,8 @@ import com.petory.repository.PetRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
 
 @Service
@@ -43,5 +45,46 @@ public class PetService {
 
   public List<Pet> getPetsByMember(Long memberId) {
     return petRepository.findByMemberId(memberId);
+  }
+
+  public LocalDate calculateNextVaccinationDate(Long petId) {
+    // 1. ID로 펫 정보를 DB에서 조회합니다.
+    Pet pet = petRepository.findById(petId)
+      .orElseThrow(() -> new IllegalArgumentException("해당 ID의 펫을 찾을 수 없습니다: " + petId));
+
+    LocalDate birthDate = pet.getPet_Birth();
+    LocalDate today = LocalDate.now();
+
+    // 2. 오늘 날짜와 생년월일을 기준으로 나이를 계산합니다.
+    Period age = Period.between(birthDate, today);
+
+    // 3. 나이에 따른 다음 접종일을 반환합니다. (규칙 기반)
+    // 생후 2개월 미만 -> 2개월차 접종일 반환
+    if (age.getYears() == 0 && age.getMonths() < 2) {
+      return birthDate.plusMonths(2);
+    }
+    // 생후 4개월 미만 -> 4개월차 접종일 반환
+    if (age.getYears() == 0 && age.getMonths() < 4) {
+      return birthDate.plusMonths(4);
+    }
+    // 생후 6개월 미만 -> 6개월차 접종일 반환
+    if (age.getYears() == 0 && age.getMonths() < 6) {
+      return birthDate.plusMonths(6);
+    }
+    // 1년 미만 -> 1년(12개월)차 접종일 반환
+    if (age.getYears() < 1) {
+      return birthDate.plusYears(1);
+    }
+
+    // 그 이후는 매년 1회 접종으로 가정
+    // 올해 아직 접종일이 지나지 않았다면 -> 올해의 접종일 반환
+    if (birthDate.plusYears(age.getYears()).isAfter(today)) {
+      // ✅ 수정된 부분: birth -> birthDate
+      return birthDate.plusYears(age.getYears());
+    } else {
+      // ✅ 수정된 부분: birth -> birthDate
+      // 올해 접종일이 이미 지났다면 -> 내년의 접종일 반환
+      return birthDate.plusYears(age.getYears() + 1);
+    }
   }
 }

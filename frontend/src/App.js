@@ -20,6 +20,9 @@ import OAuthRedirect from './components/OAuthRedirect.jsx';
 import PetRegister from './components/mypage/PetRegister.jsx';
 import MapServicePage from './pages/MapServicePage'; // 경로 확인 필요 (src/pages/MapServicePage.jsx)
 
+import PaymentMethodPage from './pages/PaymentMethodPage'; // 결제창
+import TossAuthSuccessPage from './pages/TossAuthSuccessPage'; // 토스관련완료확인창
+
 import { BoardMain, BoardDetail, BoardWrite, BoardEdit, BoardList } from './components/board';
 
 function App() {
@@ -58,6 +61,10 @@ function App() {
         <Route path="/trails" element={<WalkingTrailListPage />} />
         <Route path="/trails/:trailId" element={<WalkingTrailDetailPage />} />
         <Route path="/create-trail" element={<WalkingTrailCreatePage />} />
+
+        {/* 결제 시스템 관련 라우팅 */}
+        <Route path="/payment-management" element={<PaymentMethodPage />} />
+        <Route path="/toss-auth-success" element={<TossAuthSuccessPage />} />
       </Routes>
     </BrowserRouter>
    </KakaoMapsScriptProvider>
