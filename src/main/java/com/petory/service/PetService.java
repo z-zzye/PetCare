@@ -73,7 +73,8 @@ public class PetService {
     pet.setPet_Category(dto.getPet_Category());
 
     // JPA 더티 체킹으로 save() 없이도 수정 완료
-    
+  }
+
   public LocalDate calculateNextVaccinationDate(Long petId) {
     // 1. ID로 펫 정보를 DB에서 조회합니다.
     Pet pet = petRepository.findById(petId)

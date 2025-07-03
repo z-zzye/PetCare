@@ -127,6 +127,8 @@ public class BoardService {
     if (!board.getMember().getMember_Email().equals(email)) {
       throw new IllegalStateException("게시글을 삭제할 권한이 없습니다.");
     }
+    boardRecommendRepository.deleteAllByBoard_Id(boardId); // 추천 기록 먼저 삭제
+    commentRepository.deleteAllByBoard_Id(boardId);
     boardRepository.delete(board);
   }
 

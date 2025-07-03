@@ -17,28 +17,47 @@ const WalkingTrailListPage = () => {
   const { role } = useAuth();
 
   // 리스트 불러오기 함수
-  const fetchTrails = () => {
-    setIsLoading(true);
-    // 쿼리스트링 조립
-    const params = [];
-    if (keyword) params.push(`keyword=${encodeURIComponent(keyword)}`);
-    if (minTime) params.push(`minTime=${minTime}`);
-    if (maxTime) params.push(`maxTime=${maxTime}`);
-    if (minDistance) params.push(`minDistance=${minDistance}`);
-    if (maxDistance) params.push(`maxDistance=${maxDistance}`);
-    if (sortBy) params.push(`sortBy=${sortBy}`);
-    const query = params.length > 0 ? `?${params.join('&')}` : '';
-    fetch(`/api/trails${query}`)
-      .then(res => res.json())
-      .then(data => {
-        setTrails(data);
-        setIsLoading(false);
-      })
-      .catch(error => {
-        console.error("산책로 목록을 불러오는 중 오류 발생:", error);
-        setIsLoading(false);
-      });
-  };
+    const fetchTrails = () => {
+        setIsLoading(true);
+        const params = new URLSearchParams({
+            keyword: keyword || '',
+            minTime: minTime || '',
+            maxTime: maxTime || '',
+            minDistance: minDistance || '',
+            maxDistance: maxDistance || '',
+            sortBy: sortBy || 'regDate',
+        }).toString();
+
+        // 1. localStorage에서 토큰을 가져옵니다.
+        const token = localStorage.getItem('token');
+        const headers = {
+            'Content-Type': 'application/json',
+        };
+
+        // 2. 토큰이 존재하면 Authorization 헤더에 추가합니다.
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        fetch(`/api/trails?${params}`, { headers }) // 3. 헤더를 fetch 요청에 포함합니다.
+            .then(res => {
+                // 4. 응답이 실패(예: 401)했을 경우 에러를 발생시켜 catch 블록으로 보냅니다.
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                return res.json();
+            })
+            .then(data => {
+                // 5. 서버 응답이 배열인지 한번 더 확인하여 안전하게 상태를 업데이트합니다.
+                setTrails(Array.isArray(data) ? data : []);
+                setIsLoading(false);
+            })
+            .catch(error => {
+                console.error("산책로 목록을 불러오는 중 오류 발생:", error);
+                setTrails([]); // ✅ 에러 발생 시 빈 배열로 초기화하여 .map() 오류를 방지합니다.
+                setIsLoading(false);
+            });
+    };
 
   // 최초 렌더링 및 정렬/검색 조건 변경 시 리스트 불러오기
   useEffect(() => {
