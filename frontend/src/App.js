@@ -21,6 +21,7 @@ import AuctionPage from './components/shop/Auction.jsx';
 import ItemRegister from './components/shop/ItemRegister.jsx';
 import ItemDetail from './components/shop/ItemDetail.jsx';
 import WhatsInMyCart from './components/shop/WhatsInMyCart.jsx';
+import ItemModify from './components/shop/ItemModify.jsx';
 
 // 문제 생기면 이 두줄이 문제일수있음
 import MapServicePage from './pages/MapServicePage'; // 지도 서비스 페이지
@@ -64,6 +65,7 @@ function App() {
         <Route path="/shop/item/register" element={<ItemRegister />} />
         <Route path="/shop/shopping/item/:itemId" element={<ItemDetail />} />
         <Route path="/shop/cart" element={<WhatsInMyCart />} />
+        <Route path="/shop/item/edit/:itemId" element={<ItemModify />} />
       </Routes>
     </Router>
    </AuthProvider>
