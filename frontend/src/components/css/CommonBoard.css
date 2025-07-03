@@ -32,3 +32,165 @@
     background: #ffe082;
     color: #223A5E;
   }
+
+/* 산책로 리스트 공통 컨테이너 */
+.trail-list-container {
+  max-width: 800px;
+  margin: 40px auto 0 auto;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  padding: 36px 32px 32px 32px;
+}
+
+.common-title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #223A5E;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.trail-list-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.trail-create-btn {
+  background: #ffe066;
+  color: #223A5E;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-size: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  transition: background 0.2s;
+}
+.trail-create-btn:hover {
+  background: #ffd43b;
+}
+
+.trail-sort-btns {
+  display: flex;
+  gap: 8px;
+}
+.trail-sort-btn {
+  background: #f1f3f5;
+  color: #223A5E;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 16px;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: background 0.2s, color 0.2s;
+}
+.trail-sort-btn.active, .trail-sort-btn:hover {
+  background: #ffe066;
+  color: #223A5E;
+}
+
+.trail-search-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 22px;
+  justify-content: center;
+}
+.trail-search-input {
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  padding: 7px 12px;
+  font-size: 1rem;
+  width: 130px;
+  transition: border 0.2s;
+}
+.trail-search-input:focus {
+  border: 1.5px solid #2a74e8;
+  outline: none;
+}
+.trail-search-btn {
+  background: #ffe066;
+  color: #223A5E;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 18px;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+.trail-search-btn:hover {
+  background: #ffd43b;
+}
+
+.trail-list-content {
+  margin-top: 10px;
+}
+.trail-list-ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.trail-list-card {
+  background: #f8fafc;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  padding: 22px 20px 18px 20px;
+  transition: box-shadow 0.2s, transform 0.2s;
+  border: 1.5px solid #e9ecef;
+}
+.trail-list-card:hover {
+  box-shadow: 0 6px 24px rgba(42,116,232,0.10);
+  transform: translateY(-2px) scale(1.01);
+  border: 1.5px solid #2a74e8;
+}
+.trail-list-link {
+  text-decoration: none;
+  color: #222;
+  display: block;
+}
+.trail-list-title {
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin-bottom: 7px;
+  color: #223A5E;
+}
+.trail-list-info {
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 6px;
+}
+.trail-list-recommend {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #e74c3c;
+}
+.trail-list-loading, .trail-list-empty {
+  text-align: center;
+  color: #888;
+  font-size: 1.1rem;
+  margin: 30px 0 20px 0;
+}
+
+/* 반응형 */
+@media (max-width: 600px) {
+  .trail-list-container {
+    padding: 16px 4px 18px 4px;
+    max-width: 99vw;
+  }
+  .trail-list-card {
+    padding: 13px 7px 12px 7px;
+  }
+  .trail-search-input {
+    width: 90px;
+    font-size: 0.95rem;
+  }
+  .common-title {
+    font-size: 1.2rem;
+  }
+}

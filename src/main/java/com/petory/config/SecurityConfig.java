@@ -58,6 +58,7 @@ public class SecurityConfig {
                     "/api/sms/**",
                     "/api/members/find-id",
                     "/api/members/reset-password",
+                    "/api/trails/**",
                     "/api/categories"
                 ).permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/boards", "/api/boards/**").permitAll()

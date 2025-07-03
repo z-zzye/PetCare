@@ -15,16 +15,13 @@ const OAuth2RedirectHandler = () => {
   useEffect(() => {
     const params = getQueryParams(location.search);
     const { token, role, profileImg, nickname, needPhoneInput } = params;
-    /*if (token) {
-      localStorage.setItem('jwtToken', token);
-    }*/
 
     if (!token) return; // token 없으면 아무것도 하지 않음
 
-      // 로그인 이미 되어 있으면 재로그인 방지
-      if (!localStorage.getItem('token')) {
-        login(token, role || 'USER', profileImg || '/images/profile-default.png', nickname || '');
-      }
+    // 로그인 이미 되어 있으면 재로그인 방지
+    if (!localStorage.getItem('token')) {
+      login(token, role || 'USER', profileImg || '/images/profile-default.png', nickname || '');
+    }
 
     if (needPhoneInput === 'true') {
       fetchMemberInfo(token).then(memberInfo => {

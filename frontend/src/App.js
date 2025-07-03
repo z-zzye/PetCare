@@ -1,7 +1,7 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-
+import React, { useEffect } from 'react'; // useEffect를 React에서 임포트해야 합니다.
+import { BrowserRouter, Routes, Route } from 'react-router-dom'; // BrowserRouter를 직접 사용합니다.
 import { AuthProvider } from './contexts/AuthContext';
+import { KakaoMapsScriptProvider } from './contexts/KakaoMapsScriptContext';
 import MemberLogin from './components/MemberLogin.jsx';
 import MemberSignUp from './components/MemberSignUp.jsx';
 import MemberSocialExtra from './components/MemberSocialExtra.jsx';
@@ -10,32 +10,23 @@ import MainPage from './components/MainPage.jsx';
 import FindId from './components/FindId.jsx';
 import FindPw from './components/FindPw.jsx';
 import ResetPw from './components/ResetPw.jsx';
+import ShoppingPage from './components/Shop/Shopping.jsx'; // 경로 및 대소문자 재확인
+import AuctionPage from './components/Shop/Auction.jsx';   // 경로 및 대소문자 재확인
+import WalkingTrailListPage from './components/WalkingTrailListPage';
+import WalkingTrailDetailPage from './components/WalkingTrailDetailPage';
+import WalkingTrailCreatePage from './components/WalkingTrailCreatePage';
 import MyPage from './components/mypage/Mypage.jsx';
 import OAuthRedirect from './components/OAuthRedirect.jsx';
 import PetRegister from './components/mypage/PetRegister.jsx';
+import MapServicePage from './pages/MapServicePage'; // 경로 확인 필요 (src/pages/MapServicePage.jsx)
 
-
-//쇼핑
-import ShoppingPage from './components/shop/Shopping.jsx';
-import AuctionPage from './components/shop/Auction.jsx';
-import ItemRegister from './components/shop/ItemRegister.jsx';
-import ItemDetail from './components/shop/ItemDetail.jsx';
-import WhatsInMyCart from './components/shop/WhatsInMyCart.jsx';
-import ItemModify from './components/shop/ItemModify.jsx';
-
-// 문제 생기면 이 두줄이 문제일수있음
-import MapServicePage from './pages/MapServicePage'; // 지도 서비스 페이지
-
-import BoardMain from './components/BoardMain';
-import BoardDetail from './components/BoardDetail';
-import BoardWrite from './components/BoardWrite';
-import BoardEdit from './components/BoardEdit';
+import { BoardMain, BoardDetail, BoardWrite, BoardEdit, BoardList } from './components/board';
 
 function App() {
-  // 소셜 추가정보 페이지는 실제로는 사용자 정보를 prop으로 받아야 하지만, 예시로 빈 객체 전달
   return (
    <AuthProvider>
-    <Router>
+   <KakaoMapsScriptProvider>
+    <BrowserRouter> {/* Router 대신 BrowserRouter 사용 */}
       <Routes>
         <Route path="/members/login" element={<MemberLogin />} />
         <Route path="/members/new" element={<MemberSignUp />} />
@@ -55,19 +46,21 @@ function App() {
         <Route path="/place" element={<MapServicePage />} />
 
         <Route path="/board" element={<BoardMain />} />
-        <Route path="/board/:id" element={<BoardDetail />} />
         <Route path="/board/write" element={<BoardWrite />} />
-        <Route path="/board/edit/:id" element={<BoardEdit />} />
+        <Route path="/board/:category" element={<BoardList />} />
+        <Route path="/board/:category/:id" element={<BoardDetail />} />
+        <Route path="/board/edit/:category/:id" element={<BoardEdit />} />
 
         {/* 쇼핑 관련 라우팅 */}
         <Route path="/shop/shopping" element={<ShoppingPage />} />
         <Route path="/shop/auction" element={<AuctionPage />} />
-        <Route path="/shop/item/register" element={<ItemRegister />} />
-        <Route path="/shop/shopping/item/:itemId" element={<ItemDetail />} />
-        <Route path="/shop/cart" element={<WhatsInMyCart />} />
-        <Route path="/shop/item/edit/:itemId" element={<ItemModify />} />
+
+        <Route path="/trails" element={<WalkingTrailListPage />} />
+        <Route path="/trails/:trailId" element={<WalkingTrailDetailPage />} />
+        <Route path="/create-trail" element={<WalkingTrailCreatePage />} />
       </Routes>
-    </Router>
+    </BrowserRouter>
+   </KakaoMapsScriptProvider>
    </AuthProvider>
   );
 }
