@@ -80,6 +80,7 @@ public class ItemController {
     @RequestParam(value = "imagesIsRep", required = false) List<String> imagesIsRep,
     @RequestParam(value = "remainImageUrls", required = false) String remainImageUrlsJson
   ) {
+    System.out.println("=== 컨트롤러 진입: /api/items/" + itemId + " ===");
     try {
       ObjectMapper objectMapper = new ObjectMapper();
       ItemFormDto formDto = objectMapper.readValue(itemDtoJson, ItemFormDto.class);

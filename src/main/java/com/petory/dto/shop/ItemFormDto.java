@@ -34,4 +34,6 @@ public class ItemFormDto {
   private List<ItemOptionDto> options;
 
   private List<ItemImageDto> images;
+
+  private List<String> remainImageUrls;
 }

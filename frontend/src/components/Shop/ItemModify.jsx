@@ -98,37 +98,54 @@ const ItemModify = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log('handleSubmit 진입!');
+    // form.images 배열 전체를 콘솔에 출력
+    console.log('form.images:', form.images);
     if (form.options.length === 0) {
+      console.log('옵션 없음 return');
       setToast('옵션을 작성해주세요');
       return;
     }
     // 대표 이미지 유효성 검사
     if (!hasRepresentative) {
+      console.log('대표이미지 없음 return');
       setToast('대표 이미지를 반드시 선택해야 합니다.');
       return;
     }
+    // 대표이미지가 images[0]이 되도록 정렬
+    const sortedImages = [
+      ...form.images.filter(img => img.isRepresentative),
+      ...form.images.filter(img => !img.isRepresentative)
+    ];
     // 기존 이미지와 새 이미지 분리
-    const remainImageUrls = form.images
+    const remainImageUrls = sortedImages
       .filter(img => !(img instanceof File))
       .map(img => img.url);
-    const newImages = form.images.filter(img => img instanceof File);
+    // remainImageUrls 콘솔 출력
+    console.log('remainImageUrls:', remainImageUrls);
+    const newImages = sortedImages.filter(img => img instanceof File);
     const data = new FormData();
     data.append('itemDto', JSON.stringify({
       ...form,
       images: undefined, // images 필드는 빼고,
       remainImageUrls
     }));
+    // remainImageUrls가 undefined/null이면 빈 배열로 대체하여 FormData에 append
+    data.append('remainImageUrls', JSON.stringify(remainImageUrls ?? []));
     newImages.forEach((file) => {
       data.append('images', file);
       data.append('imagesIsRep', file.isRepresentative ? 'true' : 'false');
     });
+    console.log('axios 요청 직전!');
     try {
       await axios.put(`/items/${itemId}`, data);
+      console.log('axios 요청 후!');
       setToast('상품 수정이 완료되었습니다.');
       setTimeout(() => {
         navigate('/shop/shopping');
       }, 1200);
     } catch (err) {
+      console.log('axios 에러:', err);
       setToast('상품 수정 실패: ' + (err.response?.data?.message || '오류 발생'));
     }
   };
@@ -199,7 +216,7 @@ const ItemModify = () => {
                 <span className="option-label">추가금액</span>
                 <span className="option-label">재고</span>
               </div>
-              {form.options.map((opt, idx) => (
+              {form.options.filter(opt => opt.isActive === undefined || opt.isActive === true || opt.isActive === 1 || opt.isActive === 'Y').map((opt, idx) => (
                 <div className="option-row" key={idx}>
                   <input
                     type="text"
@@ -207,6 +224,7 @@ const ItemModify = () => {
                     onChange={e => handleOptionChange(idx, 'optionName', e.target.value)}
                     placeholder="옵션명"
                     required
+                    disabled={!!opt.optionId}
                   />
                   <input
                     type="number"

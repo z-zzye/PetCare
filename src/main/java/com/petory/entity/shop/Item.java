@@ -40,6 +40,9 @@ public class Item extends BaseEntity {
   @Column(nullable = false)
   private Integer itemPrice; // 상품가격
 
+  @Column(nullable = false)
+  private Boolean isActive = true; // 상품 활성/비활성(soft delete)
+
   @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<ItemOption> itemOptions = new ArrayList<>();
 

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from '../../api/axios';
 import Header from '../Header.jsx';
-import { MdShoppingCart } from 'react-icons/md';
+import { MdShoppingCart, MdDelete } from 'react-icons/md';
 import { FaDog, FaCat, FaDove } from 'react-icons/fa';
 
 function ItemDetail() {
@@ -18,6 +18,7 @@ function ItemDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const memberRole = localStorage.getItem('member_Role');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -38,7 +39,7 @@ function ItemDetail() {
   if (error) return <div>오류 발생: {error.message}</div>;
   if (!item) return <div>데이터 없음</div>;
 
-  const isSoldOut = item.options && item.options.length > 0 && item.options.every(opt => opt.optionStock === 0);
+  const isSoldOut = item.itemStatus === 'SOLD_OUT' || (item.options && item.options.length > 0 && item.options.every(opt => opt.optionStock === 0));
   const selectedOption = item.options[selectedOptIdx] || { optionAddPrice: 0 };
 
   // images 배열에서 url만 추출
@@ -138,17 +139,23 @@ function ItemDetail() {
     navigate(`/shop/item/edit/${item.itemId}`);
   };
   const handleDelete = async () => {
-    if (window.confirm('정말로 이 상품을 삭제하시겠습니까?')) {
-      try {
-        await axios.delete(`/items/${item.itemId}`);
-        setToast('상품이 삭제되었습니다.');
-        setTimeout(() => {
-          navigate('/shop/shopping');
-        }, 1200);
-      } catch (e) {
-        setToast('삭제 실패: ' + (e.response?.data?.message || '오류 발생'));
-      }
+    setShowDeleteConfirm(true);
+  };
+  const confirmDelete = async () => {
+    try {
+      await axios.delete(`/items/${item.itemId}`);
+      setToast('상품이 삭제되었습니다.');
+      setShowDeleteConfirm(false);
+      setTimeout(() => {
+        navigate('/shop/shopping');
+      }, 1200);
+    } catch (e) {
+      setToast('삭제 실패: ' + (e.response?.data?.message || '오류 발생'));
+      setShowDeleteConfirm(false);
     }
+  };
+  const cancelDelete = () => {
+    setShowDeleteConfirm(false);
   };
 
   return (
@@ -180,6 +187,26 @@ function ItemDetail() {
               onClick={() => setCartToast(false)}>
               닫기
             </button>
+          </div>
+        </div>
+      )}
+      {showDeleteConfirm && (
+        <div style={{
+          position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+          background: '#223A5E', color: '#fff', padding: '2rem 2.5rem', borderRadius: 18,
+          fontSize: '1.1rem', zIndex: 10000, boxShadow: '0 2px 16px #0005', opacity: 0.98,
+          textAlign: 'center', fontWeight: 700
+        }}>
+          <div style={{ marginBottom: 18 }}>정말로 이 상품을 삭제하시겠습니까?</div>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 18 }}>
+            <button
+              style={{ background: '#ff5252', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: '1rem', padding: '0.6rem 1.6rem', cursor: 'pointer' }}
+              onClick={confirmDelete}
+            >예</button>
+            <button
+              style={{ background: '#fff', color: '#223A5E', border: '1.5px solid #223A5E', borderRadius: 8, fontWeight: 700, fontSize: '1rem', padding: '0.6rem 1.6rem', cursor: 'pointer' }}
+              onClick={cancelDelete}
+            >아니오</button>
           </div>
         </div>
       )}
@@ -225,7 +252,28 @@ function ItemDetail() {
             {memberRole === 'ADMIN' && (
               <div style={{ display: 'flex', gap: 10 }}>
                 <button onClick={handleEdit} style={{ padding: '0.5rem 1.2rem', borderRadius: 8, border: 'none', background: '#223A5E', color: '#fff', fontWeight: 700, fontSize: '1rem', cursor: 'pointer', marginRight: 4 }}>상품 수정</button>
-                <button onClick={handleDelete} style={{ padding: '0.5rem 1.2rem', borderRadius: 8, border: 'none', background: '#ff5252', color: '#fff', fontWeight: 700, fontSize: '1rem', cursor: 'pointer' }}>상품 삭제</button>
+                <button
+                  onClick={handleDelete}
+                  title="상품 삭제"
+                  style={{
+                    padding: '0.5rem 1.2rem',
+                    borderRadius: 8,
+                    border: '2px solid transparent',
+                    background: '#ffc107',
+                    color: '#223A5E',
+                    fontWeight: 700,
+                    fontSize: '1.3rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'border 0.2s',
+                  }}
+                  onMouseOver={e => e.currentTarget.style.border = '2px solid #223A5E'}
+                  onMouseOut={e => e.currentTarget.style.border = '2px solid transparent'}
+                >
+                  <MdDelete style={{ fontSize: '1.3rem' }} />
+                </button>
               </div>
             )}
           </div>
@@ -460,22 +508,47 @@ function ItemDetail() {
           </div>
           {/* 우측: 상품 정보 */}
           <div className="detail-info-col">
-            <h2 style={{ fontSize: '2rem', color: '#223A5E', marginBottom: 12 }}>{item.itemName}</h2>
-            <div style={{ fontSize: '1.5rem', color: '#ff9800', fontWeight: 700, marginBottom: 8 }}>
-              {item.itemPrice.toLocaleString()}원
+            <h2 style={{ fontSize: '2rem', color: '#223A5E', marginBottom: 18 }}>{item.itemName}</h2>
+            <div style={{ display: 'flex', alignItems: 'center', fontSize: '1.5rem', fontWeight: 700, marginBottom: 24 }}>
+              <span style={{ color: isSoldOut ? '#888' : '#ff9800' }}>{item.itemPrice.toLocaleString()}원</span>
+              {isSoldOut && (
+                <span style={{ color: 'red', fontWeight: 'bold', fontSize: '1.1rem', marginLeft: 16 }}>품절</span>
+              )}
             </div>
-            <div className="qty-row">
+            {/* 옵션 선택 */}
+            <div style={{ marginBottom: 18, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
               <select
-                style={{ padding: '0.7rem 1.2rem', fontSize: '1.1rem', width: 220 }}
+                style={{
+                  padding: '0.7rem 1.2rem',
+                  fontSize: '1.1rem',
+                  width: 280,
+                  border: isSoldOut ? '2px solid #ccc' : '2px solid #ffc107',
+                  borderRadius: 5,
+                  background: isSoldOut ? '#f8f9fa' : '#fff',
+                  color: isSoldOut ? '#bbb' : '#223A5E',
+                  outline: 'none',
+                  appearance: 'auto',
+                  transition: 'border 0.2s',
+                  height: 'auto',
+                  lineHeight: 'normal'
+                }}
                 value={selectedOptIdx}
                 onChange={e => setSelectedOptIdx(Number(e.target.value))}
+                disabled={isSoldOut}
               >
-                {item.options && item.options.map((opt, idx) => (
-                  <option key={idx} value={idx} disabled={opt.optionStock === 0}>
-                    {opt.optionName}
-                    {opt.optionAddPrice > 0 ? ` (+${opt.optionAddPrice.toLocaleString()}원)` : ''}
-                  </option>
-                ))}
+                {item.options && item.options
+                  .filter(opt =>
+                    opt.isActive === undefined ||
+                    opt.isActive === true ||
+                    opt.isActive === 1 ||
+                    opt.isActive === 'Y'
+                  )
+                  .map((opt, idx) => (
+                    <option key={opt.optionId} value={idx} disabled={opt.optionStock === 0}>
+                      {opt.optionName}
+                      {opt.optionAddPrice > 0 ? ` (+${opt.optionAddPrice.toLocaleString()}원)` : ''}
+                    </option>
+                  ))}
               </select>
               <button
                 style={{
@@ -486,21 +559,23 @@ function ItemDetail() {
                   border: 'none',
                   borderRadius: 8,
                   fontWeight: 700,
-                  cursor: 'pointer',
+                  cursor: isSoldOut ? 'not-allowed' : 'pointer',
                   fontSize: '0.9rem',
                   height: '2.1rem',
                   lineHeight: '2.1rem',
-                  display: 'flex',
+                  display: 'inline-flex',
                   alignItems: 'center',
-                  justifyContent: 'center'
+                  justifyContent: 'center',
+                  opacity: isSoldOut ? 0.5 : 1
                 }}
                 onClick={handleAddOption}
+                disabled={isSoldOut}
               >
                 추가
               </button>
             </div>
             {/* 선택된 옵션/수량/금액 리스트 */}
-            <div className="selected-opt-list">
+            <div className="selected-opt-list" style={{ marginBottom: 24 }}>
               {selectedOptions.map((opt, idx) => (
                 <div className="selected-opt-item" key={opt.optionName}>
                   <div className="selected-opt-info">
@@ -525,52 +600,55 @@ function ItemDetail() {
                 </div>
               ))}
             </div>
-            <div className="order-price-row">
+            {/* 주문금액 */}
+            <div className="order-price-row" style={{ marginBottom: 28, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
               <span className="order-price-label">주문금액</span>
-              <span className="order-price-value">{totalPrice.toLocaleString()}원</span>
+              <span className="order-price-value" style={{ marginLeft: 12 }}>{totalPrice.toLocaleString()}원</span>
             </div>
-            {/* 장바구니/바로구매 버튼 */}
-            <div style={{ display: 'flex', gap: 18, marginBottom: 24 }}>
+            {/* 장바구니/바로구매 버튼을 세로로 넓게 배치 */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 32 }}>
               <button
                 style={{
-                  flex: 0.3,
+                  width: '100%',
                   background: '#fff',
                   color: '#223A5E',
                   border: '2px solid #223A5E',
                   borderRadius: 12,
                   fontWeight: 700,
                   fontSize: '1.1rem',
-                  padding: '1rem 0',
-                  cursor: 'pointer',
+                  padding: '1.1rem 0',
+                  cursor: isSoldOut ? 'not-allowed' : 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   transition: 'background 0.2s, color 0.2s',
+                  opacity: isSoldOut ? 0.5 : 1
                 }}
                 onClick={handleCartClick}
+                disabled={isSoldOut}
               >
-                <MdShoppingCart style={{ fontSize: '1.6rem' }} />
+                <MdShoppingCart style={{ fontSize: '1.6rem', marginRight: 8 }} />
+                장바구니
               </button>
               <button
                 style={{
-                  flex: 1,
+                  width: '100%',
                   background: '#223A5E',
                   color: '#fff',
                   border: 'none',
                   borderRadius: 12,
                   fontWeight: 700,
                   fontSize: '1.1rem',
-                  padding: '1rem 0',
-                  cursor: 'pointer',
+                  padding: '1.1rem 0',
+                  cursor: isSoldOut ? 'not-allowed' : 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   transition: 'background 0.2s, color 0.2s',
+                  opacity: isSoldOut ? 0.5 : 1
                 }}
                 onClick={handleBuyNowClick}
+                disabled={isSoldOut}
               >
                 바로구매
               </button>
             </div>
-            {isSoldOut && (
-              <div style={{ color: 'red', fontWeight: 'bold', fontSize: '1.2rem', marginBottom: 12 }}>품절</div>
-            )}
             <div style={{ marginBottom: 16, color: '#555', fontSize: '1.1rem' }}>{item.itemDescription}</div>
           </div>
         </div>

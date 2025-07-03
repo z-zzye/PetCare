@@ -26,4 +26,7 @@ public class ItemOption {
 
   @Column(nullable = false)
   private Integer optionStock; // 재고수량
+
+  @Column(nullable = false)
+  private Boolean isActive = true; // soft delete용
 }

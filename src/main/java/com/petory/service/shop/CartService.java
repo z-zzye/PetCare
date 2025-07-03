@@ -106,6 +106,7 @@ public class CartService {
                     .optionName(ci.getOption().getOptionName())
                     .optionAddPrice(ci.getOption().getOptionAddPrice())
                     .optionStock(ci.getOption().getOptionStock())
+                    .isActive(ci.getOption().getIsActive())
                     .build() : null)
                 .build())
             .toList();

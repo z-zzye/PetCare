@@ -101,7 +101,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     // 상품 옵션 목록
     @Query("""
-    SELECT new com.petory.dto.shop.ItemOptionDto(o.optionId, o.optionName, o.optionAddPrice, o.optionStock)
+    SELECT new com.petory.dto.shop.ItemOptionDto(o.optionId, o.optionName, o.optionAddPrice, o.optionStock, o.isActive)
     FROM ItemOption o
     WHERE o.item.itemId = :itemId
     """)
