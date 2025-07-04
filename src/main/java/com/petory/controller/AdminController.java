@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.petory.dto.MemberDto;
+import com.petory.dto.MemberSearchDto;
 import com.petory.service.MemberService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -117,12 +118,12 @@ public class AdminController {
     }
 
   @GetMapping("/users")
-  public ResponseEntity<List<MemberDto>> getUsersByRole(@RequestParam("role") String role) {
+  public ResponseEntity<List<MemberSearchDto>> getUsersByRole(@RequestParam("role") String role) {
     // memberService를 사용하여 회원 정보를 조회합니다.
     com.petory.constant.Role roleEnum = com.petory.constant.Role.valueOf(role.toUpperCase());
 
     // 변환된 Enum을 서비스로 전달
-    List<MemberDto> users = memberService.findMembersByRole(roleEnum);
+    List<MemberSearchDto> users = memberService.findMembersByRole(roleEnum);
     return ResponseEntity.ok(users);
   }
 

@@ -11,8 +11,6 @@ import MainPage from './components/MainPage.jsx';
 import FindId from './components/FindId.jsx';
 import FindPw from './components/FindPw.jsx';
 import ResetPw from './components/ResetPw.jsx';
-import ShoppingPage from './components/shop/Shopping.jsx';
-import AuctionPage from './components/shop/Auction.jsx';
 import ItemRegister from './components/shop/ItemRegister.jsx';
 import ItemDetail from './components/shop/ItemDetail.jsx';
 import WhatsInMyCart from './components/shop/WhatsInMyCart.jsx';
@@ -24,13 +22,8 @@ import WalkingTrailDetailPage from './components/WalkingTrailDetailPage';
 import WalkingTrailCreatePage from './components/WalkingTrailCreatePage';
 import MyPage from './components/mypage/Mypage.jsx';
 import OAuthRedirect from './components/OAuthRedirect.jsx';
-import ResetPw from './components/ResetPw.jsx';
-import AuctionPage from './components/Shop/Auction.jsx'; // 경로 및 대소문자 재확인
-import ShoppingPage from './components/Shop/Shopping.jsx'; // 경로 및 대소문자 재확인
-import WalkingTrailCreatePage from './components/WalkingTrailCreatePage';
-import WalkingTrailDetailPage from './components/WalkingTrailDetailPage';
-import WalkingTrailListPage from './components/WalkingTrailListPage';
-import MyPage from './components/mypage/Mypage.jsx';
+import AuctionPage from './components/shop/Auction.jsx'; // 경로 및 대소문자 재확인
+import ShoppingPage from './components/shop/Shopping.jsx'; // 경로 및 대소문자 재확인
 import PetRegister from './components/mypage/PetRegister.jsx';
 import PetUpdate from './components/mypage/PetUpdate.jsx';
 import MapServicePage from './pages/MapServicePage';
