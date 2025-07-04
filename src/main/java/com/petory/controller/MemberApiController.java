@@ -175,4 +175,40 @@ public class MemberApiController {
       Member member = memberService.getMemberByEmail(email); // ✅ Service를 통해 조회
       return ResponseEntity.ok(member.getMember_Id()); // 정확한 필드명
     }
+
+
+    /*멤버 업데이트*/
+    @PutMapping(value = "/update", consumes = {"multipart/form-data"})
+    public ResponseEntity<?> updateMember(
+      @RequestPart("data") @Valid MemberUpdateDto dto,
+      @RequestPart(value = "member_ProfileImgFile", required = false) MultipartFile file,
+      BindingResult bindingResult
+    ) {
+      if (bindingResult.hasErrors()) {
+        String errorMsg = bindingResult.getFieldErrors().stream()
+          .map(FieldError::getDefaultMessage)
+          .collect(Collectors.joining("\n"));
+        return ResponseEntity.badRequest().body(errorMsg);
+      }
+
+      try {
+        dto.setMember_ProfileImgFile(file);
+        memberService.updateMember(dto); // ✅ service에 MultipartFile 포함된 dto 그대로 넘김
+        return ResponseEntity.ok("회원 정보 수정 완료");
+      } catch (Exception e) {
+        return ResponseEntity.status(500).body("회원 정보 수정 중 오류 발생: " + e.getMessage());
+      }
+    }
+
+    @GetMapping("/info")
+    public ResponseEntity<MemberDto> getMemberInfo(@RequestParam String email) {
+      try {
+        Member member = memberService.getMemberByEmail(email);
+        MemberDto dto = MemberDto.from(member); // 응답에 필요한 필드만 추려서 반환
+        return ResponseEntity.ok(dto);
+      } catch (Exception e) {
+        return ResponseEntity.status(404).body(null);
+      }
+    }
+
 }

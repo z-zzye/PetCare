@@ -119,6 +119,28 @@ const PetUpdate = () => {
       alert('수정 실패: ' + errMsg);
     }
   };
+const handleDelete = async () => {
+  const confirmed = await Swal.fire({
+    title: '정말 삭제하시겠습니까?',
+    text: '삭제된 펫 정보는 복구할 수 없습니다.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#aaa',
+    confirmButtonText: '삭제하기',
+    cancelButtonText: '취소',
+  });
+
+  if (confirmed.isConfirmed) {
+    try {
+      await axios.delete(`/pets/${petId}`); // ✅ petId는 props 또는 useParams() 등으로 전달받은 ID
+      Swal.fire('삭제 완료', '펫 정보가 삭제되었습니다.', 'success');
+      navigate('/members/mypage'); // 삭제 후 마이페이지로 이동
+    } catch (error) {
+      Swal.fire('삭제 실패', '서버 오류가 발생했습니다.', 'error');
+    }
+  }
+};
 
   return (
     <div className="pet-register-container">
@@ -220,7 +242,11 @@ const PetUpdate = () => {
         <button type="submit" className="submit-btn">
           수정하기
         </button>
+        <button type="button" className="delete-btn" onClick={handleDelete}>
+          삭제하기
+        </button>
       </form>
+
     </div>
   );
 };

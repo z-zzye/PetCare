@@ -6,6 +6,7 @@ import com.petory.entity.Pet;
 import com.petory.service.PetService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -85,5 +86,21 @@ public class PetController {
     }
   }
 
+  /*✅ 펫 삭제*/
+  /*@DeleteMapping("/{petId}")
+  public ResponseEntity<Void> deletePet(@PathVariable Long petId) throws Exception {
+    petService.deletePet(petId); // 이미지 포함 삭제
+    return ResponseEntity.noContent().build(); // 204
+  }*/
+  @DeleteMapping("/{petId}")
+  public ResponseEntity<String> deletePet(@PathVariable Long petId) {
+    try {
+      petService.deletePet(petId);
+      return ResponseEntity.ok("펫 삭제 완료!");
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body("삭제 실패: " + e.getMessage());
+    }
+  }
 
 }
