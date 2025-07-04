@@ -3,6 +3,8 @@ package com.petory.controller;
 import java.util.List;
 import java.util.Map;
 
+import com.petory.dto.MemberDto;
+import com.petory.service.MemberService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,7 +32,7 @@ public class AdminController {
 
     private final CleanBotService cleanBotService;
     private final BoardService boardService;
-
+    private final MemberService memberService;
     /**
      * 금지어 목록을 조회하는 API
      */
@@ -113,4 +115,15 @@ public class AdminController {
             return ResponseEntity.badRequest().body("업데이트 중 오류 발생: " + e.getMessage());
         }
     }
+
+  @GetMapping("/users")
+  public ResponseEntity<List<MemberDto>> getUsersByRole(@RequestParam("role") String role) {
+    // memberService를 사용하여 회원 정보를 조회합니다.
+    com.petory.constant.Role roleEnum = com.petory.constant.Role.valueOf(role.toUpperCase());
+
+    // 변환된 Enum을 서비스로 전달
+    List<MemberDto> users = memberService.findMembersByRole(roleEnum);
+    return ResponseEntity.ok(users);
+  }
+
 }

@@ -1,49 +1,41 @@
-import React, { useState } from 'react';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 import './boards/BoardAdmin.css'; // 기존 어드민 스타일 재사용
 
 const roles = [
   { key: 'USER', label: '일반 유저' },
+  { key: 'CREATOR', label: '크리에이터' },
+  { key: 'VET', label: '수의사' },
   { key: 'ADMIN', label: '관리자' },
-  { key: 'MODERATOR', label: '모더레이터' },
-  // 필요시 추가
-];
-
-// 임시 더미 데이터
-const dummyUsers = [
-  {
-    id: 1,
-    email: 'user1@email.com',
-    nickname: '유저1',
-    role: 'USER',
-    regDate: '2024-05-01',
-  },
-  {
-    id: 2,
-    email: 'admin@email.com',
-    nickname: '관리자',
-    role: 'ADMIN',
-    regDate: '2024-05-02',
-  },
-  {
-    id: 3,
-    email: 'mod@email.com',
-    nickname: '모더',
-    role: 'MODERATOR',
-    regDate: '2024-05-03',
-  },
-  {
-    id: 4,
-    email: 'user2@email.com',
-    nickname: '유저2',
-    role: 'USER',
-    regDate: '2024-05-04',
-  },
 ];
 
 const UserAdminPage = () => {
   const [selectedRole, setSelectedRole] = useState('USER');
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const filteredUsers = dummyUsers.filter((user) => user.role === selectedRole);
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const token = localStorage.getItem('token');
+        const res = await axios.get(`/api/admin/users?role=${selectedRole}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setUsers(res.data);
+      } catch (err) {
+        setError('유저 정보를 불러오지 못했습니다.');
+        setUsers([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUsers();
+  }, [selectedRole]);
 
   return (
     <div className="board-admin-page">
@@ -71,24 +63,37 @@ const UserAdminPage = () => {
             <th>닉네임</th>
             <th>권한</th>
             <th>가입일</th>
-            {/* 추후 관리 기능(정지, 권한변경 등) 추가 가능 */}
           </tr>
         </thead>
         <tbody>
-          {filteredUsers.length === 0 ? (
+          {loading ? (
+            <tr>
+              <td colSpan={5} className="board-empty">
+                로딩 중...
+              </td>
+            </tr>
+          ) : error ? (
+            <tr>
+              <td colSpan={5} className="board-empty">
+                {error}
+              </td>
+            </tr>
+          ) : users.length === 0 ? (
             <tr>
               <td colSpan={5} className="board-empty">
                 해당 유저가 없습니다.
               </td>
             </tr>
           ) : (
-            filteredUsers.map((user, idx) => (
+            users.map((user, idx) => (
               <tr key={user.id}>
                 <td>{idx + 1}</td>
                 <td>{user.email}</td>
                 <td>{user.nickname}</td>
-                <td>{user.role}</td>
-                <td>{user.regDate}</td>
+                <td>
+                  {roles.find((r) => r.key === user.role)?.label || user.role}
+                </td>
+                <td>{user.regDate ? user.regDate.split('T')[0] : ''}</td>
               </tr>
             ))
           )}

@@ -2,13 +2,13 @@ import React from 'react'; // useEffect를 React에서 임포트해야 합니다
 import { BrowserRouter, Route, Routes } from 'react-router-dom'; // BrowserRouter를 직접 사용합니다.
 import FindId from './components/FindId.jsx';
 import FindPw from './components/FindPw.jsx';
-import ResetPw from './components/ResetPw.jsx';
 import MainPage from './components/MainPage.jsx';
 import MemberLogin from './components/MemberLogin.jsx';
 import MemberSignUp from './components/MemberSignUp.jsx';
 import MemberSocialExtra from './components/MemberSocialExtra.jsx';
 import OAuth2RedirectHandler from './components/OAuth2RedirectHandler.jsx';
 import OAuthRedirect from './components/OAuthRedirect.jsx';
+import ResetPw from './components/ResetPw.jsx';
 import AuctionPage from './components/Shop/Auction.jsx'; // 경로 및 대소문자 재확인
 import ShoppingPage from './components/Shop/Shopping.jsx'; // 경로 및 대소문자 재확인
 import WalkingTrailCreatePage from './components/WalkingTrailCreatePage';
@@ -38,6 +38,7 @@ import {
 import AdminPage from './components/admin/AdminPage.jsx';
 import AdminRoute from './components/admin/AdminRoute.jsx';
 import ProfanityManagePage from './components/admin/ProfanityManagePage.jsx';
+import UserAdminPage from './components/admin/UserAdminPage';
 
 function App() {
   return (
@@ -113,6 +114,7 @@ function App() {
                 </AdminRoute>
               }
             />
+            <Route path="/admin/users" element={<UserAdminPage />} />
           </Routes>
         </BrowserRouter>
       </KakaoMapsScriptProvider>

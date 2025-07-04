@@ -1,6 +1,8 @@
 package com.petory.exception;
 
-import com.petory.dto.ErrorResponse;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -8,8 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.petory.dto.ErrorResponse;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -47,8 +48,9 @@ public class GlobalExceptionHandler {
    */
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ErrorResponse> handleAllUncaughtException(Exception e) {
-    System.err.println("An unexpected error occurred: " + e.getMessage());
-    e.printStackTrace(); // 예외의 전체 스택 트레이스를 콘솔에 빨간색으로 출력합니다.
+    System.err.println("==== 예외 발생 ====");
+    e.printStackTrace();
+    System.err.println("==== 예외 끝 ====");
     // 예측하지 못한 서버 내부의 오류이므로 500 Internal Server Error를 반환합니다.
     // 실제 운영 시에는 e.getMessage() 대신 "서버 내부 오류가 발생했습니다." 와 같은 일반적인 메시지를 사용하는 것이 좋습니다.
     return ErrorResponse.toResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다.");
