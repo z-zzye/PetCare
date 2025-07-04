@@ -142,6 +142,10 @@ public class MemberService implements UserDetailsService {
         member.setMember_Phone(phone);
     }
 
+    public Member getMemberById(Long member_Id) {
+      return memberRepository.findByMember_Id(member_Id).orElse(null);
+    }
+
     public Member getMemberByPhone(String phone) {
       return memberRepository.findByMember_Phone(phone).orElse(null);
     }

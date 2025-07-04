@@ -22,6 +22,8 @@ import PetRegister from './components/mypage/PetRegister.jsx';
 import PetUpdate from './components/mypage/PetUpdate.jsx';
 import MapServicePage from './pages/MapServicePage'; // 경로 확인 필요 (src/pages/MapServicePage.jsx)
 
+import ChatPage from './components/chat/ChatPage.jsx'; //채팅창
+
 import PaymentMethodPage from './pages/PaymentMethodPage'; // 결제창
 import TossAuthSuccessPage from './pages/TossAuthSuccessPage'; // 토스관련완료확인창
 
@@ -51,6 +53,10 @@ function App() {
         <Route path="/members/pet-edit/:petId" element={<PetUpdate />} />
 
         <Route path="/place" element={<MapServicePage />} />
+
+
+        {/*채팅*/}
+        <Route path="/chat/:receiverId" element={<ChatPage />} />
 
         <Route path="/board" element={<BoardMain />} />
         <Route path="/board/write" element={<BoardWrite />} />

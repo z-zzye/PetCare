@@ -124,6 +124,31 @@
       <version>4.3.0</version>
     </dependency>
 
+    <!-- WebSocket & STOMP 지원 -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-websocket</artifactId>
+    </dependency>
+
+    <!-- 메시지 직렬화용 JSON 포함 (기본 포함일 수도 있음) -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+
+    <!--WebSocket 연결 시 JWT 인증 연동-->
+    <dependency>
+      <groupId>io.jsonwebtoken</groupId>
+      <artifactId>jjwt-api</artifactId>
+      <version>0.11.5</version>
+    </dependency>
+
+    <!--채팅 Redis에 브로드캐스팅 할 경우 의존성추가-->
+    <!--<dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-redis</artifactId>
+    </dependency>-->
+
 	</dependencies>
 
 	<build>

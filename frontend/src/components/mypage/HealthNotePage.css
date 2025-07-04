@@ -1,0 +1,126 @@
+.healthnote-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.healthnote-top {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.pet-list-selector {
+  min-width: 120px;
+}
+
+.pet-profile {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.pet-profile-img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 3px solid #222;
+  object-fit: cover;
+}
+
+.pet-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pet-name {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.pet-birth {
+  font-size: 1rem;
+  color: #666;
+}
+
+.pet-status-cards {
+  display: flex;
+  gap: 1rem;
+}
+
+.status-card {
+  width: 70px;
+  height: 70px;
+  border: 2px solid #3a5ad7;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  background: #fff;
+}
+
+.healthnote-vaccine-banner {
+  display: flex;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.vaccine-card {
+  flex: 1;
+  min-width: 180px;
+  border: 2px solid #3a5ad7;
+  border-radius: 16px;
+  padding: 1rem;
+  background: #f7faff;
+}
+
+.vaccine-title {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.vaccine-desc {
+  color: #555;
+}
+
+.healthnote-history {
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  padding: 1rem;
+  background: #fafafa;
+}
+
+.history-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.history-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.history-item {
+  display: flex;
+  gap: 1rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+.history-item:last-child {
+  border-bottom: none;
+}
+
+.history-date {
+  color: #888;
+  min-width: 90px;
+}
+
+.history-event {
+  color: #222;
+} 

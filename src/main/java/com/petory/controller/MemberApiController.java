@@ -197,4 +197,11 @@ public class MemberApiController {
       }
     }
 
+  // MemberController.java
+  @GetMapping("/nickname/{memberId}")
+  public ResponseEntity<String> getNickname(@PathVariable Long memberId) {
+    Member member = memberService.getMemberById(memberId);
+    return ResponseEntity.ok(member.getMember_NickName());
+  }
+
 }
