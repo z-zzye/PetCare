@@ -1,16 +1,15 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import MainHeader from './Header';
+import Header from './Header';
 import './Header.css';
 
 const MainPage = () => {
   const navigate = useNavigate();
   return (
     <>
-      <MainHeader />
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f7f7fa' }}>
-        <div style={{ background: '#fff', borderRadius: '1.5rem', boxShadow: '0 8px 32px 0 #0001', padding: '3rem 2rem', minWidth: '320px', minHeight: '200px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          {/* 메인컨테이너 */}
+      <Header />
+      <div className="mainpage-bg">
+        <div className="mainpage-container">
           <h2 style={{ marginBottom: '2rem', color: '#223A5E', fontWeight: 700 }}>Petory Main Page</h2>
           <button
             style={{
@@ -32,6 +31,29 @@ const MainPage = () => {
           </button>
         </div>
       </div>
+      <style>{`
+        body {
+          background: #fff;
+        }
+        .mainpage-bg {
+          min-height: 100vh;
+          background: #fff;
+          width: 100vw;
+        }
+        .mainpage-container {
+          background: #fff;
+          border-radius: 1.5rem;
+          box-shadow: 0 8px 32px 0 #0001;
+          padding: 3rem 2rem;
+          min-width: 320px;
+          min-height: 200px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          margin: 3rem auto 2rem auto;
+          max-width: 700px;
+        }
+      `}</style>
     </>
   );
 };

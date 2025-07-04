@@ -143,9 +143,22 @@ public class ImageService {
      * 파일 삭제 로직 (추후 상품 수정/삭제 시 사용 가능)
      */
     public void deleteFile(String filePath) throws Exception {
-        // filePath는 "/images/item/uuid-filename.jpg" 와 같은 웹 경로
-        // 실제 물리적 경로로 변환하여 파일을 삭제해야 함
-        // 예시: String physicalPath = filePath.replace("/images/item", itemImgLocation) ...
-        // new File(physicalPath).delete();
+      if (!StringUtils.hasText(filePath)) return;
+
+      // 프론트에서 넘어온 경로 예: /images/petProfile/abc123.png
+      // 실제 저장된 경로는: C:/petory/petProfile/abc123.png
+      if (filePath.startsWith("/images/petProfile/")) {
+        String fileName = filePath.replace("/images/petProfile/", ""); // abc123.png
+        String absolutePath = petProfileImgLocation + fileName;
+
+        File file = new File(absolutePath);
+        if (file.exists()) {
+          boolean deleted = file.delete();
+          if (!deleted) {
+            throw new Exception("이미지 파일 삭제 실패: " + absolutePath);
+          }
+        }
+      }
     }
+
 }

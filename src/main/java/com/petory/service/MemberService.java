@@ -1,8 +1,13 @@
 package com.petory.service;
 
+import com.petory.dto.MemberFormDto;
+import com.petory.dto.MemberUpdateDto;
+import com.petory.dto.PhoneUpdateDto;
+import com.petory.entity.Member;
+import com.petory.repository.MemberRepository;
+import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -162,6 +167,29 @@ public class MemberService implements UserDetailsService {
         System.out.println("변경 후 비밀번호: " + member.getMember_Pw());
     }
 
+  @Transactional
+  public void updateMember(MemberUpdateDto dto) {
+    Member member = memberRepository.findByMember_Email(dto.getMember_Email())
+      .orElseThrow(() -> new IllegalStateException("해당 이메일의 회원을 찾을 수 없습니다."));
+
+
+    // 닉네임, 전화번호 수정
+    member.setMember_NickName(dto.getMember_NickName());
+    member.setMember_Phone(dto.getMember_Phone());
+
+    // 프로필 이미지 수정 (선택 사항)
+    MultipartFile newProfileImg = dto.getMember_ProfileImgFile();
+    if (newProfileImg != null && !newProfileImg.isEmpty()) {
+      try {
+        String uploadedPath = imageService.uploadFile(newProfileImg, "profile");
+        member.setMember_ProfileImg(uploadedPath);
+      } catch (Exception e) {
+        throw new RuntimeException("프로필 이미지 업로드 중 오류 발생", e);
+      }
+    }
+
+    // 마일리지는 건드리지 않음 (member_Mileage 유지)
+    // JPA의 더티 체킹을 통해 자동 반영 (save 불필요)
   public List<MemberDto> findMembersByRole(Role role) {
     List<Member> members = memberRepository.findAllByMember_Role(role); // 'findAllByMember_Role'은 MemberRepository에 정의된 메서드 이름
 

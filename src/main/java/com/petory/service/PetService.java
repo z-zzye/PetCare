@@ -75,6 +75,20 @@ public class PetService {
     // JPA 더티 체킹으로 save() 없이도 수정 완료
   }
 
+  @Transactional
+  public void deletePet(Long petId) throws Exception {
+    Pet pet = petRepository.findById(petId)
+      .orElseThrow(() -> new IllegalArgumentException("해당 펫이 존재하지 않습니다."));
+
+    // 1. 프로필 이미지 파일이 있을 경우 삭제
+    if (pet.getPet_ProfileImg() != null && !pet.getPet_ProfileImg().isEmpty()) {
+      imageService.deleteFile(pet.getPet_ProfileImg());
+    }
+
+    // 2. 펫 DB 정보 삭제
+    petRepository.delete(pet);
+  }
+
   public LocalDate calculateNextVaccinationDate(Long petId) {
     // 1. ID로 펫 정보를 DB에서 조회합니다.
     Pet pet = petRepository.findById(petId)

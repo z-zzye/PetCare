@@ -11,5 +11,4 @@ public class PetoryApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(PetoryApplication.class, args);
 	}
-
 }
