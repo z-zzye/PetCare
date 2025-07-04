@@ -120,6 +120,20 @@ public class MemberApiController {
         }
     }
 
+    // 마일리지 조회
+    @GetMapping("/mileage")
+    public ResponseEntity<?> getMileage(@RequestHeader("Authorization") String authHeader) {
+        try {
+            String token = authHeader.substring(7); // "Bearer " 제거
+            String email = jwtTokenProvider.getEmail(token);
+            Member member = memberService.getMemberByEmail(email);
+            Integer mileage = member.getMember_Mileage();
+            return ResponseEntity.ok(Map.of("mileage", mileage));
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body("인증 실패: " + e.getMessage());
+        }
+    }
+
     // 휴대폰 번호로 아이디 조회
     @PostMapping("/find-id")
     public ResponseEntity<String> findIdByPhone(@RequestBody Map<String, String> payload) {

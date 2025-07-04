@@ -1,11 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import axios from '../../api/axios';
 import Header from '../Header.jsx';
+import { useNavigate } from 'react-router-dom';
 
 function WhatsInMyCart() {
   const [cartItems, setCartItems] = useState([]);
   const [checkedIds, setCheckedIds] = useState([]);
   const [allChecked, setAllChecked] = useState(false);
+  const [toast, setToast] = useState('');
+  const [deleteTargetId, setDeleteTargetId] = useState(null);
+  const [deleteType, setDeleteType] = useState('single'); // 'single' or 'multi'
+  const [deleteMultiIds, setDeleteMultiIds] = useState([]);
+  const navigate = useNavigate();
 
   // 장바구니 데이터 불러오기
   useEffect(() => {
@@ -28,7 +34,11 @@ function WhatsInMyCart() {
       setCheckedIds([]);
       setAllChecked(false);
     } else {
-      setCheckedIds(cartItems.map(item => item.item.itemId + '-' + (item.option?.optionId || '')));
+      setCheckedIds(
+        cartItems
+          .filter(item => !(item.option && (item.option.isActive === false || item.option.isActive === 0 || item.option.isActive === 'N')))
+          .map(item => item.item.itemId + '-' + (item.option?.optionId || ''))
+      );
       setAllChecked(true);
     }
   };
@@ -46,19 +56,54 @@ function WhatsInMyCart() {
 
   // 삭제
   const handleDelete = (cartItemId) => {
-    axios.delete(`/cart/${cartItemId}`)
-      .then(() => {
-        setCartItems(items => items.filter(i => i.cartItemId !== cartItemId));
-        setCheckedIds(ids => ids.filter(id => !id.startsWith(cartItemId + '-')));
-      });
+    setDeleteType('single');
+    setDeleteTargetId(cartItemId);
+    setToast('해당 상품을 삭제하시겠습니까?');
   };
 
   // 선택삭제
   const handleDeleteSelected = () => {
-    checkedIds.forEach(id => {
-      const cartItem = cartItems.find(i => (i.item.itemId + '-' + (i.option?.optionId || '')) === id);
-      if (cartItem) handleDelete(cartItem.cartItemId);
-    });
+    if (checkedIds.length === 0) return;
+    setDeleteType('multi');
+    setDeleteMultiIds([...checkedIds]);
+    setToast(`선택한 ${checkedIds.length}개의 상품을 삭제하시겠습니까?`);
+  };
+
+  // 삭제 확인
+  const confirmDelete = () => {
+    if (deleteType === 'single' && deleteTargetId) {
+      axios.delete(`/cart/${deleteTargetId}`)
+        .then(() => {
+          setCartItems(items => items.filter(i => i.cartItemId !== deleteTargetId));
+          setCheckedIds(ids => ids.filter(id => !id.startsWith(deleteTargetId + '-')));
+        })
+        .finally(() => {
+          setToast('');
+          setDeleteTargetId(null);
+        });
+    } else if (deleteType === 'multi' && deleteMultiIds.length > 0) {
+      // 여러 개 삭제
+      const idsToDelete = deleteMultiIds.map(id => {
+        const cartItem = cartItems.find(i => (i.item.itemId + '-' + (i.option?.optionId || '')) === id);
+        return cartItem ? cartItem.cartItemId : null;
+      }).filter(Boolean);
+      Promise.all(idsToDelete.map(cartItemId => axios.delete(`/cart/${cartItemId}`)))
+        .then(() => {
+          setCartItems(items => items.filter(i => !idsToDelete.includes(i.cartItemId)));
+          setCheckedIds(ids => ids.filter(id => !deleteMultiIds.includes(id)));
+        })
+        .finally(() => {
+          setToast('');
+          setDeleteMultiIds([]);
+        });
+    }
+  };
+
+  // 삭제 취소
+  const cancelDelete = () => {
+    setToast('');
+    setDeleteTargetId(null);
+    setDeleteMultiIds([]);
   };
 
   // 금액 계산
@@ -70,9 +115,49 @@ function WhatsInMyCart() {
   const shippingFee = selectedItems.length > 0 ? 2500 : 0;
   const finalPrice = totalPrice + shippingFee;
 
+  // 구매하기 버튼 클릭 핸들러
+  const handleBuy = () => {
+    if (selectedItems.length === 0) {
+      setToast('구매하실 상품을 선택해주세요.');
+      return;
+    }
+    // OrderItemDto 형태로 변환
+    const orderItems = selectedItems.map(item => ({
+      itemId: item.item.itemId,
+      thumbnailUrl: item.item.images?.[0]?.url || item.item.thumbnailUrl,
+      itemName: item.item.itemName,
+      optionId: item.option?.optionId,
+      optionName: item.option?.optionName,
+      quantity: item.quantity,
+      orderPrice: (item.item.itemPrice + (item.option?.optionAddPrice || 0)) * item.quantity,
+      optionAddPrice: item.option?.optionAddPrice
+    }));
+    navigate('/order', { state: { orderItems } });
+  };
+
   return (
     <>
       <Header />
+      {toast && (
+        <div style={{
+          position: 'fixed', top: 80, left: '50%', transform: 'translateX(-50%)',
+          background: '#222', color: '#fff', padding: '1rem 2.2rem', borderRadius: 16,
+          fontSize: '1.1rem', zIndex: 9999, boxShadow: '0 2px 12px #0003', opacity: 0.95,
+          textAlign: 'center', fontWeight: 700
+        }}>
+          <div style={{ marginBottom: 14 }}>{toast}</div>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 18 }}>
+            <button
+              style={{ background: '#ff5252', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: '1rem', padding: '0.5rem 1.4rem', cursor: 'pointer' }}
+              onClick={confirmDelete}
+            >예</button>
+            <button
+              style={{ background: '#fff', color: '#223A5E', border: '1.5px solid #223A5E', borderRadius: 8, fontWeight: 700, fontSize: '1rem', padding: '0.5rem 1.4rem', cursor: 'pointer' }}
+              onClick={cancelDelete}
+            >아니오</button>
+          </div>
+        </div>
+      )}
       <div style={{ display: 'flex', maxWidth: 1200, margin: '0 auto', padding: '2rem 0' }}>
         {/* 좌측: 장바구니 리스트 */}
         <div style={{ flex: 2, marginRight: 32 }}>
@@ -166,7 +251,7 @@ function WhatsInMyCart() {
                     </div>
                   </div>
                   <div style={{ fontWeight: 700, fontSize: '1.1rem', minWidth: 90, textAlign: 'right' }}>{totalPrice.toLocaleString()}원</div>
-                  <button onClick={() => handleDelete(item.cartItemId)} style={{ marginLeft: 16, color: '#ff5252', fontWeight: 700, fontSize: 18, background: 'none', border: 'none', cursor: 'pointer' }} disabled={isOptionDeleted}>×</button>
+                  <button onClick={() => handleDelete(item.cartItemId)} style={{ marginLeft: 16, color: '#ff5252', fontWeight: 700, fontSize: 18, background: 'none', border: 'none', cursor: 'pointer' }}>×</button>
                 </div>
               );
             })
@@ -188,7 +273,8 @@ function WhatsInMyCart() {
             <span style={{ color: '#223A5E' }}>{finalPrice.toLocaleString()}원</span>
           </div>
           <button style={{ width: '100%', background: '#223A5E', color: '#fff', fontWeight: 700, fontSize: '1.1rem', border: 'none', borderRadius: 8, padding: '1rem 0', cursor: 'pointer' }}
-            disabled={selectedItems.some(i => i.option && (i.option.isActive === false || i.option.isActive === 0 || i.option.isActive === 'N'))}>
+            disabled={selectedItems.some(i => i.option && (i.option.isActive === false || i.option.isActive === 0 || i.option.isActive === 'N'))}
+            onClick={handleBuy}>
             {selectedItems.length}개 상품 구매하기
           </button>
         </div>

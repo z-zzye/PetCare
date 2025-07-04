@@ -16,6 +16,8 @@ import ItemRegister from './components/shop/ItemRegister.jsx';
 import ItemDetail from './components/shop/ItemDetail.jsx';
 import WhatsInMyCart from './components/shop/WhatsInMyCart.jsx';
 import ItemModify from './components/shop/ItemModify.jsx';
+import OrderPage from './components/shop/OrderPage';
+import OrderCompletePage from './components/shop/OrderCompletePage.jsx';
 import WalkingTrailListPage from './components/WalkingTrailListPage';
 import WalkingTrailDetailPage from './components/WalkingTrailDetailPage';
 import WalkingTrailCreatePage from './components/WalkingTrailCreatePage';
@@ -27,6 +29,8 @@ import MapServicePage from './pages/MapServicePage'; // 경로 확인 필요 (sr
 
 import PaymentMethodPage from './pages/PaymentMethodPage'; // 결제창
 import TossAuthSuccessPage from './pages/TossAuthSuccessPage'; // 토스관련완료확인창
+import PaymentFailPage from './pages/PaymentFailPage.jsx'; //토스페이먼츠 쇼핑몰 구매 실패창
+
 
 import { BoardMain, BoardDetail, BoardWrite, BoardEdit, BoardList } from './components/board';
 
@@ -67,6 +71,8 @@ function App() {
         <Route path="/shop/shopping/item/:itemId" element={<ItemDetail />} />
         <Route path="/shop/cart" element={<WhatsInMyCart />} />
         <Route path="/shop/item/edit/:itemId" element={<ItemModify />} />
+        <Route path="/order" element={<OrderPage />} />
+        <Route path="/order/complete" element={<OrderCompletePage />} />
 
         <Route path="/trails" element={<WalkingTrailListPage />} />
         <Route path="/trails/:trailId" element={<WalkingTrailDetailPage />} />
@@ -75,6 +81,8 @@ function App() {
         {/* 결제 시스템 관련 라우팅 */}
         <Route path="/payment-management" element={<PaymentMethodPage />} />
         <Route path="/toss-auth-success" element={<TossAuthSuccessPage />} />
+        <Route path="/payment/fail" element={<PaymentFailPage />} />
+        <Route path="/payment/success" element={<OrderCompletePage />} />
       </Routes>
     </BrowserRouter>
    </KakaoMapsScriptProvider>
