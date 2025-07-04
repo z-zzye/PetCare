@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react'; // useEffect를 React에서 임포트해야 합니다.
-import { BrowserRouter, Routes, Route } from 'react-router-dom'; // BrowserRouter를 직접 사용합니다.
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';// BrowserRouter를 직접 사용합니다.
 import { AuthProvider } from './contexts/AuthContext';
 import { KakaoMapsScriptProvider } from './contexts/KakaoMapsScriptContext';
 import MemberLogin from './components/MemberLogin.jsx';
@@ -26,10 +26,9 @@ import MyPage from './components/mypage/Mypage.jsx';
 import OAuthRedirect from './components/OAuthRedirect.jsx';
 import PetRegister from './components/mypage/PetRegister.jsx';
 import PetUpdate from './components/mypage/PetUpdate.jsx';
-import MapServicePage from './pages/MapServicePage'; // 경로 확인 필요 (src/pages/MapServicePage.jsx)
-
-import PaymentMethodPage from './pages/PaymentMethodPage'; // 결제창
-import TossAuthSuccessPage from './pages/TossAuthSuccessPage'; // 토스관련완료확인창
+import MapServicePage from './pages/MapServicePage';
+import PaymentMethodPage from './pages/PaymentMethodPage';//결제창
+import TossAuthSuccessPage from './pages/TossAuthSuccessPage';//토스관련완료확인창
 import PaymentFailPage from './pages/PaymentFailPage.jsx'; //토스페이먼츠 쇼핑몰 구매 실패창
 
 

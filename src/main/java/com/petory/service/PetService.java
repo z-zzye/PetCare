@@ -87,6 +87,8 @@ public class PetService {
 
     // 2. 펫 DB 정보 삭제
     petRepository.delete(pet);
+  }
+
   public LocalDate calculateNextVaccinationDate(Long petId) {
     // 1. ID로 펫 정보를 DB에서 조회합니다.
     Pet pet = petRepository.findById(petId)
