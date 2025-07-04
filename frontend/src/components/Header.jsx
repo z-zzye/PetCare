@@ -1,10 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import './Header.css';
 import { FaBell, FaComments, FaBars, FaTimes } from 'react-icons/fa';
 import { useAuth } from '../contexts/AuthContext';
 import { Link } from 'react-router-dom';
 
-const menu = [
+const baseMenu = [
   {
     name: '커뮤니티',
     link: '/board',
@@ -43,10 +43,23 @@ const Header = () => {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [accordionOpen, setAccordionOpen] = useState(null);
   const [hoveredIdx, setHoveredIdx] = useState(null);
-  const { isLoggedIn, profileImg, nickname, logout } = useAuth();
+  const { isLoggedIn, profileImg, nickname, logout, isAdmin } = useAuth();
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef();
+
+  const menu = useMemo(() => {
+    if (isAdmin) {
+      // 관리자일 경우, '마이페이지'를 '관리 페이지'로 교체한 새 배열을 반환
+      return baseMenu.map(item =>
+        item.name === '마이페이지'
+          ? { name: '관리 페이지', link: '/admin', submenu: [] } // 링크도 /admin으로 변경
+          : item
+      );
+    }
+    // 일반 사용자는 기존 메뉴를 그대로 반환
+    return baseMenu;
+  }, [isAdmin]); // isAdmin 값이 바뀔 때만 이 로직이 다시 실행됩니다.
 
   useEffect(() => {
     function handleClickOutside(event) {

@@ -61,7 +61,7 @@ function MemberLogin() {
       const data = await res.json();
       console.log('로그인 응답 데이터:', data); // 디버깅용
       // profileImg가 빈 문자열이면 기본 이미지 사용
-      const profileImgUrl = data.profileImg && data.profileImg.trim() !== ''
+/*       const profileImgUrl = data.profileImg && data.profileImg.trim() !== ''
         ? data.profileImg
         : '/images/profile-default.png';
       console.log('설정할 프로필 이미지 URL:', profileImgUrl); // 디버깅용
@@ -71,7 +71,9 @@ function MemberLogin() {
         localStorage.removeItem('accessToken'); // ✅ 기존 토큰 제거
         localStorage.setItem('accessToken', data.token); // ✅ 새 토큰 저장
         console.log('새 accessToken 저장됨:', data.token);
-      }
+      } */
+
+      login(data.token, data.role, data.profileImg, data.nickname);
       navigate('/');
     } catch (err) {
       setLoginError('로그인 중 오류가 발생했습니다.');

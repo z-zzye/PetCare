@@ -1,13 +1,6 @@
 package com.petory.service;
 
-import jakarta.annotation.PostConstruct;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,6 +8,13 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+
+import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
@@ -34,6 +34,7 @@ public class CleanBotService {
     @PostConstruct
     private void init() {
         this.filePath = Paths.get(profanityFilePath);
+        log.info("금지어 파일 경로: {}", filePath);
         try {
             // 파일이 위치할 디렉토리가 없으면 생성합니다.
             if (!Files.exists(filePath.getParent())) {
@@ -56,7 +57,9 @@ public class CleanBotService {
      */
     public String getProfanityListAsString() {
         try {
-            return Files.readString(filePath);
+            String result = Files.readString(filePath, java.nio.charset.StandardCharsets.UTF_8);
+            log.info("금지어 파일 실제 반환값: {}", result);
+            return result;
         } catch (IOException e) {
             log.error("금지어 목록 파일을 읽는 중 오류 발생", e);
             return "오류: 금지어 목록을 불러올 수 없습니다.";
