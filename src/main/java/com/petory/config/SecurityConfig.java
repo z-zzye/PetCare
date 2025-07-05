@@ -36,25 +36,26 @@ public class SecurityConfig {
         /*.requestMatchers("/api/calendar/**").authenticated()*/
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf(csrf -> csrf.disable())
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-          .authorizeHttpRequests(auth -> auth
-            .requestMatchers(
-              "/", "/favicon.ico", "/css/**", "/js/**", "/img/**", "/images/**", "/profile/**",
-              "/api/members/signup",
-              "/api/members/login",
-              "/oauth2/**",
-              "/auth/**",
-              "/api/sms/**",
-              "/api/members/find-id",
-              "/api/members/reset-password"
-            ).permitAll()
-            .requestMatchers(HttpMethod.GET, "/api/boards", "/api/boards/**").permitAll()
-            .requestMatchers("/admin/**").hasRole("ADMIN")
-            .anyRequest().authenticated()
-          )
+      http
+        .csrf(csrf -> csrf.disable())
+        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+        .authorizeHttpRequests(auth -> auth
+          .requestMatchers(
+            "/", "/favicon.ico", "/css/**", "/js/**", "/img/**", "/images/**", "/profile/**", "/index.html", "/static/",
+            "/api/members/signup",
+            "/api/members/login",
+            "/oauth2/**",
+            "/auth/**",
+            "/api/sms/**",
+            "/api/members/find-id",
+            "/api/members/reset-password",
+            "/api/members/public/**"
+          ).permitAll()
+          .requestMatchers(HttpMethod.GET, "/api/boards", "/api/boards/**").permitAll()
+          .requestMatchers("/admin/**").hasRole("ADMIN")
+          .anyRequest().permitAll()
+        )
             .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService), UsernamePasswordAuthenticationFilter.class)
 /*            .formLogin(form -> form
                 .loginPage("/members/login")
