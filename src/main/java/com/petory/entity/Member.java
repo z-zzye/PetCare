@@ -16,7 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class Member extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "member_Id")
+    @Column(name = "member_id")
     private Long member_Id;
 
     @Column(name = "member_Pw", nullable = false)
@@ -56,5 +56,9 @@ public class Member extends BaseEntity {
         member.setMember_Mileage(0);
         member.setMember_ProfileImg(profileImageName);
         return member;
+    }
+
+    public Long getMemberId() {
+        return member_Id;
     }
 }

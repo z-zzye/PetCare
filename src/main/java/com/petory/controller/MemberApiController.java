@@ -99,7 +99,9 @@ public class MemberApiController {
                 "token", token,
                 "role", member.getMember_Role().name(),
                 "profileImg", member.getMember_ProfileImg() != null ? member.getMember_ProfileImg() : "",
-                "nickname", member.getMember_NickName()
+                "nickname", member.getMember_NickName(), 
+                "memberId", member.getMember_Id() //추가 - 결제 검증때 필요
+
             ));
         } catch (Exception e) {
             System.out.println("로그인 실패 예외: " + e.getMessage());

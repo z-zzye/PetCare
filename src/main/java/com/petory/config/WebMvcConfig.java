@@ -50,11 +50,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
         // uploadPath 경로에서 파일을 찾아 제공하도록 설정합니다.
         registry.addResourceHandler(resourceHandler)
                 .addResourceLocations(uploadPath);
-        
+
         // 프로필 이미지 전용 핸들러
         registry.addResourceHandler(profileResourceHandler)
                 .addResourceLocations(profileResourceLocation);
-        
+
         // 상품 이미지 전용 핸들러
         registry.addResourceHandler(itemResourceHandler)
                 .addResourceLocations(itemResourceLocation);
@@ -62,10 +62,37 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
-        // /api로 시작하는 경로는 SPA 포워딩에서 제외
-        registry.addViewController("/{spring:[a-zA-Z0-9-_]+}")
+        // SPA 라우팅을 위한 설정
+        // /api로 시작하는 경로는 제외하고, 나머지 모든 경로를 index.html로 포워딩
+        registry.addViewController("/")
             .setViewName("forward:/index.html");
-        registry.addViewController("/**/{spring:[a-zA-Z0-9-_]+}")
+        registry.addViewController("/order")
+            .setViewName("forward:/index.html");
+        registry.addViewController("/order/complete")
+            .setViewName("forward:/index.html");
+        registry.addViewController("/shop/**")
+            .setViewName("forward:/index.html");
+        registry.addViewController("/members/**")
+            .setViewName("forward:/index.html");
+        registry.addViewController("/board/**")
+            .setViewName("forward:/index.html");
+        registry.addViewController("/trails/**")
+            .setViewName("forward:/index.html");
+        registry.addViewController("/admin/**")
+            .setViewName("forward:/index.html");
+        registry.addViewController("/place")
+            .setViewName("forward:/index.html");
+        registry.addViewController("/payment/**") //아임포트에서 /payment/success로 리다이렉트
+            .setViewName("forward:/index.html");
+        registry.addViewController("/toss-auth-success")
+            .setViewName("forward:/index.html");
+        registry.addViewController("/find-id")
+            .setViewName("forward:/index.html");
+        registry.addViewController("/find-pw")
+            .setViewName("forward:/index.html");
+        registry.addViewController("/reset-pw")
+            .setViewName("forward:/index.html");
+        registry.addViewController("/oauth2/**")
             .setViewName("forward:/index.html");
     }
 }

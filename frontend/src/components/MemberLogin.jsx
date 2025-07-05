@@ -74,6 +74,12 @@ function MemberLogin() {
       } */
 
       login(data.token, data.role, data.profileImg, data.nickname);
+
+      // 추가: memberId 저장 - 결제 검증할때 반드시 보내야하는 데이터
+      if (data.memberId) {
+        localStorage.setItem('memberId', data.memberId);
+      } 
+
       navigate('/');
     } catch (err) {
       setLoginError('로그인 중 오류가 발생했습니다.');
@@ -113,12 +119,18 @@ function MemberLogin() {
     const token = params.get("token");
     const profileImg = params.get("profileImg");
     const nickname = params.get("nickname");
+    const memberId = params.get("memberId"); //추가-결제검증에 필요
 
     if (token) {
       localStorage.removeItem("accessToken"); // 기존 토큰 제거
       localStorage.setItem("accessToken", token); // 새 토큰 저장
       localStorage.setItem("member_ProfileImg", profileImg || "");
       localStorage.setItem("member_Nickname", nickname || "");
+
+      //추가 - memberId 저장 - 결제 검증할 때 반드시 보내야 하는 데이터
+      if (memberId) {
+        localStorage.setItem("memberId", memberId);
+      }
 
       console.log("소셜 로그인 토큰 저장 완료:", token);
       window.location.href = "/"; // 또는 navigate("/") 사용 가능
