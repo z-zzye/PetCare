@@ -3,6 +3,7 @@ import './Header.css';
 import { FaBell, FaComments, FaBars, FaTimes } from 'react-icons/fa';
 import { useAuth } from '../contexts/AuthContext';
 import { Link } from 'react-router-dom';
+import ChatRoomListPopup from './ChatRoomListPopup';
 
 const menu = [
   {
@@ -47,6 +48,7 @@ const Header = () => {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef();
+  const [isChatListOpen, setIsChatListOpen] = useState(false);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -117,7 +119,9 @@ const Header = () => {
         {/* 우측 아이콘/프로필 (로그인 상태) */}
         {isLoggedIn ? (
           <div className="main-navbar-right desktop-menu">
-            <button className="main-navbar-icon-btn"><FaComments size={26} color="#223A5E" /></button>
+            <button className="main-navbar-icon-btn" onClick={() => setIsChatListOpen(true)}>
+              <FaComments size={26} color="#223A5E" />
+            </button>
             <button className="main-navbar-icon-btn"><FaBell size={26} color="#223A5E" />{hasNewNotification && <span className="main-navbar-badge-dot" />}</button>
             <div className="main-navbar-profile-container">
               <div
@@ -197,7 +201,7 @@ const Header = () => {
         <div className="mobile-nav-bottom">
           {isLoggedIn ? (
             <>
-              <button className="main-navbar-icon-btn">
+              <button className="main-navbar-icon-btn" onClick={() => setIsChatListOpen(true)}>
                 <FaComments size={26} color="#223A5E" />
               </button>
               <button className="main-navbar-icon-btn">
@@ -231,6 +235,9 @@ const Header = () => {
             <img src={profileImg} alt="프로필 확대" className="profile-modal-img" />
           </div>
         </div>
+      )}
+      {isChatListOpen && (
+        <ChatRoomListPopup onClose={() => setIsChatListOpen(false)} />
       )}
     </nav>
   );

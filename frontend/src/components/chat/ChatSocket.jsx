@@ -3,77 +3,142 @@
 import React, { useEffect, useState, useRef } from 'react';
 import SockJS from 'sockjs-client';
 import { CompatClient, Stomp } from '@stomp/stompjs';
-import { jwtDecode } from 'jwt-decode';
 
-const ChatSocket = ({ receiverId }) => {
-  const [messages, setMessages] = useState([]);
+const ChatSocket = ({ receiverId, chatRoomId, myId, onMessageReceived, onReadReceived }) => {
   const [input, setInput] = useState('');
   const stompClient = useRef(null);
-  const [senderId, setSenderId] = useState(null);
+  const messagesEndRef = useRef(null);
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) return;
-
-    const decoded = jwtDecode(token);
-    const email = decoded.sub || decoded.email;
-
-    // 백엔드에서 이메일 → memberId 조회 API 호출
-    fetch(`/api/members/id-by-email?email=${email}`)
-      .then(res => res.json())
-      .then(data => {
-        setSenderId(data);
-        connectSocket(data);
-      });
-  }, []);
-
-  const connectSocket = (userId) => {
-    const socket = new SockJS('/ws/chat');
-    const client = Stomp.over(socket);
-
-    client.connect({}, () => {
-      client.subscribe(`/queue/chat/${userId}`, (message) => {
-        const body = JSON.parse(message.body);
-        setMessages(prev => [...prev, body]);
-      });
-    });
-
-    stompClient.current = client;
+  // 스크롤을 맨 아래로 이동
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  useEffect(() => {
+    scrollToBottom();
+  }, []);
+
+  useEffect(() => {
+    if (!myId) return;
+
+    const token = localStorage.getItem('token');
+    const socket = new SockJS(`/ws/chat?token=${token}`);
+    const client = Stomp.over(socket);
+
+    client.connect(
+      { Authorization: `Bearer ${token}` }, // JWT 토큰을 헤더로 전달
+      () => {
+        console.log('✅ WebSocket 연결 성공');
+        // 내 큐에 메시지 수신 구독
+        client.subscribe(`/queue/chat/${myId}`, (message) => {
+          const body = JSON.parse(message.body);
+          console.log('📨 새 메시지 수신:', body);
+          onMessageReceived(body);
+          scrollToBottom();
+        });
+        // 읽음 알림 구독
+        client.subscribe(`/queue/read/${myId}`, (message) => {
+          const body = JSON.parse(message.body);
+          console.log('👁️ 읽음 알림 수신:', body);
+          if (onReadReceived) onReadReceived(body);
+        });
+        // 채팅방 진입 시 읽음 이벤트 전송
+        if (chatRoomId && myId) {
+          client.send('/app/chat.read', {}, JSON.stringify({ chatRoomId, readerId: myId }));
+        }
+      },
+      (error) => {
+        console.error('❌ WebSocket 연결 실패:', error);
+      }
+    );
+
+    stompClient.current = client;
+
+    return () => {
+      if (client) {
+        client.disconnect();
+      }
+    };
+  }, [myId, chatRoomId, onMessageReceived, onReadReceived]);
+
   const sendMessage = () => {
-    if (!input.trim() || !stompClient.current) return;
+    if (!input.trim() || !stompClient.current || !myId) return;
 
     const msg = {
-      senderId,
-      receiverId,
-      message: input,
+      senderId: myId,
+      receiverId: receiverId,
+      chatRoomId: chatRoomId,
+      message: input.trim(),
     };
 
+    console.log('📤 메시지 전송:', msg);
+    
+    // WebSocket으로 메시지 전송
     stompClient.current.send('/app/chat.send', {}, JSON.stringify(msg));
-    setMessages(prev => [...prev, msg]);
+    
+    // 로컬에 즉시 추가 (내가 보낸 메시지)
+    const localMsg = {
+      ...msg,
+      sentAt: new Date().toISOString(),
+      isRead: false
+    };
+    onMessageReceived(localMsg);
+    
     setInput('');
+    scrollToBottom();
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
   };
 
   return (
-    <div style={{ padding: '1rem', maxWidth: '600px', margin: '0 auto' }}>
-      <h2>1:1 채팅</h2>
-      <div style={{ border: '1px solid #ccc', height: '300px', overflowY: 'scroll', padding: '0.5rem' }}>
-        {messages.map((msg, idx) => (
-          <div key={idx} style={{ textAlign: msg.senderId === senderId ? 'right' : 'left' }}>
-            <div>{msg.message}</div>
-          </div>
-        ))}
-      </div>
-      <div style={{ marginTop: '1rem' }}>
+    <div style={{
+      border: '1px solid #ddd',
+      borderRadius: '8px',
+      padding: '1rem',
+      background: 'white'
+    }}>
+      <div style={{
+        display: 'flex',
+        gap: '0.5rem',
+        alignItems: 'center'
+      }}>
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-          style={{ width: '80%', padding: '0.5rem' }}
+          onKeyPress={handleKeyPress}
+          placeholder="메시지를 입력하세요..."
+          style={{
+            flex: 1,
+            padding: '0.75rem',
+            border: '1px solid #ddd',
+            borderRadius: '20px',
+            fontSize: '14px',
+            outline: 'none'
+          }}
         />
-        <button onClick={sendMessage} style={{ padding: '0.5rem' }}>전송</button>
+        <button 
+          onClick={sendMessage}
+          disabled={!input.trim()}
+          style={{
+            padding: '0.75rem 1.5rem',
+            backgroundColor: input.trim() ? '#007bff' : '#6c757d',
+            color: 'white',
+            border: 'none',
+            borderRadius: '20px',
+            cursor: input.trim() ? 'pointer' : 'not-allowed',
+            fontSize: '14px',
+            fontWeight: '500'
+          }}
+        >
+          전송
+        </button>
       </div>
+      <div ref={messagesEndRef} />
     </div>
   );
 };

@@ -218,4 +218,10 @@ public class MemberApiController {
     return ResponseEntity.ok(member.getMember_NickName());
   }
 
+  // 채팅방 아이디 찾기
+  @GetMapping("/public/{id}")
+  public ResponseEntity<ChatMemberDto> getPublicMember(@PathVariable Long id) {
+    return ResponseEntity.ok(memberService.getChatMemberById(id));
+  }
+
 }

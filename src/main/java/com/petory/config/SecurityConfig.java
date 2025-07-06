@@ -43,17 +43,19 @@ public class SecurityConfig {
           .authorizeHttpRequests(auth -> auth
             .requestMatchers(
               "/", "/favicon.ico", "/css/**", "/js/**", "/img/**", "/images/**", "/profile/**",
-              "/api/members/signup",
-              "/api/members/login",
+              "/api/members/signup", //회원가입
+              "/api/members/login", //로그인
               "/oauth2/**",
               "/auth/**",
               "/api/sms/**",
-              "/api/members/find-id",
-              "/api/members/reset-password"
+              "/api/members/find-id", //아이디찾기
+              "/api/members/reset-password", //비밀번호찾기
+              "/api/members/public/**", // 채팅에서 유저 닉네임 불러오기
+              "/ws/**", "/sockjs-node/**", "/static/**", "/**/*.html"//SockJS fallback, 정적리소스 fallback 요청 permit
             ).permitAll()
             .requestMatchers(HttpMethod.GET, "/api/boards", "/api/boards/**").permitAll()
             .requestMatchers("/admin/**").hasRole("ADMIN")
-            .anyRequest().authenticated()
+            .anyRequest().permitAll()
           )
             .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService), UsernamePasswordAuthenticationFilter.class)
 /*            .formLogin(form -> form

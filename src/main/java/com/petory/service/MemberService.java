@@ -1,5 +1,6 @@
 package com.petory.service;
 
+import com.petory.dto.ChatMemberDto;
 import com.petory.dto.MemberFormDto;
 import com.petory.dto.MemberUpdateDto;
 import com.petory.dto.PhoneUpdateDto;
@@ -188,4 +189,17 @@ public class MemberService implements UserDetailsService {
     // 마일리지는 건드리지 않음 (member_Mileage 유지)
     // JPA의 더티 체킹을 통해 자동 반영 (save 불필요)
   }
+
+  public ChatMemberDto getChatMemberById(Long memberId) {
+    Member member = memberRepository.findById(memberId)
+      .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+    return new ChatMemberDto(
+      member.getMember_Id(),
+      member.getMember_NickName(),
+      member.getMember_ProfileImg() // 프로필 이미지 URL 컬럼명 맞게 수정
+    );
+  }
+
+
 }

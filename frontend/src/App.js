@@ -19,7 +19,6 @@ import WhatsInMyCart from './components/shop/WhatsInMyCart.jsx';
 import ItemModify from './components/shop/ItemModify.jsx';
 import OrderPage from './components/shop/OrderPage';
 import OrderCompletePage from './components/shop/OrderCompletePage.jsx';
-import AuctionPage from './components/Shop/Auction.jsx';   // 경로 및 대소문자 재확인
 import WalkingTrailListPage from './components/WalkingTrailListPage';
 import WalkingTrailDetailPage from './components/WalkingTrailDetailPage';
 import WalkingTrailCreatePage from './components/WalkingTrailCreatePage';
