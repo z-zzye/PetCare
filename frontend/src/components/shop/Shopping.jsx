@@ -26,9 +26,13 @@ function Shopping() {
       .catch(err => console.error('카테고리 불러오기 실패', err));
   }, []);
 
-  // 대분류/소분류 분리
-  const mainCategories = categories.filter(cat => cat.parentOption === null);
-  const subCategories = categories.filter(cat => cat.parentOption !== null);
+  // '경매' 대분류의 categoryId 찾기
+  const auctionMain = categories.find(cat => cat.parentOption === null && cat.optionValue === '경매');
+  const auctionMainId = auctionMain?.categoryId;
+
+  // 대분류/소분류 분리 (경매 제외)
+  const mainCategories = categories.filter(cat => cat.parentOption === null && cat.optionValue !== '경매');
+  const subCategories = categories.filter(cat => cat.parentOption !== null && cat.parentOption !== auctionMainId);
 
   // 선택된 대분류의 소분류만 필터링
   const filteredSubs = selectedMain

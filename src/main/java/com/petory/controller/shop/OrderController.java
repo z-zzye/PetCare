@@ -57,8 +57,7 @@ public class OrderController {
         return ResponseEntity.ok(dto);
     }
 
-    // 주문 관련 엔드포인트
-
+    // 결제검증 엔드포인트
     @PostMapping("/verify-and-create-order")
     public ResponseEntity<?> verifyAndCreateOrder(@RequestBody OrderRequestDto dto, @RequestHeader("Authorization") String authHeader) {
         String token = authHeader.substring(7);
@@ -96,25 +95,26 @@ public class OrderController {
     }
 
     // 주문 취소(환불) 요청 DTO
-    public static class CancelRequestDto {
-        private String reason;
+    public static class CancelRequestDto { //프론트에서 보낸 JSON 데이터(취소사유) 받기 위한 DTO클래스
+        private String reason; //취소 사유를 저장할 필드
         public String getReason() { return reason; }
-        public void setReason(String reason) { this.reason = reason; }
+        public void setReason(String reason) { this.reason = reason; } //reason필드의 getter/setter (JSON -> 객체 변환 시 사용)
     }
 
-    @PostMapping("/{merchantUid}/cancel")
+    @PostMapping("/{merchantUid}/cancel") // /orders/{merchantUid}/cancel 경로로 들어오는 POST요청 처리
+                                        //URL경로에서 주문번호(merchantUid)추출  //요청 body의 JSON을 CancelRequestDto 객체로 변환
     public ResponseEntity<?> cancelOrder(@PathVariable String merchantUid, @RequestBody CancelRequestDto dto) {
         // 로그 추가
-        System.out.println("[cancelOrder] called! merchantUid=" + merchantUid + ", reason=" + dto.getReason());
+        System.out.println("[cancelOrder] called! merchantUid=" + merchantUid + ", reason=" + dto.getReason()); //주문번호, 취소사유 콘솔에 출력
         // 1. 주문 조회 (merchantUid로)
         Order order = orderService.findByMerchantUid(merchantUid);
-        String impUid = order.getImpUid(); // impUid 필드에서 값 추출
+        String impUid = order.getImpUid(); // impUid 필드에서 값 추출 - 환불 요청 시 아임포트 API에 필요하기 때문
         System.out.println("[cancelOrder] impUid=" + impUid);
 
         // 2. 아임포트 환불 요청
         boolean success = orderService.cancelOrderWithRefund(impUid, dto.getReason(), merchantUid);
         System.out.println("[cancelOrder] refund success=" + success);
-        if (success) {
+        if (success) { //환불 성공 여부
             return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.status(500).body("환불 실패");

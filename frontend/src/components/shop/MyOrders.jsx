@@ -18,14 +18,13 @@ const MyOrders = () => {
     const [error, setError] = useState(null);
     // 관리자 여부 로컬스토리지에서 확인
     const isAdmin = localStorage.getItem('member_Role') === 'ADMIN';
-    const [selectedOrderIds, setSelectedOrderIds] = useState([]);
     // 구매확정 툴팁용 state (fixed 위치)
     const [tooltip, setTooltip] = useState({ visible: false, x: 0, y: 0, idx: null });
     // 주문 취소 관련 state
     const [showCancelModal, setShowCancelModal] = useState(false);
     const [showReasonModal, setShowReasonModal] = useState(false);
-    const [cancelOrderId, setCancelOrderId] = useState(null);
-    const [cancelReason, setCancelReason] = useState('');
+    const [cancelOrderId, setCancelOrderId] = useState(null); //취소하려는 주문의 주문번호 저장
+    const [cancelReason, setCancelReason] = useState(''); //사용자가 입력한 주문취소 사유 저장
     const [cancelLoading, setCancelLoading] = useState(false);
     const [toast, setToast] = useState('');
 
@@ -42,14 +41,6 @@ const MyOrders = () => {
       setTooltip({ visible: false, x: 0, y: 0, idx: null });
     };
 
-    // 체크박스 핸들러
-    const handleSelectOrder = (merchantUid) => {
-      setSelectedOrderIds(prev =>
-        prev.includes(merchantUid)
-          ? prev.filter(id => id !== merchantUid)
-          : [...prev, merchantUid]
-      );
-    };
     // 배송완료로 상태 변경 함수
     const handleSetDelivered = async (merchantUid) => {
       try {
@@ -103,29 +94,30 @@ const MyOrders = () => {
 
     // 주문 취소 처리 함수
     const handleCancelOrder = async () => {
-      setCancelLoading(true);
+      setCancelLoading(true); //1. 취소 처리 중임을 표시 (로딩상태 true)
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('token'); //2. JWT 토큰 가져오기(로그인 인증)
+        //3. 주문 취소 API 호출 (취소 사유와 함께)
         await axios.post(`/orders/${cancelOrderId}/cancel`, { reason: cancelReason }, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
         });
-        // 주문 목록 새로고침
+        // 주문 목록 새로고침 (취소 후 최신 상태 반영)
         const response = await axios.get('/orders/my-orders', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
         });
-        setOrders(response.data.orders || []);
-        setShowReasonModal(false);
-        setCancelOrderId(null);
-        setCancelReason('');
-        alert('주문이 정상적으로 취소되었습니다.');
+        setOrders(response.data.orders || []); // 5. 주문 목록 state 갱신
+        setShowReasonModal(false); // 6. 취소 사유 입력 모달 닫기
+        setCancelOrderId(null); // 7. 취소할 주문 ID 초기화
+        setCancelReason(''); // 8. 취소 사유 입력값 초기화
+        alert('주문이 정상적으로 취소되었습니다.'); // 9. 성공 알림
       } catch (err) {
-        alert('주문 취소에 실패했습니다.');
+        alert('주문 취소에 실패했습니다.'); // 10. 실패시 알림
       } finally {
-        setCancelLoading(false);
+        setCancelLoading(false); // 11. 로딩 상태 해제
       }
     };
 
@@ -134,7 +126,7 @@ const MyOrders = () => {
             try {
                 setLoading(true);
                 const token = localStorage.getItem('token');
-                
+
                 const response = await axios.get('/orders/my-orders', {
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -603,7 +595,7 @@ const MyOrders = () => {
                                         )
                                     )}
                                 </div>
-                                
+
                                 <div style={styles.orderContent}>
                                     <div style={styles.productList}>
                                         {order.orderItems.map((item, itemIndex) => (
@@ -630,7 +622,7 @@ const MyOrders = () => {
                                             </div>
                                         ))}
                                     </div>
-                                    
+
                                     <div style={styles.orderSummary}>
                                         <div style={styles.totalPrice}>
                                             총 결제금액: {formatPrice(order.totalPrice)}원
