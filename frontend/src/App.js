@@ -15,8 +15,10 @@ import ItemRegister from './components/shop/ItemRegister.jsx';
 import ItemDetail from './components/shop/ItemDetail.jsx';
 import WhatsInMyCart from './components/shop/WhatsInMyCart.jsx';
 import ItemModify from './components/shop/ItemModify.jsx';
-import OrderPage from './components/shop/OrderPage';
+import OrderPage from './components/shop/OrderPage.jsx';
 import OrderCompletePage from './components/shop/OrderCompletePage.jsx';
+import OrderDetail from './components/shop/OrderDetail.jsx';
+import MyOrders from './components/shop/MyOrders.jsx';
 import WalkingTrailListPage from './components/WalkingTrailListPage';
 import WalkingTrailDetailPage from './components/WalkingTrailDetailPage';
 import WalkingTrailCreatePage from './components/WalkingTrailCreatePage';
@@ -46,7 +48,8 @@ import {
 import AdminPage from './components/admin/AdminPage.jsx';
 import AdminRoute from './components/admin/AdminRoute.jsx';
 import ProfanityManagePage from './components/admin/ProfanityManagePage.jsx';
-import UserAdminPage from './components/admin/UserAdminPage';
+import UserAdminPage from './components/admin/UserAdminPage.jsx';
+import ShopAdminPage from './components/admin/ShopAdminPage.jsx';
 
 function App() {
   return (
@@ -88,6 +91,10 @@ function App() {
         <Route path="/shop/item/edit/:itemId" element={<ItemModify />} />
         <Route path="/order" element={<OrderPage />} />
         <Route path="/order/complete" element={<OrderCompletePage />} />
+        <Route path="/orders/:orderId" element={<OrderDetail />} />
+        <Route path="/shop/item/:itemId" element={<ItemDetail />} /> /*구매 내역 상세 페이지에서 이미지 클릭시 이동*/
+        <Route path="/shop/my-orders" element={<MyOrders />} />
+        <Route path="/shop/order" element={<OrderPage />} /> /*바로구매 버튼 클릭시 이동*/
 
         <Route path="/trails" element={<WalkingTrailListPage />} />
         <Route path="/trails/:trailId" element={<WalkingTrailDetailPage />} />
@@ -124,6 +131,14 @@ function App() {
               }
             />
             <Route path="/admin/users" element={<UserAdminPage />} />
+            <Route
+              path="/admin/shop"
+              element={
+                <AdminRoute>
+                  <ShopAdminPage />
+                </AdminRoute>
+              }
+            />
           </Routes>
         </BrowserRouter>
       </KakaoMapsScriptProvider>

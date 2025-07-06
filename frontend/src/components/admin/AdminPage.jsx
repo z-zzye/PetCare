@@ -28,6 +28,11 @@ const AdminPage = () => {
             <h3>산책로 관리</h3>
             <p>산책로 정보를 관리합니다</p>
           </Link>
+          <Link to="/admin/shop" className="admin-menu-item">
+            <div className="admin-menu-icon">🛒</div>
+            <h3>쇼핑몰 관리</h3>
+            <p>주문, 상품, 회원 구매 이력을 관리합니다</p>
+          </Link>
         </div>
       </div>
     </div>
