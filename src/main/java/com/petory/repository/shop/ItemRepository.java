@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
 
@@ -16,6 +18,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
       (SELECT img.itemImageUrl FROM ItemImage img WHERE img.item = i AND img.isRepresentative = true)
     )
     FROM Item i
+    ORDER BY i.regDate DESC
     """)
     List<ItemListDto> findAllItemList();
 
@@ -27,6 +30,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     )
     FROM Item i
     WHERE LOWER(i.itemName) LIKE LOWER(CONCAT('%', :search, '%'))
+    ORDER BY i.regDate DESC
     """)
     List<ItemListDto> findAllItemListBySearch(@Param("search") String search);
 
@@ -38,6 +42,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     )
     FROM Item i
     WHERE i.category.parentOption = :mainCategoryId
+    ORDER BY i.regDate DESC
     """)
     List<ItemListDto> findByMainCategory(@Param("mainCategoryId") Long mainCategoryId);
 
@@ -50,6 +55,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     FROM Item i
     WHERE i.category.parentOption = :mainCategoryId
       AND LOWER(i.itemName) LIKE LOWER(CONCAT('%', :search, '%'))
+    ORDER BY i.regDate DESC
     """)
     List<ItemListDto> findByMainCategoryAndSearch(@Param("mainCategoryId") Long mainCategoryId, @Param("search") String search);
 
@@ -61,6 +67,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     )
     FROM Item i
     WHERE i.category.categoryId = :subCategoryId
+    ORDER BY i.regDate DESC
     """)
     List<ItemListDto> findBySubCategory(@Param("subCategoryId") Long subCategoryId);
 
@@ -73,6 +80,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     FROM Item i
     WHERE i.category.categoryId = :subCategoryId
       AND LOWER(i.itemName) LIKE LOWER(CONCAT('%', :search, '%'))
+    ORDER BY i.regDate DESC
     """)
     List<ItemListDto> findBySubCategoryAndSearch(@Param("subCategoryId") Long subCategoryId, @Param("search") String search);
 
@@ -110,4 +118,23 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     // 특정 상품의 대표 이미지 URL 조회
     @Query("SELECT img.itemImageUrl FROM ItemImage img WHERE img.item.itemId = :itemId AND img.isRepresentative = true")
     String findRepresentativeImageUrlByItemId(@Param("itemId") Long itemId);
+
+    // 페이지네이션 상품 목록 (카테고리/검색 조건 모두 지원)
+    @Query("""
+    SELECT new com.petory.dto.shop.ItemListDto(
+      i.itemId, i.itemName, i.itemPrice,
+      (SELECT img.itemImageUrl FROM ItemImage img WHERE img.item = i AND img.isRepresentative = true)
+    )
+    FROM Item i
+    WHERE (:subCategoryId IS NULL OR i.category.categoryId = :subCategoryId)
+      AND (:mainCategoryId IS NULL OR i.category.parentOption = :mainCategoryId)
+      AND (:search IS NULL OR LOWER(i.itemName) LIKE LOWER(CONCAT('%', :search, '%')))
+    ORDER BY i.regDate DESC
+    """)
+    Page<ItemListDto> findPagedItems(
+      @Param("mainCategoryId") Long mainCategoryId,
+      @Param("subCategoryId") Long subCategoryId,
+      @Param("search") String search,
+      Pageable pageable
+    );
 }

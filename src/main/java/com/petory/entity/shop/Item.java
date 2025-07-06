@@ -12,6 +12,7 @@ import java.util.List;
 @Table(name = "items")
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @AttributeOverrides({

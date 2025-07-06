@@ -112,7 +112,7 @@ function WhatsInMyCart() {
     const price = (i.item.itemPrice || 0) + (i.option?.optionAddPrice || 0);
     return sum + price * (i.quantity || 1);
   }, 0);
-  const shippingFee = selectedItems.length > 0 ? 2500 : 0;
+  const shippingFee = selectedItems.length > 0 ? 100 : 0;
   const finalPrice = totalPrice + shippingFee;
 
   // 구매하기 버튼 클릭 핸들러

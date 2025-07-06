@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Table(name = "orders")
 @Getter
 @Setter
 @AllArgsConstructor
@@ -50,15 +51,24 @@ public class Order extends BaseEntity {
     // 결제수단
     private String paymentMethod;
 
+    // 주문번호(merchantUid, 결제사와 연동되는 고유값) - 구매취소(환불)시 필요
+    @Column(unique = true, nullable = false)
+    private String merchantUid;
+
+    // 아임포트 결제 고유번호(impUid, 환불 시 필요)
+    @Column(name = "imp_uid", unique = true)
+    private String impUid;
+
     // 주문 상품들
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<OrderItem> orderItems = new ArrayList<>();
 
     // 총금액
     private int totalPrice;
 
-    // 포인트 사용
-    private int usedPoint;
+    // 마일리지 사용
+    private int usedMileage;
 
     // 배송비
     private int deliveryFee;

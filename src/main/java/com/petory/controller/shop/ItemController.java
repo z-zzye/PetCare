@@ -95,4 +95,19 @@ public class ItemController {
       return ResponseEntity.internalServerError().body("수정 중 오류 발생: " + e.getMessage());
     }
   }
+
+  // 페이지네이션 상품 목록 조회 API
+  @GetMapping("/page")
+  public ResponseEntity<?> getItemListPaged(
+    @RequestParam(defaultValue = "0") int page,
+    @RequestParam(defaultValue = "20") int size,
+    @RequestParam(value = "mainCategory", required = false) Long mainCategoryId,
+    @RequestParam(value = "subCategory", required = false) Long subCategoryId,
+    @RequestParam(value = "search", required = false) String search
+  ) {
+    // 서비스에 page, size, mainCategoryId, subCategoryId, search를 넘겨서 Page<ItemListDto> 반환하도록 구현해야 함
+    // (아직 서비스/리포지토리 구현 필요)
+    var result = itemService.getItemListPaged(page, size, mainCategoryId, subCategoryId, search);
+    return ResponseEntity.ok(result);
+  }
 }

@@ -20,4 +20,6 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long> {
     void deleteByItem_ItemId(Long itemId);
 
     int countByOption_OptionId(Long optionId);
+
+    void deleteByCartAndItem_ItemIdAndOption_OptionId(Cart cart, Long itemId, Long optionId);
 } 

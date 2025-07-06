@@ -11,7 +11,7 @@ function ItemDetail() {
   const [item, setItem] = useState(null);
   const [mainImgIdx, setMainImgIdx] = useState(0);
   const [qty, setQty] = useState(1);
-  const [selectedOptIdx, setSelectedOptIdx] = useState(0);
+  const [selectedOptIdx, setSelectedOptIdx] = useState(null);
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [toast, setToast] = useState('');
   const [cartToast, setCartToast] = useState(false);
@@ -45,35 +45,30 @@ function ItemDetail() {
   // images 배열에서 url만 추출
   const imageUrls = item.images ? item.images.map(img => img.url) : [];
 
-  const handleAddOption = () => {
-    const opt = item.options[selectedOptIdx];
+  const handleAddOption = (optIdx) => {
+    const opt = item.options[optIdx];
     if (!opt) return;
     const exist = selectedOptions.find(o => o.optionName === opt.optionName);
-    const totalQty = (exist ? exist.qty : 0) + qty;
+    if (exist) {
+      setToast('이미 선택한 옵션입니다.');
+      return;
+    }
+    const totalQty = qty;
     if (totalQty > opt.optionStock) {
       setToast('재고가 없습니다');
       return;
     }
-    setSelectedOptions(prev => {
-      const existIdx = prev.findIndex(o => o.optionName === opt.optionName);
-      if (existIdx !== -1) {
-        const updated = [...prev];
-        updated[existIdx].qty += qty;
-        return updated;
-      } else {
-        return [
-          ...prev,
-          {
-            optionId: opt.optionId,
-            optionName: opt.optionName,
-            optionAddPrice: opt.optionAddPrice,
-            qty,
-            price: item.itemPrice + (opt.optionAddPrice || 0),
-            optionStock: opt.optionStock
-          }
-        ];
+    setSelectedOptions(prev => [
+      ...prev,
+      {
+        optionId: opt.optionId,
+        optionName: opt.optionName,
+        optionAddPrice: opt.optionAddPrice,
+        qty,
+        price: item.itemPrice + (opt.optionAddPrice || 0),
+        optionStock: opt.optionStock
       }
-    });
+    ]);
     setQty(1);
   };
 
@@ -130,8 +125,21 @@ function ItemDetail() {
       setToast('구매하실 상품을 선택해주세요');
       return;
     }
-    alert('바로구매 기능은 추후 구현 예정입니다.');
-    // 실제 바로구매 로직은 추후 구현
+    
+    // OrderPage가 기대하는 구조로 데이터 변환
+    const orderItems = selectedOptions.map(opt => ({
+      itemId: item.itemId,
+      itemName: item.itemName,
+      itemPrice: item.itemPrice,
+      thumbnailUrl: imageUrls[0],
+      quantity: opt.qty,
+      optionId: opt.optionId, // 옵션ID 추가
+      optionName: opt.optionName,
+      orderPrice: (item.itemPrice + opt.optionAddPrice) * opt.qty
+    }));
+    
+    // state로 데이터 전달
+    navigate('/shop/order', { state: { orderItems } });
   };
 
   // 관리자용 상품 수정/삭제 핸들러
@@ -163,9 +171,10 @@ function ItemDetail() {
       <Header />
       {toast && (
         <div style={{
-          position: 'fixed', top: 80, left: '50%', transform: 'translateX(-50%)',
-          background: '#222', color: '#fff', padding: '1rem 2.2rem', borderRadius: 16,
-          fontSize: '1.1rem', zIndex: 9999, boxShadow: '0 2px 12px #0003', opacity: 0.95
+          position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+          background: '#223A5E', color: '#fff', padding: '1rem 2.2rem', borderRadius: 16,
+          fontSize: '1rem', zIndex: 9999, boxShadow: '0 2px 12px #0003', opacity: 0.97,
+          textAlign: 'center', fontWeight: 400
         }}>{toast}</div>
       )}
       {cartToast && (
@@ -288,10 +297,10 @@ function ItemDetail() {
             min-width: 420px;
           }
           .detail-main-img {
-            width: 400px;
-            height: 400px;
+            width: 500px;
+            height: 500px;
             object-fit: cover;
-            border-radius: 12px;
+            border-radius: 4px;
             border: 1px solid #eee;
           }
           .detail-thumb-row {
@@ -305,7 +314,7 @@ function ItemDetail() {
             width: 70px;
             height: 70px;
             object-fit: cover;
-            border-radius: 8px;
+            border-radius: 4px;
             border: 1px solid #eee;
             cursor: pointer;
             transition: border 0.2s;
@@ -323,28 +332,51 @@ function ItemDetail() {
             gap: 12px;
             margin-bottom: 16px;
           }
+          /* 수량 조절 그룹 */
+          .qty-group {
+            display: flex;
+            align-items: center;
+          }
           .qty-btn {
             width: 32px;
             height: 32px;
             border: 1px solid #ccc;
-            background: #f8f9fa;
+            background: #fff;
             color: #223A5E;
             font-size: 1.2rem;
-            border-radius: 50%;
+            border-radius: 0;
             cursor: pointer;
             transition: background 0.2s;
+            margin: 0;
+            padding: 0;
+          }
+          .qty-btn:first-child {
+            border-top-left-radius: 6px;
+            border-bottom-left-radius: 6px;
+            border-right: none;
+          }
+          .qty-btn:last-child {
+            border-top-right-radius: 6px;
+            border-bottom-right-radius: 6px;
+            border-left: none;
           }
           .qty-btn:hover {
-            background: #ffc10722;
+            background: #f8f9fa;
           }
           .qty-input {
-            width: 48px;
+            width: 40px;
+            height: 32px;
             text-align: center;
-            font-size: 1.1rem;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            padding: 0.3rem 0.2rem;
+            font-size: 1rem;
+            line-height: 32px;
+            border-top: 1px solid #ccc;
+            border-bottom: 1px solid #ccc;
+            border-left: none;
+            border-right: none;
+            border-radius: 0;
             background: #fff;
+            margin: 0;
+            padding: 0;
           }
           .order-price-row {
             display: flex;
@@ -354,11 +386,11 @@ function ItemDetail() {
           }
           .order-price-label {
             color: #888;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 500;
           }
           .order-price-value {
-            font-size: 1.5rem;
+            font-size: 1rem;
             font-weight: 700;
             color: #223A5E;
           }
@@ -368,13 +400,13 @@ function ItemDetail() {
           .selected-opt-item {
             background: #f8f9fa;
             border-radius: 12px;
-            padding: 1rem 1.2rem;
+            padding: 0.6rem 0.8rem;
             margin-bottom: 10px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 18px;
-            font-size: 1.08rem;
+            gap: 14px;
+            font-size: 0.97rem;
           }
           .selected-opt-info {
             flex: 1;
@@ -483,6 +515,14 @@ function ItemDetail() {
           .detail-info-col option {
             color: #223A5E;
           }
+          .qty-input::-webkit-outer-spin-button,
+          .qty-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+          }
+          .qty-input[type='number'] {
+            -moz-appearance: textfield;
+          }
         `}</style>
         <div className="detail-flex-wrap">
           {/* 좌측: 대표 이미지 + 썸네일 */}
@@ -507,116 +547,110 @@ function ItemDetail() {
             </div>
           </div>
           {/* 우측: 상품 정보 */}
-          <div className="detail-info-col">
-            <h2 style={{ fontSize: '2rem', color: '#223A5E', marginBottom: 18 }}>{item.itemName}</h2>
-            <div style={{ display: 'flex', alignItems: 'center', fontSize: '1.5rem', fontWeight: 700, marginBottom: 24 }}>
-              <span style={{ color: isSoldOut ? '#888' : '#ff9800' }}>{item.itemPrice.toLocaleString()}원</span>
+          <div className="detail-info-col" style={{ minWidth: 350, flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: 18, minHeight: 500 }}>
+            <h2 style={{ fontSize: '1.5rem', color: '#223A5E', fontWeight: 600, marginBottom: 0 }}>{item.itemName}</h2>
+            <div style={{ display: 'flex', alignItems: 'center', fontSize: '2rem', fontWeight: 800, marginBottom: 0 }}>
+              <span style={{ color: isSoldOut ? '#888' : '#ff9800', fontSize: '2rem', fontWeight: 800 }}>{item.itemPrice.toLocaleString()}원</span>
               {isSoldOut && (
                 <span style={{ color: 'red', fontWeight: 'bold', fontSize: '1.1rem', marginLeft: 16 }}>품절</span>
               )}
             </div>
             {/* 옵션 선택 */}
-            <div style={{ marginBottom: 18, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+            <div style={{ marginBottom: 18 }}>
               <select
                 style={{
-                  padding: '0.7rem 1.2rem',
-                  fontSize: '1.1rem',
-                  width: 280,
+                  width: '100%',
+                  padding: '0.4rem 0.9rem',
+                  fontSize: '1rem',
                   border: isSoldOut ? '2px solid #ccc' : '2px solid #ffc107',
                   borderRadius: 5,
                   background: isSoldOut ? '#f8f9fa' : '#fff',
                   color: isSoldOut ? '#bbb' : '#223A5E',
                   outline: 'none',
-                  appearance: 'auto',
+                  appearance: 'none',
+                  WebkitAppearance: 'none',
+                  MozAppearance: 'none',
+                  backgroundImage: `url('data:image/svg+xml;utf8,<svg fill=\"%23ffc107\" height=\"20\" viewBox=\"0 0 24 24\" width=\"20\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M7 10l5 5 5-5z\"/></svg>')`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'right 0.9rem center',
+                  backgroundSize: '1.1rem',
                   transition: 'border 0.2s',
                   height: 'auto',
                   lineHeight: 'normal'
                 }}
-                value={selectedOptIdx}
-                onChange={e => setSelectedOptIdx(Number(e.target.value))}
-                disabled={isSoldOut}
-              >
-                {item.options && item.options
-                  .filter(opt =>
-                    opt.isActive === undefined ||
-                    opt.isActive === true ||
-                    opt.isActive === 1 ||
-                    opt.isActive === 'Y'
-                  )
-                  .map((opt, idx) => (
-                    <option key={opt.optionId} value={idx} disabled={opt.optionStock === 0}>
-                      {opt.optionName}
-                      {opt.optionAddPrice > 0 ? ` (+${opt.optionAddPrice.toLocaleString()}원)` : ''}
-                    </option>
-                  ))}
-              </select>
-              <button
-                style={{
-                  marginLeft: 10,
-                  padding: '0.5rem 1.1rem',
-                  background: '#ffc107',
-                  color: '#223A5E',
-                  border: 'none',
-                  borderRadius: 8,
-                  fontWeight: 700,
-                  cursor: isSoldOut ? 'not-allowed' : 'pointer',
-                  fontSize: '0.9rem',
-                  height: '2.1rem',
-                  lineHeight: '2.1rem',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  opacity: isSoldOut ? 0.5 : 1
-                }}
-                onClick={handleAddOption}
-                disabled={isSoldOut}
-              >
-                추가
-              </button>
+                  value={selectedOptIdx === null ? '' : selectedOptIdx}
+                  onChange={e => {
+                    const idx = e.target.value;
+                    if (idx === '' || idx === '-1') return;
+                    handleAddOption(Number(idx));
+                    setSelectedOptIdx(null);
+                  }}
+                  disabled={isSoldOut}
+                >
+                  <option value="">옵션을 선택해주세요.</option>
+                  {item.options && item.options
+                    .filter(opt =>
+                      opt.isActive === undefined ||
+                      opt.isActive === true ||
+                      opt.isActive === 1 ||
+                      opt.isActive === 'Y'
+                    )
+                    .map((opt, idx) => (
+                      <option key={opt.optionId} value={idx} disabled={opt.optionStock === 0}>
+                        {opt.optionName}
+                        {opt.optionAddPrice > 0 ? ` (+${opt.optionAddPrice.toLocaleString()}원)` : ''}
+                      </option>
+                    ))}
+                </select>
             </div>
-            {/* 선택된 옵션/수량/금액 리스트 */}
-            <div className="selected-opt-list" style={{ marginBottom: 24 }}>
+            {/* 옵션 리스트 */}
+            <div className="selected-opt-list" style={{ marginBottom: 8 }}>
               {selectedOptions.map((opt, idx) => (
                 <div className="selected-opt-item" key={opt.optionName}>
                   <div className="selected-opt-info">
                     <div>{item.itemName} + {opt.optionName}</div>
                   </div>
                   {/* 수량 조절 UI */}
-                  <button className="qty-btn" onClick={() => handleQtyChange(idx, Math.max(1, opt.qty - 1))}>-</button>
-                  <input
-                    className="qty-input"
-                    type="number"
-                    min={1}
-                    max={opt.optionStock}
-                    value={opt.qty}
-                    onChange={e => {
-                      const v = Math.max(1, Math.min(opt.optionStock, Number(e.target.value)));
-                      handleQtyChange(idx, v);
-                    }}
-                  />
-                  <button className="qty-btn" onClick={() => handleQtyChange(idx, opt.qty + 1)}>+</button>
+                  <div className="qty-group">
+                    <button className="qty-btn" onClick={() => handleQtyChange(idx, Math.max(1, opt.qty - 1))}>-</button>
+                    <input
+                      className="qty-input"
+                      type="number"
+                      min={1}
+                      max={opt.optionStock}
+                      value={opt.qty}
+                      onChange={e => {
+                        const v = Math.max(1, Math.min(opt.optionStock, Number(e.target.value)));
+                        handleQtyChange(idx, v);
+                      }}
+                    />
+                    <button className="qty-btn" onClick={() => handleQtyChange(idx, opt.qty + 1)}>+</button>
+                  </div>
                   <div className="selected-opt-price">{(opt.price * opt.qty).toLocaleString()}원</div>
                   <button className="selected-opt-remove" onClick={() => handleRemoveOption(opt.optionName)} title="삭제">×</button>
                 </div>
               ))}
             </div>
+            <div style={{ borderBottom: '1.5px solid #eee', margin: '8px 0' }}></div>
             {/* 주문금액 */}
-            <div className="order-price-row" style={{ marginBottom: 28, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+            <div className="order-price-row" style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
               <span className="order-price-label">주문금액</span>
-              <span className="order-price-value" style={{ marginLeft: 12 }}>{totalPrice.toLocaleString()}원</span>
+              <span className="order-price-value" style={{ marginRight: 5, marginLeft: 5 }}>{totalPrice.toLocaleString()}원</span>
             </div>
-            {/* 장바구니/바로구매 버튼을 세로로 넓게 배치 */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 32 }}>
+            {/* 쿠폰 영역 예시 */}
+            <div style={{ minHeight: 32 }}></div>
+            {/* 장바구니/바로구매 버튼을 가로로 넓게 배치 */}
+            <div style={{ display: 'flex', flexDirection: 'row', gap: 16, marginBottom: 32, width: '100%' }}>
               <button
                 style={{
-                  width: '100%',
+                  flex: 1,
                   background: '#fff',
                   color: '#223A5E',
                   border: '2px solid #223A5E',
                   borderRadius: 12,
                   fontWeight: 700,
-                  fontSize: '1.1rem',
-                  padding: '1.1rem 0',
+                  fontSize: '1rem',
+                  padding: '0.7rem 0',
                   cursor: isSoldOut ? 'not-allowed' : 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   transition: 'background 0.2s, color 0.2s',
@@ -630,14 +664,14 @@ function ItemDetail() {
               </button>
               <button
                 style={{
-                  width: '100%',
+                  flex: 1,
                   background: '#223A5E',
                   color: '#fff',
                   border: 'none',
                   borderRadius: 12,
                   fontWeight: 700,
-                  fontSize: '1.1rem',
-                  padding: '1.1rem 0',
+                  fontSize: '1rem',
+                  padding: '0.7rem 0',
                   cursor: isSoldOut ? 'not-allowed' : 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   transition: 'background 0.2s, color 0.2s',
@@ -649,7 +683,7 @@ function ItemDetail() {
                 바로구매
               </button>
             </div>
-            <div style={{ marginBottom: 16, color: '#555', fontSize: '1.1rem' }}>{item.itemDescription}</div>
+            <div style={{ color: '#555', fontSize: '1.1rem' }}>{item.itemDescription}</div>
           </div>
         </div>
       </div>

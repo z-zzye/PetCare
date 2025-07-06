@@ -20,7 +20,7 @@ function OrderCompletePage() {
       <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
         <button
           style={{ padding: '10px 22px', borderRadius: 6, border: 'none', background: '#223A5E', color: '#fff', fontWeight: 700, fontSize: '1rem', cursor: 'pointer' }}
-          onClick={() => navigate('/members/mypage')}
+          onClick={() => navigate(`/orders/${orderId}`)}
         >주문내역 보기</button>
         <button
           style={{ padding: '10px 22px', borderRadius: 6, border: 'none', background: '#FFB300', color: '#223A5E', fontWeight: 700, fontSize: '1rem', cursor: 'pointer' }}

@@ -21,8 +21,8 @@ public class OrderItem {
     private Order order;
 
     // 상품
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "item_id")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "item_id", nullable = false)
     private Item item;
 
     // 주문 당시 가격

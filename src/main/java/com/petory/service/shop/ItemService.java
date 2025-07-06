@@ -23,6 +23,9 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 @Service
 @RequiredArgsConstructor
@@ -103,6 +106,12 @@ public class ItemService {
         return itemRepository.findAllItemList();
       }
     }
+  }
+
+  // 페이지네이션 상품 목록 조회
+  public Page<ItemListDto> getItemListPaged(int page, int size, Long mainCategoryId, Long subCategoryId, String search) {
+    Pageable pageable = PageRequest.of(page, size);
+    return itemRepository.findPagedItems(mainCategoryId, subCategoryId, search, pageable);
   }
 
   // 상품 상세 정보 조회
@@ -339,6 +348,15 @@ public class ItemService {
                       .isRepresentative(isRep)
                       .build();
                   itemImageRepository.save(image);
+              }
+              
+              // 새 이미지 중 대표이미지가 있다면, 기존 대표이미지들을 모두 false로 변경
+              boolean hasNewRep = imagesIsRep != null && imagesIsRep.stream().anyMatch("true"::equals);
+              if (hasNewRep) {
+                  for (ItemImage img : remainImages) {
+                      img.setIsRepresentative(false);
+                      itemImageRepository.save(img);
+                  }
               }
           }
       }

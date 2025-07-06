@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from '../../api/axios';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Header from '../Header.jsx';
+import PortOne from '@portone/browser-sdk/v2';
 
 // 배송지명 Enum 예시
 const DELIVERY_NAMES = [
@@ -13,15 +14,21 @@ const DELIVERY_NAMES = [
 
 function OrderPage() {
   const location = useLocation();
+  const navigate = useNavigate();
   const orderItems = location.state?.orderItems || [];
 
   // 배송지 정보 및 모달 상태
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [addressInfo, setAddressInfo] = useState(null);
+  const [orderMemo, setOrderMemo] = useState('');
 
   const [availableMileage, setAvailableMileage] = useState(0);
   const [usedMileage, setUsedMileage] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState('CARD');
+
+  useEffect(() => {
+    axios.get('/test').then(res => console.log('프록시 테스트 응답:', res.data)).catch(err => console.log('프록시 테스트 에러:', err));
+  }, []);
 
   useEffect(() => {
     axios.get('/members/mileage')
@@ -30,7 +37,7 @@ function OrderPage() {
   }, []);
 
   const totalPrice = orderItems.reduce((sum, i) => sum + i.orderPrice, 0);
-  const shippingFee = orderItems.length > 0 ? 2500 : 0;
+  const shippingFee = orderItems.length > 0 ? 100 : 0;
   const finalPrice = totalPrice + shippingFee - usedMileage;
 
   const [saveHover, setSaveHover] = useState(false);
@@ -48,16 +55,53 @@ function OrderPage() {
       alert('주문 상품이 없습니다.');
       return;
     }
+
+    // 1. 아임포트 객체 초기화
+    const { IMP } = window;
+    IMP.init(process.env.REACT_APP_PORTONE_STORE_ID); // 아임포트 가맹점 식별코드
+
+    // 2. 결제 요청 파라미터 구성
     const orderId = 'ORDER-' + Date.now();
-    const tossPayments = window.TossPayments(process.env.REACT_APP_TOSS_CLIENT_KEY);
-    const payMethod = paymentMethod === 'CARD' ? '카드' : '가상계좌';
-    tossPayments.requestPayment(payMethod, {
-      amount: finalPrice,
-      orderId,
-      orderName: orderItems.map(i => i.itemName).join(', '),
-      customerName: addressInfo.receiverName,
-      successUrl: `${window.location.origin}/payment/success?orderId=${orderId}`,
-      failUrl: `${window.location.origin}/payment/fail`,
+    const params = {
+      pg: 'html5_inicis', // 결제대행사(PG사)설정: KG이니시스
+      pay_method: paymentMethod === 'CARD' ? 'card' : 'vbank', //결제수단
+      merchant_uid: orderId, //주문 고유번호
+      name: orderItems.map(i => i.itemName).join(', '), //상품명
+      amount: finalPrice, //결제 금액
+      buyer_email: localStorage.getItem('email')?.trim() || 'test@portone.io', //구매자 이메일
+      buyer_name: addressInfo.receiverName, //구매자 이름
+      buyer_tel: addressInfo.receiverPhone, //구매자 연락처
+      buyer_addr: addressInfo.address + ' ' + addressInfo.addressDetail, //주소
+      buyer_postcode: '', // 필요시 추가
+      m_redirect_url: `${window.location.origin}/payment/success?orderId=${orderId}`, //모바일 결제 리디렉션 URL - 모바일 웹에서만 사용됨
+    };
+
+    // 3. 결제창 호출
+    IMP.request_pay(params, (rsp) => {
+      console.log('아임포트 콜백:', rsp);
+      if (rsp.success) {
+        console.log('결제 성공! 주문/검증 API 호출');
+        axios.post('/orders/verify-and-create-order', {
+          impUid: rsp.imp_uid,
+          merchantUid: rsp.merchant_uid,
+          totalPrice: finalPrice,
+          orderItems: orderItems,
+          addressInfo: addressInfo,
+          orderMemo: orderMemo,
+          usedMileage: usedMileage
+        }).then(() => {
+          console.log('주문/검증 API 성공');
+          navigate(`/order/complete?orderId=${rsp.merchant_uid}`);
+        }).catch((err) => {
+          console.log('주문/검증 API 실패', err);
+          alert('결제 검증 또는 주문 생성에 실패했습니다.');
+          navigate('/payment/fail');
+        });
+      } else {
+        console.log('결제 실패:', rsp.error_msg);
+        alert('결제에 실패했습니다: ' + rsp.error_msg);
+        navigate('/payment/fail');
+      }
     });
   };
 
@@ -101,6 +145,19 @@ function OrderPage() {
             ) : (
               <div style={{ color: '#888', fontSize: '1rem' }}>배송지 정보를 입력해 주세요.</div>
             )}
+            {/* 배송메세지 입력란 */}
+            <div style={{ marginTop: 16 }}>
+              <label htmlFor="orderMemo" style={{ color: '#888', fontWeight: 500, fontSize: '1rem', marginRight: 8 }}>배송메세지</label>
+              <input
+                id="orderMemo"
+                type="text"
+                value={orderMemo}
+                onChange={e => setOrderMemo(e.target.value)}
+                placeholder="예: 문 앞에 놓아주세요."
+                style={{ width: '100%', padding: 8, borderRadius: 6, border: '1px solid #ddd', marginTop: 4 }}
+                maxLength={50}
+              />
+            </div>
           </section>
 
           {/* 주문 상품 목록 */}
@@ -227,12 +284,12 @@ function AddressModal({ onClose, onSave, initialValue }) {
 
   // 저장 버튼 클릭 시 유효성 검사 및 깜빡임 처리
   const handleSave = () => {
-    const emptyFields = [];
-    if (!receiverName) emptyFields.push('receiverName');
-    if (!receiverPhone) emptyFields.push('receiverPhone');
-    if (!address) emptyFields.push('address');
-    if (!addressDetail) emptyFields.push('addressDetail');
-    if (!deliveryName) emptyFields.push('deliveryName');
+    const emptyFields = [];  //배송지 입력 필드
+    if (!receiverName) emptyFields.push('receiverName'); //받는 사람
+    if (!receiverPhone) emptyFields.push('receiverPhone'); //연락처
+    if (!address) emptyFields.push('address'); //도로명주소
+    if (!addressDetail) emptyFields.push('addressDetail'); //상세주소
+    if (!deliveryName) emptyFields.push('deliveryName'); //배송지명
     if (emptyFields.length > 0) {
       setInvalidFields(emptyFields);
       setTimeout(() => setInvalidFields([]), 300);

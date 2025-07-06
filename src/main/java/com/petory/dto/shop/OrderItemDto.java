@@ -7,7 +7,8 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class OrderItemDto {
+//주문 상품별 정보
+public class OrderItemDto { 
     private Long itemId;         // 상품 ID
     private String itemName;     // 상품명
     private String thumbnailUrl;    // 대표이미지 (URL 또는 파일명)

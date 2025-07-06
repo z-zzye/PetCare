@@ -654,7 +654,7 @@ span.main-navbar-link,
   left: 0;
   background: #fff;
   border: 1px solid #eee;
-  border-radius: 8px;
+  border-radius: 4px;
   box-shadow: 0 4px 16px #0001;
   padding: 8px 0;
   min-width: 90px;
@@ -662,6 +662,11 @@ span.main-navbar-link,
   display: flex;
   flex-direction: column;
   align-items: stretch;
+}
+
+.profile-dropdown-menu .logout-btn,
+.profile-dropdown-menu .profile-dropdown-btn {
+  font-size: 0.85rem;
 }
 
 .main-navbar-login-btn {

@@ -120,4 +120,29 @@ public class PaymentService {
     return "paid".equals(status) && amount == expectedAmount;
   }
 
+  // 아임포트(PortOne) 결제 환불(취소)
+  public boolean cancelPortonePayment(String impUid, String reason) {
+    String token = getPortoneAccessToken();
+    RestTemplate restTemplate = new RestTemplate();
+    String url = "https://api.iamport.kr/payments/cancel";
+
+    org.json.JSONObject body = new org.json.JSONObject();
+    body.put("imp_uid", impUid); // 또는 merchant_uid 사용 가능
+    if (reason != null && !reason.isEmpty()) {
+        body.put("reason", reason);
+    }
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    headers.setBearerAuth(token);
+
+    HttpEntity<String> entity = new HttpEntity<>(body.toString(), headers);
+    ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
+
+    org.json.JSONObject json = new org.json.JSONObject(response.getBody());
+    // 성공 여부는 response.getStatusCode() 또는 json의 내용으로 판단
+    // 아임포트 환불 성공 시 response에 "response" 객체가 포함됨
+    return response.getStatusCode().is2xxSuccessful() && !json.isNull("response");
+  }
+
 }
