@@ -12,6 +12,7 @@ export const AuthProvider = ({ children }) => {
   const [role, setRole] = useState(localStorage.getItem('member_Role') || '');
   const [nickname, setNickname] = useState(localStorage.getItem('member_Nickname') || '');
   const [email, setEmail] = useState(localStorage.getItem('email') || null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const login = (token, role, profileImg, nickname) => {
     try {
@@ -30,6 +31,7 @@ export const AuthProvider = ({ children }) => {
       const finalProfileImg = profileImg && profileImg.trim() !== '' ? profileImg : '/images/profile-default.png';
       setProfileImg(finalProfileImg);
       setEmail(userEmail); // state에도 email 저장
+      setIsAdmin(role === 'ADMIN');
     } catch (error) {
       console.error("로그인 처리 중 토큰 디코딩 실패", error);
       logout(); // 문제 발생 시 로그아웃 처리
@@ -60,7 +62,9 @@ export const AuthProvider = ({ children }) => {
         if (decoded.exp * 1000 > Date.now()) {
           // 토큰이 유효하면 모든 상태를 localStorage 값으로 복원
           setIsLoggedIn(true);
-          setRole(localStorage.getItem('member_Role') || '');
+          const savedRole = localStorage.getItem('member_Role') || '';
+          setRole(savedRole);
+          setIsAdmin(savedRole === 'ADMIN');
           setNickname(localStorage.getItem('member_Nickname') || '');
           setEmail(localStorage.getItem('email') || decoded.sub);
           const savedImg = localStorage.getItem('member_ProfileImg');
@@ -77,7 +81,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, profileImg, role, nickname, email, login, logout }}>
+    <AuthContext.Provider value={{ isLoggedIn, profileImg, role, nickname, email, isAdmin, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

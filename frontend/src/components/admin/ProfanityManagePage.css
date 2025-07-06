@@ -1,0 +1,221 @@
+.profanity-manage-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+}
+
+.profanity-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+}
+
+.profanity-header {
+  margin-bottom: 30px;
+}
+
+.back-button {
+  display: inline-block;
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 500;
+  margin-bottom: 20px;
+  transition: color 0.3s ease;
+}
+
+.back-button:hover {
+  color: #5a6fd8;
+}
+
+.profanity-title {
+  color: #333;
+  font-size: 2.5rem;
+  margin: 0;
+  font-weight: 700;
+}
+
+.profanity-description {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 30px;
+  border-left: 4px solid #667eea;
+}
+
+.profanity-description p {
+  margin: 0 0 10px 0;
+  color: #555;
+  line-height: 1.6;
+}
+
+.profanity-description p:last-child {
+  margin-bottom: 0;
+}
+
+.profanity-form {
+  margin-bottom: 30px;
+}
+
+.textarea-container {
+  margin-bottom: 25px;
+}
+
+.textarea-label {
+  display: block;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 10px;
+  font-size: 1.1rem;
+}
+
+.profanity-textarea {
+  width: 100%;
+  min-height: 400px;
+  padding: 15px;
+  border: 2px solid #e1e5e9;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-family: 'Courier New', monospace;
+  line-height: 1.5;
+  resize: vertical;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+.profanity-textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.button-group {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.save-button,
+.reset-button,
+.test-button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 120px;
+}
+
+.save-button {
+  background: #28a745;
+  color: white;
+}
+
+.save-button:hover:not(:disabled) {
+  background: #218838;
+  transform: translateY(-2px);
+}
+
+.reset-button {
+  background: #dc3545;
+  color: white;
+}
+
+.reset-button:hover:not(:disabled) {
+  background: #c82333;
+  transform: translateY(-2px);
+}
+
+.test-button {
+  background: #17a2b8;
+  color: white;
+}
+
+.test-button:hover:not(:disabled) {
+  background: #138496;
+  transform: translateY(-2px);
+}
+
+.save-button:disabled,
+.reset-button:disabled,
+.test-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.message {
+  padding: 15px 20px;
+  border-radius: 8px;
+  margin-bottom: 25px;
+  font-weight: 500;
+}
+
+.message.success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.message.error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.profanity-info {
+  background: #e3f2fd;
+  padding: 25px;
+  border-radius: 10px;
+  border-left: 4px solid #2196f3;
+}
+
+.profanity-info h3 {
+  color: #1976d2;
+  margin: 0 0 15px 0;
+  font-size: 1.3rem;
+}
+
+.profanity-info ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.profanity-info li {
+  color: #424242;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.profanity-info li:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  .profanity-container {
+    padding: 20px;
+    margin: 10px;
+  }
+
+  .profanity-title {
+    font-size: 2rem;
+  }
+
+  .button-group {
+    flex-direction: column;
+  }
+
+  .save-button,
+  .reset-button,
+  .test-button {
+    width: 100%;
+  }
+
+  .profanity-textarea {
+    min-height: 300px;
+  }
+}

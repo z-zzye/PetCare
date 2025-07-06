@@ -1,13 +1,30 @@
 package com.petory.controller;
 
-import com.petory.service.CleanBotService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-
+import java.util.List;
 import java.util.Map;
+
+import com.petory.dto.MemberDto;
+import com.petory.dto.MemberSearchDto;
+import com.petory.service.MemberService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.petory.constant.BoardKind;
+import com.petory.dto.BoardListDto;
+import com.petory.dto.BoardUpdateDto;
+import com.petory.entity.Board;
+import com.petory.service.BoardService;
+import com.petory.service.CleanBotService;
+
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -15,15 +32,15 @@ import java.util.Map;
 public class AdminController {
 
     private final CleanBotService cleanBotService;
-
+    private final BoardService boardService;
+    private final MemberService memberService;
     /**
-     * 금지어 관리 페이지를 보여주는 메서드
+     * 금지어 목록을 조회하는 API
      */
     @GetMapping("/profanity")
-    public String profanityManagementPage(Model model) {
+    public ResponseEntity<String> getProfanityList() {
         String currentProfanityList = cleanBotService.getProfanityListAsString();
-        model.addAttribute("profanityList", currentProfanityList);
-        return "admin/profanity-manage"; // templates/admin/profanity-manage.html
+        return ResponseEntity.ok(currentProfanityList);
     }
 
     /**
@@ -31,8 +48,83 @@ public class AdminController {
      */
     @PostMapping("/profanity/update")
     public ResponseEntity<String> updateProfanityList(@RequestBody Map<String, String> payload) {
-      String updatedList = payload.get("list");
-      cleanBotService.updateProfanityList(updatedList);
-      return ResponseEntity.ok("금지어 목록이 성공적으로 갱신되었습니다.");
+        try {
+            String updatedList = payload.get("list");
+            cleanBotService.updateProfanityList(updatedList);
+            return ResponseEntity.ok("금지어 목록이 성공적으로 갱신되었습니다.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("금지어 목록 갱신에 실패했습니다: " + e.getMessage());
+        }
     }
+
+    @PostMapping("/boards/{id}/blind")
+    public ResponseEntity<String> blindOrUnblindBoard(@PathVariable Long id) {
+        try {
+            Board board = boardService.getBoardById(id);
+            if (board.isBlinded()) {
+                boardService.unblindBoard(id);
+                return ResponseEntity.ok("블라인드 해제 완료");
+            } else {
+                boardService.blindBoard(id);
+                return ResponseEntity.ok("블라인드 처리 완료");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("처리 중 오류 발생: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/boards/{id}")
+    public ResponseEntity<String> deleteBoard(@PathVariable Long id) {
+        boardService.deleteBoardByAdmin(id);
+        return ResponseEntity.ok("삭제 완료");
+    }
+
+    @GetMapping("/boards/{id}/original-title")
+    public ResponseEntity<String> getOriginalTitle(@PathVariable Long id) {
+        String originalTitle = boardService.getOriginalTitle(id);
+        return ResponseEntity.ok(originalTitle);
+    }
+
+    @GetMapping("/boards/{id}/original-content")
+    public ResponseEntity<String> getOriginalContent(@PathVariable Long id) {
+        String originalContent = boardService.getOriginalContent(id);
+        return ResponseEntity.ok(originalContent);
+    }
+
+    @PatchMapping("/boards/{id}")
+    public ResponseEntity<String> updateBoardByAdmin(@PathVariable Long id, @RequestBody BoardUpdateDto updateDto) {
+        boardService.updateBoardByAdmin(id, updateDto);
+        return ResponseEntity.ok("수정 완료");
+    }
+
+    @GetMapping("/boards")
+    public ResponseEntity<List<BoardListDto>> getAdminBoardList(@RequestParam String category) {
+        BoardKind boardKind = BoardKind.valueOf(category.toUpperCase());
+        List<BoardListDto> list = boardService.getBoardListByKind(boardKind);
+        return ResponseEntity.ok(list);
+    }
+
+    /**
+     * 기존 게시글들 중 클린봇이 감지했지만 blinded 필드가 설정되지 않은 게시글들을 업데이트하는 API
+     */
+    @PostMapping("/boards/update-blinded")
+    public ResponseEntity<String> updateExistingBlindedPosts() {
+        try {
+            boardService.updateExistingBlindedPosts();
+            return ResponseEntity.ok("기존 블라인드 게시글 업데이트가 완료되었습니다.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("업데이트 중 오류 발생: " + e.getMessage());
+        }
+    }
+
+  @GetMapping("/users")
+  public ResponseEntity<List<MemberSearchDto>> getUsersByRole(@RequestParam("role") String role) {
+    // memberService를 사용하여 회원 정보를 조회합니다.
+    com.petory.constant.Role roleEnum = com.petory.constant.Role.valueOf(role.toUpperCase());
+
+    // 변환된 Enum을 서비스로 전달
+    List<MemberSearchDto> users = memberService.findMembersByRole(roleEnum);
+    return ResponseEntity.ok(users);
+  }
+
 }

@@ -1,24 +1,27 @@
 package com.petory.service;
 
-import com.petory.dto.ChatMemberDto;
-import com.petory.dto.MemberFormDto;
-import com.petory.dto.MemberUpdateDto;
-import com.petory.dto.PhoneUpdateDto;
+import com.petory.dto.*;
 import com.petory.entity.Member;
 import com.petory.repository.MemberRepository;
 import jakarta.transaction.Transactional;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
+
+import com.petory.constant.Role;
+import com.petory.dto.MemberFormDto;
+import com.petory.dto.PhoneUpdateDto;
+import com.petory.entity.Member;
+import com.petory.repository.MemberRepository;
 
 import lombok.RequiredArgsConstructor;
-import java.io.IOException;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @Transactional
@@ -185,9 +188,22 @@ public class MemberService implements UserDetailsService {
         throw new RuntimeException("프로필 이미지 업로드 중 오류 발생", e);
       }
     }
+  }
 
     // 마일리지는 건드리지 않음 (member_Mileage 유지)
     // JPA의 더티 체킹을 통해 자동 반영 (save 불필요)
+  public List<MemberSearchDto> findMembersByRole(Role role) {
+    List<Member> members = memberRepository.findAllByMember_Role(role); // 'findAllByMember_Role'은 MemberRepository에 정의된 메서드 이름
+
+    return members.stream()
+      .map(member -> MemberSearchDto.builder()
+        .id(member.getMember_Id()) // Member 엔티티의 Getter에 맞게 수정
+        .email(member.getMember_Email())
+        .nickname(member.getMember_NickName())
+        .role(member.getMember_Role()) // ◀◀◀ .toString() 제거
+        .regDate(member.getRegDate().toString())
+        .build())
+      .collect(Collectors.toList());
   }
 
   public ChatMemberDto getChatMemberById(Long memberId) {

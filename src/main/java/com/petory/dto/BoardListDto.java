@@ -1,11 +1,12 @@
 package com.petory.dto;
 
+import java.time.LocalDateTime;
+
 import com.petory.entity.Board;
 import com.petory.entity.Member;
+
 import lombok.Getter;
 import lombok.Setter;
-
-import java.time.LocalDateTime;
 
 // 게시판 조회 DTO
 
@@ -20,6 +21,7 @@ public class BoardListDto {
   private int viewCount;
   private int likeCount;
   private int commentCount;
+  private boolean blinded;
 
   public static BoardListDto from(Board board) {
     BoardListDto dto = new BoardListDto();
@@ -33,6 +35,7 @@ public class BoardListDto {
     dto.setViewCount(board.getViewCount());
     dto.setLikeCount(board.getLikeCount());
     dto.setCommentCount(board.getCommentCount());
+    dto.setBlinded(board.isBlinded());
     return dto;
   }
 }

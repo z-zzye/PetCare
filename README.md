@@ -1,7 +1,7 @@
 # 🐾 PetCare 프로젝트
 
 > 반려동물을 위한 통합 케어 플랫폼
-> Spring Boot + React 기반의 웹 애플리케이션 
+> Spring Boot + React 기반의 웹 애플리케이션
 
 ---
 

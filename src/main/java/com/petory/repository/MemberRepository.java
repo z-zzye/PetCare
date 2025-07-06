@@ -1,11 +1,13 @@
 package com.petory.repository;
 
-import com.petory.entity.Member;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.Optional;
+import com.petory.entity.Member;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
@@ -23,4 +25,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     @Query("SELECT m FROM Member m WHERE m.member_Id = :memberId")
     Optional<Member>findByMember_Id(Long memberId);
+    @Query("SELECT m FROM Member m WHERE m.member_Role = :role")
+    List<Member> findAllByMember_Role(@Param("role") com.petory.constant.Role role);
+
 }

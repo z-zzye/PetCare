@@ -11,8 +11,6 @@ import MainPage from './components/MainPage.jsx';
 import FindId from './components/FindId.jsx';
 import FindPw from './components/FindPw.jsx';
 import ResetPw from './components/ResetPw.jsx';
-import ShoppingPage from './components/shop/Shopping.jsx';
-import AuctionPage from './components/shop/Auction.jsx';
 import ItemRegister from './components/shop/ItemRegister.jsx';
 import ItemDetail from './components/shop/ItemDetail.jsx';
 import WhatsInMyCart from './components/shop/WhatsInMyCart.jsx';
@@ -24,6 +22,8 @@ import WalkingTrailDetailPage from './components/WalkingTrailDetailPage';
 import WalkingTrailCreatePage from './components/WalkingTrailCreatePage';
 import MyPage from './components/mypage/Mypage.jsx';
 import OAuthRedirect from './components/OAuthRedirect.jsx';
+import AuctionPage from './components/shop/Auction.jsx'; // 경로 및 대소문자 재확인
+import ShoppingPage from './components/shop/Shopping.jsx'; // 경로 및 대소문자 재확인
 import PetRegister from './components/mypage/PetRegister.jsx';
 import PetUpdate from './components/mypage/PetUpdate.jsx';
 import MapServicePage from './pages/MapServicePage';
@@ -33,7 +33,21 @@ import PaymentFailPage from './pages/PaymentFailPage.jsx'; //토스페이먼츠 
 
 import ChatPage from './components/chat/ChatPage.jsx'; //채팅창
 
-import { BoardMain, BoardDetail, BoardWrite, BoardEdit, BoardList } from './components/board';
+import BoardAdminPage from './components/admin/boards/BoardAdminPage';
+
+import {
+  BoardDetail,
+  BoardEdit,
+  BoardList,
+  BoardMain,
+  BoardWrite,
+} from './components/board';
+
+// 관리자 페이지 컴포넌트
+import AdminPage from './components/admin/AdminPage.jsx';
+import AdminRoute from './components/admin/AdminRoute.jsx';
+import ProfanityManagePage from './components/admin/ProfanityManagePage.jsx';
+import UserAdminPage from './components/admin/UserAdminPage';
 
 function App() {
   return (
@@ -89,10 +103,36 @@ function App() {
         <Route path="/toss-auth-success" element={<TossAuthSuccessPage />} />
         <Route path="/payment/fail" element={<PaymentFailPage />} />
         <Route path="/payment/success" element={<OrderCompletePage />} />
-      </Routes>
-    </BrowserRouter>
-   </KakaoMapsScriptProvider>
-   </AuthProvider>
+            {/* 관리자 페이지 라우팅 */}
+            <Route
+              path="/admin"
+              element={
+                <AdminRoute>
+                  <AdminPage />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/profanity"
+              element={
+                <AdminRoute>
+                  <ProfanityManagePage />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/boards"
+              element={
+                <AdminRoute>
+                  <BoardAdminPage />
+                </AdminRoute>
+              }
+            />
+            <Route path="/admin/users" element={<UserAdminPage />} />
+          </Routes>
+        </BrowserRouter>
+      </KakaoMapsScriptProvider>
+    </AuthProvider>
   );
 }
 

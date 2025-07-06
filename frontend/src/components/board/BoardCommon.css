@@ -114,28 +114,68 @@
   padding-right: 16px;
 }
 
-.th-id,
-.th-views,
-.th-likes {
+.board-table th.th-id,
+.board-table td.th-id,
+.board-admin-table th.th-id,
+.board-admin-table td.th-id {
   width: 70px;
   min-width: 70px;
-  max-width: 90px;
+  max-width: 70px;
+  text-align: center;
+  padding-left: 0;
+  padding-right: 0;
 }
 
-.th-author,
-.board-table td.th-author {
+.board-table th.th-title,
+.board-table td.th-title,
+.board-admin-table th.th-title,
+.board-admin-table td.th-title {
+  width: 340px;
+  min-width: 200px;
+  max-width: 400px;
+  text-align: left;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.board-table th.th-author,
+.board-table td.th-author,
+.board-admin-table th.th-author,
+.board-admin-table td.th-author {
+  width: 120px;
+  min-width: 100px;
+  max-width: 140px;
   text-align: center;
 }
 
-.th-date {
+.board-table th.th-date,
+.board-table td.th-date,
+.board-admin-table th.th-date,
+.board-admin-table td.th-date {
   width: 130px;
   min-width: 110px;
   max-width: 150px;
+  text-align: center;
 }
 
-.th-title,
-.board-table td.th-title {
-  text-align: left;
+.board-table th.th-status,
+.board-table td.th-status,
+.board-admin-table th.th-status,
+.board-admin-table td.th-status {
+  width: 90px;
+  min-width: 80px;
+  max-width: 100px;
+  text-align: center;
+}
+
+.board-table th.th-manage,
+.board-table td.th-manage,
+.board-admin-table th.th-manage,
+.board-admin-table td.th-manage {
+  width: 180px;
+  min-width: 150px;
+  max-width: 200px;
+  text-align: center;
 }
 
 .board-table th {

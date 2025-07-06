@@ -62,9 +62,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
-      registry.addViewController("/{spring:\\w+}")
-        .setViewName("forward:/index.html");
-      registry.addViewController("/**/{spring:[\\w\\-]+}") // 경로에 하이픈(-) 포함 가능
-        .setViewName("forward:/index.html");
+        // /api로 시작하는 경로는 SPA 포워딩에서 제외
+        registry.addViewController("/{spring:[a-zA-Z0-9-_]+}")
+            .setViewName("forward:/index.html");
+        registry.addViewController("/**/{spring:[a-zA-Z0-9-_]+}")
+            .setViewName("forward:/index.html");
     }
 }
