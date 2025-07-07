@@ -103,6 +103,11 @@ const PetUpdate = () => {
             headers: { 'Content-Type': 'multipart/form-data' },
           });
 
+      const birthDate = new Date(form.pet_Birth);
+      const today = new Date();
+      const ageInMonths = (today.getFullYear() - birthDate.getFullYear()) * 12 + (today.getMonth() - birthDate.getMonth());
+
+
       // ✅ SweetAlert2로 1초 알림 후 이동
           Swal.fire({
             icon: 'success',
@@ -111,7 +116,18 @@ const PetUpdate = () => {
             timer: 1000,
             timerProgressBar: true,
           }).then(() => {
-            navigate('/members/mypage');
+            if (ageInMonths < 12) {
+              // 12개월 미만이면, 신호와 함께 마이페이지로 이동
+              navigate('/members/mypage', {
+                state: {
+                  showAutoVaxPopup: true,
+                  petName: form.pet_Name
+                }
+              });
+            } else {
+              // 12개월 이상이면 그냥 마이페이지로 이동
+              navigate('/members/mypage');
+            }
           });
     } catch (err) {
       console.error('펫 수정 오류:', err);

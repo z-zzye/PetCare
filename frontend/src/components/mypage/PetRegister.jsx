@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './PetRegister.css';
 import { jwtDecode } from 'jwt-decode';
 import axios from '../../api/axios';
@@ -9,6 +10,7 @@ const PetRegister = () => {
   const [profileImgPreview, setProfileImgPreview] = useState(null);
   const [errors, setErrors] = useState({});
   const fileInputRef = useRef(null);
+  const navigate = useNavigate();
 
   const [form, setForm] = useState({
     pet_Name: '',
@@ -89,7 +91,24 @@ const PetRegister = () => {
 
           await axios.post('/pets/register', formData);
           alert('펫 등록이 완료되었습니다!');
-          window.location.href = '/members/mypage';
+
+          const birthDate = new Date(form.pet_Birth);
+          const today = new Date();
+          const ageInMonths = (today.getFullYear() - birthDate.getFullYear()) * 12 + (today.getMonth() - birthDate.getMonth());
+
+          if (ageInMonths < 12) {
+            // 12개월 미만이면, 팝업을 띄우라는 신호(state)와 함께 마이페이지로 이동
+            navigate('/members/mypage', {
+              state: {
+                showAutoVaxPopup: true,
+                petName: form.pet_Name
+              }
+            });
+          } else {
+            // 12개월 이상이면 그냥 마이페이지로 이동
+            navigate('/members/mypage');
+          }
+
         } catch (error) {
           console.error('펫 등록 오류:', error);
           const errMsg = error.response?.data?.message || '펫 등록 중 문제가 발생했습니다.';
