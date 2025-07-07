@@ -1,0 +1,141 @@
+/* 채팅방 리스트(최초 모달) - 기존 위치(오른쪽 상단 등) */
+.chatroom-list-popup-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.15);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+}
+
+.chatroom-list-popup {
+  background: #fff;
+  border-radius: 14px;
+  margin: 2.5rem 2.5rem 0 0;
+  padding: 2rem 1.5rem 1.5rem 1.5rem;
+  min-width: 340px;
+  max-width: 400px;
+  box-shadow: 0 4px 16px rgba(34,58,94,0.10), 0 1.5px 4px rgba(34,58,94,0.08);
+  position: relative;
+}
+
+/* 채팅방(실제 대화창) 모달만 중앙 정렬 유지 */
+.chatroom-popup-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.15);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chatroom-popup {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.13);
+  max-width: 360px;
+  width: 60vw;
+  min-height: 500px;
+  padding: 2.5rem 0.3rem 1.5rem 0.3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.chatroom-popup-close {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.2rem;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #222;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.chatroom-popup-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #223A5E;
+  margin-bottom: 1.2rem;
+  text-align: left;
+}
+
+.chatroom-popup-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.chatroom-popup-list-item {
+  display: flex;
+  align-items: center;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid #f0f2f5;
+}
+
+.chatroom-popup-list-item:last-child {
+  border-bottom: none;
+}
+
+.chatroom-popup-profile {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid #e2e3e5;
+  margin-right: 0.9rem;
+}
+
+.chatroom-popup-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.chatroom-popup-nickname {
+  font-weight: 500;
+  color: #223A5E;
+  font-size: 1rem;
+  margin-bottom: 0.2rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chatroom-popup-lastmsg {
+  color: #888;
+  font-size: 0.92rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chatroom-popup-enter {
+  background: #223A5E;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.45rem 1.1rem;
+  font-size: 0.97rem;
+  font-weight: 500;
+  margin-left: 1rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.chatroom-popup-enter:hover {
+  background: #1a2d47;
+}
+
+.chatroom-popup-loading,
+.chatroom-popup-empty {
+  color: #888;
+  text-align: center;
+  padding: 2rem 0 1.5rem 0;
+  font-size: 1.05rem;
+} 

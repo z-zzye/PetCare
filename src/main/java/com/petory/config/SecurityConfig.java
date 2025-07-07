@@ -36,27 +36,27 @@ public class SecurityConfig {
         /*.requestMatchers("/api/calendar/**").authenticated()*/
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-      http
-        .csrf(csrf -> csrf.disable())
-        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-        .authorizeHttpRequests(auth -> auth
-          .requestMatchers(
-            "/", "/favicon.ico", "/css/**", "/js/**", "/img/**", "/images/**", "/profile/**", "/index.html", "/static/",
-            "/api/members/signup",
-            "/api/members/login",
-            "/oauth2/**",
-            "/auth/**",
-            "/api/sms/**",
-            "/api/members/find-id",
-            "/api/members/reset-password",
-            "/api/members/public/**"
-          ).permitAll()
-          .requestMatchers(HttpMethod.GET, "/api/boards", "/api/boards/**").permitAll()
-          .requestMatchers("/api/orders/admin/**").hasAuthority("ADMIN")
-          .requestMatchers("/admin/**").hasRole("ADMIN")
-          .anyRequest().permitAll()
-        )
+        http
+            .csrf(csrf -> csrf.disable())
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+          .authorizeHttpRequests(auth -> auth
+            .requestMatchers(
+              "/", "/favicon.ico", "/css/**", "/js/**", "/img/**", "/images/**", "/profile/**",
+              "/api/members/signup", //회원가입
+              "/api/members/login", //로그인
+              "/oauth2/**",
+              "/auth/**",
+              "/api/sms/**",
+              "/api/members/find-id", //아이디찾기
+              "/api/members/reset-password", //비밀번호찾기
+              "/api/members/public/**", // 채팅에서 유저 닉네임 불러오기
+              "/ws/**", "/sockjs-node/**", "/static/**", "/**/*.html"//SockJS fallback, 정적리소스 fallback 요청 permit
+            ).permitAll()
+            .requestMatchers(HttpMethod.GET, "/api/boards", "/api/boards/**").permitAll()
+            .requestMatchers("/admin/**").hasRole("ADMIN")
+            .anyRequest().permitAll()
+          )
             .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService), UsernamePasswordAuthenticationFilter.class)
 /*            .formLogin(form -> form
                 .loginPage("/members/login")

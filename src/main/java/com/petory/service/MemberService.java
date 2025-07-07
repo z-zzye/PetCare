@@ -146,6 +146,10 @@ public class MemberService implements UserDetailsService {
         member.setMember_Phone(phone);
     }
 
+    public Member getMemberById(Long member_Id) {
+      return memberRepository.findByMember_Id(member_Id).orElse(null);
+    }
+
     public Member getMemberByPhone(String phone) {
       return memberRepository.findByMember_Phone(phone).orElse(null);
     }
@@ -201,4 +205,17 @@ public class MemberService implements UserDetailsService {
         .build())
       .collect(Collectors.toList());
   }
+
+  public ChatMemberDto getChatMemberById(Long memberId) {
+    Member member = memberRepository.findById(memberId)
+      .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+    return new ChatMemberDto(
+      member.getMember_Id(),
+      member.getMember_NickName(),
+      member.getMember_ProfileImg() // 프로필 이미지 URL 컬럼명 맞게 수정
+    );
+  }
+
+
 }
