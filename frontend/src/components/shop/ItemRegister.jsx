@@ -189,6 +189,7 @@ const ItemRegister = () => {
                 <select name="itemStatus" value={form.itemStatus} onChange={handleChange}>
                   <option value="SELL">판매중</option>
                   <option value="SOLD_OUT">품절</option>
+                  <option value="AUCTION">경매 상품</option>
                 </select>
               </div>
             </div>
@@ -237,7 +238,10 @@ const ItemRegister = () => {
                 ))}
               </div>
             </div>
-            <button type="submit" className="submit-btn">상품 등록</button>
+            <div className="button-row">
+              <button type="submit" className="action-btn" disabled={form.itemStatus === 'AUCTION'}>상품 등록</button>
+              <button type="button" className="action-btn auction-btn" onClick={() => window.location.href='/admin/auction/register'}>경매 등록</button>
+            </div>
           </form>
           <style>{`
             .item-register-bg {
@@ -419,22 +423,46 @@ const ItemRegister = () => {
               gap: 0.3rem;
               margin-top: 0.3rem;
             }
-            .submit-btn {
-              width: 100%;
-              background: linear-gradient(90deg, #ffc107, #ff9800);
-              color: #223A5E;
-              border: none;
-              border-radius: 8px;
-              padding: 1rem 0;
-              font-size: 1.15rem;
+            .action-btn {
+              width: 200px;
+              min-height: 56px;
+              padding: 0;
+              font-size: 1.1rem;
               font-weight: 700;
-              margin-top: 2rem;
+              border-radius: 10px;
+              line-height: 1.2;
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+              box-sizing: border-box;
+              border: none;
+              transition: background 0.2s;
+              margin: 0;
               cursor: pointer;
               box-shadow: 0 2px 8px #ffc10722;
-              transition: background 0.2s;
             }
-            .submit-btn:hover {
+            .action-btn {
+              background: linear-gradient(90deg, #ffc107, #ff9800);
+              color: #223A5E;
+            }
+            .action-btn:hover {
               background: linear-gradient(90deg, #ffd54f, #ffc107);
+            }
+            .auction-btn {
+              background: linear-gradient(90deg, #667eea, #764ba2);
+              color: #fff;
+              box-shadow: 0 2px 8px #667eea22;
+            }
+            .auction-btn:hover {
+              background: linear-gradient(90deg, #5a6fd8, #667eea);
+            }
+            .button-row {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              width: 100%;
+              gap: 2.5rem;
+              margin-top: 2rem;
             }
             @media (max-width: 700px) {
               .item-register-container {

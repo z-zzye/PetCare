@@ -18,7 +18,7 @@ INSERT INTO item_category (parent_option, option_value) VALUES (13, '기타');
 -- 경매 대분류
 INSERT INTO item_category (parent_option, option_value) VALUES (NULL, '경매');
 -- 경매 소분류 (대분류 category_id가 14라고 가정)
-INSERT INTO item_category (parent_option, option_value) VALUES (16, '경매');
+INSERT INTO item_category (parent_option, option_value) VALUES (15, '경매');
 
 INSERT INTO items (category_id, item_name, item_description, item_price, item_status, is_active, item_reg_date, item_update_date) VALUES (2, '강아지 사료 상품1', '강아지의 사료용 고급 상품입니다.', 13200, 'SELL', true, NOW(), NOW());
 INSERT INTO items_option (item_id, option_name, option_add_price, option_stock, is_active) VALUES ((SELECT MAX(item_id) FROM items), 'S', 5800, 17, true);

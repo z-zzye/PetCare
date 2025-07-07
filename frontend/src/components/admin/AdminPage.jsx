@@ -33,6 +33,11 @@ const AdminPage = () => {
             <h3>쇼핑몰 관리</h3>
             <p>주문, 상품, 회원 구매 이력을 관리합니다</p>
           </Link>
+          <Link to="/admin/auction" className="admin-menu-item">
+            <div className="admin-menu-icon">🏷️</div>
+            <h3>경매 관리</h3>
+            <p>경매 상품과 입찰 현황을 관리합니다</p>
+          </Link>
         </div>
       </div>
     </div>

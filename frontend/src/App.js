@@ -33,6 +33,8 @@ import PaymentMethodPage from './pages/PaymentMethodPage';//결제창
 import TossAuthSuccessPage from './pages/TossAuthSuccessPage';//토스관련완료확인창
 import PaymentFailPage from './pages/PaymentFailPage.jsx'; //토스페이먼츠 쇼핑몰 구매 실패창
 
+// 경매 관련
+import AuctionItemRegister from './components/shop/AuctionItemRegister.jsx';
 
 import BoardAdminPage from './components/admin/boards/BoardAdminPage';
 
@@ -50,6 +52,7 @@ import AdminRoute from './components/admin/AdminRoute.jsx';
 import ProfanityManagePage from './components/admin/ProfanityManagePage.jsx';
 import UserAdminPage from './components/admin/UserAdminPage.jsx';
 import ShopAdminPage from './components/admin/ShopAdminPage.jsx';
+import AuctionAdminPage from './components/admin/AuctionAdminPage.jsx';
 
 function App() {
   return (
@@ -96,6 +99,16 @@ function App() {
         <Route path="/shop/my-orders" element={<MyOrders />} />
         <Route path="/shop/order" element={<OrderPage />} /> /*바로구매 버튼 클릭시 이동*/
 
+        /*경매 관련 라우팅 */
+        <Route
+            path="/admin/auction/register"
+            element={
+              <AdminRoute>
+                  <AuctionItemRegister />
+              </AdminRoute>
+            }
+        />
+
         <Route path="/trails" element={<WalkingTrailListPage />} />
         <Route path="/trails/:trailId" element={<WalkingTrailDetailPage />} />
         <Route path="/create-trail" element={<WalkingTrailCreatePage />} />
@@ -131,11 +144,20 @@ function App() {
               }
             />
             <Route path="/admin/users" element={<UserAdminPage />} />
+
             <Route
               path="/admin/shop"
               element={
                 <AdminRoute>
                   <ShopAdminPage />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/auction"
+              element={
+                <AdminRoute>
+                  <AuctionAdminPage />
                 </AdminRoute>
               }
             />
