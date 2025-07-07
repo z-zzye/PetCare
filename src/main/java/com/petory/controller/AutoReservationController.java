@@ -3,11 +3,14 @@ package com.petory.controller;
 import com.petory.dto.AutoReservationRequestDto;
 import com.petory.service.AutoReservationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auto-reservations")
@@ -17,13 +20,18 @@ public class AutoReservationController {
   private final AutoReservationService autoReservationService;
 
   @PostMapping("/start")
-  public ResponseEntity<String> startAutoReservation(@RequestBody AutoReservationRequestDto requestDto) {
+// ✅ 1. 반환 타입을 Map<String, Object>으로 변경
+  public ResponseEntity<Map<String, Object>> startAutoReservation(@RequestBody AutoReservationRequestDto requestDto) {
     try {
-      autoReservationService.startAutoReservationProcess(requestDto);
-      return ResponseEntity.ok("자동 예약 절차를 시작했습니다. 완료 시 알림이 전송됩니다.");
+      // ✅ 2. 서비스가 반환하는 예약 정보를 result 변수에 저장
+      Map<String, Object> result = autoReservationService.startAutoReservationProcess(requestDto);
+
+      // ✅ 3. 서비스로부터 받은 결과(result)를 프론트엔드로 전달
+      return ResponseEntity.ok(result);
+
     } catch (Exception e) {
-      // 실제 운영 코드에서는 예외 종류에 따라 더 상세한 처리가 필요합니다.
-      return ResponseEntity.badRequest().body(e.getMessage());
+      Map<String, Object> errorBody = Map.of("error", e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorBody);
     }
   }
 }

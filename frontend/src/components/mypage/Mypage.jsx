@@ -48,6 +48,7 @@ const Mypage = () => {
         // PetRegister 또는 PetUpdate에서 보낸 신호(state)가 있는지 확인
         if (location.state?.showAutoVaxPopup) {
           const { petId, petName } = location.state;
+          console.log('3. Mypage가 페이지 이동(navigate) 직후 받은 petId:', petId);
           setSelectedPetName(petName);
           setSelectedPetId(petId);
 
@@ -111,6 +112,7 @@ const Mypage = () => {
           </div>
         </div>
 
+        {console.log('4. Mypage가 모달로 넘겨주는 최종 petId:', selectedPetId)}
         <AutoVaxApplyModal
           isOpen={isApplyModalOpen} // 모달을 열지 말지 결정하는 상태
           onRequestClose={() => setIsApplyModalOpen(false)} // 모달 닫기 함수

@@ -4,6 +4,7 @@ import axios from '../../api/axios'; // axios 인스턴스
 import Swal from 'sweetalert2';
 
 const AutoVaxForm = ({ petName, petId, onComplete }) => {
+  console.log('1. AutoVaxForm이 최종적으로 받은 petId:', petId);
   const [location, setLocation] = useState(null); // { lat, lng }
   const [preferredTime, setPreferredTime] = useState(null); // 'MORNING', 'AFTERNOON', 'EVENING'
   const [isLoading, setIsLoading] = useState(false);
@@ -63,12 +64,24 @@ const handleGpsLocation = () => {
     try {
       setIsLoading(true);
       console.log('서버로 전송할 데이터:', requestData);
-      await axios.post('/auto-reservations/start', requestData);
+      // ✅ API 호출 후 그 결과를 response 변수에 저장
+      const response = await axios.post('/auto-reservations/start', requestData);
+      const result = response.data; // 응답 데이터 추출
+
+      // ✅ 응답 데이터를 사용해 상세한 결과 팝업 표시
+      const confirmedDate = new Date(result.confirmedDateTime);
+      const formattedDate = `${confirmedDate.getFullYear()}년 ${confirmedDate.getMonth() + 1}월 ${confirmedDate.getDate()}일`;
+      const formattedTime = `${confirmedDate.getHours()}시 ${confirmedDate.getMinutes()}분`;
+
 
       Swal.fire({
         icon: 'success',
-        title: '자동 예약 요청 완료!',
-        text: `${petName}의 예약이 확정되면 알려드릴게요.`,
+        title: '자동 예약이 확정되었습니다!',
+        html: `
+          <b>병원:</b> ${result.hospitalName}<br/>
+          <b>일시:</b> ${formattedDate} ${formattedTime}
+        `,
+        confirmButtonText: '확인',
       });
 
       onComplete(); // 부모 컴포넌트(모달)를 닫는 함수 호출

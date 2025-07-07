@@ -90,8 +90,9 @@ const PetRegister = () => {
           }
 
           const response = await axios.post('/pets/register', formData);
-          const newPet = response.data;
-          alert('펫 등록이 완료되었습니다!');
+          const apiResponse = response.data;
+          const newPet = apiResponse.data;
+          alert(apiResponse.message);
 
           const birthDate = new Date(form.pet_Birth);
           const today = new Date();
@@ -102,8 +103,8 @@ const PetRegister = () => {
             navigate('/members/mypage', {
               state: {
                 showAutoVaxPopup: true,
-                petName: form.pet_Name, // form의 이름 대신 응답받은 이름 사용
-                petId: form.pet_Num     // ✅ 백엔드에서 받은 새로운 펫 ID(pet_Num)
+                petName: newPet.pet_Name, // form의 이름 대신 응답받은 이름 사용
+                petId: newPet.pet_Num     // ✅ 백엔드에서 받은 새로운 펫 ID(pet_Num)
               }
             });
           } else {

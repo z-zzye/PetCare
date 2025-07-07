@@ -20,7 +20,7 @@ public class PetService {
   private final MemberRepository memberRepository;
   private final ImageService imageService;
 
-  public void registerPet(PetRegisterDto dto) {
+  public Pet registerPet(PetRegisterDto dto) {
     String imageUrl = null;
     if (dto.getPet_ProfileImg() != null && !dto.getPet_ProfileImg().isEmpty()) {
       try {
@@ -41,7 +41,7 @@ public class PetService {
     pet.setPet_ProfileImg(imageUrl);
     pet.setPet_Category(dto.getPet_Category());
 
-    petRepository.save(pet);
+    return petRepository.save(pet);
   }
 
   public Pet findById(Long petId) {
@@ -54,7 +54,7 @@ public class PetService {
   }
 
   @Transactional
-  public void updatePet(Long petId, PetRegisterDto dto) throws Exception {
+  public Pet updatePet(Long petId, PetRegisterDto dto) throws Exception {
     Pet pet = petRepository.findById(petId)
       .orElseThrow(() -> new RuntimeException("해당 펫이 존재하지 않습니다."));
 
@@ -73,6 +73,8 @@ public class PetService {
     pet.setPet_Category(dto.getPet_Category());
 
     // JPA 더티 체킹으로 save() 없이도 수정 완료
+
+    return pet;
   }
 
   @Transactional

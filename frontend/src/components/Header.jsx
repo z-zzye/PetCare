@@ -17,7 +17,7 @@ const baseMenu = [
   },
   {
     name: '쇼핑',
-    link: '/shop',
+    link: '/shop/shopping',
     submenu: [
       { name: '쇼핑', link: '/shop/shopping' },
       { name: 'Auction', link: '/shop/auction' },

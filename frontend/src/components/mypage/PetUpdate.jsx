@@ -99,9 +99,12 @@ const PetUpdate = () => {
         formData.append('pet_ProfileImgFile', form.profileImgFile);
       }
 
-      await axios.put(`/pets/${petId}`, formData, {
+      const response = await axios.put(`/pets/${petId}`, formData, {
             headers: { 'Content-Type': 'multipart/form-data' },
-          });
+      });
+
+      const apiResponse = response.data;
+      const updatedPet = apiResponse.data;
 
       const birthDate = new Date(form.pet_Birth);
       const today = new Date();
@@ -111,7 +114,7 @@ const PetUpdate = () => {
       // ✅ SweetAlert2로 1초 알림 후 이동
           Swal.fire({
             icon: 'success',
-            title: '펫 정보가 수정되었습니다!',
+            title: apiResponse.message,
             showConfirmButton: false,
             timer: 1000,
             timerProgressBar: true,
@@ -121,8 +124,8 @@ const PetUpdate = () => {
               navigate('/members/mypage', {
                 state: {
                   showAutoVaxPopup: true,
-                  petName: form.pet_Name,
-                  petId: petId
+                  petName: updatedPet.pet_Name,
+                  petId: updatedPet.pet_Num
                 }
               });
             } else {

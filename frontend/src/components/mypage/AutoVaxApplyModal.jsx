@@ -27,6 +27,7 @@ const customStyles = {
 // 여기서는 Mypage에서 직접 호출할 것이므로 그곳에 추가하겠습니다.
 
 const AutoVaxApplyModal = ({ isOpen, onRequestClose, petName, petId }) => {
+    console.log('2. AutoVaxApplyModal이 중간에서 받은 petId:', petId);
   // ✅ 1. 모달의 단계를 관리하는 상태 (1: 동의 단계, 2: 폼 작성 단계)
   const [step, setStep] = useState(1);
   // ✅ 2. 동의 여부를 관리하는 상태

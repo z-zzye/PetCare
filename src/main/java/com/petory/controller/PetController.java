@@ -13,7 +13,9 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -23,7 +25,7 @@ public class PetController {
   private final PetService petService;
 
   @PostMapping(value = "/register", consumes = {"multipart/form-data"})
-  public ResponseEntity<?> registerPet(
+  public ResponseEntity<Map<String, Object>> registerPet(
     @RequestPart("data") @Valid PetRegisterDto dto,
     @RequestPart(value = "pet_ProfileImgFile", required = false) MultipartFile pet_ProfileImgFile,
     BindingResult bindingResult) {
@@ -32,15 +34,23 @@ public class PetController {
       String errorMsg = bindingResult.getFieldErrors().stream()
         .map(FieldError::getDefaultMessage)
         .collect(Collectors.joining("\n"));
-      return ResponseEntity.badRequest().body(errorMsg);
+      Map<String, Object> errorBody = Map.of("message", errorMsg);
+      return ResponseEntity.badRequest().body(errorBody);
     }
 
     try {
       dto.setPet_ProfileImg(pet_ProfileImgFile);
-      petService.registerPet(dto);
-      return ResponseEntity.ok("펫 등록 완료!");
+      Pet savedPet = petService.registerPet(dto);
+
+      Map<String, Object> responseBody = new HashMap<>();
+
+      responseBody.put("message", "펫 등록 완료!");
+      responseBody.put("data", savedPet);
+
+      return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
     } catch (Exception e) {
-      return ResponseEntity.status(500).body("펫 등록 중 오류 발생: " + e.getMessage());
+      Map<String, Object> errorBody = Map.of("message", "펫 등록 중 오류 발생: " + e.getMessage());
+      return ResponseEntity.status(500).body(errorBody);
     }
   }
 
@@ -64,7 +74,7 @@ public class PetController {
 
   // ✅ 펫 수정 후 업데이트
   @PutMapping(value = "/{petId}", consumes = {"multipart/form-data"})
-  public ResponseEntity<?> updatePet(
+  public ResponseEntity<Map<String, Object>> updatePet(
     @PathVariable Long petId,
     @RequestPart("data") @Valid PetRegisterDto dto,
     @RequestPart(value = "pet_ProfileImgFile", required = false) MultipartFile pet_ProfileImgFile,
@@ -74,15 +84,22 @@ public class PetController {
       String errorMsg = bindingResult.getFieldErrors().stream()
         .map(FieldError::getDefaultMessage)
         .collect(Collectors.joining("\n"));
-      return ResponseEntity.badRequest().body(errorMsg);
+      Map<String, Object> errorBody = Map.of("message", errorMsg);
+      return ResponseEntity.badRequest().body(errorBody);
     }
 
     try {
       dto.setPet_ProfileImg(pet_ProfileImgFile);
-      petService.updatePet(petId, dto); // 서비스 로직에서 처리
-      return ResponseEntity.ok("펫 정보 수정 완료!");
+      Pet updatedPet = petService.updatePet(petId, dto); // 서비스 로직에서 처리
+
+      Map<String, Object> responseBody = new HashMap<>();
+      responseBody.put("message", "펫 정보 수정이 완료되었습니다!");
+      responseBody.put("data", updatedPet);
+
+      return ResponseEntity.ok(responseBody);
     } catch (Exception e) {
-      return ResponseEntity.status(500).body("펫 정보 수정 중 오류 발생: " + e.getMessage());
+      Map<String, Object> errorBody = Map.of("message", "펫 정보 수정 중 오류 발생: " + e.getMessage());
+      return ResponseEntity.status(500).body(errorBody);
     }
   }
 
