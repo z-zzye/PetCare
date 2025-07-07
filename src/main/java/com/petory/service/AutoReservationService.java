@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -33,6 +34,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class AutoReservationService {
+
+  @Value("${external.dummy.api.url}")
+  String dummyApiUrl;
 
   private final PetRepository petRepository;
   private final RestTemplate restTemplate;
@@ -85,22 +89,32 @@ public class AutoReservationService {
    * 스마트 Enum을 사용하여 다음 접종일을 계산하는 메서드
    */
   private List<LocalDate> calculateNextVaccinationDates(Pet pet) {
-    List<LocalDate> dates = new ArrayList<>();
-    LocalDate birthDate = pet.getPet_Birth();
-    PetCategory category = pet.getPet_Category();
+    // 1. 이 반려동물이 '방문 완료(COMPLETED)'한 모든 예약 기록을 DB에서 조회합니다.
+    List<Reservation> completedReservations = reservationRepository.findByPetAndReservationStatus(pet, ReservationStatus.COMPLETED);
 
-    // 모든 VaccineType을 순회
+    // 2. 완료된 접종 기록을 백신 종류별로 카운팅합니다. (예: {DOG_COMPREHENSIVE: 2, DOG_RABIES: 1})
+    Map<VaccineType, Long> completedCounts = completedReservations.stream()
+            .collect(Collectors.groupingBy(Reservation::getVaccineType, Collectors.counting()));
+
+    List<LocalDate> nextDates = new ArrayList<>();
+    LocalDate birthDate = pet.getPet_Birth();
+
+    // 3. 모든 백신 종류를 순회하며 '다음 접종일'을 계산합니다.
     for (VaccineType vaccine : VaccineType.values()) {
-      // 이 백신이 해당 펫의 종류와 일치하는지 확인
-      if (vaccine.getPetCategory() == category) {
-        LocalDate firstShotDate = birthDate.plusWeeks(vaccine.getStartWeeks());
-        for (int i = 0; i < vaccine.getTotalShots(); i++) {
-          dates.add(firstShotDate.plusWeeks((long) i * vaccine.getIntervalWeeks()));
+      if (vaccine.getPetCategory() == pet.getPet_Category()) {
+        long alreadyDone = completedCounts.getOrDefault(vaccine, 0L);
+
+        // 4. 총 맞아야 할 횟수보다 적게 맞았다면, 다음 접종일을 계산합니다.
+        if (alreadyDone < vaccine.getTotalShots()) {
+          LocalDate firstShotDate = birthDate.plusWeeks(vaccine.getStartWeeks());
+          // 다음 접종은 '이미 맞은 횟수'를 기반으로 계산합니다. (0부터 시작하므로 그대로 사용)
+          LocalDate nextShotDate = firstShotDate.plusWeeks(alreadyDone * vaccine.getIntervalWeeks());
+          nextDates.add(nextShotDate);
         }
       }
     }
-    // TODO: 이미 맞은 접종 기록을 DB에서 확인하고, dates 리스트에서 제외하는 로직 추가 필요
-    return dates;
+    // 이 nextDates 리스트에는 정말 다음에 맞아야 할 접종 날짜들만 남게 됩니다.
+    return nextDates;
   }
 
   // 특정 펫 종류에 해당하는 첫 번째 백신 타입을 찾는 헬퍼 메서드
@@ -121,7 +135,6 @@ public class AutoReservationService {
           List<LocalDate> targetDates,
           String preferredTime) {
     // ... 기존 코드와 동일 ...
-    String dummyApiUrl = "http://localhost:3001/api/hospitals/availability";
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
     Map<String, Object> searchLocation = Map.of("latitude", location.getLat(), "longitude", location.getLng());

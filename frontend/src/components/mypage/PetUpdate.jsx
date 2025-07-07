@@ -124,8 +124,8 @@ const PetUpdate = () => {
               navigate('/members/mypage', {
                 state: {
                   showAutoVaxPopup: true,
-                  petName: updatedPet.pet_Name,
-                  petId: updatedPet.pet_Num
+                  petName: updatedPet.petName,
+                  petId: updatedPet.petNum
                 }
               });
             } else {

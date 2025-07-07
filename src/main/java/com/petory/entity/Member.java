@@ -43,6 +43,9 @@ public class Member extends BaseEntity {
 
     private String member_Address;
 
+    @Column(name = "customer_uid", length = 255)
+    private String customerUid;
+
 
     public static Member createMember(MemberFormDto memberFormDto,
                                       PasswordEncoder passwordEncoder,

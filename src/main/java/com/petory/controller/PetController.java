@@ -45,7 +45,7 @@ public class PetController {
       Map<String, Object> responseBody = new HashMap<>();
 
       responseBody.put("message", "펫 등록 완료!");
-      responseBody.put("data", savedPet);
+      responseBody.put("data", PetDto.from(savedPet));
 
       return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
     } catch (Exception e) {
@@ -94,7 +94,7 @@ public class PetController {
 
       Map<String, Object> responseBody = new HashMap<>();
       responseBody.put("message", "펫 정보 수정이 완료되었습니다!");
-      responseBody.put("data", updatedPet);
+      responseBody.put("data", PetDto.from(updatedPet));
 
       return ResponseEntity.ok(responseBody);
     } catch (Exception e) {
