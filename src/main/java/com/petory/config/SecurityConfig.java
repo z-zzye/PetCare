@@ -53,7 +53,7 @@ public class SecurityConfig {
             ).permitAll()
             .requestMatchers(HttpMethod.GET, "/api/boards", "/api/boards/**").permitAll()
             .requestMatchers("/admin/**").hasRole("ADMIN")
-            .anyRequest().authenticated()
+            .anyRequest().permitAll()
           )
             .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService), UsernamePasswordAuthenticationFilter.class)
 /*            .formLogin(form -> form
