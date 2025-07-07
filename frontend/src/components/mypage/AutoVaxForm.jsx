@@ -3,7 +3,7 @@ import './AutoVaxForm.css'; // 아래에 제공될 CSS 파일
 import axios from '../../api/axios'; // axios 인스턴스
 import Swal from 'sweetalert2';
 
-const AutoVaxForm = ({ petName, onComplete }) => {
+const AutoVaxForm = ({ petName, petId, onComplete }) => {
   const [location, setLocation] = useState(null); // { lat, lng }
   const [preferredTime, setPreferredTime] = useState(null); // 'MORNING', 'AFTERNOON', 'EVENING'
   const [isLoading, setIsLoading] = useState(false);
@@ -54,17 +54,22 @@ const handleGpsLocation = () => {
       return;
     }
 
+    const requestData = {
+      petId: petId, // petName 대신 petId 사용
+      location: location,
+      preferredTime: preferredTime,
+    };
+
     try {
       setIsLoading(true);
-      // TODO: 백엔드에 자동 예약 시작을 요청하는 API 호출
-      // const response = await axios.post('/api/auto-reservations/start', {
-      //   petName: petName,
-      //   location: location,
-      //   preferredTime: preferredTime
-      // });
+      console.log('서버로 전송할 데이터:', requestData);
+      await axios.post('/auto-reservations/start', requestData);
 
-      console.log('서버로 전송할 데이터:', { petName, location, preferredTime });
-      alert(`${petName}의 자동 예약을 시작합니다! 예약이 확정되면 알려드릴게요.`);
+      Swal.fire({
+        icon: 'success',
+        title: '자동 예약 요청 완료!',
+        text: `${petName}의 예약이 확정되면 알려드릴게요.`,
+      });
 
       onComplete(); // 부모 컴포넌트(모달)를 닫는 함수 호출
 

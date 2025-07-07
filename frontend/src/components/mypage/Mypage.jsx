@@ -22,6 +22,7 @@ const Mypage = () => {
   // 자동예약 신청 모달 관련
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
   const [selectedPetName, setSelectedPetName] = useState('');
+  const [selectedPetId, setSelectedPetId] = useState(null);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -46,8 +47,9 @@ const Mypage = () => {
     useEffect(() => {
         // PetRegister 또는 PetUpdate에서 보낸 신호(state)가 있는지 확인
         if (location.state?.showAutoVaxPopup) {
-          const { petName } = location.state;
+          const { petId, petName } = location.state;
           setSelectedPetName(petName);
+          setSelectedPetId(petId);
 
           Swal.fire({
             icon: 'info',
@@ -113,6 +115,7 @@ const Mypage = () => {
           isOpen={isApplyModalOpen} // 모달을 열지 말지 결정하는 상태
           onRequestClose={() => setIsApplyModalOpen(false)} // 모달 닫기 함수
           petName={selectedPetName} // 모달에 표시할 펫 이름
+          petId={selectedPetId} // 모달에 petId 전달
         />
       </>
     );

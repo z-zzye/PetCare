@@ -26,7 +26,7 @@ const customStyles = {
 // 접근성을 위해 앱의 최상위 요소를 알려줍니다. (index.js 또는 App.js에서 설정)
 // 여기서는 Mypage에서 직접 호출할 것이므로 그곳에 추가하겠습니다.
 
-const AutoVaxApplyModal = ({ isOpen, onRequestClose, petName }) => {
+const AutoVaxApplyModal = ({ isOpen, onRequestClose, petName, petId }) => {
   // ✅ 1. 모달의 단계를 관리하는 상태 (1: 동의 단계, 2: 폼 작성 단계)
   const [step, setStep] = useState(1);
   // ✅ 2. 동의 여부를 관리하는 상태
@@ -110,7 +110,7 @@ const AutoVaxApplyModal = ({ isOpen, onRequestClose, petName }) => {
 
       {/* --- 2단계: 위치 및 시간 설정 폼 --- */}
       {step === 2 && (
-        <AutoVaxForm petName={petName} onComplete={handleCloseModal} />
+        <AutoVaxForm petName={petName} petId={petId} onComplete={handleCloseModal} />
       )}
 
       {/* ▲▲▲▲▲ -------------------- ▲▲▲▲▲ */}
