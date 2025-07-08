@@ -42,7 +42,7 @@ public class ItemService {
   상품등록
    */
   @Transactional
-  public void saveItem(ItemFormDto formDto, List<org.springframework.web.multipart.MultipartFile> images, List<String> imagesIsRep) throws Exception {
+  public Long saveItem(ItemFormDto formDto, List<org.springframework.web.multipart.MultipartFile> images, List<String> imagesIsRep) throws Exception {
     // 1. 카테고리 조회
     ItemCategory category = itemCategoryRepository.findById(formDto.getCategoryId())
       .orElseThrow(() -> new IllegalArgumentException("해당 카테고리가 존재하지 않습니다."));
@@ -82,6 +82,7 @@ public class ItemService {
         itemImageRepository.save(image);
       }
     }
+    return item.getItemId();
   }
 
   // 상품 목록 조회 (카테고리 조건별 + 검색)

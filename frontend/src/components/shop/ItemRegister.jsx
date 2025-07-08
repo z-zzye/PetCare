@@ -1,17 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from '../../api/axios'; // 경로 수정
 import Header from '../Header.jsx';
 
 const ItemRegister = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [categories, setCategories] = useState([]);
+  
+  // 경로에 따라 초기 상태 설정
+  const isAuctionRegister = location.pathname === '/admin/auction/register';
+  
   const [form, setForm] = useState({
     categoryId: '',
     itemName: '',
     itemDescription: '',
     itemPrice: '',
-    itemStatus: 'SELL',
+    itemStatus: isAuctionRegister ? 'AUCTION' : 'SELL',
     options: [],
     images: []
   });
@@ -92,6 +97,51 @@ const ItemRegister = () => {
 
   // 대표 이미지 유효성 검사 추가
   const hasRepresentative = form.images.some(img => img.isRepresentative);
+
+  const handleAuctionRegister = async () => {
+    // 옵션 유효성 검사
+    if (form.options.length === 0) {
+      setToast('옵션을 작성해주세요');
+      return;
+    }
+    
+    // 대표 이미지 유효성 검사
+    if (!hasRepresentative) {
+      setToast('대표 이미지를 반드시 선택해야 합니다.');
+      return;
+    }
+
+    const data = new FormData();
+    const itemDto = {
+      categoryId: form.categoryId,
+      itemName: form.itemName,
+      itemDescription: form.itemDescription,
+      itemStatus: 'AUCTION', // 경매 상태로 설정
+      itemPrice: form.itemPrice,
+      options: form.options
+    };
+    
+    data.append('itemDto', JSON.stringify(itemDto));
+    form.images.forEach((file) => {
+      data.append('images', file);
+      data.append('imagesIsRep', file.isRepresentative ? 'true' : 'false');
+    });
+
+    try {
+      const response = await axios.post('/items/new', data);
+      console.log('상품 등록 응답:', response.data); // 응답 전체 콘솔 출력
+      const itemId = response.data.item_id; // item_id로 변경
+      
+      setToast('상품이 등록되었습니다. 경매 정보를 입력해주세요.');
+      setTimeout(() => {
+        navigate(`/shop/auction/register/${itemId}`);
+      }, 1200);
+      
+    } catch (err) {
+      console.error('❌ 상품 등록 실패:', err);
+      setToast('상품 등록 실패: ' + (err.response?.data?.message || '오류 발생'));
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -239,8 +289,33 @@ const ItemRegister = () => {
               </div>
             </div>
             <div className="button-row">
-              <button type="submit" className="action-btn" disabled={form.itemStatus === 'AUCTION'}>상품 등록</button>
-              <button type="button" className="action-btn auction-btn" onClick={() => window.location.href='/admin/auction/register'}>경매 등록</button>
+              <button 
+                type="submit" 
+                className="action-btn" 
+                disabled={form.itemStatus === 'AUCTION'}
+                style={{
+                  background: form.itemStatus === 'AUCTION' ? '#cccccc' : 'linear-gradient(90deg, #ffc107, #ff9800)',
+                  color: form.itemStatus === 'AUCTION' ? '#666666' : '#223A5E',
+                  cursor: form.itemStatus === 'AUCTION' ? 'not-allowed' : 'pointer',
+                  boxShadow: form.itemStatus === 'AUCTION' ? 'none' : '0 2px 8px #ffc10722'
+                }}
+              >
+                상품 등록
+              </button>
+              <button 
+                type="button" 
+                className="action-btn auction-btn" 
+                onClick={handleAuctionRegister}
+                style={{
+                  background: form.itemStatus === 'AUCTION' ? 'linear-gradient(90deg, #667eea, #764ba2)' : '#cccccc',
+                  color: form.itemStatus === 'AUCTION' ? '#fff' : '#666666',
+                  cursor: form.itemStatus === 'AUCTION' ? 'pointer' : 'not-allowed',
+                  boxShadow: form.itemStatus === 'AUCTION' ? '0 2px 8px #667eea22' : 'none'
+                }}
+                disabled={form.itemStatus !== 'AUCTION'}
+              >
+                경매 등록
+              </button>
             </div>
           </form>
           <style>{`

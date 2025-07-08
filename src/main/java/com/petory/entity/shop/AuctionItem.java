@@ -2,6 +2,7 @@ package com.petory.entity.shop;
 
 
 import com.petory.entity.Member;
+import com.petory.constant.AuctionStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -43,9 +44,11 @@ public class AuctionItem {
   @Column(name = "bid_unit")
   private Integer bidUnit; // 최소 입찰 단위 (100, 500 등)
 
-  @Column(name = "started", nullable = false)
-  private boolean started; // 경매 시작 여부
+  @Enumerated(EnumType.STRING)
+  @Column(name = "auction_status", nullable = false)
+  private AuctionStatus auctionStatus; // 경매 상태 (예정, 진행, 종료)
 
-  @Column(name = "ended", nullable = false)
-  private boolean ended; // 경매 종료 여부
+  @Lob
+  @Column(name = "auction_description")
+  private String auctionDescription; // 관리자 메모/경매 설명 (nullable)
 }
