@@ -2,6 +2,7 @@ package com.petory.service;
 
 import com.petory.dto.member.MemberSearchDto;
 import com.petory.dto.member.MemberUpdateDto;
+import com.petory.dto.ChatMemberDto;
 import com.petory.entity.Member;
 import com.petory.repository.MemberRepository;
 import jakarta.transaction.Transactional;

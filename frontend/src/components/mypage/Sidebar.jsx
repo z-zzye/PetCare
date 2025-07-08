@@ -14,6 +14,20 @@ const Sidebar = ({ onTabChange }) => {
   const [memberId, setMemberId] = useState(null);
   const [pets, setPets] = useState([]);
 
+  const handleRunSchedulerTest = async () => {
+      const confirmed = window.confirm("정말로 스케줄러를 수동 실행하시겠습니까?");
+      if (confirmed) {
+          try {
+              alert('스케줄러를 수동으로 실행합니다. 백엔드 로그를 확인해주세요.');
+              // 컨트롤러에 만들어둔 임시 API 호출
+              await axios.post('/auto-reservations/test/run-scheduler');
+          } catch (error) {
+              alert('스케줄러 실행 요청에 실패했습니다.');
+              console.error(error);
+          }
+      }
+  };
+
   // ✅ 토큰 디코딩 → 이메일 → 소셜회원 여부 + 멤버ID 조회
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -120,6 +134,25 @@ const Sidebar = ({ onTabChange }) => {
           <button className="info-btn" onClick={() => navigate('/payment-management')}>
             결제수단 관리
           </button>
+        </div>
+
+        <div className="developer-menu" style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid #555' }}>
+            <p style={{fontSize: '10px', color: '#ccc', textAlign: 'center', margin: '0 0 5px 0' }}>- Developer Menu -</p>
+            <button
+                onClick={handleRunSchedulerTest}
+                style={{
+                    width: '100%',
+                    padding: '8px',
+                    fontSize: '12px',
+                    backgroundColor: '#c9302c',
+                    color: 'white',
+                    border: '1px solid #ac2925',
+                    borderRadius: '4px',
+                    cursor: 'pointer'
+                }}
+            >
+                스케줄러 강제 실행
+            </button>
         </div>
       </div>
 

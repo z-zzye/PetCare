@@ -32,7 +32,6 @@ import PaymentMethodPage from './components/mypage/PaymentMethodPage';
 import ChatPage from './components/chat/ChatPage.jsx'; //채팅창
 
 import BoardAdminPage from './components/admin/boards/BoardAdminPage';
-
 import {
   BoardDetail,
   BoardEdit,
@@ -95,6 +94,7 @@ function App() {
         <Route path="/trails" element={<WalkingTrailListPage />} />
         <Route path="/trails/:trailId" element={<WalkingTrailDetailPage />} />
         <Route path="/create-trail" element={<WalkingTrailCreatePage />} />
+        <Route path="/chat/room/:receiverId" element={<ChatPage />} />
 
         {/* 결제 시스템 관련 라우팅 */}
         <Route path="/payment/fail" element={<PaymentFailPage />} />
