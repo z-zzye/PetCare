@@ -61,6 +61,8 @@ const Mypage = () => {
             cancelButtonColor: '#d33',
             confirmButtonText: '신청하기',
             cancelButtonText: '나중에 할래요',
+            allowOutsideClick: false, // 바깥 영역 클릭으로 닫히지 않도록 설정
+            //allowEscapeKey: false,    // ESC 키로 닫히지 않도록 설정
           }).then((result) => {
             if (result.isConfirmed) {
               // '신청하기'를 누르면 자동 예약 신청 페이지로 이동

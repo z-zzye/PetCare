@@ -1,6 +1,9 @@
 package com.petory.controller;
 
 import com.petory.dto.*;
+import com.petory.dto.member.MemberDto;
+import com.petory.dto.member.MemberFormDto;
+import com.petory.dto.member.MemberUpdateDto;
 import com.petory.entity.Member;
 import com.petory.service.MemberService;
 import jakarta.validation.Valid;
@@ -99,7 +102,7 @@ public class MemberApiController {
                 "token", token,
                 "role", member.getMember_Role().name(),
                 "profileImg", member.getMember_ProfileImg() != null ? member.getMember_ProfileImg() : "",
-                "nickname", member.getMember_NickName(), 
+                "nickname", member.getMember_NickName(),
                 "memberId", member.getMember_Id() //추가 - 결제 검증때 필요
 
             ));

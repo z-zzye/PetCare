@@ -1,4 +1,4 @@
-package com.petory.dto;
+package com.petory.dto.board;
 
 import java.time.LocalDateTime;
 

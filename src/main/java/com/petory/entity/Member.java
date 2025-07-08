@@ -1,7 +1,7 @@
 package com.petory.entity;
 
 import com.petory.constant.Role;
-import com.petory.dto.MemberFormDto;
+import com.petory.dto.member.MemberFormDto;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.crypto.password.PasswordEncoder;

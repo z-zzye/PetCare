@@ -1,5 +1,6 @@
-package com.petory.dto;
+package com.petory.dto.walkingTrail;
 
+import com.petory.dto.CommentDto;
 import com.petory.entity.WalkingTrail;
 import lombok.Getter;
 import lombok.Setter;

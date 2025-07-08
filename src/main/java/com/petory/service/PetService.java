@@ -1,24 +1,34 @@
 package com.petory.service;
 
+import com.petory.constant.ReservationStatus;
 import com.petory.dto.PetRegisterDto;
 import com.petory.entity.Member;
 import com.petory.entity.Pet;
+import com.petory.entity.Reservation;
 import com.petory.repository.MemberRepository;
 import com.petory.repository.PetRepository;
+import com.petory.repository.ReservationRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PetService {
   private final PetRepository petRepository;
   private final MemberRepository memberRepository;
   private final ImageService imageService;
+  private final ReservationRepository reservationRepository;
+  private final RestTemplate restTemplate;
 
   public Pet registerPet(PetRegisterDto dto) {
     String imageUrl = null;
@@ -77,58 +87,48 @@ public class PetService {
     return pet;
   }
 
+  /**
+   * ✅ [수정] 펫과 관련된 모든 데이터(프로필 이미지, DB 예약, 더미서버 예약)를
+   * 안전하게 삭제하는 새로운 로직으로 교체합니다.
+   */
   @Transactional
   public void deletePet(Long petId) throws Exception {
+    // 1. 삭제할 펫 엔티티를 조회합니다.
     Pet pet = petRepository.findById(petId)
       .orElseThrow(() -> new IllegalArgumentException("해당 펫이 존재하지 않습니다."));
 
-    // 1. 프로필 이미지 파일이 있을 경우 삭제
+    // 2. 해당 펫과 연결된 모든 예약을 조회합니다.
+    List<Reservation> reservations = reservationRepository.findByPet(pet);
+
+    // 3. '보류(PENDING)' 상태인 예약이 있다면, 더미 서버에 슬롯 취소를 요청합니다.
+    for (Reservation reservation : reservations) {
+      if (reservation.getReservationStatus() == ReservationStatus.PENDING) {
+        cancelDummyServerSlot(reservation);
+      }
+    }
+
+    // 4. 기존 프로필 이미지가 있다면 파일 시스템에서 삭제합니다.
     if (pet.getPet_ProfileImg() != null && !pet.getPet_ProfileImg().isEmpty()) {
       imageService.deleteFile(pet.getPet_ProfileImg());
     }
 
-    // 2. 펫 DB 정보 삭제
+    // 5. 마지막으로 펫을 삭제합니다.
+    // (Pet 엔티티의 cascade 옵션에 의해 DB의 Reservation 데이터도 함께 삭제됩니다.)
     petRepository.delete(pet);
   }
 
-  public LocalDate calculateNextVaccinationDate(Long petId) {
-    // 1. ID로 펫 정보를 DB에서 조회합니다.
-    Pet pet = petRepository.findById(petId)
-      .orElseThrow(() -> new IllegalArgumentException("해당 ID의 펫을 찾을 수 없습니다: " + petId));
+  private void cancelDummyServerSlot(Reservation reservation) {
+    String url = "http://localhost:3001/api/hospitals/cancel-slot";
+    Map<String, String> requestBody = new HashMap<>();
+    requestBody.put("hospitalId", reservation.getReservedHospitalId());
+    requestBody.put("targetDate", reservation.getReservedDate().toString());
+    requestBody.put("timeSlot", reservation.getReservedTimeSlot());
 
-    LocalDate birthDate = pet.getPet_Birth();
-    LocalDate today = LocalDate.now();
-
-    // 2. 오늘 날짜와 생년월일을 기준으로 나이를 계산합니다.
-    Period age = Period.between(birthDate, today);
-
-    // 3. 나이에 따른 다음 접종일을 반환합니다. (규칙 기반)
-    // 생후 2개월 미만 -> 2개월차 접종일 반환
-    if (age.getYears() == 0 && age.getMonths() < 2) {
-      return birthDate.plusMonths(2);
-    }
-    // 생후 4개월 미만 -> 4개월차 접종일 반환
-    if (age.getYears() == 0 && age.getMonths() < 4) {
-      return birthDate.plusMonths(4);
-    }
-    // 생후 6개월 미만 -> 6개월차 접종일 반환
-    if (age.getYears() == 0 && age.getMonths() < 6) {
-      return birthDate.plusMonths(6);
-    }
-    // 1년 미만 -> 1년(12개월)차 접종일 반환
-    if (age.getYears() < 1) {
-      return birthDate.plusYears(1);
-    }
-
-    // 그 이후는 매년 1회 접종으로 가정
-    // 올해 아직 접종일이 지나지 않았다면 -> 올해의 접종일 반환
-    if (birthDate.plusYears(age.getYears()).isAfter(today)) {
-      // ✅ 수정된 부분: birth -> birthDate
-      return birthDate.plusYears(age.getYears());
-    } else {
-      // ✅ 수정된 부분: birth -> birthDate
-      // 올해 접종일이 이미 지났다면 -> 내년의 접종일 반환
-      return birthDate.plusYears(age.getYears() + 1);
+    try {
+      restTemplate.postForEntity(url, requestBody, Map.class);
+    } catch (Exception e) {
+      // 더미 서버 통신 실패가 전체 펫 삭제를 막지 않도록 로그만 남깁니다.
+      log.error("더미 서버 슬롯 취소 요청 실패: Reservation ID {}", reservation.getId(), e);
     }
   }
 }

@@ -1,6 +1,7 @@
 package com.petory.service;
 
-import com.petory.dto.*;
+import com.petory.dto.member.MemberSearchDto;
+import com.petory.dto.member.MemberUpdateDto;
 import com.petory.entity.Member;
 import com.petory.repository.MemberRepository;
 import jakarta.transaction.Transactional;
@@ -15,10 +16,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.petory.constant.Role;
-import com.petory.dto.MemberFormDto;
+import com.petory.dto.member.MemberFormDto;
 import com.petory.dto.PhoneUpdateDto;
-import com.petory.entity.Member;
-import com.petory.repository.MemberRepository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;

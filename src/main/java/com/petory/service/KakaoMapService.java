@@ -1,6 +1,6 @@
 package com.petory.service;
 
-import com.petory.dto.AmenityDto;
+import com.petory.dto.walkingTrail.AmenityDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;

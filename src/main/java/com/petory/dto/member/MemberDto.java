@@ -1,4 +1,4 @@
-package com.petory.dto;
+package com.petory.dto.member;
 
 import com.petory.entity.Member;
 import lombok.Getter;

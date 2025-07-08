@@ -1,4 +1,4 @@
-package com.petory.dto;
+package com.petory.dto.walkingTrail;
 
 import com.petory.entity.WalkingTrail;
 import lombok.Getter;

@@ -1,152 +1,248 @@
-import React, { useState } from 'react';
-import './AutoVaxForm.css'; // 아래에 제공될 CSS 파일
-import axios from '../../api/axios'; // axios 인스턴스
+import React, { useState, useEffect } from 'react';
+import './AutoVaxForm.css';
+import axios from '../../api/axios';
 import Swal from 'sweetalert2';
 
 const AutoVaxForm = ({ petName, petId, onComplete }) => {
-  console.log('1. AutoVaxForm이 최종적으로 받은 petId:', petId);
-  const [location, setLocation] = useState(null); // { lat, lng }
-  const [preferredTime, setPreferredTime] = useState(null); // 'MORNING', 'AFTERNOON', 'EVENING'
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+    const [location, setLocation] = useState(null);
+    const [preferredTime, setPreferredTime] = useState(null);
+    const [searchRadius, setSearchRadius] = useState(5);
 
-  // 1. 현재 위치(GPS) 사용 핸들러
-const handleGpsLocation = () => {
-  setIsLoading(true);
-  setError('');
-  navigator.geolocation.getCurrentPosition(
-    (position) => {
-            const { latitude, longitude } = position.coords;
-            setLocation({ lat: latitude, lng: longitude });
-            setIsLoading(false); // ★ 로딩 상태 해제
-    },
-    (err) => {
-      // ▼▼▼▼▼ 에러 처리 로직 수정 ▼▼▼▼▼
-      // 에러 코드 1번이 'PERMISSION_DENIED' (사용자가 권한 거부) 입니다.
-      if (err.code === 1) {
-        Swal.fire({
-          icon: 'warning',
-          title: '위치 권한이 차단되어 있어요',
-          html: `원활한 서비스 이용을 위해, <br/>브라우저 주소창 왼쪽의 🔒 아이콘을 클릭하여<br/>위치 권한을 '허용'으로 변경해주세요.`,
-          confirmButtonText: '확인',
-        });
-        setError('위치 정보 권한을 허용해주세요.'); // 기존 에러 메시지도 유지
-      } else {
-        // 그 외 다른 에러 (GPS를 잡을 수 없는 경우 등)
-        setError('위치 정보를 가져오는 데 실패했습니다.');
-      }
-      setIsLoading(false);
-      // ▲▲▲▲▲ -------------------- ▲▲▲▲▲
-    }
-  );
-};
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
 
-  // 2. 지도에서 선택 핸들러 (추후 구현)
-  const handleMapLocation = () => {
-    // TODO: 카카오맵 등을 이용한 지도 API 연동 로직
-    alert('지도에서 위치 선택 기능은 준비 중입니다. 임시로 기본 위치가 설정됩니다.');
-    setLocation({ lat: 37.5665, lng: 126.9780 }); // 임시 서울 시청 위치
-  };
+    const [availableSlots, setAvailableSlots] = useState([]);
+    const [selectedSlot, setSelectedSlot] = useState(null);
 
-  // 3. 최종 제출 핸들러
-  const handleSubmit = async () => {
-    if (!location || !preferredTime) {
-      alert('위치와 선호 시간을 모두 선택해주세요.');
-      return;
-    }
+    // 백신 선택을 위한 상태 추가
+    const [allVaccines, setAllVaccines] = useState([]); // 백엔드에서 받아온 전체 백신 목록
+    const [selectedVaccines, setSelectedVaccines] = useState([]); // 사용자가 선택한 백신
 
-    const requestData = {
-      petId: petId, // petName 대신 petId 사용
-      location: location,
-      preferredTime: preferredTime,
+    // 컴포넌트 로드 시, 맞을 수 있는 백신 목록을 백엔드에서 가져오기
+    useEffect(() => {
+        if (petId) {
+            // ✅ 임시 데이터를 삭제하고, 실제 API 호출 코드로 교체합니다.
+            axios.get(`/vaccines/pet/${petId}`)
+                .then(res => {
+                    setAllVaccines(res.data);
+                })
+                .catch(err => {
+                    console.error("백신 목록start을 불러오는 데 실패했습니다.", err);
+                    // 에러 발생 시 사용자에게 알림
+                    Swal.fire('오류', '접종 목록을 불러올 수 없습니다.', 'error');
+                });
+        }
+    }, [petId]);
+    // 체크박스 선택 핸들러
+    const handleVaccineChange = (e) => {
+        const { value, checked } = e.target;
+        if (checked) {
+            setSelectedVaccines(prev => [...prev, value]);
+        } else {
+            setSelectedVaccines(prev => prev.filter(v => v !== value));
+        }
     };
 
-    try {
-      setIsLoading(true);
-      console.log('서버로 전송할 데이터:', requestData);
-      // ✅ API 호출 후 그 결과를 response 변수에 저장
-      const response = await axios.post('/auto-reservations/start', requestData);
-      const result = response.data; // 응답 데이터 추출
+    const handleSearch = async (radius) => {
+        if (selectedVaccines.length === 0) {
+            Swal.fire('확인 필요', '하나 이상의 접종 항목을 선택해주세요.', 'warning');
+            return;
+        }
+        if (!location || !preferredTime) {
+            Swal.fire('확인 필요', '위치와 선호 시간을 모두 선택해주세요.', 'warning');
+            return;
+        }
+        setIsLoading(true);
+        setError('');
+        setAvailableSlots([]);
+        setSelectedSlot(null); // 새로운 검색 시 선택 초기화
 
-      // ✅ 응답 데이터를 사용해 상세한 결과 팝업 표시
-      const confirmedDate = new Date(result.confirmedDateTime);
-      const formattedDate = `${confirmedDate.getFullYear()}년 ${confirmedDate.getMonth() + 1}월 ${confirmedDate.getDate()}일`;
-      const formattedTime = `${confirmedDate.getHours()}시 ${confirmedDate.getMinutes()}분`;
+        try {
+            const requestData = {
+                petId,
+                location,
+                radius,
+                preferredTime,
+                vaccineTypes: selectedVaccines
+            };
 
+            const response = await axios.post('/auto-reservations/search-slots', requestData);
 
-      Swal.fire({
-        icon: 'success',
-        title: '자동 예약이 확정되었습니다!',
-        html: `
-          <b>병원:</b> ${result.hospitalName}<br/>
-          <b>일시:</b> ${formattedDate} ${formattedTime}
-        `,
-        confirmButtonText: '확인',
-      });
+            if (response.data && response.data.length > 0) {
+                setAvailableSlots(response.data);
+            } else {
+                if (radius >= 10) {
+                    Swal.fire('결과 없음', '10km 내에 예약 가능한 병원을 찾지 못했습니다.', 'info');
+                    return;
+                }
 
-      onComplete(); // 부모 컴포넌트(모달)를 닫는 함수 호출
+                const result = await Swal.fire({
+                    title: '예약 가능한 병원이 없어요',
+                    text: `${radius}km 내에는 예약 가능한 병원이 없습니다. 반경을 10km로 넓혀 다시 찾아볼까요?`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: '넓혀서 다시 찾기',
+                    cancelButtonText: '다음에 할래요'
+                });
 
-    } catch (err) {
-      setError('자동 예약 요청에 실패했습니다. 잠시 후 다시 시도해주세요.');
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+                if (result.isConfirmed) {
+                    setSearchRadius(10);
+                    await handleSearch(10); // 재귀 호출 시 await 추가
+                }
+            }
+        } catch (err) {
+            setError('병원 탐색 중 오류가 발생했습니다.');
+            console.error(err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
-  return (
-    <div className="autovax-form-container">
-      <h3>"{petName}" 자동 예약 설정</h3>
+    const handleConfirm = async () => {
+        if (!selectedSlot) {
+            alert('예약할 병원을 선택해주세요.');
+            return;
+        }
+        setIsLoading(true);
+        try {
+            const requestData = {
+                petId: petId,
+                hospitalId: selectedSlot.hospitalId,
+                targetDate: selectedSlot.targetDate,
+                timeSlot: selectedSlot.timeSlot,
+                vaccineTypes: selectedVaccines // TODO: 실제 선택된 백신으로 변경 필요
+            };
 
-      <div className="form-section">
-        <h4>1. 예약할 지역을 알려주세요.</h4>
-        <div className="button-group">
-          <button onClick={handleGpsLocation} disabled={isLoading}>현재 위치 사용</button>
-          <button onClick={handleMapLocation} disabled={isLoading}>지도에서 직접 선택</button>
+            await axios.post('/auto-reservations/confirm', requestData);
+
+            Swal.fire('예약 보류 완료!', '예약이 보류 상태로 접수되었습니다. 마이페이지에서 확인해주세요.', 'success');
+            onComplete();
+
+        } catch (err) {
+            setError('예약 확정 중 오류가 발생했습니다.');
+            Swal.fire('예약 실패', err.response?.data?.error || '알 수 없는 오류가 발생했습니다.', 'error');
+            console.error(err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleGpsLocation = () => {
+        setIsLoading(true);
+        setError('');
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+                setLocation({ lat: latitude, lng: longitude });
+                setIsLoading(false);
+            },
+            (err) => {
+                if (err.code === 1) {
+                    Swal.fire('위치 권한 차단됨', '원활한 서비스 이용을 위해 브라우저의 위치 권한을 허용해주세요.', 'warning');
+                } else {
+                    setError('위치 정보를 가져오는 데 실패했습니다.');
+                }
+                setIsLoading(false);
+            }
+        );
+    };
+
+    const handleMapLocation = () => {
+        alert('지도에서 위치 선택 기능은 준비 중입니다. 임시로 기본 위치가 설정됩니다.');
+        setLocation({ lat: 37.4905, lng: 126.7260 });
+    };
+
+    return (
+        <div className="autovax-form-container">
+            <h3>"{petName}" 자동 예약 설정</h3>
+
+            <div className="form-section">
+                <h4>1. 자동 예약을 원하는 접종 항목을 선택해주세요.</h4>
+                <div className="vaccine-list">
+                    {allVaccines.map(vaccine => (
+                        <label key={vaccine.name}>
+                            <input
+                                type="checkbox"
+                                value={vaccine.name}
+                                onChange={handleVaccineChange}
+                            />
+                            {vaccine.description}
+                        </label>
+                    ))}
+                </div>
+            </div>
+
+            <div className="form-section">
+                <h4>2. 예약할 지역을 알려주세요.</h4>
+                <div className="button-group">
+                    <button onClick={handleGpsLocation} disabled={isLoading}>현재 위치 사용</button>
+                    <button onClick={handleMapLocation} disabled={isLoading}>지도에서 직접 선택</button>
+                </div>
+                {location && (
+                    <p className="info-text success">
+                        위치 설정 완료! (위도: {location.lat.toFixed(4)}, 경도: {location.lng.toFixed(4)})
+                    </p>
+                )}
+            </div>
+
+            <div className="form-section">
+                <h4>3. 원하시는 시간대를 선택해주세요.</h4>
+                <div className="button-group">
+                    {['MORNING', 'AFTERNOON', 'EVENING'].map(time => (
+                        <button
+                            key={time}
+                            onClick={() => setPreferredTime(time)}
+                            className={preferredTime === time ? 'selected' : ''}
+                        >
+                            {time === 'MORNING' && '오전 (9시~1시)'}
+                            {time === 'AFTERNOON' && '오후 (1시~6시)'}
+                            {time === 'EVENING' && '저녁 (6시 이후)'}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {availableSlots.length === 0 ? (
+                <button
+                    className="submit-button"
+                    onClick={() => handleSearch(searchRadius)}
+                    disabled={!location || !preferredTime || isLoading}
+                >
+                    {isLoading ? '탐색 중...' : `예약 가능한 병원 찾기 (${searchRadius}km)`}
+                </button>
+            ) : (
+                <div className="form-section">
+                    <h4>3. 예약할 병원을 선택해주세요.</h4>
+                    <div className="slot-list">
+                        {availableSlots
+                            .filter(slot => slot.timeSlot === preferredTime)
+                            .map(slot => (
+                                <div key={`${slot.hospitalId}-${slot.timeSlot}`} className="slot-item">
+                                    <label>
+                                        <input
+                                            type="radio"
+                                            name="selected-slot"
+                                            checked={selectedSlot?.hospitalId === slot.hospitalId && selectedSlot?.timeSlot === slot.timeSlot}
+                                            onChange={() => setSelectedSlot(slot)}
+                                        />
+                                        {slot.hospitalName}
+                                    </label>
+                                </div>
+                            ))}
+                    </div>
+                    <button
+                        className="submit-button"
+                        onClick={handleConfirm}
+                        disabled={!selectedSlot || isLoading}
+                    >
+                        {isLoading ? '예약 중...' : '이 병원으로 예약하기'}
+                    </button>
+                </div>
+            )}
+
+            {error && <p className="error-text">{error}</p>}
         </div>
-        {isLoading && <p className="info-text">위치 정보를 가져오는 중...</p>}
-        {error && <p className="error-text">{error}</p>}
-        {location && (
-          <p className="info-text success">
-            위치 설정 완료! (위도: {location.lat.toFixed(4)}, 경도: {location.lng.toFixed(4)})
-          </p>
-        )}
-      </div>
-
-      <div className="form-section">
-        <h4>2. 원하시는 시간대를 선택해주세요.</h4>
-        <div className="button-group">
-          <button
-            onClick={() => setPreferredTime('MORNING')}
-            className={preferredTime === 'MORNING' ? 'selected' : ''}
-          >
-            오전 (9시~1시)
-          </button>
-          <button
-            onClick={() => setPreferredTime('AFTERNOON')}
-            className={preferredTime === 'AFTERNOON' ? 'selected' : ''}
-          >
-            오후 (1시~6시)
-          </button>
-          <button
-            onClick={() => setPreferredTime('EVENING')}
-            className={preferredTime === 'EVENING' ? 'selected' : ''}
-          >
-            저녁 (6시 이후)
-          </button>
-        </div>
-        {preferredTime && <p className="info-text success">{preferredTime} 시간대 선택 완료!</p>}
-      </div>
-
-      <button
-        className="submit-button"
-        onClick={handleSubmit}
-        disabled={!location || !preferredTime || isLoading}
-      >
-        {isLoading ? '요청하는 중...' : '자동 예약 시작하기'}
-      </button>
-    </div>
-  );
+    );
 };
 
 export default AutoVaxForm;

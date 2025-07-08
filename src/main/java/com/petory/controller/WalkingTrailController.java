@@ -1,6 +1,10 @@
 package com.petory.controller;
 
 import com.petory.dto.*;
+import com.petory.dto.walkingTrail.AmenityDto;
+import com.petory.dto.walkingTrail.WalkingTrailCreateDto;
+import com.petory.dto.walkingTrail.WalkingTrailDetailResponseDto;
+import com.petory.dto.walkingTrail.WalkingTrailListResponseDto;
 import com.petory.service.WalkingTrailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
