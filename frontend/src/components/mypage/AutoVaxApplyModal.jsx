@@ -15,7 +15,9 @@ const customStyles = {
     maxWidth: '500px',
     padding: '30px',
     borderRadius: '10px',
-    zIndex: 1001
+    zIndex: 1001,
+    maxHeight: '90vh', // 모달의 최대 높이를 화면 높이의 90%로 제한
+    overflowY: 'auto',  // 세로 내용이 넘칠 경우 자동으로 스크롤바 생성
   },
   overlay: {
     backgroundColor: 'rgba(0, 0, 0, 0.75)',
@@ -54,6 +56,8 @@ const AutoVaxApplyModal = ({ isOpen, onRequestClose, petName, petId }) => {
       onRequestClose={handleCloseModal} // 수정된 닫기 함수 사용
       style={customStyles}
       contentLabel="자동 접종 예약 신청"
+      shouldCloseOnOverlayClick={false} // 오버레이(바깥) 클릭 시 닫히지 않도록 설정
+      shouldCloseOnEsc={true}          // ESC 키로 닫히도록 설정
     >
       {/* ▼▼▼▼▼ 단계(step)에 따라 다른 내용을 보여줌 ▼▼▼▼▼ */}
 

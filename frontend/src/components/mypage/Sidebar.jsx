@@ -115,6 +115,11 @@ const Sidebar = ({ onTabChange }) => {
           ) : (
             <div className="creator-image-placeholder" />
           )}
+
+          {/* ✅ [추가] 결제수단 관리 버튼 */}
+          <button className="info-btn" onClick={() => navigate('/payment-management')}>
+            결제수단 관리
+          </button>
         </div>
       </div>
 

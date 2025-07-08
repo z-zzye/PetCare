@@ -2,7 +2,10 @@
 
 package com.petory.controller;
 
-import com.petory.dto.*;
+import com.petory.dto.board.BoardCreateDto;
+import com.petory.dto.board.BoardDetailDto;
+import com.petory.dto.board.BoardListDto;
+import com.petory.dto.board.BoardUpdateDto;
 import com.petory.service.BoardService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package com.petory.dto;
+package com.petory.dto.member;
 
 import com.petory.constant.Role;
 import lombok.Builder; // ◀◀◀ Builder import

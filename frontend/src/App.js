@@ -27,10 +27,8 @@ import ShoppingPage from './components/shop/Shopping.jsx'; // 경로 및 대소�
 import PetRegister from './components/mypage/PetRegister.jsx';
 import PetUpdate from './components/mypage/PetUpdate.jsx';
 import MapServicePage from './pages/MapServicePage';
-import PaymentMethodPage from './pages/PaymentMethodPage';//결제창
-import TossAuthSuccessPage from './pages/TossAuthSuccessPage';//토스관련완료확인창
 import PaymentFailPage from './pages/PaymentFailPage.jsx'; //토스페이먼츠 쇼핑몰 구매 실패창
-
+import PaymentMethodPage from './components/mypage/PaymentMethodPage';
 import ChatPage from './components/chat/ChatPage.jsx'; //채팅창
 
 import BoardAdminPage from './components/admin/boards/BoardAdminPage';
@@ -99,11 +97,12 @@ function App() {
         <Route path="/create-trail" element={<WalkingTrailCreatePage />} />
 
         {/* 결제 시스템 관련 라우팅 */}
-        <Route path="/payment-management" element={<PaymentMethodPage />} />
-        <Route path="/toss-auth-success" element={<TossAuthSuccessPage />} />
         <Route path="/payment/fail" element={<PaymentFailPage />} />
         <Route path="/payment/success" element={<OrderCompletePage />} />
-            {/* 관리자 페이지 라우팅 */}
+
+        {/* 자동 결제 수단 관리 페이지 라우팅 */}
+        <Route path="/payment-management" element={<PaymentMethodPage />} />
+        {/* 관리자 페이지 라우팅 */}
             <Route
               path="/admin"
               element={

@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -40,4 +42,7 @@ public class Pet {
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private PetCategory pet_Category;
+
+  @OneToMany(mappedBy = "pet", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+  private List<Reservation> reservations = new ArrayList<>();
 }

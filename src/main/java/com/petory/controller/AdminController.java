@@ -3,8 +3,7 @@ package com.petory.controller;
 import java.util.List;
 import java.util.Map;
 
-import com.petory.dto.MemberDto;
-import com.petory.dto.MemberSearchDto;
+import com.petory.dto.member.MemberSearchDto;
 import com.petory.service.MemberService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,8 +17,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.petory.constant.BoardKind;
-import com.petory.dto.BoardListDto;
-import com.petory.dto.BoardUpdateDto;
+import com.petory.dto.board.BoardListDto;
+import com.petory.dto.board.BoardUpdateDto;
 import com.petory.entity.Board;
 import com.petory.service.BoardService;
 import com.petory.service.CleanBotService;

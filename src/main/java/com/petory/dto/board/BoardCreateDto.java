@@ -1,4 +1,4 @@
-package com.petory.dto;
+package com.petory.dto.board;
 
 import com.petory.constant.BoardKind;
 import jakarta.validation.constraints.NotBlank;

@@ -1,10 +1,10 @@
 package com.petory.service;
 
 import com.petory.dto.CommentCreateDto;
-import com.petory.dto.WalkingTrailCreateDto;
-import com.petory.dto.WalkingTrailDetailResponseDto;
-import com.petory.dto.WalkingTrailListResponseDto;
-import com.petory.dto.AmenityDto;
+import com.petory.dto.walkingTrail.WalkingTrailCreateDto;
+import com.petory.dto.walkingTrail.WalkingTrailDetailResponseDto;
+import com.petory.dto.walkingTrail.WalkingTrailListResponseDto;
+import com.petory.dto.walkingTrail.AmenityDto;
 
 import java.util.List;
 
