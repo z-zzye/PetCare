@@ -15,5 +15,8 @@ public class AvailableSlotResponseDto {
   private String hospitalName;
   private String targetDate; // "YYYY-MM-DD"
   private String timeSlot; // "MORNING", "AFTERNOON", "EVENING"
+  private Double distance;
+  private String address;
+  private String phone;
 
 }

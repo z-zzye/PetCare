@@ -2,9 +2,7 @@ package com.petory.service;
 
 import com.petory.constant.ReservationStatus;
 import com.petory.constant.VaccineType;
-import com.petory.dto.autoReservation.AvailableSlotResponseDto;
-import com.petory.dto.autoReservation.ReservationConfirmRequestDto;
-import com.petory.dto.autoReservation.SlotSearchRequestDto;
+import com.petory.dto.autoReservation.*;
 import com.petory.entity.Pet;
 import com.petory.entity.Reservation;
 import com.petory.repository.PetRepository;
@@ -17,15 +15,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.time.temporal.TemporalAdjusters;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,43 +35,111 @@ public class AutoReservationService {
   private final RestTemplate restTemplate;
 
   /**
-   * [1단계: 탐색] 사용자의 조건에 맞는 예약 가능한 병원/시간 슬롯 목록을 반환합니다.
+   * [수정] 백신별 예약 가능일과, 가장 빠른 날짜의 병원 목록을 함께 반환합니다.
    */
-  @Transactional(readOnly = true) // DB 변경이 없으므로 readOnly 설정
-  public List<AvailableSlotResponseDto> findAvailableSlots(SlotSearchRequestDto requestDto) {
-    log.info("예약 가능 슬롯 탐색 시작: petId={}, radius={}", requestDto.getPetId(), requestDto.getRadius());
+  @Transactional(readOnly = true)
+  public DetailedSlotSearchResponseDto findAvailableSlots(SlotSearchRequestDto requestDto) {
+    log.info("상세 슬롯 탐색 시작: petId={}", requestDto.getPetId());
 
-    // 1. 접종 기록을 바탕으로 예약이 필요한 날짜들을 계산합니다.
     Pet pet = petRepository.findById(requestDto.getPetId())
       .orElseThrow(() -> new IllegalArgumentException("해당 펫을 찾을 수 없습니다."));
-    List<LocalDate> targetDates = calculateNextVaccinationDates(pet, requestDto.getVaccineTypes());
-    if (targetDates.isEmpty()) {
+
+    // 1. 선택된 백신별로 각각의 가장 빠른 접종일을 계산합니다.
+    List<VaccineDateInfo> vaccineDates = calculateNextVaccineDateInfos(pet, requestDto.getVaccineTypes());
+
+    if (vaccineDates.isEmpty()) {
       log.info("더 이상 예약할 접종이 없습니다.");
-      return List.of(); // 빈 리스트 반환
+      return new DetailedSlotSearchResponseDto(Collections.emptyList(), Collections.emptyList());
     }
 
-    // 2. 가장 빠른 접종일을 기준으로 더미 서버에 예약 가능 여부를 조회합니다.
-    LocalDate earliestDate = targetDates.get(0);
+    // 2. 이 중 전체에서 가장 빠른 날짜를 찾습니다.
+    LocalDate overallEarliestDate = vaccineDates.stream()
+      .min(Comparator.comparing(VaccineDateInfo::getDate))
+      .get()
+      .getDate();
 
-    String url = UriComponentsBuilder.fromHttpUrl("http://localhost:3001/api/hospitals/check-availability")
-      .queryParam("lat", requestDto.getLocation().getLat())
-      .queryParam("lng", requestDto.getLocation().getLng())
-      .queryParam("radius", requestDto.getRadius())
-      .queryParam("targetDate", earliestDate.toString())
-      .toUriString();
+    // 3. 가장 빠른 날짜를 기준으로 예약 가능한 병원 목록을 조회합니다.
+    List<AvailableSlotResponseDto> availableSlots = findHospitalsForDate(overallEarliestDate, requestDto);
 
-    try {
-      log.info("더미 서버에 예약 가능 슬롯 요청: {}", url);
-      // 더미 서버가 반환하는 JSON 배열을 List<AvailableSlotResponseDto>로 바로 변환
-      ResponseEntity<List<AvailableSlotResponseDto>> response = restTemplate.exchange(
-        url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {});
+    // 4. 두 종류의 정보를 모두 담아 반환합니다.
+    return new DetailedSlotSearchResponseDto(vaccineDates, availableSlots);
+  }
 
-      log.info("{}개의 예약 가능한 슬롯을 찾았습니다.", response.getBody() != null ? response.getBody().size() : 0);
-      return response.getBody();
-    } catch (RestClientException e) {
-      log.error("더미 서버 호출 중 예외 발생", e);
-      throw new IllegalStateException("병원 정보를 조회하는 중 오류가 발생했습니다.");
+  /**
+   * 특정 시작일과 선호 요일을 기준으로 예약 가능한 병원을 탐색하는 헬퍼 메서드
+   */
+  private List<AvailableSlotResponseDto> findHospitalsForDate(LocalDate earliestDate, SlotSearchRequestDto requestDto) {
+    List<DayOfWeek> preferredDays = requestDto.getPreferredDays();
+    if (preferredDays == null || preferredDays.isEmpty()) {
+      throw new IllegalArgumentException("선호 요일을 하나 이상 선택해야 합니다.");
     }
+
+    for (int i = 0; i < 8; i++) { // 최대 8주까지 탐색
+      final LocalDate currentSearchWeekStart = earliestDate.plusWeeks(i);
+
+      // 정렬된 선호 요일 목록을 순회하며 가장 빠른 슬롯을 찾는다.
+      List<LocalDate> potentialQueryDates = preferredDays.stream()
+        .map(day -> currentSearchWeekStart.with(TemporalAdjusters.nextOrSame(day)))
+        .sorted()
+        .collect(Collectors.toList());
+
+      for (LocalDate queryDate : potentialQueryDates) {
+        String url = UriComponentsBuilder.fromHttpUrl("http://localhost:3001/api/hospitals/check-availability")
+          .queryParam("lat", requestDto.getLocation().getLat())
+          .queryParam("lng", requestDto.getLocation().getLng())
+          .queryParam("radius", requestDto.getRadius())
+          .queryParam("targetDate", queryDate.toString())
+          .toUriString();
+
+        try {
+          log.info("[{}주차] 더미 서버 요청 (날짜: {}): {}", i + 1, queryDate, url);
+          ResponseEntity<List<AvailableSlotResponseDto>> response = restTemplate.exchange(
+            url, HttpMethod.GET, null, new ParameterizedTypeReference<>() {});
+
+          List<AvailableSlotResponseDto> slots = response.getBody();
+          if (slots != null && !slots.isEmpty()) {
+            log.info("성공! {}개의 예약 가능한 슬롯을 찾았습니다.", slots.size());
+            return slots; // 결과를 찾으면 즉시 반환
+          }
+        } catch (RestClientException e) {
+          log.error("더미 서버 호출 중 예외 발생", e);
+        }
+      }
+    }
+    log.info("최대 탐색 기간(8주) 동안 예약 가능한 슬롯을 찾지 못했습니다.");
+    return Collections.emptyList();
+  }
+
+  /**
+   * [수정] 다음 접종일 계산 결과를 VaccineDateInfo 리스트로 반환합니다.
+   */
+  private List<VaccineDateInfo> calculateNextVaccineDateInfos(Pet pet, List<String> selectedVaccineNames) {
+    List<Reservation> completedReservations = reservationRepository.findByPetAndReservationStatus(pet, ReservationStatus.COMPLETED);
+    Optional<Reservation> lastCompleted = reservationRepository.findTopByPetAndReservationStatusOrderByReservationDateTimeDesc(pet, ReservationStatus.COMPLETED);
+    Map<VaccineType, Long> completedCounts = completedReservations.stream()
+      .collect(Collectors.groupingBy(Reservation::getVaccineType, Collectors.counting()));
+
+    return selectedVaccineNames.stream()
+      .map(VaccineType::valueOf)
+      .filter(vaccine -> completedCounts.getOrDefault(vaccine, 0L) < vaccine.getTotalShots())
+      .map(vaccine -> {
+        long alreadyDone = completedCounts.getOrDefault(vaccine, 0L);
+        LocalDate idealDate = pet.getPet_Birth()
+          .plusWeeks(vaccine.getStartWeeks())
+          .plusWeeks(alreadyDone * vaccine.getIntervalWeeks());
+
+        LocalDate today = LocalDate.now();
+        LocalDate minGracePeriodDate = today.plusWeeks(1);
+        LocalDate minIntervalDate = lastCompleted
+          .map(r -> r.getReservationDateTime().toLocalDate().plusWeeks(3))
+          .orElse(today);
+        LocalDate earliestPossibleDate = minGracePeriodDate.isAfter(minIntervalDate) ? minGracePeriodDate : minIntervalDate;
+        LocalDate finalDate = idealDate.isBefore(earliestPossibleDate) ? earliestPossibleDate : idealDate;
+
+        return new VaccineDateInfo(vaccine.name(), vaccine.getDescription(), finalDate);
+      })
+      .sorted(Comparator.comparing(VaccineDateInfo::getDate))
+      .collect(Collectors.toList());
   }
 
   /**
@@ -121,47 +185,5 @@ public class AutoReservationService {
     return reservationRepository.save(reservation);
   }
 
-
-  /**
-   * 스마트 Enum을 사용하여 다음 접종일을 계산하는 메서드
-   */
-  private List<LocalDate> calculateNextVaccinationDates(Pet pet, List<String> selectedVaccineNames) {
-    // 1. DB에서 모든 완료된 접종 기록과 가장 최근 접종 완료일을 가져옵니다.
-    List<Reservation> completedReservations = reservationRepository.findByPetAndReservationStatus(pet, ReservationStatus.COMPLETED);
-    Optional<Reservation> lastCompleted = reservationRepository.findTopByPetAndReservationStatusOrderByReservationDateTimeDesc(pet, ReservationStatus.COMPLETED);
-
-    // 2. 완료된 접종 기록을 백신 종류별로 카운팅합니다. (예: {DOG_COMPREHENSIVE: 2, DOG_RABIES: 1})
-    Map<VaccineType, Long> completedCounts = completedReservations.stream()
-            .collect(Collectors.groupingBy(Reservation::getVaccineType, Collectors.counting()));
-
-    List<LocalDate> nextDates = selectedVaccineNames.stream()
-      .map(VaccineType::valueOf) // 문자열을 Enum으로 변환
-      .filter(vaccine -> { // 아직 접종 횟수가 남은 백신만 필터링
-        long alreadyDone = completedCounts.getOrDefault(vaccine, 0L);
-        return alreadyDone < vaccine.getTotalShots();
-      })
-      .map(vaccine -> { // 각 백신별 이상적인 다음 접종일 계산
-        long alreadyDone = completedCounts.getOrDefault(vaccine, 0L);
-        return pet.getPet_Birth()
-          .plusWeeks(vaccine.getStartWeeks())
-          .plusWeeks(alreadyDone * vaccine.getIntervalWeeks());
-      })
-      .map(idealDate -> { // ✅ [핵심] 날짜 보정 규칙 적용
-        LocalDate today = LocalDate.now();
-        LocalDate minGracePeriodDate = today.plusWeeks(1); // 최소 유예 기간: 오늘 + 1주
-        LocalDate minIntervalDate = lastCompleted
-          .map(r -> r.getReservationDateTime().toLocalDate().plusWeeks(3))
-          .orElse(today); // 다른 백신과의 최소 간격: 마지막 접종일 + 3주
-
-        LocalDate earliestPossibleDate = minGracePeriodDate.isAfter(minIntervalDate) ? minGracePeriodDate : minIntervalDate;
-
-        // 이상적인 날짜가 이미 지났거나, 최소 확보해야 하는 날짜보다 이르면, 보정된 날짜를 사용
-        return idealDate.isBefore(earliestPossibleDate) ? earliestPossibleDate : idealDate;
-      })
-      .collect(Collectors.toList());
-
-    // 3. 계산된 날짜들을 오름차순으로 정렬하여 반환
-    return nextDates.stream().sorted().collect(Collectors.toList());
-  }
 }
 
