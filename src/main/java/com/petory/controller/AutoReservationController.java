@@ -1,6 +1,7 @@
 package com.petory.controller;
 
 import com.petory.dto.autoReservation.AvailableSlotResponseDto;
+import com.petory.dto.autoReservation.DetailedSlotSearchResponseDto;
 import com.petory.dto.autoReservation.ReservationConfirmRequestDto;
 import com.petory.dto.autoReservation.SlotSearchRequestDto;
 import com.petory.service.AutoReservationService;
@@ -35,11 +36,11 @@ public class AutoReservationController {
   public ResponseEntity<?> searchAvailableSlots(@RequestBody SlotSearchRequestDto requestDto) {
     try {
       log.info("예약 가능 슬롯 탐색 API 호출: {}", requestDto);
-      List<AvailableSlotResponseDto> availableSlots = autoReservationService.findAvailableSlots(requestDto);
+      DetailedSlotSearchResponseDto detailedResponse = autoReservationService.findAvailableSlots(requestDto);
 
       // 결과가 없는 경우도 정상 응답이므로, 빈 리스트를 그대로 반환합니다.
       // 프론트엔드에서 이 리스트의 길이를 보고 분기 처리(반경 확장 제안 등)를 할 수 있습니다.
-      return ResponseEntity.ok(availableSlots);
+      return ResponseEntity.ok(detailedResponse);
 
     } catch (Exception e) {
       log.error("슬롯 탐색 중 오류 발생", e);

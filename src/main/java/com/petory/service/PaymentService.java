@@ -1,17 +1,22 @@
 package com.petory.service;
 
-import com.petory.entity.Member;
-import com.petory.entity.PaymentMethod;
-import com.petory.repository.MemberRepository;
-import com.petory.repository.PaymentMethodRepository;
-import lombok.RequiredArgsConstructor;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.http.*;
-import org.json.JSONObject;
+
+import com.petory.entity.Member;
+import com.petory.repository.MemberRepository;
+import com.petory.repository.PaymentMethodRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
