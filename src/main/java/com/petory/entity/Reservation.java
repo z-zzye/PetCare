@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Getter
@@ -31,12 +32,14 @@ public class Reservation {
   // 예약한 병원 이름 (외부 정보이므로 일단 문자열로 저장)
   @Column(nullable = false)
   private String hospitalName;
+  private String hospitalAddress; // 병원 주소
+  private String hospitalPhone; // 병원 전화번호
 
   // 확정된 예약 일시
   @Column(nullable = false)
   private LocalDateTime reservationDateTime;
 
-  // 예약 종류 (예: 예방접종, 미용, 일반진료 등)
+  // 접종 종류
   @Enumerated(EnumType.STRING)
   private VaccineType vaccineType;
 
@@ -45,5 +48,17 @@ public class Reservation {
   @Column(nullable = false)
   private ReservationStatus reservationStatus;
 
-  // 참고: 생성일, 수정일 등은 BaseEntity 등을 상속받아 공통 관리할 수 있습니다.
+  @Column(nullable = false)
+  private Integer totalAmount; // 총 접종비
+
+  @Column(nullable = false)
+  private Integer deposit;     // 예약금
+
+  // 예약 보류 상태의 결제 마감 기한
+  private LocalDateTime paymentDueDate;
+
+  // 더미 서버의 슬롯 취소를 위한 정보
+  private String reservedHospitalId;
+  private LocalDate reservedDate;
+  private String reservedTimeSlot;
 }

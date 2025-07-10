@@ -1,7 +1,7 @@
 package com.petory.entity;
 
 import com.petory.constant.Role;
-import com.petory.dto.MemberFormDto;
+import com.petory.dto.member.MemberFormDto;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -42,6 +42,9 @@ public class Member extends BaseEntity {
     private Integer member_Mileage;
 
     private String member_Address;
+
+    @Column(name = "customer_uid", length = 255)
+    private String customerUid;
 
 
     public static Member createMember(MemberFormDto memberFormDto,

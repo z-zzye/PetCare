@@ -1,0 +1,25 @@
+package com.petory.dto.autoReservation;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.Map;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class AvailableSlotResponseDto {
+
+  private String address;
+  private String hospitalId;
+  private String phone;
+  private Long petId;
+  private String hospitalName;
+  private String targetDate; // "YYYY-MM-DD"
+  private String timeSlot; // "MORNING", "AFTERNOON", "EVENING"
+  private Double distance;
+  private Map<String, Integer> priceList;
+}

@@ -16,7 +16,6 @@ public enum VaccineType {
   DOG_RABIES("강아지 광견병", PetCategory.DOG, 16, 1, 0), // 4개월 -> 16주
   DOG_ANTIBODY_TEST("강아지 항체검사", PetCategory.DOG, 16, 1, 0); // 4개월 -> 16주
 
-
   private final String description;       // 백신 설명
   private final PetCategory petCategory;  // 적용 가능한 동물 종류
   private final int startWeeks;           // 접종 시작 주차 (생후)

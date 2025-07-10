@@ -1,5 +1,6 @@
-package com.petory.dto;
+package com.petory.dto.board;
 
+import com.petory.dto.CommentDto;
 import com.petory.entity.Board;
 import com.petory.entity.Comment;
 import com.petory.entity.Member;

@@ -1,4 +1,4 @@
-package com.petory.dto;
+package com.petory.dto.member;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

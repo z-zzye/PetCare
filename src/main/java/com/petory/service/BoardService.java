@@ -8,10 +8,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.petory.constant.BoardKind;
-import com.petory.dto.BoardCreateDto;
-import com.petory.dto.BoardDetailDto;
-import com.petory.dto.BoardListDto;
-import com.petory.dto.BoardUpdateDto;
+import com.petory.dto.board.BoardCreateDto;
+import com.petory.dto.board.BoardDetailDto;
+import com.petory.dto.board.BoardListDto;
+import com.petory.dto.board.BoardUpdateDto;
 import com.petory.entity.Board;
 import com.petory.entity.BoardRecommend;
 import com.petory.entity.Comment;
@@ -45,11 +45,11 @@ public class BoardService {
       .orElseThrow(() -> new IllegalArgumentException("해당 회원을 찾을 수 없습니다."));
 
     Board board = new Board();
-    
+
     // 클린봇 필터링 적용
     String filteredTitle = cleanBotService.filter(requestDto.getTitle());
     String filteredContent = cleanBotService.filter(requestDto.getContent());
-    
+
     board.setTitle(filteredTitle);
     board.setContent(filteredContent);
     board.setBoardKind(requestDto.getBoardKind());
@@ -57,7 +57,7 @@ public class BoardService {
     board.setMember(member);
 
     // 클린봇이 부적절한 내용을 감지한 경우 블라인드 처리
-    if (cleanBotService.containsProfanity(requestDto.getTitle()) || 
+    if (cleanBotService.containsProfanity(requestDto.getTitle()) ||
         cleanBotService.containsProfanity(requestDto.getContent())) {
       board.setOriginalTitle(requestDto.getTitle());
       board.setOriginalContent(requestDto.getContent());
@@ -130,25 +130,25 @@ public class BoardService {
     if (requestDto.getTitle() != null) {
       String filteredTitle = cleanBotService.filter(requestDto.getTitle());
       board.setTitle(filteredTitle);
-      
+
       // 클린봇이 부적절한 내용을 감지한 경우 블라인드 처리
       if (cleanBotService.containsProfanity(requestDto.getTitle())) {
         board.setOriginalTitle(requestDto.getTitle());
         board.setBlinded(true);
       }
     }
-    
+
     if (requestDto.getContent() != null) {
       String filteredContent = cleanBotService.filter(requestDto.getContent());
       board.setContent(filteredContent);
-      
+
       // 클린봇이 부적절한 내용을 감지한 경우 블라인드 처리
       if (cleanBotService.containsProfanity(requestDto.getContent())) {
         board.setOriginalContent(requestDto.getContent());
         board.setBlinded(true);
       }
     }
-    
+
     if (requestDto.getBoardKind() != null) board.setBoardKind(requestDto.getBoardKind());
     if (requestDto.getHashTag() != null) board.setHashTag(requestDto.getHashTag());
 
@@ -247,29 +247,29 @@ public class BoardService {
   public void updateBoardByAdmin(Long boardId, BoardUpdateDto requestDto) {
     Board board = boardRepository.findById(boardId)
         .orElseThrow(() -> new IllegalArgumentException("해당 게시글을 찾을 수 없습니다."));
-    
+
     if (requestDto.getTitle() != null) {
       String filteredTitle = cleanBotService.filter(requestDto.getTitle());
       board.setTitle(filteredTitle);
-      
+
       // 클린봇이 부적절한 내용을 감지한 경우 블라인드 처리
       if (cleanBotService.containsProfanity(requestDto.getTitle())) {
         board.setOriginalTitle(requestDto.getTitle());
         board.setBlinded(true);
       }
     }
-    
+
     if (requestDto.getContent() != null) {
       String filteredContent = cleanBotService.filter(requestDto.getContent());
       board.setContent(filteredContent);
-      
+
       // 클린봇이 부적절한 내용을 감지한 경우 블라인드 처리
       if (cleanBotService.containsProfanity(requestDto.getContent())) {
         board.setOriginalContent(requestDto.getContent());
         board.setBlinded(true);
       }
     }
-    
+
     if (requestDto.getBoardKind() != null) board.setBoardKind(requestDto.getBoardKind());
     if (requestDto.getHashTag() != null) board.setHashTag(requestDto.getHashTag());
   }
@@ -289,17 +289,17 @@ public class BoardService {
   @Transactional
   public void updateExistingBlindedPosts() {
     List<Board> allBoards = boardRepository.findAll();
-    
+
     for (Board board : allBoards) {
       // 이미 blinded가 true인 게시글은 건너뛰기
       if (board.isBlinded()) {
         continue;
       }
-      
+
       // 제목이나 내용에 부적절한 단어가 포함되어 있는지 확인
       boolean hasProfanityInTitle = cleanBotService.containsProfanity(board.getTitle());
       boolean hasProfanityInContent = cleanBotService.containsProfanity(board.getContent());
-      
+
       if (hasProfanityInTitle || hasProfanityInContent) {
         // 원본 내용 저장
         if (board.getOriginalTitle() == null) {
@@ -308,10 +308,10 @@ public class BoardService {
         if (board.getOriginalContent() == null) {
           board.setOriginalContent(board.getContent());
         }
-        
+
         // blinded 상태로 설정
         board.setBlinded(true);
-        
+
         // 필터링된 내용으로 업데이트
         if (hasProfanityInTitle) {
           board.setTitle(cleanBotService.filter(board.getTitle()));

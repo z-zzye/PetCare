@@ -1,6 +1,10 @@
 package com.petory.service;
 
 import com.petory.dto.*;
+import com.petory.dto.walkingTrail.AmenityDto;
+import com.petory.dto.walkingTrail.WalkingTrailCreateDto;
+import com.petory.dto.walkingTrail.WalkingTrailDetailResponseDto;
+import com.petory.dto.walkingTrail.WalkingTrailListResponseDto;
 import com.petory.entity.*;
 import com.petory.repository.CleanBotLogRepository;
 import com.petory.repository.MemberRepository;

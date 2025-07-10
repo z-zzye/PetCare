@@ -9,6 +9,7 @@ import './Mypage.css';
 import CalendarPage from './CalendarPage';
 import HealthNotePage from './HealthNotePage';
 import MyPostsPage from './MyPostsPage';
+import MyReservationsPage from './MyReservationsPage';
 import Swal from 'sweetalert2';
 //import './MainPage.css';         // 스타일 분리 (선택)
 
@@ -48,7 +49,7 @@ const Mypage = () => {
         // PetRegister 또는 PetUpdate에서 보낸 신호(state)가 있는지 확인
         if (location.state?.showAutoVaxPopup) {
           const { petId, petName } = location.state;
-          console.log('3. Mypage가 페이지 이동(navigate) 직후 받은 petId:', petId);
+          console.log('Mypage가 navigate로부터 받은 petId:', petId);
           setSelectedPetName(petName);
           setSelectedPetId(petId);
 
@@ -61,6 +62,8 @@ const Mypage = () => {
             cancelButtonColor: '#d33',
             confirmButtonText: '신청하기',
             cancelButtonText: '나중에 할래요',
+            allowOutsideClick: false, // 바깥 영역 클릭으로 닫히지 않도록 설정
+            //allowEscapeKey: false,    // ESC 키로 닫히지 않도록 설정
           }).then((result) => {
             if (result.isConfirmed) {
               // '신청하기'를 누르면 자동 예약 신청 페이지로 이동
@@ -82,6 +85,8 @@ const Mypage = () => {
         return <HealthNotePage />;
       case 'posts':
         return <MyPostsPage />;
+      case 'reservations':
+        return <MyReservationsPage />;
       default:
         return <div>탭을 선택하세요.</div>;
     }
@@ -112,7 +117,7 @@ const Mypage = () => {
           </div>
         </div>
 
-        {console.log('4. Mypage가 모달로 넘겨주는 최종 petId:', selectedPetId)}
+        {console.log('모달로 전달하는 최종 petId:', selectedPetId)}
         <AutoVaxApplyModal
           isOpen={isApplyModalOpen} // 모달을 열지 말지 결정하는 상태
           onRequestClose={() => setIsApplyModalOpen(false)} // 모달 닫기 함수
