@@ -118,56 +118,78 @@ function AuctionCard({ item, isBack, currentTime }) {
   const auctionStarted = isAuctionStarted();
   const timeUntilStart = getTimeUntilStart();
 
-  // WebSocket 연결 및 경매 입장
-  const handleEnterAuction = () => {
+  // WebSocket 연결 및 경매 세션 입장
+  const handleEnterAuction = async () => {
     const token = localStorage.getItem('token');
     if (!token) {
       alert('로그인이 필요합니다.');
       return;
     }
 
-    const socket = new SockJS(`/ws/auction?token=${token}`);
-    const client = Stomp.over(socket);
-
-    client.connect(
-      { Authorization: `Bearer ${token}` },
-      () => {
-        console.log('✅ 경매 WebSocket 연결 성공');
-        
-        // 경매 세션 참여 메시지 전송
-        client.send('/app/auction.join', {}, item.auction_item_id);
-        
-        // 경매 업데이트 구독
-        client.subscribe(`/topic/auction/session-${item.auction_item_id}`, (message) => {
-          const data = JSON.parse(message.body);
-          console.log('📨 경매 업데이트:', data);
-          
-          // 입찰 정보 업데이트 등 처리
-          if (data.type === 'BID_SUCCESS') {
-            console.log('새로운 입찰:', data.bid);
-          }
-        });
-        
-        // 개별 알림 구독
-        const memberId = localStorage.getItem('memberId'); // 또는 다른 방법으로 memberId 가져오기
-        if (memberId) {
-          client.subscribe(`/queue/auction/${memberId}`, (message) => {
-            const data = JSON.parse(message.body);
-            console.log('📨 개별 알림:', data);
-          });
+    try {
+      // 1. 먼저 경매 세션이 존재하는지 확인
+      const sessionResponse = await fetch(`/api/auction/sessions/auction/${item.auction_item_id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
-        
-        setStompClient(client);
-        setIsEntered(true);
-        
-        // 페이지 이동
-        navigate(`/auction/${item.auction_item_id}`);
-      },
-      (error) => {
-        console.error('❌ 경매 WebSocket 연결 실패:', error);
-        alert('경매 입장에 실패했습니다.');
+      });
+
+      if (!sessionResponse.ok) {
+        alert('경매 세션이 생성되지 않았습니다. 관리자에게 문의해주세요.');
+        return;
       }
-    );
+
+      const sessionData = await sessionResponse.json();
+      console.log('✅ 경매 세션 확인:', sessionData);
+
+      // 2. WebSocket 연결
+      const socket = new SockJS(`/ws/auction?token=${token}`);
+      const client = Stomp.over(socket);
+
+      client.connect(
+        { Authorization: `Bearer ${token}` },
+        () => {
+          console.log('✅ 경매 WebSocket 연결 성공');
+          
+          // 3. 경매 세션 참여 메시지 전송
+          client.send('/app/auction.join', {}, item.auction_item_id);
+          
+          // 4. 경매 업데이트 구독
+          client.subscribe(`/topic/auction/${sessionData.sessionKey}`, (message) => {
+            const data = JSON.parse(message.body);
+            console.log('📨 경매 업데이트:', data);
+            
+            // 입찰 정보 업데이트 등 처리
+            if (data.type === 'BID_SUCCESS') {
+              console.log('새로운 입찰:', data.bid);
+            }
+          });
+          
+          // 5. 개별 알림 구독
+          const memberId = localStorage.getItem('memberId');
+          if (memberId) {
+            client.subscribe(`/queue/auction/${memberId}`, (message) => {
+              const data = JSON.parse(message.body);
+              console.log('📨 개별 알림:', data);
+            });
+          }
+          
+          setStompClient(client);
+          setIsEntered(true);
+          
+          // 6. 경매방 페이지로 이동
+          navigate(`/auction/${item.auction_item_id}`);
+        },
+        (error) => {
+          console.error('❌ 경매 WebSocket 연결 실패:', error);
+          alert('경매 입장에 실패했습니다.');
+        }
+      );
+    } catch (error) {
+      console.error('❌ 경매 세션 확인 실패:', error);
+      alert('경매 입장에 실패했습니다.');
+    }
   };
 
   return (

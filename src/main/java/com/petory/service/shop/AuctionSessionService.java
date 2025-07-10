@@ -27,9 +27,8 @@ public class AuctionSessionService {
     private final AuctionSessionRepository auctionSessionRepository;
     private final AuctionItemRepository auctionItemRepository;
 
-    /**
-     * 경매 세션 생성
-     */
+
+     /* 경매 세션 생성*/
     @Transactional
     public AuctionSession createSession(AuctionItem auctionItem) {
         log.info("경매 세션 생성 시작: auctionItemId={}", auctionItem.getId());
@@ -52,8 +51,6 @@ public class AuctionSessionService {
                 .status(AuctionSessionStatus.WAITING)
                 .startTime(auctionItem.getStartTime())
                 .endTime(auctionItem.getEndTime())
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .build();
 
         AuctionSession savedSession = auctionSessionRepository.save(session);
@@ -99,7 +96,6 @@ public class AuctionSessionService {
 
         auctionSessionRepository.findById(sessionId).ifPresent(session -> {
             session.setStatus(status);
-            session.setUpdatedAt(LocalDateTime.now());
             auctionSessionRepository.save(session);
         });
     }
@@ -111,7 +107,6 @@ public class AuctionSessionService {
     public void updateParticipantCount(Long sessionId, int count) {
         auctionSessionRepository.findById(sessionId).ifPresent(session -> {
             session.setParticipantCount(count);
-            session.setUpdatedAt(LocalDateTime.now());
             auctionSessionRepository.save(session);
         });
     }
@@ -126,7 +121,6 @@ public class AuctionSessionService {
         auctionSessionRepository.findById(sessionId).ifPresent(session -> {
             session.setStatus(AuctionSessionStatus.ENDED);
             session.setEndTime(LocalDateTime.now());
-            session.setUpdatedAt(LocalDateTime.now());
             auctionSessionRepository.save(session);
         });
     }
@@ -190,8 +184,8 @@ public class AuctionSessionService {
                 .status(session.getStatus())
                 .startTime(session.getStartTime())
                 .endTime(session.getEndTime())
-                .createdAt(session.getCreatedAt())
-                .updatedAt(session.getUpdatedAt())
+                .createdAt(session.getRegDate())
+                .updatedAt(session.getUpdateDate())
                 .startPrice(session.getAuctionItem().getStartPrice())
                 .currentPrice(0) // TODO: AuctionBidRepository에서 조회
                 .currentWinner("") // TODO: AuctionBidRepository에서 조회
@@ -234,22 +228,66 @@ public class AuctionSessionService {
     }
 
     /**
-     * 경매 시작 시간이 된 SCHEDULED 상태의 AuctionItem을 찾아 세션 자동 생성 (스케줄러)
+     * 앞으로 5분 이내에 시작되는 경매가 있는지 확인하고 세션 자동 생성 (스케줄러)
      */
-    @org.springframework.scheduling.annotation.Scheduled(fixedRate = 60000) // 1분마다 실행
+    @org.springframework.scheduling.annotation.Scheduled(cron = "0 * * * * *") // 1분마다 실행
     @Transactional
     public void createSessionsForScheduledAuctions() {
         LocalDateTime now = LocalDateTime.now();
-        List<AuctionItem> itemsToStart = auctionItemRepository.findByStartTimeBeforeAndAuctionStatus(now, AuctionStatus.SCHEDULED);
-        for (AuctionItem item : itemsToStart) {
+        LocalDateTime fiveMinutesFromNow = now.plusMinutes(5);
+        
+        log.info("=== 경매 세션 스케줄러 실행: {} ===", now);
+        
+        // 앞으로 5분 이내에 시작되는 SCHEDULED 상태의 경매 조회
+        List<AuctionItem> itemsToCreateSession = auctionItemRepository
+            .findByStartTimeBetweenAndAuctionStatus(now, fiveMinutesFromNow, AuctionStatus.SCHEDULED);
+        
+        log.info("5분 이내 시작할 경매: {}개", itemsToCreateSession.size());
+        
+        for (AuctionItem item : itemsToCreateSession) {
             // 세션이 이미 없으면 생성
             if (!auctionSessionRepository.existsByAuctionItemId(item.getId())) {
-                createSession(item); // 기본적으로 WAITING 상태로 생성됨
-                // 경매 상품 상태도 ACTIVE로 변경
-                item.setAuctionStatus(AuctionStatus.ACTIVE);
-                auctionItemRepository.save(item);
-                log.info("경매 세션 자동 생성 및 상태 변경: auctionItemId={}", item.getId());
+                createSession(item); // WAITING 상태로 생성됨
+                log.info("✅ 세션 생성 완료: auctionItemId={}, startTime={}", item.getId(), item.getStartTime());
+            } else {
+                log.info("⏭️ 이미 세션 존재: auctionItemId={}", item.getId());
             }
+        }
+        
+        // 경매 시작 시간이 된 WAITING 상태의 세션을 ACTIVE로 변경
+        List<AuctionSession> sessionsToStart = auctionSessionRepository
+            .findSessionsToStart(AuctionSessionStatus.WAITING, now);
+        
+        log.info("시작할 세션: {}개", sessionsToStart.size());
+        
+        for (AuctionSession session : sessionsToStart) {
+            session.setStatus(AuctionSessionStatus.ACTIVE);
+            auctionSessionRepository.save(session);
+            
+            // 경매 상품 상태도 ACTIVE로 변경
+            AuctionItem item = session.getAuctionItem();
+            item.setAuctionStatus(AuctionStatus.ACTIVE);
+            auctionItemRepository.save(item);
+            
+            log.info("✅ 경매 시작: sessionId={}, auctionItemId={}", session.getId(), item.getId());
+        }
+        
+        // 경매 종료 시간이 된 ACTIVE 상태의 세션을 ENDED로 변경
+        List<AuctionSession> sessionsToEnd = auctionSessionRepository
+            .findSessionsToEnd(AuctionSessionStatus.ACTIVE, now);
+        
+        log.info("종료할 세션: {}개", sessionsToEnd.size());
+        
+        for (AuctionSession session : sessionsToEnd) {
+            session.setStatus(AuctionSessionStatus.ENDED);
+            auctionSessionRepository.save(session);
+            
+            // 경매 상품 상태도 ENDED로 변경
+            AuctionItem item = session.getAuctionItem();
+            item.setAuctionStatus(AuctionStatus.ENDED);
+            auctionItemRepository.save(item);
+            
+            log.info("✅ 경매 종료: sessionId={}, auctionItemId={}", session.getId(), item.getId());
         }
     }
 }

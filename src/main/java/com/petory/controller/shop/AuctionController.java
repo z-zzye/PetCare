@@ -39,6 +39,15 @@ public class AuctionController {  //기본 경매 CRUD
     return ResponseEntity.ok(list);
   }
 
+  @GetMapping("/{auctionItemId}") // 경매 상품 단건 조회
+  public ResponseEntity<AuctionItemResponseDto> getAuctionItem(@PathVariable Long auctionItemId) {
+    AuctionItemResponseDto item = auctionService.getAuctionItem(auctionItemId);
+    if (item == null) {
+      return ResponseEntity.notFound().build();
+    }
+    return ResponseEntity.ok(item);
+  }
+
   @PutMapping("/{auctionItemId}") //경매 상품 수정
   public ResponseEntity<?> updateAuction(
       @PathVariable Long auctionItemId,

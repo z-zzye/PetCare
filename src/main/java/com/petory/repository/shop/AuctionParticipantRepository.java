@@ -61,13 +61,13 @@ public interface AuctionParticipantRepository extends JpaRepository<AuctionParti
     // 특정 시간 범위에 입장한 참여자들 조회
     List<AuctionParticipant> findByJoinedAtBetween(LocalDateTime startTime, LocalDateTime endTime);
 
-    // 특정 세션의 최고 입찰가를 가진 참여자 조회
-    @Query("SELECT p FROM AuctionParticipant p WHERE p.session = :session AND p.highestBidAmount = (SELECT MAX(p2.highestBidAmount) FROM AuctionParticipant p2 WHERE p2.session = :session)")
-    Optional<AuctionParticipant> findTopBidderBySession(@Param("session") AuctionSession session);
+    // 특정 세션의 최고 입찰가를 가진 참여자 조회 (실시간 계산으로 변경)
+    // @Query("SELECT p FROM AuctionParticipant p WHERE p.session = :session AND p.highestBidAmount = (SELECT MAX(p2.highestBidAmount) FROM AuctionParticipant p2 WHERE p2.session = :session)")
+    // Optional<AuctionParticipant> findTopBidderBySession(@Param("session") AuctionSession session);
 
-    // 특정 세션의 입찰 횟수가 많은 참여자들 조회 (상위 10명)
-    @Query("SELECT p FROM AuctionParticipant p WHERE p.session = :session ORDER BY p.totalBids DESC")
-    List<AuctionParticipant> findTopBiddersBySession(@Param("session") AuctionSession session);
+    // 특정 세션의 입찰 횟수가 많은 참여자들 조회 (실시간 계산으로 변경)
+    // @Query("SELECT p FROM AuctionParticipant p WHERE p.session = :session ORDER BY p.totalBids DESC")
+    // List<AuctionParticipant> findTopBiddersBySession(@Param("session") AuctionSession session);
 
     // 특정 세션의 참여자 존재 여부 확인
     boolean existsBySessionAndMember(AuctionSession session, Member member);

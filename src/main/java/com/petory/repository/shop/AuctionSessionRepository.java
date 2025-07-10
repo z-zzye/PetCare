@@ -41,8 +41,8 @@ public interface AuctionSessionRepository extends JpaRepository<AuctionSession, 
     // 참여자 수가 특정 수 이상인 세션들 조회
     List<AuctionSession> findByParticipantCountGreaterThanEqual(Integer minParticipantCount);
     
-    // 특정 시간 범위에 생성된 세션들 조회
-    List<AuctionSession> findByCreatedAtBetween(LocalDateTime startTime, LocalDateTime endTime);
+    // 특정 시간 범위에 생성된 세션들 조회 (BaseTimeEntity의 regDate 사용)
+    List<AuctionSession> findByRegDateBetween(LocalDateTime startTime, LocalDateTime endTime);
     
     // 세션 존재 여부 확인
     boolean existsByAuctionItemId(Long auctionItemId);

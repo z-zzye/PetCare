@@ -27,10 +27,6 @@ function OrderPage() {
   const [paymentMethod, setPaymentMethod] = useState('CARD');
 
   useEffect(() => {
-    axios.get('/test').then(res => console.log('프록시 테스트 응답:', res.data)).catch(err => console.log('프록시 테스트 에러:', err));
-  }, []);
-
-  useEffect(() => {
     axios.get('/members/mileage')
       .then(res => setAvailableMileage(res.data.mileage ?? 0))
       .catch(() => setAvailableMileage(0));

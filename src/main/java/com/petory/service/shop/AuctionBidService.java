@@ -53,7 +53,7 @@ public class AuctionBidService {
         // 입찰 기록 생성
         AuctionBid bid = AuctionBid.builder()
                 .auctionItem(auctionItem)
-                .bidder(member)
+                .member(member)
                 .bidAmount(bidAmount)
                 .bidTime(LocalDateTime.now())
                 .build();
@@ -97,7 +97,7 @@ public class AuctionBidService {
      * 특정 사용자의 입찰 내역 조회
      */
     public List<AuctionBid> getUserBidHistory(AuctionItem auctionItem, Member member) {
-        return auctionBidRepository.findByAuctionItemAndBidderOrderByBidTimeDesc(auctionItem, member);
+        return auctionBidRepository.findByAuctionItemAndMemberOrderByBidTimeDesc(auctionItem, member);
     }
 
     /**
@@ -152,8 +152,8 @@ public class AuctionBidService {
                 .bidId(bid.getId())
                 .auctionItemId(bid.getAuctionItem().getId())
                 .auctionItemName(bid.getAuctionItem().getItem().getItemName())
-                .memberId(bid.getBidder().getMemberId())
-                .memberNickname(bid.getBidder().getMember_NickName())
+                .memberId(bid.getMember().getMemberId())
+                .memberNickname(bid.getMember().getMember_NickName())
                 .bidAmount(bid.getBidAmount())
                 .bidTime(bid.getBidTime())
                 .isHighest(isHighestBid(bid))

@@ -152,11 +152,7 @@ public class AuctionParticipantService {
         // 경매 상품으로 세션 조회
         Optional<AuctionSession> sessionOpt = auctionSessionService.getSessionByAuctionItem(auctionItem);
         if (sessionOpt.isEmpty()) {
-            // 세션이 없으면 생성
-            AuctionSession session = auctionSessionService.createSession(auctionItem);
-            log.info("새로운 세션 생성: sessionId={}", session.getId());
-            AuctionParticipant participant = joinSession(session.getId(), member, connectionId);
-            return convertToDto(participant);
+            throw new IllegalArgumentException("경매 세션이 생성되지 않았습니다. 관리자에게 문의해주세요: " + auctionItemId);
         }
         
         AuctionSession session = sessionOpt.get();

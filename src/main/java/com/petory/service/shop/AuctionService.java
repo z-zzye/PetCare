@@ -95,4 +95,40 @@ public class AuctionService {
         .build();
     }).collect(Collectors.toList());
   }
+
+  public AuctionItemResponseDto getAuctionItem(Long auctionItemId) {
+    AuctionItem auctionItem = auctionItemRepository.findById(auctionItemId)
+      .orElse(null);
+    if (auctionItem == null) return null;
+
+    // 현재 최고 입찰가 조회
+    Integer currentPrice = auctionBidRepository.findMaxBidAmountByAuctionItem(auctionItem)
+        .orElse(auctionItem.getStartPrice());
+    // 현재 최고 입찰자 조회
+    Member currentWinner = auctionBidRepository.findCurrentWinnerByAuctionItem(auctionItem)
+        .orElse(null);
+    String rawThumbnailUrl = itemRepository.findRepresentativeImageUrlByItemId(auctionItem.getItem().getItemId());
+    String thumbnailUrl = null;
+    if (rawThumbnailUrl != null && !rawThumbnailUrl.startsWith("/")) {
+      thumbnailUrl = "/images/" + rawThumbnailUrl;
+    } else {
+      thumbnailUrl = rawThumbnailUrl;
+    }
+    return AuctionItemResponseDto.builder()
+      .auction_item_id(auctionItem.getId())
+      .item_id(auctionItem.getItem().getItemId())
+      .itemName(auctionItem.getItem().getItemName())
+      .itemPrice(auctionItem.getItem().getItemPrice())
+      .thumbnailUrl(thumbnailUrl)
+      .start_price(auctionItem.getStartPrice())
+      .start_time(auctionItem.getStartTime())
+      .end_time(auctionItem.getEndTime())
+      .current_price(currentPrice)
+      .bid_unit(auctionItem.getBidUnit())
+      .auction_status(auctionItem.getAuctionStatus())
+      .auction_description(auctionItem.getAuctionDescription())
+      .currentWinnerName(currentWinner != null ? currentWinner.getMember_NickName() : null)
+      .currentWinnerId(currentWinner != null ? currentWinner.getMemberId() : null)
+      .build();
+  }
 }

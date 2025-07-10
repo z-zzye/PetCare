@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import com.petory.constant.AuctionStatus;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,5 +24,8 @@ public interface AuctionItemRepository extends JpaRepository<AuctionItem, Long> 
     List<AuctionItem> findEndedAuctions();
 
     // 경매 시작 시간이 지난 SCHEDULED 상태의 경매 상품 조회
-    List<AuctionItem> findByStartTimeBeforeAndAuctionStatus(java.time.LocalDateTime now, com.petory.constant.AuctionStatus status);
+    List<AuctionItem> findByStartTimeBeforeAndAuctionStatus(LocalDateTime now, AuctionStatus status);
+    
+    // 특정 시간 범위에 시작할 SCHEDULED 상태의 경매 상품 조회
+    List<AuctionItem> findByStartTimeBetweenAndAuctionStatus(LocalDateTime startTime, LocalDateTime endTime, AuctionStatus status);
 } 
