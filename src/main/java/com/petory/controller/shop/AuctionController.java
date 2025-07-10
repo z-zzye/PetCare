@@ -15,11 +15,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/auctions")
 @RequiredArgsConstructor
-public class AuctionController {
+public class AuctionController {  //기본 경매 CRUD
 
   private final AuctionService auctionService;
 
-  @PostMapping("/new")
+  @PostMapping("/new") //경매 상품 등록
   public ResponseEntity<?> registerAuction(@RequestBody AuctionItemDto auctionItemDto) {
     try {
       Long auctionId = auctionService.saveAuctionItem(auctionItemDto);
@@ -33,13 +33,13 @@ public class AuctionController {
     }
   }
 
-  @GetMapping("/list")
+  @GetMapping("/list") //경매 상품목록 조회
   public ResponseEntity<List<AuctionItemResponseDto>> getAuctionList() {
     List<AuctionItemResponseDto> list = auctionService.getAuctionList();
     return ResponseEntity.ok(list);
   }
 
-  @PutMapping("/{auctionItemId}")
+  @PutMapping("/{auctionItemId}") //경매 상품 수정
   public ResponseEntity<?> updateAuction(
       @PathVariable Long auctionItemId,
       @RequestBody AuctionItemDto auctionItemDto
@@ -51,4 +51,4 @@ public class AuctionController {
       return ResponseEntity.internalServerError().body("경매 수정 중 오류 발생: " + e.getMessage());
     }
   }
-} 
+}

@@ -1,0 +1,14 @@
+/* AuctionRoom 경매방 기본 스타일 */
+.auction-room-root { padding: 24px; }
+.auction-room-header { display: flex; align-items: center; margin-bottom: 16px; }
+.auction-room-back { margin-right: 16px; background: #eee; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+.auction-room-title { font-size: 1.5rem; font-weight: bold; }
+.auction-room-main { max-width: 600px; margin: 0 auto; }
+.auction-room-core-info { display: flex; gap: 24px; margin-bottom: 16px; }
+.auction-room-img { width: 160px; height: 160px; object-fit: cover; border-radius: 8px; background: #f5f5f5; }
+.auction-room-info-block { flex: 1; }
+.auction-room-item-name { font-size: 1.2rem; font-weight: bold; margin-bottom: 8px; }
+.auction-room-accordion { margin-top: 24px; }
+.accordion-toggle { background: #eee; border: none; padding: 8px 16px; cursor: pointer; border-radius: 4px; font-size: 1rem; }
+.accordion-content { background: #fafafa; border: 1px solid #ddd; border-radius: 4px; padding: 16px; margin-top: 8px; }
+.auction-room-section { margin-bottom: 16px; } 

@@ -257,6 +257,19 @@
   border: 2px solid #223A5E;
 }
 
+.auction-enter-btn.disabled {
+  background: #ccc;
+  color: #666;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.auction-enter-btn.disabled:hover {
+  background: #ccc;
+  color: #666;
+  border: none;
+}
+
 @media (max-width: 900px) {
   .carousel-card.center { width: 90vw; height: 320px; }
   .carousel-card.side { width: 38vw; height: 140px; }

@@ -1,9 +1,22 @@
 import React, { useState, useEffect } from 'react';
+import SockJS from 'sockjs-client';
+import { CompatClient, Stomp } from '@stomp/stompjs';
 import './AuctionCarousel.css';
+import { useNavigate } from 'react-router-dom';
 
 const AuctionCarousel = ({ items = [] }) => {
   const [current, setCurrent] = useState(0);
+  const [currentTime, setCurrentTime] = useState(new Date());
   const itemCount = items.length;
+
+  // 현재 시간 업데이트 (1초마다)
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   // 이미지 프리로드
   useEffect(() => {
@@ -46,22 +59,22 @@ const AuctionCarousel = ({ items = [] }) => {
       <div className="carousel-cards-flex">
         {/* 왼쪽 카드 */}
         <div className="carousel-card side left">
-          <AuctionCard item={cardItems[0]} />
+          <AuctionCard item={cardItems[0]} currentTime={currentTime} />
         </div>
         {/* 가운데 카드 - 플립 효과 */}
         <div className="carousel-card center flip-card">
           <div className="flip-card-inner">
             <div className="flip-card-front">
-              <AuctionCard item={cardItems[1]} />
+              <AuctionCard item={cardItems[1]} currentTime={currentTime} />
             </div>
             <div className="flip-card-back">
-              <AuctionCard item={cardItems[1]} isBack={true} />
+              <AuctionCard item={cardItems[1]} isBack={true} currentTime={currentTime} />
             </div>
           </div>
         </div>
         {/* 오른쪽 카드 */}
         <div className="carousel-card side right">
-          <AuctionCard item={cardItems[2]} />
+          <AuctionCard item={cardItems[2]} currentTime={currentTime} />
         </div>
       </div>
       <button className="carousel-arrow right" onClick={handleNext}>&gt;</button>
@@ -69,8 +82,94 @@ const AuctionCarousel = ({ items = [] }) => {
   );
 };
 
-function AuctionCard({ item, isBack }) {
+function AuctionCard({ item, isBack, currentTime }) {
+  const [isEntered, setIsEntered] = useState(false);
+  const [stompClient, setStompClient] = useState(null);
+  const navigate = useNavigate();
+  
   if (!item) return null;
+
+  // 경매 시작 시간과 현재 시간 비교
+  const isAuctionStarted = () => {
+    if (!item.start_time) return false;
+    const startTime = new Date(item.start_time);
+    return currentTime >= startTime;
+  };
+
+  // 경매 시작까지 남은 시간 계산
+  const getTimeUntilStart = () => {
+    if (!item.start_time) return null;
+    const startTime = new Date(item.start_time);
+    const timeDiff = startTime - currentTime;
+    
+    if (timeDiff <= 0) return null;
+    
+    const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+    
+    if (days > 0) return `${days}일 ${hours}시간`;
+    if (hours > 0) return `${hours}시간 ${minutes}분`;
+    if (minutes > 0) return `${minutes}분 ${seconds}초`;
+    return `${seconds}초`;
+  };
+
+  const auctionStarted = isAuctionStarted();
+  const timeUntilStart = getTimeUntilStart();
+
+  // WebSocket 연결 및 경매 입장
+  const handleEnterAuction = () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('로그인이 필요합니다.');
+      return;
+    }
+
+    const socket = new SockJS(`/ws/auction?token=${token}`);
+    const client = Stomp.over(socket);
+
+    client.connect(
+      { Authorization: `Bearer ${token}` },
+      () => {
+        console.log('✅ 경매 WebSocket 연결 성공');
+        
+        // 경매 세션 참여 메시지 전송
+        client.send('/app/auction.join', {}, item.auction_item_id);
+        
+        // 경매 업데이트 구독
+        client.subscribe(`/topic/auction/session-${item.auction_item_id}`, (message) => {
+          const data = JSON.parse(message.body);
+          console.log('📨 경매 업데이트:', data);
+          
+          // 입찰 정보 업데이트 등 처리
+          if (data.type === 'BID_SUCCESS') {
+            console.log('새로운 입찰:', data.bid);
+          }
+        });
+        
+        // 개별 알림 구독
+        const memberId = localStorage.getItem('memberId'); // 또는 다른 방법으로 memberId 가져오기
+        if (memberId) {
+          client.subscribe(`/queue/auction/${memberId}`, (message) => {
+            const data = JSON.parse(message.body);
+            console.log('📨 개별 알림:', data);
+          });
+        }
+        
+        setStompClient(client);
+        setIsEntered(true);
+        
+        // 페이지 이동
+        navigate(`/auction/${item.auction_item_id}`);
+      },
+      (error) => {
+        console.error('❌ 경매 WebSocket 연결 실패:', error);
+        alert('경매 입장에 실패했습니다.');
+      }
+    );
+  };
+
   return (
     <div className="auction-card-content">
       {item.thumbnailUrl && !isBack && (
@@ -80,19 +179,40 @@ function AuctionCard({ item, isBack }) {
         <div className="auction-card-title">{item.itemName}</div>
         <div className="auction-card-price">시작가: {item.start_price}P</div>
         {item.start_time && (
-          <div className="auction-card-date">{item.start_time.slice(0, 16).replace('T', ' ')} 경매 시작</div>
+          <div className="auction-card-date">{item.start_time.slice(0, 16).replace('T', ' ')} OPEN</div>
         )}
         {isBack && item.auction_description && (
           <div style={{ marginTop: 12, color: '#444', fontSize: '1rem' }}>{item.auction_description}</div>
         )}
         {isBack && (
-          <button className="auction-enter-btn" onClick={() => alert('경매 입장!')}>
-            경매 입장
-          </button>
+          <div style={{ marginTop: 12 }}>
+            {!auctionStarted && timeUntilStart && (
+              <div style={{ 
+                color: '#ff6b6b', 
+                fontSize: '0.9rem', 
+                marginBottom: 8,
+                textAlign: 'center'
+              }}>
+                경매 시작까지: {timeUntilStart}
+              </div>
+            )}
+            <button 
+              className={`auction-enter-btn ${!auctionStarted || isEntered ? 'disabled' : ''}`}
+              onClick={() => {
+                if (auctionStarted && !isEntered) {
+                  handleEnterAuction();
+                }
+              }}
+              disabled={!auctionStarted || isEntered}
+            >
+              {!auctionStarted ? '경매 대기중' : 
+               isEntered ? '입장 완료' : '경매 입장'}
+            </button>
+          </div>
         )}
       </div>
     </div>
   );
 }
 
-export default AuctionCarousel; 
+export default AuctionCarousel;

@@ -53,6 +53,7 @@ import UserAdminPage from './components/admin/UserAdminPage.jsx';
 import ShopAdminPage from './components/admin/ShopAdminPage.jsx';
 import AuctionAdminPage from './components/admin/AuctionAdminPage.jsx';
 import ChatPage from './components/chat/ChatPage.jsx';
+import AuctionRoom from './components/shop/AuctionRoom.jsx';
 
 function App() {
   return (
@@ -100,6 +101,7 @@ function App() {
         <Route path="/shop/item/:itemId" element={<ItemDetail />} /> /*구매 내역 상세 페이지에서 이미지 클릭시 이동*/
         <Route path="/shop/my-orders" element={<MyOrders />} />
         <Route path="/shop/order" element={<OrderPage />} /> /*바로구매 버튼 클릭시 이동*/
+        <Route path="/auction/:auctionItemId" element={<AuctionRoom />} />
 
         <Route path="/trails" element={<WalkingTrailListPage />} />
         <Route path="/trails/:trailId" element={<WalkingTrailDetailPage />} />

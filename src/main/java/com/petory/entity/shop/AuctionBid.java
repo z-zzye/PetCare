@@ -24,7 +24,7 @@ public class AuctionBid {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "member_id", nullable = false)
-  private Member bidder; // 입찰한 회원
+  private Member member; // 입찰한 회원
 
   @Column(name = "bid_amount", nullable = false)
   private Integer bidAmount; // 입찰 금액

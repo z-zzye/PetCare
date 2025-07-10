@@ -21,4 +21,7 @@ public interface AuctionItemRepository extends JpaRepository<AuctionItem, Long> 
     // 종료된 경매 목록 조회
     @Query("SELECT a FROM AuctionItem a WHERE a.auctionStatus = 'ENDED'")
     List<AuctionItem> findEndedAuctions();
+
+    // 경매 시작 시간이 지난 SCHEDULED 상태의 경매 상품 조회
+    List<AuctionItem> findByStartTimeBeforeAndAuctionStatus(java.time.LocalDateTime now, com.petory.constant.AuctionStatus status);
 } 

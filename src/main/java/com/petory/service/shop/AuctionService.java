@@ -4,7 +4,9 @@ import com.petory.dto.shop.AuctionItemDto;
 import com.petory.dto.shop.AuctionItemResponseDto;
 import com.petory.entity.shop.AuctionItem;
 import com.petory.entity.shop.Item;
+import com.petory.entity.Member;
 import com.petory.repository.shop.AuctionItemRepository;
+import com.petory.repository.shop.AuctionBidRepository;
 import com.petory.repository.shop.ItemRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ import java.util.stream.Collectors;
 public class AuctionService {
 
   private final AuctionItemRepository auctionItemRepository;
+  private final AuctionBidRepository auctionBidRepository;
   private final ItemRepository itemRepository;
 
   @Transactional
@@ -58,24 +61,38 @@ public class AuctionService {
 
   public List<AuctionItemResponseDto> getAuctionList() { //경매 상품 목록 조회
     List<AuctionItem> auctionItems = auctionItemRepository.findAll();
-    return auctionItems.stream().map(auctionItem -> AuctionItemResponseDto.builder()
-      .auction_item_id(auctionItem.getId())
-      .item_id(auctionItem.getItem().getItemId())
-      .itemName(auctionItem.getItem().getItemName())
-      .itemPrice(auctionItem.getItem().getItemPrice())
-      .thumbnailUrl(
-        itemRepository.findRepresentativeImageUrlByItemId(auctionItem.getItem().getItemId())
-      )
-      .start_price(auctionItem.getStartPrice())
-      .start_time(auctionItem.getStartTime())
-      .end_time(auctionItem.getEndTime())
-      .current_price(auctionItem.getCurrentPrice())
-      .bid_unit(auctionItem.getBidUnit())
-      .auction_status(auctionItem.getAuctionStatus())
-      .auction_description(auctionItem.getAuctionDescription())
-      .currentWinnerName(auctionItem.getCurrentWinner() != null ? auctionItem.getCurrentWinner().getMember_NickName() : null)
-      .currentWinnerId(auctionItem.getCurrentWinner() != null ? auctionItem.getCurrentWinner().getMemberId() : null)
-      .build()
-    ).collect(Collectors.toList());
+    return auctionItems.stream().map(auctionItem -> {
+      // 현재 최고 입찰가 조회
+      Integer currentPrice = auctionBidRepository.findMaxBidAmountByAuctionItem(auctionItem)
+          .orElse(auctionItem.getStartPrice());
+      
+      // 현재 최고 입찰자 조회
+      Member currentWinner = auctionBidRepository.findCurrentWinnerByAuctionItem(auctionItem)
+          .orElse(null);
+      
+      String rawThumbnailUrl = itemRepository.findRepresentativeImageUrlByItemId(auctionItem.getItem().getItemId());
+      String thumbnailUrl = null;
+      if (rawThumbnailUrl != null && !rawThumbnailUrl.startsWith("/")) {
+        thumbnailUrl = "/images/" + rawThumbnailUrl;
+      } else {
+        thumbnailUrl = rawThumbnailUrl;
+      }
+      return AuctionItemResponseDto.builder()
+        .auction_item_id(auctionItem.getId())
+        .item_id(auctionItem.getItem().getItemId())
+        .itemName(auctionItem.getItem().getItemName())
+        .itemPrice(auctionItem.getItem().getItemPrice())
+        .thumbnailUrl(thumbnailUrl)
+        .start_price(auctionItem.getStartPrice())
+        .start_time(auctionItem.getStartTime())
+        .end_time(auctionItem.getEndTime())
+        .current_price(currentPrice)
+        .bid_unit(auctionItem.getBidUnit())
+        .auction_status(auctionItem.getAuctionStatus())
+        .auction_description(auctionItem.getAuctionDescription())
+        .currentWinnerName(currentWinner != null ? currentWinner.getMember_NickName() : null)
+        .currentWinnerId(currentWinner != null ? currentWinner.getMemberId() : null)
+        .build();
+    }).collect(Collectors.toList());
   }
 }

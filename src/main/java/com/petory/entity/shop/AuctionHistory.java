@@ -1,6 +1,7 @@
 package com.petory.entity.shop;
 
 import com.petory.entity.Member;
+import com.petory.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,7 +12,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AuctionHistory {
+public class AuctionHistory extends BaseTimeEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "auction_history_id")
@@ -30,4 +31,10 @@ public class AuctionHistory {
 
   @Column(name = "is_winner", nullable = false)
   private boolean isWinner; // 낙찰 여부
+
+  @Column(name = "total_bids")
+  private Integer totalBids; // 총 입찰 횟수
+
+  @Column(name = "final_price")
+  private Integer finalPrice; // 최종 낙찰가
 }
