@@ -1,9 +1,11 @@
 package com.petory.repository;
 
 import com.petory.constant.ReservationStatus;
+import com.petory.entity.Member;
 import com.petory.entity.Pet;
 import com.petory.entity.Reservation;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,4 +23,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
   // 특정 Pet 엔티티와 연결된 모든 Reservation을 찾습니다.
   List<Reservation> findByPet(Pet pet);
+
+  //
+  @Query("SELECT r FROM Reservation r JOIN r.member m WHERE m.member_Id = :memberId ORDER BY r.reservationDateTime DESC")
+  List<Reservation> findByMemberReservations(Long memberId);
 }

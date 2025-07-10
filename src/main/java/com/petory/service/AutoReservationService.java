@@ -13,6 +13,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -142,46 +143,71 @@ public class AutoReservationService {
       .collect(Collectors.toList());
   }
 
-  /**
-   * [2단계: 확정] 사용자가 선택한 슬롯으로 최종 예약을 생성하고 '예약 보류' 상태로 저장합니다.
-   */
-  @Transactional
+  // (기존 PENDING 상태로 저장하는 메서드)
   public Reservation confirmReservation(ReservationConfirmRequestDto requestDto) {
-    log.info("예약 확정 요청: petId={}, hospitalId={}", requestDto.getPetId(), requestDto.getHospitalId());
+    return createReservation(requestDto, ReservationStatus.PENDING);
+  }
 
-    // 1. 더미 서버에 해당 슬롯을 선점(예약 처리)하도록 요청합니다.
+  // (새로 만든 CONFIRMED 상태로 저장하는 메서드), 현재 상태에선 사용 X
+  public Reservation confirmAndPayReservation(ReservationConfirmRequestDto requestDto) {
+    return createReservation(requestDto, ReservationStatus.CONFIRMED);
+  }
+
+  private Reservation createReservation(ReservationConfirmRequestDto requestDto, ReservationStatus status) {
+    log.info("예약 생성 요청 (상태: {}): petId={}, hospitalId={}", status, requestDto.getPetId(), requestDto.getHospitalId());
+
+    // 1. 더미 서버 슬롯 선점
     String url = "http://localhost:3001/api/hospitals/reserve-slot";
     ResponseEntity<Map> response;
     try {
       response = restTemplate.postForEntity(url, requestDto, Map.class);
     } catch (RestClientException e) {
       log.error("예약 슬롯 선점 중 오류 발생", e);
+
+      if (e instanceof HttpClientErrorException) {
+        // HTTP 상태 코드로 오류를 구분합니다.
+        HttpStatusCode statusCode = ((HttpClientErrorException) e).getStatusCode();
+        if (statusCode == HttpStatus.CONFLICT) { // 409 Conflict 오류인 경우
+          throw new IllegalStateException("해당 시간대는 방금 다른 사용자가 예약했습니다. 다른 시간을 선택해주세요.");
+        }
+      }
+      // 그 외 모든 통신 오류는 기존 메시지 유지
       throw new IllegalStateException("예약 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
     }
 
     // 2. 더미 서버의 응답을 확인하여 선점 실패 시 예외 처리
     if (response.getBody() == null || !(boolean) response.getBody().get("success")) {
-      throw new IllegalStateException("해당 시간대는 방금 다른 사용자가 예약했습니다. 다른 시간을 선택해주세요.");
+      throw new IllegalStateException("해당 시간대는 최근 다른 사용자가 예약했습니다. 다른 시간을 선택해주세요.");
     }
     Map<String, Object> reservedInfo = response.getBody();
 
-    // 3. 우리 DB에 '예약 보류' 상태로 예약 정보 저장
+    // 3. Reservation 엔티티 생성
     Pet pet = petRepository.findById(requestDto.getPetId())
       .orElseThrow(() -> new IllegalArgumentException("해당 펫을 찾을 수 없습니다."));
 
     Reservation reservation = new Reservation();
+    // vaccineTypes 리스트의 첫 번째 항목을 Reservation의 vaccineType으로 설정
+    if (requestDto.getVaccineTypes() != null && !requestDto.getVaccineTypes().isEmpty()) {
+      reservation.setVaccineType(VaccineType.valueOf(requestDto.getVaccineTypes().get(0)));
+    }
     reservation.setPet(pet);
     reservation.setMember(pet.getMember());
     reservation.setHospitalName((String) reservedInfo.get("hospitalName"));
+    reservation.setHospitalAddress(requestDto.getHospitalAddress());
+    reservation.setHospitalPhone(requestDto.getHospitalPhone());
     reservation.setReservationDateTime(LocalDateTime.parse((String) reservedInfo.get("confirmedDateTime")));
-    reservation.setReservationStatus(ReservationStatus.PENDING); // '예약 보류' 상태
-
-    reservation.setPaymentDueDate(LocalDateTime.now().plusDays(3));
     reservation.setReservedHospitalId(requestDto.getHospitalId());
+    reservation.setReservationStatus(status);
     reservation.setReservedDate(LocalDate.parse(requestDto.getTargetDate()));
     reservation.setReservedTimeSlot(requestDto.getTimeSlot());
+    reservation.setTotalAmount(requestDto.getTotalAmount());
+    reservation.setDeposit(20000);
 
-    log.info("새로운 예약이 '보류' 상태로 DB에 저장되었습니다.");
+    if (status == ReservationStatus.PENDING) {
+      reservation.setPaymentDueDate(LocalDateTime.now().plusDays(3));
+    }
+
+    log.info("새로운 예약이 '{}' 상태로 DB에 저장되었습니다.", status);
     return reservationRepository.save(reservation);
   }
 

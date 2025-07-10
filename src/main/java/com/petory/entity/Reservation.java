@@ -32,6 +32,8 @@ public class Reservation {
   // 예약한 병원 이름 (외부 정보이므로 일단 문자열로 저장)
   @Column(nullable = false)
   private String hospitalName;
+  private String hospitalAddress; // 병원 주소
+  private String hospitalPhone; // 병원 전화번호
 
   // 확정된 예약 일시
   @Column(nullable = false)
@@ -45,6 +47,12 @@ public class Reservation {
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private ReservationStatus reservationStatus;
+
+  @Column(nullable = false)
+  private Integer totalAmount; // 총 접종비
+
+  @Column(nullable = false)
+  private Integer deposit;     // 예약금
 
   // 예약 보류 상태의 결제 마감 기한
   private LocalDateTime paymentDueDate;

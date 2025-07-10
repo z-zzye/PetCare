@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import Modal from 'react-modal';
 import AutoVaxForm from './AutoVaxForm';
+import PaymentRegistration from './PaymentRegistration';
 import './AutoVaxApplyModal.css'; // CSS 파일 임포트
+import Swal from 'sweetalert2';
 
 // 모달의 스타일을 지정합니다. (기존과 동일)
 const customStyles = {
@@ -31,6 +33,7 @@ const customStyles = {
 const AutoVaxApplyModal = ({ isOpen, onRequestClose, petName, petId }) => {
   const [step, setStep] = useState(1);
   const [isAgreed, setIsAgreed] = useState(false);
+  const [formStepView, setFormStepView] = useState('form');
 
   const handleNextStep = () => {
     setStep(2);
@@ -41,8 +44,16 @@ const AutoVaxApplyModal = ({ isOpen, onRequestClose, petName, petId }) => {
     setTimeout(() => {
       setStep(1);
       setIsAgreed(false);
+      setFormStepView('form'); // 모달이 닫힐 때 상태 초기화
     }, 300);
   };
+
+  // 결제 등록이 완료되면 다시 폼 화면으로 돌아오는 함수
+  const handlePaymentComplete = () => {
+      setFormStepView('form');
+      // 사용자에게 다시 예약을 진행하라고 안내
+      Swal.fire('등록 완료!', '결제 수단이 등록되었습니다. 다시 병원을 검색하고 예약을 진행해주세요.', 'success');
+  }
 
   return (
     <Modal
@@ -102,7 +113,15 @@ const AutoVaxApplyModal = ({ isOpen, onRequestClose, petName, petId }) => {
       )}
 
       {step === 2 && (
-        <AutoVaxForm petName={petName} petId={petId} onComplete={handleCloseModal} />
+        formStepView === 'form'
+          ? <AutoVaxForm
+              petName={petName}
+              petId={petId}
+              onComplete={handleCloseModal}
+              // '결제 등록'이 필요할 때 이 함수를 호출하라고 전달
+              onRequestPaymentRegistration={() => setFormStepView('payment')}
+            />
+          : <PaymentRegistration onComplete={handlePaymentComplete} />
       )}
     </Modal>
   );

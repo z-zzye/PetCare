@@ -161,6 +161,7 @@ const Sidebar = ({ onTabChange }) => {
         <button onClick={() => onTabChange('calendar')}>📅캘린더</button>
         <button onClick={() => onTabChange('health')}>🩺건강수첩</button>
         <button onClick={() => onTabChange('posts')}>📝내가쓴글</button>
+        <button onClick={() => onTabChange('reservations')}>🎟️예약현황</button>
       </div>
     </div>
   );

@@ -8,6 +8,7 @@ import com.petory.service.AutoReservationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -62,10 +63,41 @@ public class AutoReservationController {
       // 성공 시 간단한 메시지를 반환합니다.
       return ResponseEntity.ok(Map.of("message", "예약이 성공적으로 보류 상태로 접수되었습니다."));
 
-    } catch (Exception e) {
-      log.error("예약 확정 중 오류 발생", e);
-      // 서비스 단에서 발생하는 예외(예: 이미 선점된 슬롯) 메시지를 그대로 전달합니다.
+    } catch (IllegalStateException e) { // ✅ 동일하게 수정
+      log.error("예약 확정 중 처리 불가", e);
+      if (e.getMessage().contains("다른 사용자가 예약")) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", e.getMessage()));
+      }
       return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+    } catch (Exception e) { // ✅ 동일하게 수정
+      log.error("예약 확정 중 예상치 못한 오류 발생", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body(Map.of("error", "서버 내부 오류가 발생했습니다."));
+    }
+  }
+
+  /**
+   * [신규 API] 즉시 결제와 함께 예약을 '확정(CONFIRMED)' 상태로 생성합니다.
+   */
+  @PostMapping("/confirm-and-pay")
+  public ResponseEntity<?> confirmAndPayReservation(@RequestBody ReservationConfirmRequestDto requestDto) {
+    try {
+      log.info("즉시 결제 예약 API 호출: {}", requestDto);
+      autoReservationService.confirmAndPayReservation(requestDto);
+      return ResponseEntity.ok(Map.of("message", "예약이 성공적으로 확정되었습니다."));
+
+    } catch (IllegalStateException e) {
+      log.error("즉시 결제 예약 중 오류 발생", e);
+      if (e.getMessage().contains("다른 사용자가 예약")) {
+        // '이미 예약된 슬롯' 오류일 경우 409 Conflict 반환
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", e.getMessage()));
+      }
+      // 그 외 다른 IllegalStateException은 400 Bad Request 반환
+      return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+    } catch (Exception e) { // ✅ 혹시 모를 다른 모든 예외 처리
+      log.error("즉시 결제 예약 중 예상치 못한 오류 발생", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body(Map.of("error", "서버 내부 오류가 발생했습니다."));
     }
   }
 

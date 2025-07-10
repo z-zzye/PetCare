@@ -9,6 +9,7 @@ import './Mypage.css';
 import CalendarPage from './CalendarPage';
 import HealthNotePage from './HealthNotePage';
 import MyPostsPage from './MyPostsPage';
+import MyReservationsPage from './MyReservationsPage';
 import Swal from 'sweetalert2';
 //import './MainPage.css';         // 스타일 분리 (선택)
 
@@ -84,6 +85,8 @@ const Mypage = () => {
         return <HealthNotePage />;
       case 'posts':
         return <MyPostsPage />;
+      case 'reservations':
+        return <MyReservationsPage />;
       default:
         return <div>탭을 선택하세요.</div>;
     }

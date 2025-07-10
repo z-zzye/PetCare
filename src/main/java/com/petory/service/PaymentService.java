@@ -1,5 +1,7 @@
 package com.petory.service;
 
+import com.petory.dto.autoReservation.PaymentMethodResponseDto;
+import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -18,58 +20,21 @@ import com.petory.repository.PaymentMethodRepository;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class PaymentService {
 
   private final MemberRepository memberRepository;
-  private final PaymentMethodRepository paymentMethodRepository;
 
   @Value("${portone.api-key}")
   private String apiKey;
 
   @Value("${portone.api-secret}")
   private String apiSecret;
-
-  public void issueBillingKeyAndSave(String impUid) {
-    // 1. 포트원 API 호출을 위한 액세스 토큰 발급
-    String token = getPortoneAccessToken();
-    RestTemplate restTemplate = new RestTemplate();
-    String url = "https://api.iamport.kr/payments/" + impUid;
-
-    HttpHeaders headers = new HttpHeaders();
-    headers.setBearerAuth(token);
-
-    // 2. imp_uid로 포트원에 결제(인증) 정보 요청
-    HttpEntity<Void> entity = new HttpEntity<>(headers);
-    ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-
-    JSONObject json = new JSONObject(response.getBody());
-    JSONObject paymentInfo = json.getJSONObject("response");
-
-    // 3. 인증 정보 검증 (상태가 'paid'이고, 금액이 0원인지 확인)
-    String status = paymentInfo.getString("status");
-    int amount = paymentInfo.getInt("amount");
-
-    if ("paid".equals(status) && amount == 0) {
-      // 4. 검증 성공 시 customer_uid 추출
-      String customerUid = paymentInfo.getString("customer_uid");
-
-      // 5. 현재 로그인한 사용자 정보 조회
-      String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-      Member member = memberRepository.findByMember_Email(userEmail)
-        .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-
-      // 6. Member 엔티티에 customer_uid(빌링키) 저장
-      member.setCustomerUid(customerUid); // Member 엔티티에 setCustomerUid 필요
-      memberRepository.save(member);
-
-    } else {
-      // 4-1. 검증 실패 시 예외 발생
-      throw new IllegalStateException("카드 인증 정보 검증에 실패했습니다. 상태: " + status + ", 금액: " + amount);
-    }
-  }
 
   // 아임포트(PortOne) 액세스 토큰 발급
   public String getPortoneAccessToken() {
@@ -134,6 +99,53 @@ public class PaymentService {
     // 성공 여부는 response.getStatusCode() 또는 json의 내용으로 판단
     // 아임포트 환불 성공 시 response에 "response" 객체가 포함됨
     return response.getStatusCode().is2xxSuccessful() && !json.isNull("response");
+  }
+  //////////////////////////////////////////////////////
+  // 포트원이 말아먹은 자동 결제 시스템 모방 처리 메서드들/////////
+  //////////////////////////////////////////////////////
+  public void registerMockBillingKeyForCurrentUser() {
+    // 1. 현재 로그인한 사용자 정보 조회
+    String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+    Member member = memberRepository.findByMember_Email(userEmail) // 메서드명 확인 필요
+      .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+    // 2. 이미 등록된 정보가 있는지 확인 (선택 사항)
+    if (member.getCustomerUid() != null && !member.getCustomerUid().isBlank()) {
+      log.info("사용자(email: {})는 이미 결제 수단이 등록되어 있습니다.", userEmail);
+      // 이미 키가 있다면 아무것도 하지 않거나, 필요시 예외를 발생시킬 수 있습니다.
+      // 여기서는 그냥 성공한 것처럼 처리합니다.
+      return;
+    }
+
+    // 3. 가짜 빌링키 생성 (예: mock_billing_랜덤UUID)
+    String mockBillingKey = "mock_billing_" + UUID.randomUUID().toString();
+    log.info("사용자(email: {})에게 모의 빌링키 생성: {}", userEmail, mockBillingKey);
+
+    // 4. Member 엔티티에 customer_uid(빌링키) 저장
+    member.setCustomerUid(mockBillingKey); // Member 엔티티에 setCustomerUid 필요
+    memberRepository.save(member);
+  }
+
+  /**
+   * [신규 로직] 현재 사용자의 등록된 결제수단 정보를 조회하여 DTO로 반환합니다.
+   * @return 등록된 정보가 있으면 DTO를, 없으면 null을 반환합니다.
+   */
+  @Transactional(readOnly = true)
+  public PaymentMethodResponseDto getMyPaymentMethod() {
+    String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+    Member member = memberRepository.findByMember_Email(userEmail)
+      .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+    String customerUid = member.getCustomerUid();
+
+    if (customerUid != null && !customerUid.isBlank()) {
+      // 실제라면 DB나 포트원에서 카드 정보를 가져오겠지만, 지금은 모킹이므로 가짜 정보를 만듭니다.
+      log.info("사용자(email: {})의 등록된 결제 수단 정보를 찾았습니다.", userEmail);
+      return new PaymentMethodResponseDto("등록된 카드", "**** 1234");
+    } else {
+      log.info("사용자(email: {})에게 등록된 결제 수단이 없습니다.", userEmail);
+      return null;
+    }
   }
 
 }
