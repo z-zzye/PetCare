@@ -90,22 +90,32 @@ const PetRegister = () => {
           }
 
           const response = await axios.post('/pets/register', formData);
-          const apiResponse = response.data;
-          const newPet = apiResponse.data;
-          alert(apiResponse.message);
+          const { message, data: newPet } = response.data;
+          alert(message);
+
+          console.log('백엔드로부터 받은 newPet 객체:', newPet);
 
           const birthDate = new Date(form.pet_Birth);
           const today = new Date();
           const ageInMonths = (today.getFullYear() - birthDate.getFullYear()) * 12 + (today.getMonth() - birthDate.getMonth());
 
-          if (ageInMonths < 12) {
+          if (ageInMonths < 12 && (newPet.petCategory === 'DOG' || newPet.petCategory === 'CAT')) {
             // 12개월 미만이면, 팝업을 띄우라는 신호(state)와 함께 마이페이지로 이동
+                    const stateToSend = {
+                        showAutoVaxPopup: true,
+                        petName: newPet.petName,
+                        petId: newPet.petNum,
+                        autoVaxStatus: newPet.autoVaxStatus
+                    };
+                    console.log('Mypage로 보내는 state:', stateToSend);
             navigate('/members/mypage', {
               state: {
                 showAutoVaxPopup: true,
                 petName: newPet.petName, // form의 이름 대신 응답받은 이름 사용
-                petId: newPet.petNum     // ✅ 백엔드에서 받은 새로운 펫 ID(pet_Num)
-              }
+                petId: newPet.petNum,     // ✅ 백엔드에서 받은 새로운 펫 ID(pet_Num)
+                autoVaxStatus: newPet.autoVaxStatus
+              },
+              replace: true
             });
           } else {
             // 12개월 이상이면 그냥 마이페이지로 이동

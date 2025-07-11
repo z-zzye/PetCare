@@ -123,4 +123,19 @@
 
 .history-event {
   color: #222;
-} 
+}
+
+.no-pets-message {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  color: #888;
+  text-align: center;
+}
+
+.no-pets-message h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+}

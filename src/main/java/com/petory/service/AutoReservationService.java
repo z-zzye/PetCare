@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,39 +42,112 @@ public class AutoReservationService {
   @Transactional(readOnly = true)
   public DetailedSlotSearchResponseDto findAvailableSlots(SlotSearchRequestDto requestDto) {
     log.info("상세 슬롯 탐색 시작: petId={}", requestDto.getPetId());
-
     Pet pet = petRepository.findById(requestDto.getPetId())
       .orElseThrow(() -> new IllegalArgumentException("해당 펫을 찾을 수 없습니다."));
 
-    // 1. 선택된 백신별로 각각의 가장 빠른 접종일을 계산합니다.
-    List<VaccineDateInfo> vaccineDates = calculateNextVaccineDateInfos(pet, requestDto.getVaccineTypes());
+    // 1. 먼저 펫에게 필요한 모든 다음 접종 정보를 계산합니다.
+    List<VaccineDateInfo> vaccineDates = calculateNextDatesForForm(pet, requestDto.getVaccineTypes());
 
     if (vaccineDates.isEmpty()) {
-      log.info("더 이상 예약할 접종이 없습니다.");
+      log.info("선택된 백신 중 예약할 회차가 남아있는 항목이 없습니다.");
       return new DetailedSlotSearchResponseDto(Collections.emptyList(), Collections.emptyList());
     }
 
-    // 2. 이 중 전체에서 가장 빠른 날짜를 찾습니다.
+    // 3. 필터링된 결과 중 가장 빠른 날짜를 찾습니다.
     LocalDate overallEarliestDate = vaccineDates.stream()
       .min(Comparator.comparing(VaccineDateInfo::getDate))
       .get()
       .getDate();
 
-    // 3. 가장 빠른 날짜를 기준으로 예약 가능한 병원 목록을 조회합니다.
+    // 4. 가장 빠른 날짜로 병원을 조회하고 결과를 반환합니다.
     List<AvailableSlotResponseDto> availableSlots = findHospitalsForDate(overallEarliestDate, requestDto);
-
-    // 4. 두 종류의 정보를 모두 담아 반환합니다.
     return new DetailedSlotSearchResponseDto(vaccineDates, availableSlots);
+  }
+
+  /**
+   * ✅ [역할 2: 자동 재예약] '접종 완료' 후 다음 예약을 생성할 때 사용됩니다.
+   */
+  public List<VaccineDateInfo> calculateNextDatesForRebooking(Pet pet) {
+    // 펫 엔티티에 저장된 관리 대상 백신 목록을 가져옵니다.
+    String managedTypesString = pet.getManagedVaccineTypes();
+    if (managedTypesString == null || managedTypesString.isEmpty()) {
+      return Collections.emptyList();
+    }
+    List<String> managedVaccineNames = Arrays.asList(managedTypesString.split(","));
+
+    // 공통 계산 로직을 호출합니다.
+    return calculateNextDates(pet, managedVaccineNames);
+  }
+
+  /**
+   * ✅ [신규-private] '최초 예약 폼'을 위한 날짜 계산 헬퍼 메서드
+   */
+  private List<VaccineDateInfo> calculateNextDatesForForm(Pet pet, List<String> selectedVaccineNames) {
+    // 공통 계산 로직을 호출합니다.
+    return calculateNextDates(pet, selectedVaccineNames);
+  }
+
+  /**
+   * ✅ [신규-private] '날짜 계산'이라는 핵심 로직을 담당하는 공통 메서드
+   */
+  private List<VaccineDateInfo> calculateNextDates(Pet pet, List<String> targetVaccineNames) {
+    Map<VaccineType, Long> completedCounts = getCompletedCounts(pet);
+    Optional<Reservation> lastCompleted = reservationRepository.findTopByPetAndReservationStatusOrderByReservationDateTimeDesc(pet, ReservationStatus.COMPLETED);
+
+    return targetVaccineNames.stream()
+      .map(VaccineType::valueOf)
+      .filter(vaccine -> completedCounts.getOrDefault(vaccine, 0L) < vaccine.getTotalShots())
+      .map(vaccine -> {
+        long alreadyDone = completedCounts.getOrDefault(vaccine, 0L);
+        LocalDate idealDate = pet.getPet_Birth().plusWeeks(vaccine.getStartWeeks()).plusWeeks(alreadyDone * vaccine.getIntervalWeeks());
+        LocalDate today = LocalDate.now();
+        LocalDate minGracePeriodDate = today.plusWeeks(1); // 규칙A: 최소 1주일의 준비 기간
+        LocalDate minIntervalDate = lastCompleted.map(r -> r.getReservationDateTime().toLocalDate().plusWeeks(3)).orElse(today); // 규칙B: 마지막 접종일로부터 최소 3주 간격
+        LocalDate earliestPossibleDate = minGracePeriodDate.isAfter(minIntervalDate) ? minGracePeriodDate : minIntervalDate; // 두 규칙 중 더 나중 날짜 선택
+        LocalDate finalDate = idealDate.isBefore(earliestPossibleDate) ? earliestPossibleDate : idealDate; // 최종 예약 가능일 조정
+        return new VaccineDateInfo(vaccine.name(), vaccine.getDescription(), finalDate);
+      })
+      .sorted(Comparator.comparing(VaccineDateInfo::getDate))
+      .collect(Collectors.toList());
+  }
+
+  /**
+   * [공통-private] 완료된 접종 횟수를 계산하는 헬퍼 메서드
+   */
+  private Map<VaccineType, Long> getCompletedCounts(Pet pet) {
+    return reservationRepository.findByPetAndReservationStatus(pet, ReservationStatus.COMPLETED).stream()
+      .map(Reservation::getVaccineTypes)
+      .filter(Objects::nonNull)
+      .flatMap(names -> Arrays.stream(names.split(",")))
+      .map(String::trim)
+      .filter(name -> !name.isEmpty())
+      .map(this::getVaccineTypeOrNull)
+      .filter(Objects::nonNull)
+      .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+  }
+
+  private VaccineType getVaccineTypeOrNull(String name) {
+    try {
+      return VaccineType.valueOf(name);
+    } catch (IllegalArgumentException e) {
+      log.warn("DB에 알 수 없는 백신 이름({})이 저장되어 있어 계산에서 제외합니다.", name);
+      return null;
+    }
   }
 
   /**
    * 특정 시작일과 선호 요일을 기준으로 예약 가능한 병원을 탐색하는 헬퍼 메서드
    */
   private List<AvailableSlotResponseDto> findHospitalsForDate(LocalDate earliestDate, SlotSearchRequestDto requestDto) {
-    List<DayOfWeek> preferredDays = requestDto.getPreferredDays();
-    if (preferredDays == null || preferredDays.isEmpty()) {
+    List<String> preferredDayNames = requestDto.getPreferredDays();
+    if (preferredDayNames == null || preferredDayNames.isEmpty()) {
       throw new IllegalArgumentException("선호 요일을 하나 이상 선택해야 합니다.");
     }
+
+    List<DayOfWeek> preferredDays = preferredDayNames.stream()
+      .map(String::toUpperCase) // 소문자가 들어올 경우를 대비해 대문자로 변경
+      .map(DayOfWeek::valueOf)
+      .toList();
 
     for (int i = 0; i < 8; i++) { // 최대 8주까지 탐색
       final LocalDate currentSearchWeekStart = earliestDate.plusWeeks(i);
@@ -82,10 +156,10 @@ public class AutoReservationService {
       List<LocalDate> potentialQueryDates = preferredDays.stream()
         .map(day -> currentSearchWeekStart.with(TemporalAdjusters.nextOrSame(day)))
         .sorted()
-        .collect(Collectors.toList());
+        .toList();
 
       for (LocalDate queryDate : potentialQueryDates) {
-        String url = UriComponentsBuilder.fromHttpUrl("http://localhost:3001/api/hospitals/check-availability")
+        String url = UriComponentsBuilder.fromUriString("http://localhost:3001/api/hospitals/check-availability")
           .queryParam("lat", requestDto.getLocation().getLat())
           .queryParam("lng", requestDto.getLocation().getLng())
           .queryParam("radius", requestDto.getRadius())
@@ -109,38 +183,6 @@ public class AutoReservationService {
     }
     log.info("최대 탐색 기간(8주) 동안 예약 가능한 슬롯을 찾지 못했습니다.");
     return Collections.emptyList();
-  }
-
-  /**
-   * [수정] 다음 접종일 계산 결과를 VaccineDateInfo 리스트로 반환합니다.
-   */
-  private List<VaccineDateInfo> calculateNextVaccineDateInfos(Pet pet, List<String> selectedVaccineNames) {
-    List<Reservation> completedReservations = reservationRepository.findByPetAndReservationStatus(pet, ReservationStatus.COMPLETED);
-    Optional<Reservation> lastCompleted = reservationRepository.findTopByPetAndReservationStatusOrderByReservationDateTimeDesc(pet, ReservationStatus.COMPLETED);
-    Map<VaccineType, Long> completedCounts = completedReservations.stream()
-      .collect(Collectors.groupingBy(Reservation::getVaccineType, Collectors.counting()));
-
-    return selectedVaccineNames.stream()
-      .map(VaccineType::valueOf)
-      .filter(vaccine -> completedCounts.getOrDefault(vaccine, 0L) < vaccine.getTotalShots())
-      .map(vaccine -> {
-        long alreadyDone = completedCounts.getOrDefault(vaccine, 0L);
-        LocalDate idealDate = pet.getPet_Birth()
-          .plusWeeks(vaccine.getStartWeeks())
-          .plusWeeks(alreadyDone * vaccine.getIntervalWeeks());
-
-        LocalDate today = LocalDate.now();
-        LocalDate minGracePeriodDate = today.plusWeeks(1);
-        LocalDate minIntervalDate = lastCompleted
-          .map(r -> r.getReservationDateTime().toLocalDate().plusWeeks(3))
-          .orElse(today);
-        LocalDate earliestPossibleDate = minGracePeriodDate.isAfter(minIntervalDate) ? minGracePeriodDate : minIntervalDate;
-        LocalDate finalDate = idealDate.isBefore(earliestPossibleDate) ? earliestPossibleDate : idealDate;
-
-        return new VaccineDateInfo(vaccine.name(), vaccine.getDescription(), finalDate);
-      })
-      .sorted(Comparator.comparing(VaccineDateInfo::getDate))
-      .collect(Collectors.toList());
   }
 
   // (기존 PENDING 상태로 저장하는 메서드)
@@ -188,7 +230,8 @@ public class AutoReservationService {
     Reservation reservation = new Reservation();
     // vaccineTypes 리스트의 첫 번째 항목을 Reservation의 vaccineType으로 설정
     if (requestDto.getVaccineTypes() != null && !requestDto.getVaccineTypes().isEmpty()) {
-      reservation.setVaccineType(VaccineType.valueOf(requestDto.getVaccineTypes().get(0)));
+      String vaccineNamesAsString = String.join(",", requestDto.getVaccineTypes());
+      reservation.setVaccineTypes(vaccineNamesAsString);
     }
     reservation.setPet(pet);
     reservation.setMember(pet.getMember());

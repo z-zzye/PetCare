@@ -284,3 +284,16 @@
   text-decoration: underline;
   background-color: #e0f0ff;
 }
+
+.vaccine-item-wrapper {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0.5rem;
+}
+
+.vaccine-warning {
+  font-size: 0.75rem;
+  color: #e53e3e; /* 붉은색 계열 */
+  margin: 0.25rem 0 0 1.5rem; /* 체크박스와 간격 맞춤 */
+  padding: 0;
+}

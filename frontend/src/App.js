@@ -15,7 +15,10 @@ import ItemRegister from './components/shop/ItemRegister.jsx';
 import ItemDetail from './components/shop/ItemDetail.jsx';
 import WhatsInMyCart from './components/shop/WhatsInMyCart.jsx';
 import ItemModify from './components/shop/ItemModify.jsx';
-import OrderPage from './components/shop/OrderPage';
+import OrderPage from './components/shop/OrderPage.jsx';
+import OrderDetail from './components/shop/OrderDetail.jsx';
+import MyOrders from './components/shop/MyOrders.jsx';
+import ShopAdminPage from './components/admin/ShopAdminPage.jsx';
 import OrderCompletePage from './components/shop/OrderCompletePage.jsx';
 import WalkingTrailListPage from './components/WalkingTrailListPage';
 import WalkingTrailDetailPage from './components/WalkingTrailDetailPage';
@@ -90,6 +93,9 @@ function App() {
         <Route path="/shop/item/edit/:itemId" element={<ItemModify />} />
         <Route path="/order" element={<OrderPage />} />
         <Route path="/order/complete" element={<OrderCompletePage />} />
+        <Route path="/orders/:orderId" element={<OrderDetail />} />
+        <Route path="/shop/order" element={<OrderPage />} />
+        <Route path="/shop/my-orders" element={<MyOrders />} />
 
         <Route path="/trails" element={<WalkingTrailListPage />} />
         <Route path="/trails/:trailId" element={<WalkingTrailDetailPage />} />
@@ -128,6 +134,7 @@ function App() {
               }
             />
             <Route path="/admin/users" element={<UserAdminPage />} />
+            <Route path="/admin/shop" element={<AdminRoute><ShopAdminPage /></AdminRoute>} />
           </Routes>
         </BrowserRouter>
       </KakaoMapsScriptProvider>

@@ -1,20 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from "react-router-dom";
+import React, { useEffect, useState } from 'react';
 import Modal from 'react-modal';
+import { useLocation, useNavigate } from 'react-router-dom';
 import AutoVaxApplyModal from './AutoVaxApplyModal';
 
-import Sidebar from './Sidebar'; // 따로 분리한 사이드바 컴포넌트
-import Header from '../Header';   // 기존에 있던 헤더 컴포넌트
-import './Mypage.css';
+import Swal from 'sweetalert2';
+import Header from '../Header'; // 기존에 있던 헤더 컴포넌트
 import CalendarPage from './CalendarPage';
 import HealthNotePage from './HealthNotePage';
+import './Mypage.css';
 import MyPostsPage from './MyPostsPage';
 import MyReservationsPage from './MyReservationsPage';
-import Swal from 'sweetalert2';
+import Sidebar from './Sidebar'; // 따로 분리한 사이드바 컴포넌트
+import axios from '../../api/axios';
 //import './MainPage.css';         // 스타일 분리 (선택)
 
 Modal.setAppElement('#root');
-
 
 const Mypage = () => {
   const navigate = useNavigate();
@@ -25,56 +25,65 @@ const Mypage = () => {
   const [selectedPetName, setSelectedPetName] = useState('');
   const [selectedPetId, setSelectedPetId] = useState(null);
 
-    useEffect(() => {
-        const token = localStorage.getItem("token");
+  useEffect(() => {
+    const token = localStorage.getItem('token');
 
-        if (!token) {
-          Swal.fire({
-            icon: 'warning',
-            title: '로그인이 필요합니다',
-            text: '마이페이지에 접근하려면 로그인이 필요합니다.',
-            confirmButtonColor: '#3085d6',
-            confirmButtonText: '로그인 페이지로 이동',
-            allowOutsideClick: false,  // ✅ 배경 클릭 방지
-            allowEscapeKey: false,
-          }).then((result) => {
-            if (result.isConfirmed) {
-              navigate("/members/login");
-            }
-          });
+    if (!token) {
+      Swal.fire({
+        icon: 'warning',
+        title: '로그인이 필요합니다',
+        text: '마이페이지에 접근하려면 로그인이 필요합니다.',
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: '로그인 페이지로 이동',
+        allowOutsideClick: false, // ✅ 배경 클릭 방지
+        allowEscapeKey: false,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate('/members/login');
         }
-      }, []); // ✅ 컴포넌트 마운트 시 1회 실행
+      });
+    }
+  }, []); // ✅ 컴포넌트 마운트 시 1회 실행
 
-    useEffect(() => {
-        // PetRegister 또는 PetUpdate에서 보낸 신호(state)가 있는지 확인
-        if (location.state?.showAutoVaxPopup) {
-          const { petId, petName } = location.state;
-          console.log('Mypage가 navigate로부터 받은 petId:', petId);
-          setSelectedPetName(petName);
-          setSelectedPetId(petId);
+  useEffect(() => {
+    // PetRegister 또는 PetUpdate에서 보낸 신호(state)가 있는지 확인
+    if (location.state?.showAutoVaxPopup) {
+      const { petId, petName, autoVaxStatus } = location.state;
+      if (autoVaxStatus === 'UNKNOWN') {
+        setSelectedPetName(petName);
+        setSelectedPetId(petId);
 
-          Swal.fire({
-            icon: 'info',
-            title: `"${petName}"을 위한 자동 접종 예약`,
-            text: `12개월 미만 펫을 위한 자동 예방접종 시스템을 이용해 보시겠어요?`,
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: '신청하기',
-            cancelButtonText: '나중에 할래요',
-            allowOutsideClick: false, // 바깥 영역 클릭으로 닫히지 않도록 설정
-            //allowEscapeKey: false,    // ESC 키로 닫히지 않도록 설정
-          }).then((result) => {
-            if (result.isConfirmed) {
-              // '신청하기'를 누르면 자동 예약 신청 페이지로 이동
-              setIsApplyModalOpen(true);
-            }
-          });
-
-          // ✅ 팝업을 띄운 후에는 신호를 제거하여, 새로고침 시 팝업이 다시 뜨지 않도록 함
-          window.history.replaceState({}, document.title)
-        }
-      }, [location, navigate]);
+        Swal.fire({
+          title: `"${petName}"을 위한 자동 접종 예약`,
+          text: `12개월 미만 펫을 위한 자동 예방접종 시스템을 이용해 보시겠어요?`,
+          icon: 'info',
+          showDenyButton: true,
+          showCancelButton: true,
+          confirmButtonText: '신청하기',
+          denyButtonText: '다시는 보지 않기',
+          cancelButtonText: '나중에 할래요',
+        }).then((result) => {
+          // ✅ '신청하기' 클릭 시
+          if (result.isConfirmed) {
+            // 동의 상태를 'AGREED'로 서버에 저장
+            setIsApplyModalOpen(true);
+          }
+          // ✅ '다시는 보지 않기' 클릭 시
+          else if (result.isDenied) {
+            // 동의 상태를 'DENIED'로 서버에 저장
+            axios.post(`/pets/${petId}/consent`, { status: 'DENIED' });
+            Swal.fire(
+              '알림',
+              '더 이상 자동 접종 예약 신청 안내가 표시되지 않습니다.',
+              'info'
+            );
+          }
+          // '나중에 할래요'는 아무 작업도 하지 않고 닫힘
+        });
+      }
+      window.history.replaceState({}, document.title);
+    }
+  }, [location, navigate]);
 
   const [activeTab, setActiveTab] = useState('calendar');
   const renderContent = () => {
@@ -93,39 +102,39 @@ const Mypage = () => {
   };
 
   return (
-      <>
-        <Header />
+    <>
+      <Header />
+      <div
+        className="mypage-container"
+        style={{
+          display: 'flex',
+          height: 'calc(100vh - 200px)', // 헤더 높이만큼 뺌
+        }}
+      >
+        <Sidebar onTabChange={setActiveTab} />
+
+        {/* 사이드바 탭 너비만큼 margin-left로 여백 확보 */}
         <div
-          className="mypage-container"
+          className="mypage-content"
           style={{
-            display: 'flex',
-            height: 'calc(100vh - 200px)' // 헤더 높이만큼 뺌
+            flex: 1,
+            padding: '2rem',
+            marginLeft: '5rem', // 사이드탭이 차지하는 폭만큼 조정 (rem, %, vw 가능)
           }}
         >
-          <Sidebar onTabChange={setActiveTab} />
-
-          {/* 사이드바 탭 너비만큼 margin-left로 여백 확보 */}
-          <div
-            className="mypage-content"
-            style={{
-              flex: 1,
-              padding: '2rem',
-              marginLeft: '5rem' // 사이드탭이 차지하는 폭만큼 조정 (rem, %, vw 가능)
-            }}
-          >
-            {renderContent()}
-          </div>
+          {renderContent()}
         </div>
+      </div>
 
-        {console.log('모달로 전달하는 최종 petId:', selectedPetId)}
-        <AutoVaxApplyModal
-          isOpen={isApplyModalOpen} // 모달을 열지 말지 결정하는 상태
-          onRequestClose={() => setIsApplyModalOpen(false)} // 모달 닫기 함수
-          petName={selectedPetName} // 모달에 표시할 펫 이름
-          petId={selectedPetId} // 모달에 petId 전달
-        />
-      </>
-    );
+      {console.log('모달로 전달하는 최종 petId:', selectedPetId)}
+      <AutoVaxApplyModal
+        isOpen={isApplyModalOpen} // 모달을 열지 말지 결정하는 상태
+        onRequestClose={() => setIsApplyModalOpen(false)} // 모달 닫기 함수
+        petName={selectedPetName} // 모달에 표시할 펫 이름
+        petId={selectedPetId} // 모달에 petId 전달
+      />
+    </>
+  );
 };
 
 export default Mypage;

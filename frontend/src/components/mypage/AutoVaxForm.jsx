@@ -20,6 +20,7 @@ const AutoVaxForm = ({
   const [error, setError] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
+  const [petDetails, setPetDetails] = useState(null);
 
   // 백엔드로부터 받은 상세 데이터를 저장할 상태
   const [vaccineDates, setVaccineDates] = useState([]);
@@ -28,16 +29,17 @@ const AutoVaxForm = ({
   // 백신 목록 불러오기
   useEffect(() => {
     if (petId) {
-      axios
-        .get(`/vaccines/pet/${petId}`)
-        .then((res) => {
-          console.log('서버로부터 받은 백신 데이터:', res.data);
-          setAllVaccines(res.data);
-        })
-        .catch((err) => {
-          console.error('백신 목록을 불러오는 데 실패했습니다.', err);
-          Swal.fire('오류', '접종 목록을 불러올 수 없습니다.', 'error');
-        });
+      // 백신 목록과 펫 상세 정보를 함께 불러옵니다.
+      Promise.all([
+        axios.get(`/vaccines/pet/${petId}`),
+        axios.get(`/pets/${petId}`)
+      ]).then(([vaccinesRes, petRes]) => {
+        setAllVaccines(vaccinesRes.data);
+        setPetDetails(petRes.data);
+      }).catch(err => {
+        console.error("데이터 로딩 실패:", err);
+        Swal.fire('오류', '필수 정보를 불러올 수 없습니다.', 'error');
+      });
     }
   }, [petId]);
 
@@ -126,24 +128,21 @@ const AutoVaxForm = ({
         vaccineTypes: selectedVaccines,
       };
 
+      console.log('API 요청 데이터:', requestData);
+
       const response = await axios.post(
         '/auto-reservations/search-slots',
         requestData
       );
-      console.log('병원 목록 API 실제 응답:', response.data);
+      const { availableSlots, vaccineDates } = response.data;
+
       // [성공] 백엔드가 예약 가능한 병원 목록을 하나라도 찾았을 경우
-      if (
-        response.data &&
-        response.data.availableSlots &&
-        response.data.availableSlots.length > 0
-      ) {
+      if (availableSlots && availableSlots.length > 0) {
         // 1. 백신별 예상 접종일 정보를 상태에 저장
-        setVaccineDates(response.data.vaccineDates || []);
+        setVaccineDates(vaccineDates || []);
 
         // 2. 반환된 병원 목록을 사용자가 선택한 '시간대'로 필터링
-        const filteredSlots = response.data.availableSlots.filter(
-          (slot) => slot.timeSlot === preferredTime
-        );
+        const filteredSlots = availableSlots.filter(slot => slot.timeSlot === preferredTime);
         setAvailableSlots(filteredSlots);
 
         // 3. 필터링 후에도 결과가 남아있다면, UI를 확장하고 스크롤을 올림
@@ -181,7 +180,7 @@ const AutoVaxForm = ({
           icon: 'question',
           showCancelButton: true,
           confirmButtonText: '넓혀서 다시 찾기',
-          cancelButtonText: '다음에 할래요',
+          cancelButtonText: '나중에 할래요',
         });
 
         if (result.isConfirmed) {
@@ -211,29 +210,34 @@ const AutoVaxForm = ({
       const paymentMethodRes = await axios.get('/payments/mock/my-method');
       const paymentMethod = paymentMethodRes.data;
 
-      let calculatedTotalAmount = 0;
-      if (
-        selectedSlot &&
-        selectedSlot.priceList &&
-        selectedVaccines.length > 0
-      ) {
-        selectedVaccines.forEach((vaccineName) => {
-          // priceList에서 해당 백신의 가격을 찾아 더합니다.
-          // 만약 가격이 없다면 0을 더합니다.
-          calculatedTotalAmount += selectedSlot.priceList[vaccineName] || 0;
-        });
-      }
+        // 1. 계산된 모든 다음 접종일 정보에서 가장 빠른 날짜를 찾습니다.
+        const earliestDate = vaccineDates.length > 0 ? vaccineDates[0].date : null;
 
-      const requestData = {
-        petId,
-        hospitalId: selectedSlot.hospitalId,
-        hospitalAddress: selectedSlot.address,
-        hospitalPhone: selectedSlot.phone,
-        targetDate: selectedSlot.targetDate,
-        timeSlot: selectedSlot.timeSlot,
-        vaccineTypes: selectedVaccines,
-        totalAmount: calculatedTotalAmount,
-      };
+        // 2. 가장 빠른 날짜와 동일한 날짜를 가진 모든 백신을 필터링합니다.
+        const vaccinesForThisAppointment = earliestDate
+            ? vaccineDates
+                .filter(vax => vax.date === earliestDate)
+                .map(vax => vax.vaccineName)
+            : [];
+
+        // ... 이하 총액 계산 및 requestData 생성 로직은 이제 정상적으로 동작합니다.
+        let calculatedTotalAmount = 0;
+        if (selectedSlot && selectedSlot.priceList && vaccinesForThisAppointment.length > 0) {
+            vaccinesForThisAppointment.forEach(vaccineName => {
+                calculatedTotalAmount += selectedSlot.priceList[vaccineName] || 0;
+            });
+        }
+
+        const requestData = {
+            petId,
+            hospitalId: selectedSlot.hospitalId,
+            hospitalAddress: selectedSlot.address,
+            hospitalPhone: selectedSlot.phone,
+            targetDate: selectedSlot.targetDate, // 실제 예약일은 nextSlot의 것을 사용
+            timeSlot: selectedSlot.timeSlot,
+            vaccineTypes: vaccinesForThisAppointment,
+            totalAmount: calculatedTotalAmount,
+        };
 
       // 2-1. 등록된 결제 수단이 있는 경우
       if (paymentMethod && paymentMethod.cardName) {
@@ -251,6 +255,15 @@ const AutoVaxForm = ({
         // "기존 수단으로 예약 확정"을 선택한 경우
         if (result.isConfirmed) {
           await axios.post('/auto-reservations/confirm-and-pay', requestData);
+
+          const settingsDto = {
+            managedVaccineTypes: selectedVaccines,
+            preferredHospitalId: selectedSlot.hospitalId,
+            preferredDays: preferredDays,
+            preferredTime: preferredTime
+          };
+          await axios.post(`/pets/${petId}/settings`, settingsDto);
+
           Swal.fire(
             '예약 확정!',
             '예약금 결제가 완료되어 예약이 확정되었습니다.',
@@ -381,22 +394,45 @@ const AutoVaxForm = ({
         </div>
 
         <div className="form-section">
-          <h4>4. 자동 예약을 원하는 접종 항목을 선택해주세요.</h4>
-          <div className="vaccine-list">
-            {allVaccines.map((vaccine) => (
-              <label key={vaccine.name} className="custom-checkbox-label">
-                <input
-                  type="checkbox"
-                  value={vaccine.name}
-                  checked={selectedVaccines.includes(vaccine.name)}
-                  onChange={handleVaccineChange}
-                />
-                <span className="custom-checkbox-mark"></span>
-                {vaccine.description}
-              </label>
-            ))}
-          </div>
-        </div>
+                <h4>4. 자동 예약을 원하는 접종 항목을 선택해주세요.</h4>
+                <div className="vaccine-list">
+                  {allVaccines.map((vaccine) => {
+                    // ✅ [추가] 각 백신에 대한 경고 문구 표시 여부를 계산합니다.
+                    let isTooLate = false;
+                    if (petDetails) {
+                      const petBirthDate = new Date(petDetails.petBirth);
+                      const today = new Date();
+                      const petAgeInWeeks = Math.floor((today - petBirthDate) / (1000 * 60 * 60 * 24 * 7));
+
+                      // 권장 시작 주차보다 12주 이상 지났는지 확인
+                      if (petAgeInWeeks > vaccine.startWeeks + 12) {
+                        isTooLate = true;
+                      }
+                    }
+
+                    return (
+                      <div key={vaccine.name} className="vaccine-item-wrapper">
+                        <label className="custom-checkbox-label">
+                          <input
+                            type="checkbox"
+                            value={vaccine.name}
+                            checked={selectedVaccines.includes(vaccine.name)}
+                            onChange={handleVaccineChange}
+                          />
+                          <span className="custom-checkbox-mark"></span>
+                          {vaccine.description}
+                        </label>
+                        {/* ✅ [추가] 조건이 맞을 때만 경고 문구를 표시합니다. */}
+                        {isTooLate && (
+                          <p className="vaccine-warning">
+                            * 권장 접종 시기(생후 {vaccine.startWeeks}주)가 많이 지났습니다. 접종 전 상담을 권장합니다.
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
 
         <button
           className="submit-button"
