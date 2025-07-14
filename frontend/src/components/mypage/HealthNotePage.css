@@ -2,22 +2,61 @@
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  align-items: center;
+}
+
+/* 1. 펫 선택 가로 스크롤 리스트 */
+.pet-scroll-list {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+  scrollbar-width: thin;
+  justify-content: center;
+}
+.pet-scroll-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  border: 2px solid transparent;
+  border-radius: 16px;
+  padding: 0.5rem 1rem;
+  transition: border 0.2s;
+  min-width: 80px;
+  text-align: center;
+}
+.pet-scroll-item.selected {
+  border: 2px solid #3a5ad7;
+  background: #f7faff;
+}
+.pet-scroll-img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 0.3rem;
+}
+.pet-scroll-name {
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-align: center;
 }
 
 .healthnote-top {
   display: flex;
   align-items: center;
   gap: 2rem;
-}
-
-.pet-list-selector {
-  min-width: 120px;
+  justify-content: center;
+  width: 100%;
 }
 
 .pet-profile {
   display: flex;
   align-items: center;
   gap: 1rem;
+  justify-content: center;
 }
 
 .pet-profile-img {
@@ -32,21 +71,32 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  align-items: center;
 }
 
 .pet-name {
   font-size: 1.5rem;
   font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+}
+.pet-emoji {
+  font-size: 1.7rem;
+  margin-left: 0.2rem;
 }
 
 .pet-birth {
   font-size: 1rem;
   color: #666;
+  text-align: center;
 }
 
 .pet-status-cards {
   display: flex;
   gap: 1rem;
+  justify-content: center;
 }
 
 .status-card {
@@ -60,30 +110,75 @@
   justify-content: center;
   font-size: 2rem;
   background: #fff;
+  text-align: center;
 }
 
-.healthnote-vaccine-banner {
+.status-icon {
+  font-size: 1.5rem;
+  margin-bottom: 0.2rem;
+}
+
+.status-label {
+  font-size: 0.7rem;
+  color: #3a5ad7;
+  font-weight: bold;
+}
+
+/* 2. 접종 완료 카드 고정 크기 및 가로 스크롤 */
+.healthnote-vaccine-banner-scroll {
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.healthnote-vaccine-banner-inner {
   display: flex;
   gap: 1rem;
-  margin: 1rem 0;
+  justify-content: center;
 }
-
-.vaccine-card {
-  flex: 1;
-  min-width: 180px;
+.vaccine-card.fixed {
+  min-width: 220px;
+  max-width: 220px;
   border: 2px solid #3a5ad7;
   border-radius: 16px;
   padding: 1rem;
   background: #f7faff;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .vaccine-title {
   font-weight: bold;
   margin-bottom: 0.5rem;
+  text-align: center;
 }
 
 .vaccine-desc {
   color: #555;
+  text-align: center;
+}
+
+.reservation-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.reservation-card {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto 1.5rem auto;
+}
+.card-header,
+.card-body,
+.card-actions {
+  text-align: center;
 }
 
 .healthnote-history {
@@ -91,12 +186,17 @@
   border-radius: 12px;
   padding: 1rem;
   background: #fafafa;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  text-align: center;
 }
 
 .history-title {
   font-size: 1.2rem;
   font-weight: bold;
   margin-bottom: 0.5rem;
+  text-align: center;
 }
 
 .history-list {
@@ -110,6 +210,7 @@
   gap: 1rem;
   padding: 0.5rem 0;
   border-bottom: 1px solid #eee;
+  justify-content: center;
 }
 
 .history-item:last-child {
@@ -119,10 +220,12 @@
 .history-date {
   color: #888;
   min-width: 90px;
+  text-align: center;
 }
 
 .history-event {
   color: #222;
+  text-align: center;
 }
 
 .no-pets-message {
@@ -138,4 +241,5 @@
 .no-pets-message h2 {
   font-size: 1.8rem;
   margin-bottom: 1rem;
+  text-align: center;
 }

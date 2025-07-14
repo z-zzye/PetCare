@@ -16,7 +16,8 @@
   gap: 0.3rem;
 }
 
-.button-group button, .submit-button {
+.button-group button,
+.submit-button {
   padding: 0.8rem 1rem;
   border: 1px solid #ccc;
   background-color: #f7f7f7;
@@ -83,7 +84,8 @@
   opacity: 0;
   overflow: hidden; /* 내용 숨김 */
   padding-left: 0;
-  transition: width 0.4s ease-in-out, opacity 0.3s ease-in-out, padding 0.4s ease-in-out;
+  transition: width 0.4s ease-in-out, opacity 0.3s ease-in-out,
+    padding 0.4s ease-in-out;
 
   display: flex;
   flex-direction: column;
@@ -126,7 +128,7 @@
 }
 
 /* 기본 HTML 체크박스는 숨김 */
-.custom-checkbox-label input[type="checkbox"] {
+.custom-checkbox-label input[type='checkbox'] {
   display: none;
 }
 
@@ -144,14 +146,14 @@
 }
 
 /* 체크되었을 때의 커스텀 체크박스 모양 */
-.custom-checkbox-label input[type="checkbox"]:checked + .custom-checkbox-mark {
+.custom-checkbox-label input[type='checkbox']:checked + .custom-checkbox-mark {
   background-color: #ffcc00; /* 선택된 요일 버튼과 동일한 색상 */
   border-color: #ffcc00;
 }
 
 /* 체크 표시(V) 만들기 */
 .custom-checkbox-mark::after {
-  content: "";
+  content: '';
   position: absolute;
   display: none;
   left: 6px;
@@ -164,7 +166,9 @@
 }
 
 /* 체크되었을 때 체크 표시 보여주기 */
-.custom-checkbox-label input[type="checkbox"]:checked + .custom-checkbox-mark::after {
+.custom-checkbox-label
+  input[type='checkbox']:checked
+  + .custom-checkbox-mark::after {
   display: block;
 }
 
@@ -222,7 +226,7 @@
 
 .hospital-card:hover {
   border-color: #ffcc00;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .hospital-card.selected {
@@ -266,7 +270,7 @@
 }
 
 /* 라디오 버튼은 시각적으로 중요하지 않으므로 숨김 (선택 기능은 유지) */
-.hospital-actions input[type="radio"] {
+.hospital-actions input[type='radio'] {
   display: none;
 }
 
@@ -296,4 +300,166 @@
   color: #e53e3e; /* 붉은색 계열 */
   margin: 0.25rem 0 0 1.5rem; /* 체크박스와 간격 맞춤 */
   padding: 0;
+}
+
+/* 지도 모달 스타일 */
+.map-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.map-modal {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.map-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.map-modal-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 1.3rem;
+}
+
+.map-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.map-modal-close:hover {
+  background-color: #f0f0f0;
+}
+
+.map-search-container {
+  display: flex;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.map-search-input {
+  flex: 1;
+  padding: 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.map-search-input:focus {
+  border-color: #ffcc00;
+}
+
+.map-search-button {
+  padding: 0.8rem 1.5rem;
+  background-color: #ffcc00;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.map-search-button:hover {
+  background-color: #e6b800;
+}
+
+.map-instruction {
+  padding: 1rem 1.5rem;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.map-instruction p {
+  margin: 0 0 0.5rem 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.selected-location-info {
+  color: #28a745 !important;
+  font-weight: bold;
+  margin: 0.5rem 0 0 0 !important;
+}
+
+.map-container-modal {
+  width: 100%;
+  height: 400px;
+  border-radius: 0;
+}
+
+.map-modal-actions {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-top: 1px solid #e0e0e0;
+  justify-content: flex-end;
+}
+
+.map-modal-cancel {
+  padding: 0.8rem 1.5rem;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.map-modal-cancel:hover {
+  background-color: #5a6268;
+}
+
+.map-modal-confirm {
+  padding: 0.8rem 1.5rem;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.map-modal-confirm:hover:not(:disabled) {
+  background-color: #218838;
+}
+
+.map-modal-confirm:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
 }
