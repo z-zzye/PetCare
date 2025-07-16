@@ -1,7 +1,9 @@
 package com.petory.service;
 
+import com.petory.constant.AutoVaxStatus;
 import com.petory.constant.ReservationStatus;
 import com.petory.dto.PetRegisterDto;
+import com.petory.dto.autoReservation.PetAutoVaxSettingsDto;
 import com.petory.entity.Member;
 import com.petory.entity.Pet;
 import com.petory.entity.Reservation;
@@ -50,6 +52,7 @@ public class PetService {
     pet.setIsNeutered(dto.getIsNeutered());
     pet.setPet_ProfileImg(imageUrl);
     pet.setPet_Category(dto.getPet_Category());
+    pet.setAutoVaxStatus(AutoVaxStatus.UNKNOWN);
 
     return petRepository.save(pet);
   }
@@ -85,6 +88,59 @@ public class PetService {
     // JPA 더티 체킹으로 save() 없이도 수정 완료
 
     return pet;
+  }
+
+  // 자동 예약 여부 자체를 저장하는 서비스 (자동예약 신청 완료 / 거부)
+  @Transactional
+  public void updateAutoVaxConsent(Long petId, String status, String userEmail) {
+    Pet pet = petRepository.findById(petId)
+      .orElseThrow(() -> new RuntimeException("해당 펫이 존재하지 않습니다."));
+    if (!pet.getMember().getMember_Email().equals(userEmail)) {
+      throw new SecurityException("해당 펫에 대한 권한이 없습니다.");
+    }
+
+    try {
+      AutoVaxStatus consentStatus = AutoVaxStatus.valueOf(status.toUpperCase());
+      pet.setAutoVaxStatus(consentStatus);
+    } catch (Exception e) {
+      log.error("자동예약 여부 저장 실패",  e);
+    }
+  }
+
+  /**
+   * [신규] 자동 접종 서비스 신청 시, 관리할 백신과 선호 정보를 저장합니다.
+   */
+  @Transactional
+  public void saveAutoVaxSettings(Long petId, PetAutoVaxSettingsDto dto, String userEmail) {
+    Pet pet = petRepository.findById(petId)
+      .orElseThrow(() -> new IllegalArgumentException("해당 펫이 존재하지 않습니다."));
+
+    // 소유권 확인
+    if (!pet.getMember().getMember_Email().equals(userEmail)) {
+      throw new SecurityException("해당 펫에 대한 권한이 없습니다.");
+    }
+
+    // 1. 관리할 백신 목록을 String으로 변환하여 저장
+    if (dto.getManagedVaccineTypes() != null) {
+      String vaccineNames = String.join(",", dto.getManagedVaccineTypes());
+      pet.setManagedVaccineTypes(vaccineNames);
+    }
+
+    // 2. 선호 병원 ID 저장
+    pet.setPreferredHospital(dto.getPreferredHospitalId());
+
+    // 3. 선호 요일 저장
+    if (dto.getPreferredDays() != null) {
+      pet.setPreferredDaysOfWeek(dto.getPreferredDays());
+    }
+
+    // 4. 선호 시간대 저장
+    if (dto.getPreferredTime() != null) {
+      pet.setPreferredTime(dto.getPreferredTime());
+    }
+
+    // 자동 예약에 동의했음으로 상태 변경
+    pet.setAutoVaxStatus(AutoVaxStatus.AGREED);
   }
 
   /**

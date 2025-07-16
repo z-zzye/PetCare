@@ -106,7 +106,7 @@ const AutoVaxApplyModal = ({ isOpen, onRequestClose, petName, petId }) => {
               다음
             </button>
             <button onClick={handleCloseModal} className="button-secondary">
-              다음에 할래요
+              나중에 할래요
             </button>
           </div>
         </div>

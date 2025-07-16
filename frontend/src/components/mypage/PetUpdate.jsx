@@ -102,31 +102,30 @@ const PetUpdate = () => {
       const response = await axios.put(`/pets/${petId}`, formData, {
             headers: { 'Content-Type': 'multipart/form-data' },
       });
-
-      const apiResponse = response.data;
-      const updatedPet = apiResponse.data;
-
-      const birthDate = new Date(form.pet_Birth);
-      const today = new Date();
-      const ageInMonths = (today.getFullYear() - birthDate.getFullYear()) * 12 + (today.getMonth() - birthDate.getMonth());
-
+      const { message, data: updatedPet } = response.data;
 
       // ✅ SweetAlert2로 1초 알림 후 이동
           Swal.fire({
             icon: 'success',
-            title: apiResponse.message,
+            title: message,
             showConfirmButton: false,
             timer: 1000,
             timerProgressBar: true,
           }).then(() => {
-            if (ageInMonths < 12) {
+            const birthDate = new Date(form.pet_Birth);
+            const today = new Date();
+            const ageInMonths = (today.getFullYear() - birthDate.getFullYear()) * 12 + (today.getMonth() - birthDate.getMonth());
+
+            if (ageInMonths < 12 && (updatedPet.petCategory === 'DOG' || updatedPet.petCategory === 'CAT')) {
               // 12개월 미만이면, 신호와 함께 마이페이지로 이동
               navigate('/members/mypage', {
                 state: {
                   showAutoVaxPopup: true,
                   petName: updatedPet.petName,
-                  petId: updatedPet.petNum
-                }
+                  petId: updatedPet.petNum,
+                  autoVaxStatus: updatedPet.autoVaxStatus
+                },
+                replace: true
               });
             } else {
               // 12개월 이상이면 그냥 마이페이지로 이동

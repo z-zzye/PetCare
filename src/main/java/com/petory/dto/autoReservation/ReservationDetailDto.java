@@ -1,11 +1,14 @@
 package com.petory.dto.autoReservation; // 패키지 경로는 실제 프로젝트에 맞게 수정하세요.
 
+import com.petory.constant.VaccineType;
 import com.petory.entity.Pet;
 import com.petory.entity.Reservation; //
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 @Getter
 @NoArgsConstructor
@@ -40,11 +43,10 @@ public class ReservationDetailDto {
    * @param reservation DB에서 조회한 Reservation 엔티티 객체
    */
   public ReservationDetailDto(Reservation reservation) {
-    // ... (기존 정보 매핑은 동일)
     this.reservationId = reservation.getId();
     this.reservationDateTime = reservation.getReservationDateTime();
-    if (reservation.getVaccineType() != null) {
-      this.vaccineDescription = reservation.getVaccineType().getDescription();
+    if (reservation.getVaccineTypes() != null && !reservation.getVaccineTypes().isEmpty()) {
+      this.vaccineDescription = convertVaccineNamesToDescriptions(reservation.getVaccineTypes());
     }
     Pet pet = reservation.getPet();
     this.petId = pet.getPet_Num();
@@ -65,5 +67,18 @@ public class ReservationDetailDto {
     } else {
       this.balance = 0;
     }
+  }
+
+  private String convertVaccineNamesToDescriptions(String vaccineNames) {
+    return Arrays.stream(vaccineNames.split(",")) // 쉼표로 분리
+      .map(String::trim) // 공백 제거
+      .map(name -> {
+        try {
+          return VaccineType.valueOf(name).getDescription(); // Enum에서 설명 찾아오기
+        } catch (IllegalArgumentException e) {
+          return name; // Enum에 없는 이름이면 원래 이름 그대로 반환
+        }
+      })
+      .collect(Collectors.joining(", ")); // 다시 쉼표와 공백으로 연결
   }
 }

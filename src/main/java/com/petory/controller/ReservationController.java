@@ -6,10 +6,10 @@ import com.petory.repository.MemberRepository;
 import com.petory.service.ReservationService; // ✅ AutoReservationService가 아닌 일반 ReservationService를 사용
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
@@ -50,5 +50,89 @@ public class ReservationController {
     }
   }
 
-  // TODO: 추후 이곳에 '예약 상세 조회', '예약 취소' 등의 API를 추가할 수 있습니다.
+  /**
+   * [신규] 접종 완료 처리 및 다음 예약을 생성하는 API
+   * @param reservationId 완료 처리할 예약의 ID
+   * @param principal     요청을 보낸 사용자의 정보
+   * @return 성공 메시지
+   */
+  @PostMapping("/{reservationId}/complete")
+  public ResponseEntity<?> completeAndScheduleNext(
+    @PathVariable("reservationId") Long reservationId,
+    Principal principal) {
+
+    if (principal == null) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "로그인이 필요합니다."));
+    }
+
+    try {
+      // 서비스 로직 호출 (이메일을 넘겨서 권한 확인)
+      reservationService.completeAndScheduleNext(reservationId, principal.getName());
+      return ResponseEntity.ok(Map.of("message", "접종 완료 처리되었으며, 다음 예약이 자동으로 생성되었습니다."));
+
+    } catch (IllegalArgumentException e) { // 잘못된 ID 또는 상태
+      return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+    } catch (SecurityException e) { // 권한 없는 사용자의 접근
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
+    } catch (Exception e) { // 그 외 모든 예외
+      log.error("접종 완료 처리 중 오류 발생: reservationId={}", reservationId, e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "서버 내부 오류가 발생했습니다."));
+    }
+  }
+
+  /**
+   * [사용자용] 자신의 예약을 직접 취소하는 API
+   */
+  @DeleteMapping("/{reservationId}")
+  @PreAuthorize("hasAnyAuthority('USER', 'CREATOR')")
+  public ResponseEntity<?> cancelReservationByUser(
+    @PathVariable("reservationId") Long reservationId,
+    Principal principal) {
+
+    if (principal == null) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "로그인이 필요합니다."));
+    }
+
+      try {
+        reservationService.cancelByUser(reservationId, principal.getName());
+        return ResponseEntity.ok(Map.of("message", "예약이 정상적으로 취소되었습니다."));
+      } catch (IllegalArgumentException e) { // 잘못된 ID 또는 상태
+        return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+      } catch (SecurityException e) { // 권한 없는 사용자의 접근
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
+      } catch (Exception e) {
+        log.error("예약 취소 처리 중 오류 발생: reservationId={}", reservationId, e);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "서버 내부 오류가 발생했습니다."));
+      }
+
+  }
+
+  /**
+   * [병원/관리자용] 예약을 취소 처리하는 API
+   */
+  @PostMapping("/{reservationId}/cancel-by-clinic")
+  @PreAuthorize("hasAnyAuthority('VET', 'ADMIN')")
+  public ResponseEntity<?> cancelByClinic(
+    @PathVariable("reservationId") Long reservationId,
+    Principal principal) {
+
+    if (principal == null) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "로그인이 필요합니다."));
+    }
+
+      try {
+        reservationService.cancelByClinic(reservationId, principal.getName());
+        return ResponseEntity.ok(Map.of("message", "해당 예약이 관리자에 의해 정상적으로 취소되었습니다."));
+      } catch (IllegalArgumentException e) { // 잘못된 ID 또는 상태
+        return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+      } catch (SecurityException e) { // 권한 없는 사용자의 접근
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
+      } catch (Exception e) {
+        log.error("예약 취소 처리 중 오류 발생: reservationId={}", reservationId, e);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "서버 내부 오류가 발생했습니다."));
+      }
+
+  }
+
+  // TODO: 추후 이곳에 '예약 상세 조회' 등의 API를 추가할 수 있습니다.
 }

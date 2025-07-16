@@ -2,6 +2,7 @@ package com.petory.controller;
 
 import com.petory.dto.PetDto;
 import com.petory.dto.PetRegisterDto;
+import com.petory.dto.autoReservation.PetAutoVaxSettingsDto;
 import com.petory.entity.Pet;
 import com.petory.service.PetService;
 import jakarta.validation.Valid;
@@ -13,6 +14,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -117,6 +119,50 @@ public class PetController {
     } catch (Exception e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
         .body("삭제 실패: " + e.getMessage());
+    }
+  }
+
+  /**
+   * [신규] 자동 접종 서비스 동의 여부를 업데이트하는 API
+   * (예: '다시는 보지 않기' 클릭 시)
+   */
+  @PostMapping("/{petId}/consent")
+  public ResponseEntity<?> updateAutoVaxConsent(
+    @PathVariable Long petId,
+    @RequestBody Map<String, String> request,
+    Principal principal) {
+
+    if (principal == null) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "로그인이 필요합니다."));
+    }
+
+    try {
+      String status = request.get("status");
+      petService.updateAutoVaxConsent(petId, status, principal.getName());
+      return ResponseEntity.ok(Map.of("message", "자동 접종 동의 상태가 업데이트되었습니다."));
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+    }
+  }
+
+  /**
+   * [신규] 자동 접종 서비스 신청 시, 관리할 백신과 선호 정보를 저장하는 API
+   */
+  @PostMapping("/{petId}/settings")
+  public ResponseEntity<?> saveAutoVaxSettings(
+    @PathVariable Long petId,
+    @RequestBody PetAutoVaxSettingsDto settingsDto,
+    Principal principal) {
+
+    if (principal == null) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "로그인이 필요합니다."));
+    }
+
+    try {
+      petService.saveAutoVaxSettings(petId, settingsDto, principal.getName());
+      return ResponseEntity.ok(Map.of("message", "자동 접종 설정이 저장되었습니다."));
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
     }
   }
 

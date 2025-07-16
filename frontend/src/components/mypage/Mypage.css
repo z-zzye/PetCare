@@ -1,24 +1,22 @@
 .mypage-container {
   display: flex;
-    height: calc(100vh - 200px); /* 헤더 높이를 제외한 전체 영역 */
-    flex-direction: row;
+  flex-direction: row;
+  min-height: 100vh;
 }
 
 .sidebar {
   width: clamp(200px, 22vw, 300px); /* 최소 200px, 최대 300px */
-    background-color: #ffcc00;
-    padding: 2rem 1rem;
-    border-right: 1px solid #e0e0e0;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    height: 100%; /* 부모 기준 */
-    box-sizing: border-box;
+  background-color: #ffcc00;
+  padding: 2rem 1rem;
+  border-right: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  box-sizing: border-box;
 }
 
 .mypage-content {
   flex: 1;
   padding: 2rem;
   background-color: #f9f9f9;
-  overflow-y: auto;
 }

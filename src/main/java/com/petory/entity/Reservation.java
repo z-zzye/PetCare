@@ -39,9 +39,8 @@ public class Reservation {
   @Column(nullable = false)
   private LocalDateTime reservationDateTime;
 
-  // 접종 종류
-  @Enumerated(EnumType.STRING)
-  private VaccineType vaccineType;
+  // 접종받을 전체 접종 종류
+  private String vaccineTypes;
 
   // 예약 상태 (예: 예약확정, 방문완료, 취소 등)
   @Enumerated(EnumType.STRING)

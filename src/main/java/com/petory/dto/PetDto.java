@@ -1,5 +1,6 @@
 package com.petory.dto;
 
+import com.petory.constant.AutoVaxStatus;
 import com.petory.constant.Gender;
 import com.petory.constant.Neutered;
 import com.petory.constant.PetCategory;
@@ -20,6 +21,7 @@ public class PetDto {
   private Neutered isNeutered;
   private PetCategory petCategory;
   private String petProfileImg;
+  private AutoVaxStatus autoVaxStatus;
 
   public static PetDto from(Pet pet) {
     PetDto dto = new PetDto();
@@ -30,6 +32,7 @@ public class PetDto {
     dto.setIsNeutered(pet.getIsNeutered());
     dto.setPetCategory(pet.getPet_Category());
     dto.setPetProfileImg(pet.getPet_ProfileImg());
+    dto.setAutoVaxStatus(pet.getAutoVaxStatus());
 
     return dto;
   }
