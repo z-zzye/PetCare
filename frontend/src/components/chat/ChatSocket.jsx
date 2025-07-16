@@ -22,7 +22,7 @@ const ChatSocket = ({ receiverId, chatRoomId, myId, onMessageReceived, onReadRec
     if (!myId) return;
 
     const token = localStorage.getItem('token');
-    const socket = new SockJS(`/ws/chat?token=${token}`);
+    const socket = new SockJS(`http://localhost:80/ws/chat?token=${token}`);
     const client = Stomp.over(socket);
 
     client.connect(
@@ -59,7 +59,7 @@ const ChatSocket = ({ receiverId, chatRoomId, myId, onMessageReceived, onReadRec
         client.disconnect();
       }
     };
-  }, [myId, chatRoomId, onMessageReceived, onReadReceived]);
+  }, [myId, chatRoomId]);
 
   const sendMessage = () => {
     if (!input.trim() || !stompClient.current || !myId) return;

@@ -61,6 +61,7 @@ import BoardAdminPage from './components/admin/boards/BoardAdminPage';
 import ProfanityManagePage from './components/admin/ProfanityManagePage.jsx';
 import ShopAdminPage from './components/admin/ShopAdminPage.jsx';
 import UserAdminPage from './components/admin/UserAdminPage';
+import HashtagManagePage from './components/admin/HashtagManagePage.jsx';
 
 // 페이지 컴포넌트
 import MapServicePage from './pages/MapServicePage';
@@ -217,14 +218,19 @@ function App() {
               element={
                 <AdminRoute>
                   <AutoVaxAdminPage />
+            <Route
+              path="/admin/hashtags"
+              element={
+                <AdminRoute>
+                  <HashtagManagePage />
                 </AdminRoute>
               }
             />
           </Routes>
         </BrowserRouter>
+        {/* 로그인한 사용자만 챗봇 버튼 표시 */}
+        <ChatbotButton />
       </KakaoMapsScriptProvider>
-      {/* 로그인한 사용자만 챗봇 버튼 표시 */}
-      <ChatbotButton />
     </AuthProvider>
   );
 }

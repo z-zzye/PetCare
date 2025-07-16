@@ -3,6 +3,9 @@ import { FaBars, FaComments, FaTimes } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import ChatRoomListPopup from './ChatRoomListPopup';
+import axios from '../api/axios';
+import SockJS from 'sockjs-client';
+import { Stomp } from '@stomp/stompjs';
 import './Header.css';
 import NotificationPopup from './NotificationPopup';
 
@@ -50,6 +53,8 @@ const Header = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef();
   const [isChatListOpen, setIsChatListOpen] = useState(false);
+  const [totalUnreadCount, setTotalUnreadCount] = useState(0);
+  const [myId, setMyId] = useState(null);
 
   const menu = useMemo(() => {
     if (isAdmin) {
@@ -77,6 +82,78 @@ const Header = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showDropdown]);
+
+  // 내 ID 가져오기
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    const decoded = require('jwt-decode').jwtDecode(token);
+    const email = decoded.sub || decoded.email;
+
+    axios.get(`/members/id-by-email?email=${email}`)
+      .then(res => {
+        setMyId(res.data);
+      })
+      .catch(err => console.error('❌ 내 ID 조회 실패:', err));
+  }, [isLoggedIn]);
+
+  // 전체 안 읽은 메시지 개수 조회
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    
+    axios.get('/chat/unread-count')
+      .then(res => {
+        setTotalUnreadCount(res.data);
+      })
+      .catch(err => console.error('❌ 전체 안 읽은 메시지 개수 조회 실패:', err));
+  }, [isLoggedIn]);
+
+  // WebSocket 연결 및 실시간 업데이트
+  useEffect(() => {
+    if (!isLoggedIn || !myId) return;
+
+    const token = localStorage.getItem('token');
+    const socket = new SockJS(`http://localhost:80/ws/chat?token=${token}`);
+    const client = Stomp.over(socket);
+
+    client.connect(
+      { Authorization: `Bearer ${token}` },
+      () => {
+        console.log('✅ 헤더 WebSocket 연결 성공');
+        
+        // 새 메시지 수신 시 전체 안 읽은 메시지 개수 증가
+        client.subscribe(`/queue/chat/${myId}`, (message) => {
+          const body = JSON.parse(message.body);
+          console.log('📨 새 메시지 수신 (헤더 업데이트):', body);
+          setTotalUnreadCount(prev => prev + 1);
+        });
+
+        // 읽음 처리 시 전체 안 읽은 메시지 개수 감소
+        client.subscribe(`/queue/read/${myId}`, (message) => {
+          const body = JSON.parse(message.body);
+          console.log('👁️ 읽음 알림 수신 (헤더 업데이트):', body);
+          // 읽음 처리 시 전체 안 읽은 메시지 개수를 다시 조회하여 정확한 개수로 업데이트
+          axios.get('/chat/unread-count')
+            .then(res => {
+              setTotalUnreadCount(res.data);
+            })
+            .catch(err => console.error('❌ 전체 안 읽은 메시지 개수 조회 실패:', err));
+        });
+      },
+      (error) => {
+        console.error('❌ 헤더 WebSocket 연결 실패:', error);
+      }
+    );
+
+    return () => {
+      if (client) {
+        client.disconnect();
+      }
+    };
+  }, [isLoggedIn, myId]);
 
   // 모바일 아코디언 토글
   const handleAccordion = (idx) => {
@@ -165,6 +242,11 @@ const Header = () => {
               onClick={() => setIsChatListOpen(true)}
             >
               <FaComments size={26} color="#223A5E" />
+              {totalUnreadCount > 0 && (
+                <span className="main-navbar-badge">
+                  {totalUnreadCount > 99 ? '99+' : totalUnreadCount}
+                </span>
+              )}
             </button>
             <NotificationPopup />
             <div className="main-navbar-profile-container">
@@ -303,6 +385,11 @@ const Header = () => {
                 onClick={() => setIsChatListOpen(true)}
               >
                 <FaComments size={26} color="#223A5E" />
+                {totalUnreadCount > 0 && (
+                  <span className="main-navbar-badge">
+                    {totalUnreadCount > 99 ? '99+' : totalUnreadCount}
+                  </span>
+                )}
               </button>
               <NotificationPopup />
               <div className="mobile-profile-section">
@@ -352,7 +439,13 @@ const Header = () => {
         </div>
       )}
       {isChatListOpen && (
-        <ChatRoomListPopup onClose={() => setIsChatListOpen(false)} />
+        <ChatRoomListPopup 
+          onClose={() => setIsChatListOpen(false)} 
+          onUnreadCountUpdate={(decreasedCount) => {
+            // 채팅방 입장 시 해당 채팅방의 안 읽은 개수만큼 전체 개수에서 차감
+            setTotalUnreadCount(prev => Math.max(0, prev - decreasedCount));
+          }}
+        />
       )}
     </nav>
   );

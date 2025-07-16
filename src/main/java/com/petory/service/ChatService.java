@@ -97,13 +97,20 @@ public class ChatService {
         ChatMessage lastMsg = msgs.isEmpty() ? null : msgs.get(msgs.size()-1);
         String lastMessage = lastMsg != null ? lastMsg.getMessage() : "";
         String lastMessageTime = lastMsg != null && lastMsg.getSentAt() != null ? lastMsg.getSentAt().toString() : "";
+        
+        // 안 읽은 메시지 개수 계산 (내가 보낸 메시지가 아닌 것만)
+        int unreadCount = (int) msgs.stream()
+          .filter(msg -> !msg.getSenderId().equals(myId) && !msg.is_read())
+          .count();
+        
         return new ChatRoomListDto(
           room.getId(),
           otherId,
           otherNickname,
           otherProfile,
           lastMessage,
-          lastMessageTime
+          lastMessageTime,
+          unreadCount
         );
       })
       .sorted(Comparator.comparing(ChatRoomListDto::getLastMessageTime, Comparator.nullsLast(Comparator.reverseOrder())))
@@ -125,6 +132,20 @@ public class ChatService {
       Long otherId = room.getSenderId().equals(dto.getReaderId()) ? room.getReceiverId() : room.getSenderId();
       messagingTemplate.convertAndSend("/queue/read/" + otherId, new ChatReadResultDto(dto.getChatRoomId(), readIds));
     }
+  }
+
+  // 전체 안 읽은 메시지 개수 조회
+  public int getTotalUnreadCount(Long myId) {
+    List<ChatRoom> rooms = chatRoomRepository.findAll();
+    return rooms.stream()
+      .filter(room -> room.getSenderId().equals(myId) || room.getReceiverId().equals(myId))
+      .mapToInt(room -> {
+        List<ChatMessage> msgs = chatMessageRepository.findByChatRoomOrderBySentAtAsc(room);
+        return (int) msgs.stream()
+          .filter(msg -> !msg.getSenderId().equals(myId) && !msg.is_read())
+          .count();
+      })
+      .sum();
   }
 }
 
