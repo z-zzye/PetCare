@@ -1,7 +1,8 @@
 .mypage-container {
   display: flex;
   flex-direction: row;
-  min-height: 100vh;
+  min-height: 100vh; /* 전체 뷰포트 높이 */
+  height: auto; /* 내용에 따라 자동으로 높이 조정 */
 }
 
 .sidebar {
@@ -13,10 +14,12 @@
   flex-direction: column;
   justify-content: flex-start;
   box-sizing: border-box;
+  min-height: 100vh; /* 전체 뷰포트 높이를 최소로 */
+  height: 100%; /* 부모 컨테이너의 전체 높이를 차지 */
 }
 
 .mypage-content {
   flex: 1;
   padding: 2rem;
-  background-color: #f9f9f9;
+  background-color: transparent;
 }

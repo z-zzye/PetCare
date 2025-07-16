@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axiosInstance from "../../api/axios";
 import "../css/ChatRoomListPopup.css";
 import ChatPage from "../chat/ChatPage";
@@ -124,6 +124,17 @@ const Chatbot = ({ onClose }) => {
   const [selectedFaq, setSelectedFaq] = useState(null);
   const [showMenuButtons, setShowMenuButtons] = useState(true);
   const [showAdminChatModal, setShowAdminChatModal] = useState(false);
+  const messagesEndRef = useRef(null);
+
+  // 스크롤을 최하단으로 이동시키는 함수
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // 메시지가 추가될 때마다 스크롤을 최하단으로 이동
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const resetToMenu = () => {
     setMessages([{
@@ -360,6 +371,7 @@ const Chatbot = ({ onClose }) => {
           ))}
           {messages[messages.length - 1]?.type === "faq_menu" && renderFaqMenu()}
           {loading && <div style={{ color: '#888', fontSize: 14, marginTop: 8 }}>답변을 불러오는 중...</div>}
+          <div ref={messagesEndRef} />
         </div>
         <div className="chatbot-input-area">
           <input

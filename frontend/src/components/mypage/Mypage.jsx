@@ -104,22 +104,13 @@ const Mypage = () => {
   return (
     <>
       <Header />
-      <div
-        className="mypage-container"
-        style={{
-          display: 'flex',
-          height: 'calc(100vh - 200px)', // 헤더 높이만큼 뺌
-        }}
-      >
+      <div className="mypage-container">
         <Sidebar onTabChange={setActiveTab} />
 
-        {/* 사이드바 탭 너비만큼 margin-left로 여백 확보 */}
         <div
           className="mypage-content"
           style={{
-            flex: 1,
-            padding: '2rem',
-            marginLeft: '5rem', // 사이드탭이 차지하는 폭만큼 조정 (rem, %, vw 가능)
+            marginLeft: '5rem', // 사이드탭이 차지하는 폭만큼 조정
           }}
         >
           {renderContent()}
