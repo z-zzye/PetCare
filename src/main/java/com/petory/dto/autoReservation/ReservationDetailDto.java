@@ -16,9 +16,17 @@ import lombok.NoArgsConstructor;
 public class ReservationDetailDto {
 
   // 1. 예약 기본 정보
+  private Long id; // 프론트엔드 호환성을 위해 추가
   private Long reservationId;
   private String vaccineDescription;
   private LocalDateTime reservationDateTime;
+  
+  // 2. 회원 정보
+  private String memberName;
+  
+  // 3. 날짜/시간 분리 필드 (프론트엔드 호환성)
+  private String reservationDate;
+  private String reservationTime;
 
   // 2. 예약 펫 정보
   private Long petId;
@@ -48,8 +56,21 @@ public class ReservationDetailDto {
    * @param reservation DB에서 조회한 Reservation 엔티티 객체
    */
   public ReservationDetailDto(Reservation reservation) {
+    this.id = reservation.getId(); // 프론트엔드 호환성
     this.reservationId = reservation.getId();
     this.reservationDateTime = reservation.getReservationDateTime();
+    
+    // 회원명 설정
+    if (reservation.getMember() != null) {
+      this.memberName = reservation.getMember().getMember_NickName();
+    }
+    
+    // 날짜/시간 분리 설정
+    if (reservation.getReservationDateTime() != null) {
+      this.reservationDate = reservation.getReservationDateTime().toLocalDate().toString();
+      this.reservationTime = reservation.getReservationDateTime().toLocalTime().toString();
+    }
+    
     if (reservation.getVaccineTypes() != null && !reservation.getVaccineTypes().isEmpty()) {
       this.vaccineDescription = convertVaccineNamesToDescriptions(reservation.getVaccineTypes());
     }

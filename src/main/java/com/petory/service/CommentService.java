@@ -5,23 +5,29 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.petory.dto.CommentCreateDto;
 import com.petory.entity.Board;
+import com.petory.entity.CleanBotLog;
 import com.petory.entity.Comment;
 import com.petory.entity.Member;
 import com.petory.repository.BoardRepository;
+import com.petory.repository.CleanBotLogRepository;
 import com.petory.repository.CommentRepository;
 import com.petory.repository.MemberRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class CommentService {
 
   private final CommentRepository commentRepository;
   private final MemberRepository memberRepository;
   private final BoardRepository boardRepository;
   private final CleanBotService cleanBotService;
+  private final NotificationService notificationService;
+  private final CleanBotLogRepository cleanBotLogRepository;
 
   /**
    * 새 댓글 생성
@@ -41,8 +47,33 @@ public class CommentService {
 
     board.setCommentCount(board.getCommentCount() + 1);
 
+    // 클린봇이 부적절한 내용을 감지한 경우 알림 생성
+    if (cleanBotService.containsProfanity(requestDto.getContent())) {
+      try {
+        notificationService.createCleanBotDetectedNotification(member, requestDto.getContent());
+      } catch (Exception e) {
+        log.error("클린봇 감지 알림 생성 중 오류 발생: memberId={}", member.getMember_Id(), e);
+        // 알림 생성 실패가 댓글 생성을 막지 않도록 예외를 던지지 않음
+      }
+    }
 
     Comment savedComment = commentRepository.save(comment);
+    
+    // 클린봇이 부적절한 내용을 감지한 경우 로그 저장
+    if (cleanBotService.containsProfanity(requestDto.getContent())) {
+      try {
+        CleanBotLog cleanBotLog = new CleanBotLog();
+        cleanBotLog.setTargetId(savedComment.getId());
+        cleanBotLog.setTargetType("COMMENT");
+        cleanBotLog.setOriginalContent(requestDto.getContent());
+        cleanBotLogRepository.save(cleanBotLog);
+        log.info("클린봇 로그 저장 완료: Comment ID={}", savedComment.getId());
+      } catch (Exception e) {
+        log.error("클린봇 로그 저장 중 오류 발생: Comment ID={}", savedComment.getId(), e);
+        // 로그 저장 실패가 댓글 생성을 막지 않도록 예외를 던지지 않음
+      }
+    }
+    
     return savedComment.getId();
   }
 

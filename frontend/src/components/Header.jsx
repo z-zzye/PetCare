@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { FaBars, FaBell, FaComments, FaTimes } from 'react-icons/fa';
+import { FaBars, FaComments, FaTimes } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import ChatRoomListPopup from './ChatRoomListPopup';
 import './Header.css';
+import NotificationPopup from './NotificationPopup';
 
 const baseMenu = [
   {
@@ -165,10 +166,7 @@ const Header = () => {
             >
               <FaComments size={26} color="#223A5E" />
             </button>
-            <button className="main-navbar-icon-btn">
-              <FaBell size={26} color="#223A5E" />
-              {hasNewNotification && <span className="main-navbar-badge-dot" />}
-            </button>
+            <NotificationPopup />
             <div className="main-navbar-profile-container">
               <div
                 className="main-navbar-profile"
@@ -306,12 +304,7 @@ const Header = () => {
               >
                 <FaComments size={26} color="#223A5E" />
               </button>
-              <button className="main-navbar-icon-btn">
-                <FaBell size={26} color="#223A5E" />
-                {hasNewNotification && (
-                  <span className="main-navbar-badge-dot" />
-                )}
-              </button>
+              <NotificationPopup />
               <div className="mobile-profile-section">
                 <span className="main-navbar-profile">
                   <img

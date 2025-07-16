@@ -38,6 +38,7 @@ const AutoVaxForm = ({
   // 백엔드로부터 받은 상세 데이터를 저장할 상태
   const [vaccineDates, setVaccineDates] = useState([]);
   const [availableSlots, setAvailableSlots] = useState([]);
+  const [alternativeDates, setAlternativeDates] = useState([]); // 새로운 상태 추가
 
   // 상태 추가
   const [isRadiusExpanded, setIsRadiusExpanded] = useState(false);
@@ -54,6 +55,7 @@ const AutoVaxForm = ({
       setSelectedVaccines(savedFormData.selectedVaccines);
       setVaccineDates(savedFormData.vaccineDates || []);
       setAvailableSlots(savedFormData.availableSlots || []);
+      setAlternativeDates(savedFormData.alternativeDates || []); // 새로운 상태 복원
       setIsExpanded(savedFormData.isExpanded || false);
       setSelectedSlot(savedFormData.selectedSlot || null);
       setLastSearchRadius(savedFormData.lastSearchRadius || 5);
@@ -309,14 +311,17 @@ const AutoVaxForm = ({
         '/auto-reservations/search-slots',
         requestData
       );
-      const { availableSlots, vaccineDates } = response.data;
+      const { availableSlots, vaccineDates, alternativeDates } = response.data;
 
       // [성공] 백엔드가 예약 가능한 병원 목록을 하나라도 찾았을 경우
       if (availableSlots && availableSlots.length > 0) {
         // 1. 백신별 예상 접종일 정보를 상태에 저장
         setVaccineDates(vaccineDates || []);
 
-        // 2. 반환된 병원 목록을 사용자가 선택한 '시간대'로 필터링
+        // 2. 대안 날짜 옵션들을 상태에 저장
+        setAlternativeDates(alternativeDates || []);
+
+        // 3. 반환된 병원 목록을 사용자가 선택한 '시간대'로 필터링
         const filteredSlots = availableSlots.filter(
           (slot) => slot.timeSlot === preferredTime
         );
@@ -473,6 +478,7 @@ const AutoVaxForm = ({
             selectedVaccines,
             vaccineDates,
             availableSlots,
+            alternativeDates, // 새로운 상태 추가
             isExpanded,
             selectedSlot,
             lastSearchRadius,
@@ -505,6 +511,7 @@ const AutoVaxForm = ({
             selectedVaccines,
             vaccineDates,
             availableSlots,
+            alternativeDates, // 새로운 상태 추가
             isExpanded,
             selectedSlot,
             lastSearchRadius,
@@ -696,9 +703,51 @@ const AutoVaxForm = ({
           ))}
         </div>
 
+        {/* 대안 날짜 옵션들 표시 */}
+        {alternativeDates && alternativeDates.length > 1 && (
+          <div className="alternative-dates-section">
+            <h5 className="alternative-dates-title">다른 날짜 옵션들</h5>
+            <div className="alternative-dates-list">
+              {alternativeDates.slice(1).map((option, index) => (
+                <div key={index} className="alternative-date-option">
+                  <div className="alternative-date-header">
+                    <span className="alternative-date">
+                      {option.date} ({option.reason})
+                    </span>
+                    <span className="alternative-date-info">
+                      {option.hospitalCount}개 병원 • 평균{' '}
+                      {option.averageDistance.toFixed(1)}km • 최저{' '}
+                      {option.totalPrice.toLocaleString()}원
+                    </span>
+                  </div>
+                  <button
+                    className="view-alternative-button"
+                    onClick={() => {
+                      // 백엔드에서 이미 필터링된 슬롯들이므로 그대로 사용
+                      setAvailableSlots(option.availableSlots);
+                      setSelectedSlot(null);
+                      // 스크롤을 결과 영역으로 이동
+                      if (formContainerRef.current) {
+                        const modalContent = formContainerRef.current.closest(
+                          '.ReactModal__Content'
+                        );
+                        if (modalContent) {
+                          modalContent.scrollTo({ top: 0, behavior: 'smooth' });
+                        }
+                      }
+                    }}
+                  >
+                    이 날짜로 보기
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {availableSlots.length > 0 && (
           <h5 className="hospital-list-title">
-            가장 빠른 예약 가능일 ({availableSlots[0].targetDate})의 병원 목록
+            예약 가능일 ({availableSlots[0].targetDate})의 병원 목록
           </h5>
         )}
 

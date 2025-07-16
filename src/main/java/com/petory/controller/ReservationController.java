@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -141,6 +143,56 @@ public class ReservationController {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "서버 내부 오류가 발생했습니다."));
       }
 
+  }
+
+  /**
+   * [관리자/병원용] 예약 상태를 변경하는 API
+   */
+  @PutMapping("/{reservationId}/status")
+  @PreAuthorize("hasAnyAuthority('VET', 'ADMIN')")
+  public ResponseEntity<?> updateStatusByAdmin(
+    @PathVariable("reservationId") Long reservationId,
+    @RequestBody Map<String, String> request,
+    Principal principal) {
+
+    if (principal == null) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "로그인이 필요합니다."));
+    }
+
+    try {
+      String newStatus = request.get("status");
+      if (newStatus == null || newStatus.trim().isEmpty()) {
+        return ResponseEntity.badRequest().body(Map.of("error", "상태값이 필요합니다."));
+      }
+      
+      reservationService.updateReservationStatusByAdmin(reservationId, newStatus);
+      return ResponseEntity.ok(Map.of("message", "예약 상태가 성공적으로 변경되었습니다."));
+      
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+    } catch (Exception e) {
+      log.error("예약 상태 변경 중 오류 발생: reservationId={}", reservationId, e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "서버 내부 오류가 발생했습니다."));
+    }
+  }
+
+  /**
+   * [관리자/병원용] 모든 예약 목록을 조회하는 API
+   */
+  @GetMapping("/admin/list")
+  @PreAuthorize("hasAnyAuthority('VET', 'ADMIN')")
+  public ResponseEntity<?> getAllReservations(Principal principal) {
+    if (principal == null) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "로그인이 필요합니다."));
+    }
+
+    try {
+      List<ReservationDetailDto> reservations = reservationService.getAllAutoVaxReservations();
+      return ResponseEntity.ok(reservations);
+    } catch (Exception e) {
+      log.error("관리자용 예약 목록 조회 중 오류 발생", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "서버 내부 오류가 발생했습니다."));
+    }
   }
 
   // TODO: 추후 이곳에 '예약 상세 조회' 등의 API를 추가할 수 있습니다.

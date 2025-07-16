@@ -14,20 +14,24 @@ import com.petory.dto.board.BoardListDto;
 import com.petory.dto.board.BoardUpdateDto;
 import com.petory.entity.Board;
 import com.petory.entity.BoardRecommend;
+import com.petory.entity.CleanBotLog;
 import com.petory.entity.Comment;
 import com.petory.entity.Member;
 import com.petory.repository.BoardRecommendRepository;
 import com.petory.repository.BoardRepository;
+import com.petory.repository.CleanBotLogRepository;
 import com.petory.repository.CommentRepository;
 import com.petory.repository.MemberRepository;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class BoardService {
 
   private final BoardRepository boardRepository;
@@ -36,6 +40,8 @@ public class BoardService {
   private final CleanBotService cleanBotService;
   private final HttpServletRequest httpServletRequest;
   private final BoardRecommendRepository boardRecommendRepository;
+  private final NotificationService notificationService;
+  private final CleanBotLogRepository cleanBotLogRepository;
 
   /**
    * 새 게시글 생성
@@ -62,9 +68,33 @@ public class BoardService {
       board.setOriginalTitle(requestDto.getTitle());
       board.setOriginalContent(requestDto.getContent());
       board.setBlinded(true);
+      
+      // 클린봇 감지 알림 생성
+      try {
+        notificationService.createCleanBotDetectedNotification(member, requestDto.getTitle() + " " + requestDto.getContent());
+      } catch (Exception e) {
+        log.error("클린봇 감지 알림 생성 중 오류 발생: memberId={}", member.getMember_Id(), e);
+        // 알림 생성 실패가 게시글 생성을 막지 않도록 예외를 던지지 않음
+      }
     }
 
     Board savedBoard = boardRepository.save(board);
+    
+    // 클린봇이 부적절한 내용을 감지한 경우 로그 저장
+    if (savedBoard.isBlinded()) {
+      try {
+        CleanBotLog cleanBotLog = new CleanBotLog();
+        cleanBotLog.setTargetId(savedBoard.getId());
+        cleanBotLog.setTargetType("BOARD");
+        cleanBotLog.setOriginalContent(savedBoard.getOriginalContent());
+        cleanBotLogRepository.save(cleanBotLog);
+        log.info("클린봇 로그 저장 완료: Board ID={}", savedBoard.getId());
+      } catch (Exception e) {
+        log.error("클린봇 로그 저장 중 오류 발생: Board ID={}", savedBoard.getId(), e);
+        // 로그 저장 실패가 게시글 생성을 막지 않도록 예외를 던지지 않음
+      }
+    }
+    
     return savedBoard.getId();
   }
 

@@ -38,6 +38,11 @@ const AdminPage = () => {
             <h3>경매 관리</h3>
             <p>경매 상품과 입찰 현황을 관리합니다</p>
           </Link>
+          <Link to="/admin/autovax" className="admin-menu-item">
+            <div className="admin-menu-icon">💉</div>
+            <h3>자동 예약 관리</h3>
+            <p>자동 예약 현황을 확인하고 접종 완료/취소를 처리합니다</p>
+          </Link>
         </div>
       </div>
     </div>

@@ -1,19 +1,24 @@
 package com.petory.dto.autoReservation;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import java.util.List;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class DetailedSlotSearchResponseDto {
-  // 1. 백신별 가장 빠른 예약 가능일 목록
-  private List<VaccineDateInfo> vaccineDates;
+    private List<VaccineDateInfo> vaccineDates;
+    private List<AvailableSlotResponseDto> availableSlots;
+    private List<AlternativeDateOptionDto> alternativeDates; // 새로운 필드 추가
 
-  // 2. 전체 중 가장 빠른 날짜에 예약 가능한 병원 목록
-  private List<AvailableSlotResponseDto> availableSlots;
+    public DetailedSlotSearchResponseDto(List<VaccineDateInfo> vaccineDates, List<AvailableSlotResponseDto> availableSlots) {
+        this.vaccineDates = vaccineDates;
+        this.availableSlots = availableSlots;
+        this.alternativeDates = null; // 기존 생성자 호환성 유지
+    }
 }

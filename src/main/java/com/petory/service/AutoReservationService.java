@@ -4,9 +4,11 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -19,7 +21,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
@@ -29,6 +30,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.petory.constant.ReservationStatus;
 import com.petory.constant.VaccineType;
+import com.petory.dto.autoReservation.AlternativeDateOptionDto;
 import com.petory.dto.autoReservation.AvailableSlotResponseDto;
 import com.petory.dto.autoReservation.DetailedSlotSearchResponseDto;
 import com.petory.dto.autoReservation.ReservationConfirmRequestDto;
@@ -58,7 +60,7 @@ public class AutoReservationService {
   private final MemberRepository memberRepository;
 
   /**
-   * [수정] 백신별 예약 가능일과, 가장 빠른 날짜의 병원 목록을 함께 반환합니다.
+   * [수정] 백신별 예약 가능일과, 여러 날짜 옵션의 병원 목록을 함께 반환합니다.
    */
   @Transactional(readOnly = true)
   public DetailedSlotSearchResponseDto findAvailableSlots(SlotSearchRequestDto requestDto) {
@@ -74,15 +76,14 @@ public class AutoReservationService {
       return new DetailedSlotSearchResponseDto(Collections.emptyList(), Collections.emptyList());
     }
 
-    // 3. 필터링된 결과 중 가장 빠른 날짜를 찾습니다.
-    LocalDate overallEarliestDate = vaccineDates.stream()
-      .min(Comparator.comparing(VaccineDateInfo::getDate))
-      .get()
-      .getDate();
+    // 2. 여러 날짜 옵션을 찾습니다.
+    List<AlternativeDateOptionDto> alternativeDates = findAlternativeDateOptions(vaccineDates, requestDto);
 
-    // 4. 가장 빠른 날짜로 병원을 조회하고 결과를 반환합니다.
-    List<AvailableSlotResponseDto> availableSlots = findHospitalsForDate(overallEarliestDate, requestDto);
-    return new DetailedSlotSearchResponseDto(vaccineDates, availableSlots);
+    // 3. 가장 빠른 날짜의 병원 목록을 기본 결과로 설정합니다.
+    List<AvailableSlotResponseDto> availableSlots = alternativeDates.isEmpty() ?
+      Collections.emptyList() : alternativeDates.get(0).getAvailableSlots();
+
+    return new DetailedSlotSearchResponseDto(vaccineDates, availableSlots, alternativeDates);
   }
 
   /**
@@ -122,7 +123,7 @@ public class AutoReservationService {
       .filter(vaccine -> {
         long completed = completedCounts.getOrDefault(vaccine, 0L);
         boolean needsMore = completed < vaccine.getTotalShots();
-        log.info("백신 {}: 완료 {}회 / 총 {}회 필요 -> 다음 예약 필요: {}", 
+        log.info("백신 {}: 완료 {}회 / 총 {}회 필요 -> 다음 예약 필요: {}",
                 vaccine.name(), completed, vaccine.getTotalShots(), needsMore);
         return needsMore;
       })
@@ -134,13 +135,13 @@ public class AutoReservationService {
         LocalDate minIntervalDate = lastCompleted.map(r -> r.getReservationDateTime().toLocalDate().plusWeeks(3)).orElse(today); // 규칙B: 마지막 접종일로부터 최소 3주 간격
         LocalDate earliestPossibleDate = minGracePeriodDate.isAfter(minIntervalDate) ? minGracePeriodDate : minIntervalDate; // 두 규칙 중 더 나중 날짜 선택
         LocalDate finalDate = idealDate.isBefore(earliestPossibleDate) ? earliestPossibleDate : idealDate; // 최종 예약 가능일 조정
-        
+
         log.info("백신 {}: {}회차 예약일 계산 완료 -> {}", vaccine.name(), alreadyDone + 1, finalDate);
         return new VaccineDateInfo(vaccine.name(), vaccine.getDescription(), finalDate);
       })
       .sorted(Comparator.comparing(VaccineDateInfo::getDate))
       .collect(Collectors.toList());
-    
+
     log.info("펫 ID {}의 다음 예약 계산 완료. 결과: {}개", pet.getPet_Num(), result.size());
     return result;
   }
@@ -158,10 +159,10 @@ public class AutoReservationService {
       .map(this::getVaccineTypeOrNull)
       .filter(Objects::nonNull)
       .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-    
+
     // 디버깅을 위한 로그 추가
     log.info("펫 ID {}의 완료된 접종 횟수: {}", pet.getPet_Num(), counts);
-    
+
     return counts;
   }
 
@@ -172,6 +173,111 @@ public class AutoReservationService {
       log.warn("DB에 알 수 없는 백신 이름({})이 저장되어 있어 계산에서 제외합니다.", name);
       return null;
     }
+  }
+
+  /**
+   * 여러 날짜 옵션을 찾는 메서드
+   */
+  private List<AlternativeDateOptionDto> findAlternativeDateOptions(List<VaccineDateInfo> vaccineDates, SlotSearchRequestDto requestDto) {
+    List<AlternativeDateOptionDto> alternatives = new ArrayList<>();
+
+    // 1. 가장 빠른 날짜 옵션
+    LocalDate earliestDate = vaccineDates.stream()
+      .min(Comparator.comparing(VaccineDateInfo::getDate))
+      .get()
+      .getDate();
+
+    List<AvailableSlotResponseDto> earliestSlots = findHospitalsForDate(earliestDate, requestDto);
+    if (!earliestSlots.isEmpty()) {
+      // 사용자가 선택한 시간대로 필터링
+      List<AvailableSlotResponseDto> filteredEarliestSlots = filterSlotsByPreferredTime(earliestSlots, requestDto.getPreferredTime());
+      if (!filteredEarliestSlots.isEmpty()) {
+        alternatives.add(new AlternativeDateOptionDto(earliestDate, filteredEarliestSlots, "가장 빠른 날짜"));
+      }
+    }
+
+    // 2. 선호 요일이 가장 많이 포함된 날짜 옵션들
+    List<DayOfWeek> preferredDays = requestDto.getPreferredDays().stream()
+      .map(String::toUpperCase)
+      .map(DayOfWeek::valueOf)
+      .toList();
+
+    // 각 백신 날짜에 대해 선호 요일 매칭 점수 계산
+    Map<LocalDate, Integer> dateScores = new HashMap<>();
+    for (VaccineDateInfo vaccineDate : vaccineDates) {
+      LocalDate date = vaccineDate.getDate();
+      DayOfWeek dayOfWeek = date.getDayOfWeek();
+      int score = preferredDays.contains(dayOfWeek) ? 1 : 0;
+      dateScores.merge(date, score, Integer::sum);
+    }
+
+    // 선호 요일 점수가 높은 순으로 정렬
+    List<LocalDate> preferredDates = dateScores.entrySet().stream()
+      .filter(entry -> entry.getValue() > 0)
+      .sorted(Map.Entry.<LocalDate, Integer>comparingByValue().reversed())
+      .map(Map.Entry::getKey)
+      .limit(3) // 상위 3개만 선택
+      .toList();
+
+    for (LocalDate preferredDate : preferredDates) {
+      if (!preferredDate.equals(earliestDate)) { // 이미 추가된 날짜는 제외
+        List<AvailableSlotResponseDto> preferredSlots = findHospitalsForDate(preferredDate, requestDto);
+        if (!preferredSlots.isEmpty()) {
+          // 사용자가 선택한 시간대로 필터링
+          List<AvailableSlotResponseDto> filteredPreferredSlots = filterSlotsByPreferredTime(preferredSlots, requestDto.getPreferredTime());
+          if (!filteredPreferredSlots.isEmpty()) {
+            alternatives.add(new AlternativeDateOptionDto(preferredDate, filteredPreferredSlots, "선호 요일"));
+          }
+        }
+      }
+    }
+
+    // 3. 가격 최적화 옵션 (가장 저렴한 날짜)
+    if (alternatives.size() > 1) {
+      AlternativeDateOptionDto cheapestOption = alternatives.stream()
+        .min(Comparator.comparing(AlternativeDateOptionDto::getTotalPrice))
+        .orElse(null);
+
+      if (cheapestOption != null && !cheapestOption.getDate().equals(earliestDate)) {
+        cheapestOption.setReason("가격 최적화");
+      }
+    }
+
+    // 4. 거리 최적화 옵션 (가장 가까운 병원이 있는 날짜)
+    if (alternatives.size() > 1) {
+      AlternativeDateOptionDto closestOption = alternatives.stream()
+        .min(Comparator.comparing(AlternativeDateOptionDto::getAverageDistance))
+        .orElse(null);
+
+      if (closestOption != null && !closestOption.getDate().equals(earliestDate)) {
+        closestOption.setReason("거리 최적화");
+      }
+    }
+
+    // 중복 제거 및 정렬 (가장 빠른 날짜가 첫 번째)
+    return alternatives.stream()
+      .collect(Collectors.toMap(
+        AlternativeDateOptionDto::getDate,
+        option -> option,
+        (existing, replacement) -> existing
+      ))
+      .values()
+      .stream()
+      .sorted(Comparator.comparing(AlternativeDateOptionDto::getDate))
+      .collect(Collectors.toList());
+  }
+
+  /**
+   * 슬롯들을 사용자가 선호하는 시간대로 필터링하는 헬퍼 메서드
+   */
+  private List<AvailableSlotResponseDto> filterSlotsByPreferredTime(List<AvailableSlotResponseDto> slots, String preferredTime) {
+    if (preferredTime == null || preferredTime.isEmpty()) {
+      return slots; // 선호 시간이 없으면 모든 슬롯 반환
+    }
+
+    return slots.stream()
+      .filter(slot -> preferredTime.equals(slot.getTimeSlot()))
+      .collect(Collectors.toList());
   }
 
   /**
@@ -231,19 +337,17 @@ public class AutoReservationService {
 
   // (새로 만든 CONFIRMED 상태로 저장하는 메서드)
   public Reservation confirmAndPayReservation(ReservationConfirmRequestDto requestDto) {
-    // 1. 현재 로그인한 사용자 정보 조회
-    String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-    Member member = memberRepository.findByMember_Email(userEmail)
-      .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-
-    // 2. 결제 수단 등록 여부 확인
-    if (paymentMethodRepository.findByMember(member).isEmpty()) {
+    // 1. 펫 정보 조회 (결제 수단 체크를 위해 예약 소유자 정보가 필요)
+    Pet pet = petRepository.findById(requestDto.getPetId())
+      .orElseThrow(() -> new IllegalArgumentException("해당 펫을 찾을 수 없습니다."));
+    
+    // 2. 예약 소유자(펫 주인)의 결제 수단 등록 여부 확인
+    Member reservationOwner = pet.getMember();
+    if (paymentMethodRepository.findByMember(reservationOwner).isEmpty()) {
       throw new IllegalStateException("결제 수단이 등록되어 있지 않습니다. 결제 수단을 먼저 등록해주세요.");
     }
 
     // 기존 로직 (PENDING 예약이 있으면 상태만 변경, 없으면 새로 생성)
-    Pet pet = petRepository.findById(requestDto.getPetId())
-      .orElseThrow(() -> new IllegalArgumentException("해당 펫을 찾을 수 없습니다."));
     Optional<Reservation> existingPendingReservation = reservationRepository.findByPetAndReservationStatus(pet, ReservationStatus.PENDING)
       .stream()
       .filter(r -> r.getReservedHospitalId().equals(requestDto.getHospitalId()) &&
