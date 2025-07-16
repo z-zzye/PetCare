@@ -194,20 +194,7 @@ public class AuctionSessionController { //세션관리
     }
 
 
-    /* 세션 삭제 (테스트용)*/
-    @DeleteMapping("/{sessionId}")
-    public ResponseEntity<Void> deleteSession(@PathVariable Long sessionId) {
-        log.info("세션 삭제 요청: sessionId={}", sessionId);
 
-        try {
-            auctionSessionService.deleteSession(sessionId);
-            return ResponseEntity.ok().build();
-
-        } catch (Exception e) {
-            log.error("세션 삭제 실패: sessionId={}, error={}", sessionId, e.getMessage());
-            return ResponseEntity.badRequest().build();
-        }
-    }
 
 
     /* 오래된 세션 정리 (관리자용)*/

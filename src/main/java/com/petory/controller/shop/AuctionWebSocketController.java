@@ -215,10 +215,9 @@ public class AuctionWebSocketController { //실시간 통신
             // connectionId를 서비스로 전달
             AuctionParticipantDto participant = auctionParticipantService.joinSessionByAuctionItem(auctionItemId, member, connectionId);
             String sessionKey = getSessionKey(auctionItemId);
+            // 전체 참여자에게만 알림 (개별 알림 제거)
             messagingTemplate.convertAndSend("/topic/auction/" + sessionKey,
                     createParticipantNotification(participant, "새로운 참여자가 입장했습니다."));
-            messagingTemplate.convertAndSend("/queue/auction/" + member.getMemberId(),
-                    createJoinNotification(participant));
         } catch (Exception e) {
             log.error("세션 참여 실패: {}", e.getMessage());
             messagingTemplate.convertAndSend("/queue/auction/" + member.getMemberId(),
@@ -336,15 +335,7 @@ public class AuctionWebSocketController { //실시간 통신
     }
 
 
-     /* 참여 성공 알림 생성*/
-    private Object createJoinNotification(AuctionParticipantDto participant) {
-        Map<String, Object> notification = new HashMap<>();
-        notification.put("type", "JOIN_SUCCESS");
-        notification.put("message", "경매 세션에 성공적으로 참여했습니다.");
-        notification.put("participantInfo", participant);
-        notification.put("timestamp", LocalDateTime.now());
-        return notification;
-    }
+
 
 
      /* 퇴장 알림 생성*/

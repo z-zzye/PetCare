@@ -7,6 +7,7 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
 import com.petory.config.JwtHandshakeInterceptor;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -79,6 +80,20 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
           }
         }
         return message;
+      }
+      
+      @Override
+      public void afterSendCompletion(Message<?> message, MessageChannel channel, boolean sent, Exception ex) {
+        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
+        
+        // 연결 해제 시 참여자 비활성화
+        if (accessor.getCommand() == StompCommand.DISCONNECT) {
+          String sessionId = accessor.getSessionId();
+          System.out.println("🔌 WebSocket 연결 해제 감지: sessionId=" + sessionId);
+          
+          // 연결 ID로 참여자 조회하여 비활성화
+          // (실제로는 AuctionParticipantService를 주입받아 처리)
+        }
       }
     });
   }

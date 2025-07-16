@@ -28,7 +28,7 @@ axiosInstance.interceptors.request.use((config) => {
       delete config.headers['Content-Type'];
     }
   }
-  console.log('axios 요청 config:', config);
+  console.log('📡 axios 요청:', config.method?.toUpperCase(), config.url, config);
   return config;
 });
 

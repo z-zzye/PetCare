@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import SockJS from 'sockjs-client';
 import { Stomp } from '@stomp/stompjs';
@@ -24,6 +24,11 @@ const AuctionRoom = () => {
   const [isAuctionEnded, setIsAuctionEnded] = useState(false);
   const [isWinner, setIsWinner] = useState(null); // null: 미확인, true: 낙찰, false: 비낙찰
   const [myHistory, setMyHistory] = useState(null); // 내 히스토리 상태 추가
+  
+  // WebSocket 연결 상태 관리 (중복 연결 방지)
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [hasJoined, setHasJoined] = useState(false);
+  const connectionAttempted = useRef(false);
 
   // 화면 크기 감지
   useEffect(() => {
@@ -259,15 +264,25 @@ const AuctionRoom = () => {
 
   // WebSocket 연결
   useEffect(() => {
+    // 이미 연결 시도를 했거나 연결 중이거나 참여한 경우 중복 연결 방지
+    if (connectionAttempted.current || isConnecting || hasJoined) {
+      console.log('⚠️ 이미 연결 시도했거나 연결 중이거나 참여 중입니다. 중복 연결 방지.');
+      return;
+    }
+
     const connectWebSocket = async () => {
-      console.log('�� 경매방 WebSocket 연결 시작...');
+      console.log('🔌 경매방 WebSocket 연결 시작...');
       console.log('📍 경매 상품 ID:', auctionItemId);
+      
+      setIsConnecting(true);
+      connectionAttempted.current = true;
       
       const token = localStorage.getItem('token');
       if (!token) {
         console.error('❌ 토큰이 없습니다. 로그인이 필요합니다.');
         alert('로그인이 필요합니다.');
         navigate('/login');
+        setIsConnecting(false);
         return;
       }
       console.log('✅ 토큰 확인 완료');
@@ -286,6 +301,7 @@ const AuctionRoom = () => {
           console.error('❌ 경매 세션 조회 실패:', sessionResponse.status, sessionResponse.statusText);
           alert('경매 세션이 생성되지 않았습니다.');
           navigate(-1);
+          setIsConnecting(false);
           return;
         }
 
@@ -302,7 +318,7 @@ const AuctionRoom = () => {
 
         // 2. WebSocket 연결
         console.log('🔌 WebSocket 연결 시도 중...');
-        const socket = new SockJS(`/ws/auction?token=${token}`);
+        const socket = new SockJS(`http://localhost:80/ws/auction?token=${token}`);
         const client = Stomp.over(socket);
 
         client.connect(
@@ -313,8 +329,11 @@ const AuctionRoom = () => {
             setIsConnected(true);
             
             // 3. 경매 세션 참여 메시지 전송
-            console.log('👋 경매 세션 참여 메시지 전송:', auctionItemId);
-            client.send('/app/auction.join', {}, auctionItemId);
+            if (!hasJoined) {
+              console.log('👋 경매 세션 참여 메시지 전송:', auctionItemId);
+              client.send('/app/auction.join', {}, auctionItemId);
+              setHasJoined(true);
+            }
             
             // 4. 경매 업데이트 구독
             const topicUrl = `/topic/auction/${session.sessionKey}`;
@@ -497,6 +516,8 @@ const AuctionRoom = () => {
           errorStack: error.stack
         });
         alert('경매방 입장에 실패했습니다.');
+      } finally {
+        setIsConnecting(false);
       }
     };
 
@@ -516,8 +537,12 @@ const AuctionRoom = () => {
       } else {
         console.log('ℹ️ 해제할 WebSocket 연결이 없습니다.');
       }
+      // 상태 초기화
+      setHasJoined(false);
+      setIsConnecting(false);
+      connectionAttempted.current = false;
     };
-  }, [auctionItemId, navigate]);
+  }, [auctionItemId]);
 
   // 남은 시간 계산 및 상태 갱신
   const getTimeLeft = () => {

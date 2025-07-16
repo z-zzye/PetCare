@@ -111,15 +111,7 @@ public class AuctionDeliveryService {
         return Optional.empty();
     }
 
-    /**
-     * 사용자의 배송 정보 조회
-     */
-    public List<AuctionDeliveryDto> getDeliveriesByMemberId(Long memberId) {
-        return auctionDeliveryRepository.findByMemberId(memberId)
-                .stream()
-                .map(this::convertToDto)
-                .toList();
-    }
+
 
     /**
      * 마감일이 지났는데 배송지 미입력 건 자동 취소 (매일 0시)

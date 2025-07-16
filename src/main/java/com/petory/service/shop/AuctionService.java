@@ -10,20 +10,16 @@ import com.petory.repository.shop.AuctionBidRepository;
 import com.petory.repository.shop.ItemRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.petory.constant.AuctionStatus;
 import com.petory.service.shop.AuctionSessionService;
-import com.petory.service.shop.AuctionHistoryService;
-import com.petory.constant.AuctionWinStatus;
-import com.petory.service.shop.AuctionDeliveryService;
+import com.petory.service.shop.AuctionBidService;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
-import com.petory.entity.shop.AuctionHistory;
-import com.petory.repository.shop.AuctionSessionRepository;
+import com.petory.service.shop.AuctionParticipantService;
 
 @Slf4j
 @Service
@@ -31,13 +27,11 @@ import com.petory.repository.shop.AuctionSessionRepository;
 public class AuctionService {
 
   private final AuctionItemRepository auctionItemRepository;
-  private final AuctionSessionRepository auctionSessionRepository;
   private final AuctionBidRepository auctionBidRepository;
   private final ItemRepository itemRepository;
   private final AuctionSessionService auctionSessionService;
   private final AuctionBidService auctionBidService;
-  private final AuctionHistoryService auctionHistoryService;
-  private final AuctionDeliveryService auctionDeliveryService;
+  private final AuctionParticipantService auctionParticipantService;
 
   @Transactional
   public Long saveAuctionItem(AuctionItemDto auctionItemDto) { //경매상품등록
@@ -87,8 +81,6 @@ public class AuctionService {
     auctionSessionService.createSession(auctionItem, true);
   }
 
-
-
   @Transactional
   public void forceEndAuction(Long auctionItemId) {
     AuctionItem auctionItem = auctionItemRepository.findById(auctionItemId)
@@ -104,7 +96,18 @@ public class AuctionService {
 
     // 세션도 ENDED로 변경
     auctionSessionService.getSessionByAuctionItem(auctionItem)
-        .ifPresent(session -> auctionSessionService.endSession(session.getId()));
+        .ifPresent(session -> {
+            auctionSessionService.endSession(session.getId());
+            
+            // 🚨 경매 강제 종료 시 모든 참여자 즉시 정리
+            try {
+                auctionParticipantService.emergencyCleanupSession(session.getId());
+                log.info("✅ 경매 강제 종료 - 참여자 정리 완료: sessionId={}", session.getId());
+            } catch (Exception e) {
+                log.error("❌ 경매 강제 종료 - 참여자 정리 실패: sessionId={}, error={}", 
+                    session.getId(), e.getMessage());
+            }
+        });
   }
 
   @Transactional
@@ -113,40 +116,10 @@ public class AuctionService {
   }
 
   public List<AuctionItemResponseDto> getAuctionList() { //경매 상품 목록 조회
-    List<AuctionItem> auctionItems = auctionItemRepository.findAll();
-    return auctionItems.stream().map(auctionItem -> {
-      // 현재 최고 입찰가 조회
-      Integer currentPrice = auctionBidRepository.findMaxBidAmountByAuctionItem(auctionItem)
-          .orElse(auctionItem.getStartPrice());
-
-      // 현재 최고 입찰자 조회
-      Member currentWinner = auctionBidRepository.findCurrentWinnerByAuctionItem(auctionItem)
-          .orElse(null);
-
-      String rawThumbnailUrl = itemRepository.findRepresentativeImageUrlByItemId(auctionItem.getItem().getItemId());
-      String thumbnailUrl = null;
-      if (rawThumbnailUrl != null && !rawThumbnailUrl.startsWith("/")) {
-        thumbnailUrl = "/images/" + rawThumbnailUrl;
-      } else {
-        thumbnailUrl = rawThumbnailUrl;
-      }
-      return AuctionItemResponseDto.builder()
-        .auction_item_id(auctionItem.getId())
-        .item_id(auctionItem.getItem().getItemId())
-        .itemName(auctionItem.getItem().getItemName())
-        .itemPrice(auctionItem.getItem().getItemPrice())
-        .thumbnailUrl(thumbnailUrl)
-        .start_price(auctionItem.getStartPrice())
-        .start_time(auctionItem.getStartTime())
-        .end_time(auctionItem.getEndTime())
-        .current_price(currentPrice)
-        .bid_unit(auctionItem.getBidUnit())
-        .auction_status(auctionItem.getAuctionStatus())
-        .auction_description(auctionItem.getAuctionDescription())
-        .currentWinnerName(currentWinner != null ? currentWinner.getMember_NickName() : null)
-        .currentWinnerId(currentWinner != null ? currentWinner.getMemberId() : null)
-        .build();
-    }).collect(Collectors.toList());
+    List<AuctionItem> auctionItems = auctionItemRepository.findAllByOrderByRegDateDesc();
+    return auctionItems.stream()
+        .map(this::convertToAuctionItemResponseDto)
+        .collect(Collectors.toList());
   }
 
   public AuctionItemResponseDto getAuctionItem(Long auctionItemId) {
@@ -154,12 +127,20 @@ public class AuctionService {
       .orElse(null);
     if (auctionItem == null) return null;
 
+    return convertToAuctionItemResponseDto(auctionItem);
+  }
+
+  /* AuctionItem을 AuctionItemResponseDto로 변환하는 헬퍼 메서드*/
+  private AuctionItemResponseDto convertToAuctionItemResponseDto(AuctionItem auctionItem) {
     // 현재 최고 입찰가 조회
     Integer currentPrice = auctionBidRepository.findMaxBidAmountByAuctionItem(auctionItem)
         .orElse(auctionItem.getStartPrice());
+
     // 현재 최고 입찰자 조회
     Member currentWinner = auctionBidRepository.findCurrentWinnerByAuctionItem(auctionItem)
         .orElse(null);
+
+    // 썸네일 URL 처리
     String rawThumbnailUrl = itemRepository.findRepresentativeImageUrlByItemId(auctionItem.getItem().getItemId());
     String thumbnailUrl = null;
     if (rawThumbnailUrl != null && !rawThumbnailUrl.startsWith("/")) {
@@ -167,6 +148,7 @@ public class AuctionService {
     } else {
       thumbnailUrl = rawThumbnailUrl;
     }
+
     return AuctionItemResponseDto.builder()
       .auction_item_id(auctionItem.getId())
       .item_id(auctionItem.getItem().getItemId())

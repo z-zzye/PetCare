@@ -79,6 +79,50 @@ public class AuctionParticipantController { //참여자관리
         }
     }
 
+    /* 자동 비활성화 수동 실행 (관리자용)*/
+    @PostMapping("/deactivate-inactive")
+    public ResponseEntity<Void> deactivateInactiveParticipants() {
+        log.info("자동 비활성화 수동 실행 요청");
+
+        try {
+            auctionParticipantService.deactivateInactiveParticipants();
+            return ResponseEntity.ok().build();
+
+        } catch (Exception e) {
+            log.error("자동 비활성화 수동 실행 실패: error={}", e.getMessage());
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    /* 특정 세션의 비활성 참여자 정리 (관리자용)*/
+    @PostMapping("/{sessionId}/cleanup-inactive")
+    public ResponseEntity<Void> cleanupInactiveParticipantsForSession(@PathVariable Long sessionId) {
+        log.info("세션 비활성 참여자 정리 요청: sessionId={}", sessionId);
+
+        try {
+            auctionParticipantService.cleanupInactiveParticipantsForSession(sessionId);
+            return ResponseEntity.ok().build();
+
+        } catch (Exception e) {
+            log.error("세션 비활성 참여자 정리 실패: sessionId={}, error={}", sessionId, e.getMessage());
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    /* 긴급 상황용 - 특정 세션 즉시 정리 */
+    @PostMapping("/{sessionId}/emergency-cleanup")
+    public ResponseEntity<Void> emergencyCleanupSession(@PathVariable Long sessionId) {
+        log.info("긴급 세션 정리 요청: sessionId={}", sessionId);
+
+        try {
+            auctionParticipantService.emergencyCleanupSession(sessionId);
+            return ResponseEntity.ok().build();
+
+        } catch (Exception e) {
+            log.error("긴급 세션 정리 실패: sessionId={}, error={}", sessionId, e.getMessage());
+            return ResponseEntity.internalServerError().build();
+        }
+    }
 
 
 }

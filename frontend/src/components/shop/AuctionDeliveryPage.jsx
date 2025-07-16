@@ -118,9 +118,9 @@ function AuctionDeliveryPage() {
 
       if (response.status === 200) {
         showToast('배송 요청이 완료되었습니다!', 'success');
-        // 성공 시 마이페이지로 이동
+        // 성공 시 내 입찰내역 페이지로 이동
         setTimeout(() => {
-          navigate('/mypage');
+          navigate('/shop/my-auction-history');
         }, 2000);
       }
     } catch (error) {

@@ -6,6 +6,7 @@ import com.petory.entity.shop.AuctionItem;
 import com.petory.entity.shop.AuctionSession;
 import com.petory.repository.shop.AuctionSessionRepository;
 import com.petory.repository.shop.AuctionItemRepository;
+import com.petory.repository.shop.AuctionParticipantRepository;
 import com.petory.constant.AuctionSessionStatus;
 import com.petory.constant.AuctionStatus;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,7 @@ public class AuctionSessionService {
 
     private final AuctionSessionRepository auctionSessionRepository;
     private final AuctionItemRepository auctionItemRepository;
+    private final AuctionParticipantRepository auctionParticipantRepository;
     private final AuctionBidService auctionBidService;
     private final SimpMessagingTemplate messagingTemplate;
 
@@ -40,17 +42,18 @@ public class AuctionSessionService {
     public AuctionSessionService(
             AuctionSessionRepository auctionSessionRepository,
             AuctionItemRepository auctionItemRepository,
+            AuctionParticipantRepository auctionParticipantRepository,
             @Lazy AuctionBidService auctionBidService,
             SimpMessagingTemplate messagingTemplate) {
         this.auctionSessionRepository = auctionSessionRepository;
         this.auctionItemRepository = auctionItemRepository;
+        this.auctionParticipantRepository = auctionParticipantRepository;
         this.auctionBidService = auctionBidService;
         this.messagingTemplate = messagingTemplate;
     }
 
 
      /* 경매 세션 생성*/
-    // 기존 시그니처도 유지 (기존 코드 호환성)
     @Transactional
     public AuctionSession createSession(AuctionItem auctionItem) {
         return createSession(auctionItem, false);
@@ -88,37 +91,27 @@ public class AuctionSessionService {
         return savedSession;
     }
 
-    /**
-     * 세션 조회 (ID로)
-     */
+    /* 세션 조회 (ID로)*/
     public Optional<AuctionSession> getSessionById(Long sessionId) {
         return auctionSessionRepository.findById(sessionId);
     }
 
-    /**
-     * 세션 조회 (세션 키로)
-     */
+    /* 세션 조회 (세션 키로)*/
     public Optional<AuctionSession> getSessionByKey(String sessionKey) {
         return auctionSessionRepository.findBySessionKey(sessionKey);
     }
 
-    /**
-     * 경매 상품으로 세션 조회
-     */
+    /* 경매 상품으로 세션 조회*/
     public Optional<AuctionSession> getSessionByAuctionItem(AuctionItem auctionItem) {
         return auctionSessionRepository.findByAuctionItemId(auctionItem.getId());
     }
 
-    /**
-     * 활성 세션 조회
-     */
+    /* 활성 세션 조회*/
     public List<AuctionSession> getActiveSessions() {
         return auctionSessionRepository.findByStatus(AuctionSessionStatus.ACTIVE);
     }
 
-    /**
-     * 세션 상태 업데이트
-     */
+    /* 세션 상태 업데이트*/
     @Transactional
     public void updateSessionStatus(Long sessionId, AuctionSessionStatus status) {
         log.info("세션 상태 업데이트: sessionId={}, status={}", sessionId, status);
@@ -129,9 +122,7 @@ public class AuctionSessionService {
         });
     }
 
-    /**
-     * 참여자 수 업데이트
-     */
+    /* 참여자 수 업데이트*/
     @Transactional
     public void updateParticipantCount(Long sessionId, int count) {
         auctionSessionRepository.findById(sessionId).ifPresent(session -> {
@@ -140,9 +131,7 @@ public class AuctionSessionService {
         });
     }
 
-    /**
-     * 세션 종료
-     */
+    /* 세션 종료*/
     @Transactional
     public void endSession(Long sessionId) {
         log.info("세션 종료: sessionId={}", sessionId);
@@ -154,18 +143,14 @@ public class AuctionSessionService {
         });
     }
 
-    /**
-     * 세션 활성화 상태 확인
-     */
+    /* 세션 활성화 상태 확인*/
     public boolean isSessionActive(Long sessionId) {
         return auctionSessionRepository.findById(sessionId)
                 .map(session -> session.getStatus() == AuctionSessionStatus.ACTIVE)
                 .orElse(false);
     }
 
-    /**
-     * 세션 참여 가능 여부 확인 //필요한가? ? ??
-     */
+    /* 세션 참여 가능 여부 확인*/
     public boolean canJoinSession(Long sessionId) {
         return auctionSessionRepository.findById(sessionId)
                 .map(session -> {
@@ -177,9 +162,7 @@ public class AuctionSessionService {
                 .orElse(false);
     }
 
-    /**
-     * 남은 시간 계산 (초 단위)
-     */
+    /* 남은 시간 계산 (초 단위)*/
     public long getRemainingTime(Long sessionId) {
         return auctionSessionRepository.findById(sessionId)
                 .map(session -> {
@@ -195,9 +178,7 @@ public class AuctionSessionService {
                 .orElse(0L);
     }
 
-    /**
-     * 세션 정보를 DTO로 변환
-     */
+    /* 세션 정보를 DTO로 변환*/
     public AuctionSessionDto convertToDto(AuctionSession session) {
         if (session == null) return null;
 
@@ -206,8 +187,6 @@ public class AuctionSessionService {
         return AuctionSessionDto.builder()
                 .sessionId(session.getId())
                 .auctionItemId(session.getAuctionItem().getId())
-                .auctionItemName(session.getAuctionItem().getItem().getItemName())
-                .auctionItemImage("") // TODO: ItemImage에서 메인 이미지 조회
                 .sessionKey(session.getSessionKey())
                 .participantCount(session.getParticipantCount())
                 .status(session.getStatus())
@@ -215,109 +194,113 @@ public class AuctionSessionService {
                 .endTime(session.getEndTime())
                 .createdAt(session.getRegDate())
                 .updatedAt(session.getUpdateDate())
-                .startPrice(session.getAuctionItem().getStartPrice())
-                .currentPrice(0) // TODO: AuctionBidRepository에서 조회
-                .currentWinner("") // TODO: AuctionBidRepository에서 조회
                 .isActive(session.getStatus() == AuctionSessionStatus.ACTIVE)
                 .isFull(session.getParticipantCount() >= 100)
                 .remainingTime(remainingTime)
                 .build();
     }
 
-    /**
-     * 세션 삭제 (테스트용)
-     */
-    @Transactional
-    public void deleteSession(Long sessionId) {
-        log.info("세션 삭제: sessionId={}", sessionId);
-        auctionSessionRepository.deleteById(sessionId);
-    }
 
-    /**
-     * 경매 상품 ID로 세션 키 조회
-     */
+
+    /* 경매 상품 ID로 세션 키 조회*/
     public String getSessionKey(Long auctionItemId) {
         return auctionSessionRepository.findByAuctionItemId(auctionItemId)
                 .map(AuctionSession::getSessionKey)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 경매 세션입니다: " + auctionItemId));
     }
 
-    /**
-     * 오래된 세션 정리 (정리용)
-     */
+    /* 오래된 세션 정리 7일간 보관(정리용)*/
     @Transactional
     public void cleanupOldSessions() {
         LocalDateTime cutoffTime = LocalDateTime.now().minusDays(7);
         List<AuctionSession> oldSessions = auctionSessionRepository.findByStatusAndEndTimeBefore(AuctionSessionStatus.ENDED, cutoffTime);
 
+        log.info("🧹 오래된 세션 정리 시작: {}개", oldSessions.size());
+
         for (AuctionSession session : oldSessions) {
+            // 세션과 관련된 참여자들도 함께 삭제
+            auctionParticipantRepository.deleteBySession(session);
+            log.info("세션 참여자 삭제 완료: sessionId={}", session.getId());
+            
+            // 세션 삭제
             auctionSessionRepository.delete(session);
             log.info("오래된 세션 삭제: sessionId={}", session.getId());
         }
+
+        log.info("✅ 오래된 세션 정리 완료: {}개 삭제됨", oldSessions.size());
     }
 
-    /**
-     * 앞으로 5분 이내에 시작되는 경매가 있는지 확인하고 세션 자동 생성 (스케줄러)
-     */
+    /* 오래된 세션 자동 정리 (매일 새벽 2시 실행)*/
+    @org.springframework.scheduling.annotation.Scheduled(cron = "0 0 2 * * *")
+    @Transactional
+    public void autoCleanupOldSessions() {
+        log.info("🔄 === 오래된 세션 자동 정리 시작 ===");
+        try {
+            cleanupOldSessions();
+            log.info("✅ === 오래된 세션 자동 정리 완료 ===");
+        } catch (Exception e) {
+            log.error("❌ 오래된 세션 자동 정리 중 오류 발생", e);
+        }
+    }
+
+    /* 앞으로 5분 이내에 시작되는 경매가 있는지 확인하고 세션 자동 생성 (스케줄러)*/
     @org.springframework.scheduling.annotation.Scheduled(cron = "0 * * * * *") // 1분마다 실행
     @Transactional
     public void createSessionsForScheduledAuctions() {
         try {
             LocalDateTime now = LocalDateTime.now();
             LocalDateTime fiveMinutesFromNow = now.plusMinutes(5);
-            
+
             log.info("🔄 === 경매 세션 스케줄러 실행 시작: {} ===", now);
-            
+
             // 1단계: 세션 생성
             createSessionsForUpcomingAuctions(now, fiveMinutesFromNow);
-            
+
             // 2단계: 경매 시작
             startScheduledAuctions(now);
-            
+
             // 3단계: 경매 종료
             endExpiredAuctions(now);
-            
+
             log.info("✅ === 경매 세션 스케줄러 실행 완료 ===");
-            
+
         } catch (Exception e) {
             log.error("❌ 경매 세션 스케줄러 실행 중 예상치 못한 오류 발생", e);
         }
     }
 
-    /**
-     * 1단계: 세션이 없는 SCHEDULED 상태의 경매들의 세션 생성
-     */
+    /* 1단계: 세션이 없는 SCHEDULED 상태의 경매들의 세션 생성*/
     @Transactional
     protected void createSessionsForUpcomingAuctions(LocalDateTime now, LocalDateTime fiveMinutesFromNow) {
         try {
             // 1. 앞으로 5분 이내에 시작할 경매들
             List<AuctionItem> upcomingItems = auctionItemRepository
                 .findByStartTimeBetweenAndAuctionStatus(now, fiveMinutesFromNow, AuctionStatus.SCHEDULED);
-            
+
             // 2. 시작 시간이 지났지만 아직 세션이 없는 경매들
             List<AuctionItem> overdueItems = auctionItemRepository
                 .findByStartTimeBeforeAndAuctionStatus(now, AuctionStatus.SCHEDULED);
-            
+
             // 세션이 없는 것들만 필터링
             List<AuctionItem> itemsToCreateSession = new ArrayList<>();
-            
+
             // upcomingItems에서 세션이 없는 것들 추가
             for (AuctionItem item : upcomingItems) {
                 if (!auctionSessionRepository.existsByAuctionItemId(item.getId())) {
                     itemsToCreateSession.add(item);
                 }
             }
-            
+
             // overdueItems에서 세션이 없는 것들 추가
             for (AuctionItem item : overdueItems) {
                 if (!auctionSessionRepository.existsByAuctionItemId(item.getId())) {
                     itemsToCreateSession.add(item);
                 }
             }
-            
-            log.info("📋 세션 생성할 경매: {}개 (5분 이내: {}개, 지난 경매: {}개)", 
+
+            log.info("📋 세션 생성할 경매: {}개 (5분 이내: {}개, 지난 경매: {}개)",
                 itemsToCreateSession.size(), upcomingItems.size(), overdueItems.size());
-            
+
             for (AuctionItem item : itemsToCreateSession) {
                 try {
                     // 시작 시간이 지난 경매는 즉시 ACTIVE로 생성
@@ -328,7 +311,7 @@ public class AuctionSessionService {
                         item.setAuctionStatus(AuctionStatus.ACTIVE);
                         auctionItemRepository.save(item);
                     }
-                    log.info("✅ 세션 생성 완료: auctionItemId={}, startTime={}, forceActive={}", 
+                    log.info("✅ 세션 생성 완료: auctionItemId={}, startTime={}, forceActive={}",
                         item.getId(), item.getStartTime(), forceActive);
                 } catch (Exception e) {
                     log.error("세션 생성 중 오류 발생: auctionItemId={}", item.getId(), e);
@@ -339,27 +322,25 @@ public class AuctionSessionService {
         }
     }
 
-    /**
-     * 2단계: 시작 시간이 된 WAITING 세션들을 ACTIVE로 변경
-     */
+    /* 2단계: 시작 시간이 된 WAITING 세션들을 ACTIVE로 변경*/
     @Transactional
     protected void startScheduledAuctions(LocalDateTime now) {
         try {
             List<AuctionSession> sessionsToStart = auctionSessionRepository
                 .findSessionsToStart(AuctionSessionStatus.WAITING, now);
-            
+
             log.info("🚀 시작할 세션: {}개", sessionsToStart.size());
-            
+
             for (AuctionSession session : sessionsToStart) {
                 try {
                     session.setStatus(AuctionSessionStatus.ACTIVE);
                     auctionSessionRepository.save(session);
-                    
+
                     // 경매 상품 상태도 ACTIVE로 변경
                     AuctionItem item = session.getAuctionItem();
                     item.setAuctionStatus(AuctionStatus.ACTIVE);
                     auctionItemRepository.save(item);
-                    
+
                     log.info("✅ 경매 시작: sessionId={}, auctionItemId={}", session.getId(), item.getId());
                 } catch (Exception e) {
                     log.error("경매 시작 처리 중 오류 발생: sessionId={}", session.getId(), e);
@@ -370,38 +351,36 @@ public class AuctionSessionService {
         }
     }
 
-    /**
-     * 3단계: 종료 시간이 된 ACTIVE 세션들을 ENDED로 변경
-     */
+    /* 3단계: 종료 시간이 된 ACTIVE 세션들을 ENDED로 변경*/
     @Transactional
     protected void endExpiredAuctions(LocalDateTime now) {
         try {
             List<AuctionSession> sessionsToEnd = auctionSessionRepository
                 .findSessionsToEnd(AuctionSessionStatus.ACTIVE, now);
-            
+
             log.info("⏰ 종료할 세션: {}개", sessionsToEnd.size());
-            
+
             for (AuctionSession session : sessionsToEnd) {
                 try {
                     session.setStatus(AuctionSessionStatus.ENDED);
                     auctionSessionRepository.save(session);
-                    
+
                     // 경매 상품 상태도 ENDED로 변경
                     AuctionItem item = session.getAuctionItem();
                     item.setAuctionStatus(AuctionStatus.ENDED);
                     auctionItemRepository.save(item);
-                    
+
                     log.info("✅ 경매 종료: sessionId={}, auctionItemId={}", session.getId(), item.getId());
 
                     // 경매 낙찰 처리 (마일리지 차감, 낙찰자 확정)
                     auctionBidService.processAuctionEnd(item.getId());
-                    
+
                     // WebSocket으로 경매 종료 메시지 전송
                     try {
                         String sessionKey = getSessionKey(item.getId());
                         messagingTemplate.convertAndSend("/topic/auction/" + sessionKey,
                                 createEndNotification(item.getId()));
-                        
+
                         // 낙찰자에게 개별 알림
                         Optional<Member> winnerOpt = auctionBidService.getCurrentHighestBidder(item);
                         if (winnerOpt.isPresent()) {
@@ -420,9 +399,7 @@ public class AuctionSessionService {
         }
     }
 
-    /**
-     * 경매 종료 알림 생성
-     */
+    /* 경매 종료 알림 생성*/
     private Object createEndNotification(Long auctionItemId) {
         Map<String, Object> notification = new HashMap<>();
         notification.put("type", "AUCTION_END");
@@ -432,9 +409,7 @@ public class AuctionSessionService {
         return notification;
     }
 
-    /**
-     * 낙찰자 알림 생성
-     */
+    /* 낙찰자 알림 생성*/
     private Object createWinnerNotification(Long auctionItemId, Member winner) {
         Map<String, Object> notification = new HashMap<>();
         notification.put("type", "AUCTION_WIN");

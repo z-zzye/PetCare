@@ -86,4 +86,14 @@ public interface AuctionParticipantRepository extends JpaRepository<AuctionParti
 
     // 마지막 활동 시간이 오래된 참여자들 삭제 (정리용)
     void deleteByLastActivityBefore(LocalDateTime time);
+    
+    // 활성 상태이지만 마지막 활동 시간이 오래된 참여자들 조회 (자동 비활성화용)
+    List<AuctionParticipant> findByIsActiveTrueAndLastActivityBefore(LocalDateTime time);
+    
+    // 특정 시간 이전에 마지막 활동한 활성 참여자들 조회
+    @Query("SELECT p FROM AuctionParticipant p WHERE p.isActive = true AND p.lastActivity < :cutoffTime")
+    List<AuctionParticipant> findActiveParticipantsWithOldActivity(@Param("cutoffTime") LocalDateTime cutoffTime);
+    
+    // 모든 비활성 참여자들 조회 (정리용)
+    List<AuctionParticipant> findByIsActiveFalse();
 }

@@ -36,13 +36,11 @@ public class AuctionBidService {
     private final AuctionHistoryService auctionHistoryService;
     private final AuctionDeliveryService auctionDeliveryService;
 
-    // @Autowired 제거
 
     private static final int MAX_RETRY_COUNT = 3;
 
     /*
      * 입찰 처리 (동시성 제어 포함)
-     *
      * 5분 경매 특성상 단순한 마일리지 검증:
      * 1. 입찰 시 마일리지 잔액 확인
      * 2. 낙찰 시 실제 마일리지 차감
@@ -61,11 +59,11 @@ public class AuctionBidService {
                 retryCount++;
                 log.warn("동시 입찰 감지 - 재시도 {}: auctionItemId={}, memberId={}, error={}",
                         retryCount, auctionItemId, member.getMemberId(), e.getMessage());
-                
+
                 if (retryCount >= MAX_RETRY_COUNT) {
                     throw new IllegalStateException("동시 입찰이 너무 많습니다. 잠시 후 다시 시도해주세요.");
                 }
-                
+
                 // 잠시 대기 후 재시도
                 try {
                     Thread.sleep(100 * retryCount); // 재시도마다 대기 시간 증가
@@ -75,13 +73,11 @@ public class AuctionBidService {
                 }
             }
         }
-        
+
         throw new IllegalStateException("입찰 처리에 실패했습니다.");
     }
 
-    /*
-     * 실제 입찰 처리 로직
-     */
+    /* 실제 입찰 처리 로직*/
     private AuctionBid processBid(Long auctionItemId, Member member, Integer bidAmount) {
         // 경매 상품 조회 (버전 정보 포함)
         Optional<AuctionItem> auctionItemOpt = auctionItemRepository.findById(auctionItemId);
@@ -133,60 +129,44 @@ public class AuctionBidService {
         return savedBid;
     }
 
-    /*
-     * 입찰 처리 후 DTO 반환 (트랜잭션 안에서 LAZY 필드 접근)
-     */
+    /* 입찰 처리 후 DTO 반환 (트랜잭션 안에서 LAZY 필드 접근)*/
     @Transactional
     public AuctionBidDto placeBidAndReturnDto(Long auctionItemId, Member member, Integer bidAmount) {
         AuctionBid bid = placeBid(auctionItemId, member, bidAmount);
         return convertToDto(bid);
     }
 
-    /*
-     * 현재 최고 입찰가 조회
-     */
+    /* 현재 최고 입찰가 조회*/
     public Optional<Integer> getCurrentHighestBid(AuctionItem auctionItem) {
         return auctionBidRepository.findMaxBidAmountByAuctionItem(auctionItem);
     }
 
-    /*
-     * 현재 최고 입찰자 조회
-     */
+    /* 현재 최고 입찰자 조회*/
     public Optional<Member> getCurrentHighestBidder(AuctionItem auctionItem) {
         return auctionBidRepository.findCurrentWinnerByAuctionItem(auctionItem);
     }
 
-    /*
-     * 특정 경매의 모든 입찰 내역 조회
-     */
+    /* 특정 경매의 모든 입찰 내역 조회*/
     public List<AuctionBid> getBidHistory(AuctionItem auctionItem) {
         return auctionBidRepository.findByAuctionItemOrderByBidTimeDesc(auctionItem);
     }
 
-    /*
-     * 특정 사용자의 입찰 내역 조회
-     */
+    /* 특정 사용자의 입찰 내역 조회*/
     public List<AuctionBid> getUserBidHistory(AuctionItem auctionItem, Member member) {
         return auctionBidRepository.findByAuctionItemAndMemberOrderByBidTimeDesc(auctionItem, member);
     }
 
-    /*
-     * 특정 경매의 입찰 횟수 조회
-     */
+    /* 특정 경매의 입찰 횟수 조회*/
     public long getBidCount(AuctionItem auctionItem) {
         return auctionBidRepository.countByAuctionItem(auctionItem);
     }
 
-    /*
-     * 특정 사용자의 입찰 횟수 조회
-     */
+    /* 특정 사용자의 입찰 횟수 조회*/
     public long getUserBidCount(AuctionItem auctionItem, Member member) {
-        return auctionBidRepository.countByAuctionItem(auctionItem);
+        return auctionBidRepository.countByAuctionItemAndMember(auctionItem, member);
     }
 
-    /*
-     * 입찰가 유효성 검사
-     */
+    /* 입찰가 유효성 검사*/
     private void validateBidAmount(AuctionItem auctionItem, Integer bidAmount) {
         // 최소 입찰가 확인 (시작가 + 입찰 단위)
         Integer minBidAmount = auctionItem.getStartPrice() + (auctionItem.getBidUnit() != null ? auctionItem.getBidUnit() : 100);
@@ -329,7 +309,7 @@ public class AuctionBidService {
             // 최종 낙찰가 (경매의 최고 입찰가)
             Integer finalPrice = winningBidAmount;
             AuctionHistory history = auctionHistoryService.createHistory(auctionItem, member, finalPrice, isWinner, isWinner ? com.petory.constant.AuctionWinStatus.WIN : null);
-            
+
             // 낙찰자인 경우 AuctionDelivery 생성
             if (isWinner && history != null) {
                 auctionDeliveryService.createDelivery(history, LocalDateTime.now().plusDays(5));
