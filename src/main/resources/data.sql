@@ -1,6 +1,23 @@
 -- 자동 생성된 더미 데이터
 -- 기존 데이터가 없을 때만 삽입하도록 조건부 삽입
 
+-- 자동예약 테스트를 위한 테스트 데이터 추가
+-- 테스트 회원 (비밀번호: 1234)
+INSERT INTO member (member_email, member_pw, member_name, member_phone, member_address, member_role, member_join_date, member_update_date) 
+VALUES ('test@test.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDa', '테스트회원', '010-1234-5678', '서울시 강남구', 'USER', NOW(), NOW())
+ON DUPLICATE KEY UPDATE member_email = member_email;
+
+-- 테스트 펫 (생후 8주 강아지)
+INSERT INTO pet (member_id, pet_name, pet_gender, pet_birth, is_neutered, pet_category, auto_vax_status, pet_profile_img) 
+VALUES ((SELECT member_id FROM member WHERE member_email = 'test@test.com'), '멍멍이', 'MALE', DATE_SUB(CURDATE(), INTERVAL 8 WEEK), 'NO', 'DOG', 'UNKNOWN', '/images/pet-dog.png')
+ON DUPLICATE KEY UPDATE pet_name = pet_name;
+
+-- 테스트 펫 (생후 12주 고양이)
+INSERT INTO pet (member_id, pet_name, pet_gender, pet_birth, is_neutered, pet_category, auto_vax_status, pet_profile_img) 
+VALUES ((SELECT member_id FROM member WHERE member_email = 'test@test.com'), '냥냥이', 'FEMALE', DATE_SUB(CURDATE(), INTERVAL 12 WEEK), 'NO', 'CAT', 'UNKNOWN', '/images/pet-cat.png')
+ON DUPLICATE KEY UPDATE pet_name = pet_name;
+
+-- 기존 쇼핑 데이터
 INSERT INTO item_category (parent_option, option_value) VALUES (NULL, '강아지');
 INSERT INTO item_category (parent_option, option_value) VALUES (1, '사료');
 INSERT INTO item_category (parent_option, option_value) VALUES (1, '간식');

@@ -3,8 +3,6 @@ package com.petory.controller;
 import java.util.List;
 import java.util.Map;
 
-import com.petory.dto.member.MemberSearchDto;
-import com.petory.service.MemberService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,9 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.petory.constant.BoardKind;
 import com.petory.dto.board.BoardListDto;
 import com.petory.dto.board.BoardUpdateDto;
+import com.petory.dto.member.MemberSearchDto;
 import com.petory.entity.Board;
 import com.petory.service.BoardService;
 import com.petory.service.CleanBotService;
+import com.petory.service.MemberService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -33,6 +33,7 @@ public class AdminController {
     private final CleanBotService cleanBotService;
     private final BoardService boardService;
     private final MemberService memberService;
+
     /**
      * 금지어 목록을 조회하는 API
      */
@@ -116,14 +117,13 @@ public class AdminController {
         }
     }
 
-  @GetMapping("/users")
-  public ResponseEntity<List<MemberSearchDto>> getUsersByRole(@RequestParam("role") String role) {
-    // memberService를 사용하여 회원 정보를 조회합니다.
-    com.petory.constant.Role roleEnum = com.petory.constant.Role.valueOf(role.toUpperCase());
+    @GetMapping("/users")
+    public ResponseEntity<List<MemberSearchDto>> getUsersByRole(@RequestParam("role") String role) {
+        // memberService를 사용하여 회원 정보를 조회합니다.
+        com.petory.constant.Role roleEnum = com.petory.constant.Role.valueOf(role.toUpperCase());
 
-    // 변환된 Enum을 서비스로 전달
-    List<MemberSearchDto> users = memberService.findMembersByRole(roleEnum);
-    return ResponseEntity.ok(users);
-  }
-
+        // 변환된 Enum을 서비스로 전달
+        List<MemberSearchDto> users = memberService.findMembersByRole(roleEnum);
+        return ResponseEntity.ok(users);
+    }
 }

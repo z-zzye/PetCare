@@ -200,6 +200,80 @@
   padding-top: 1rem;
 }
 
+/* 대안 날짜 옵션 스타일 */
+.alternative-dates-section {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.alternative-dates-title {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  color: #333;
+  font-weight: 600;
+}
+
+.alternative-dates-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.alternative-date-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem;
+  background-color: white;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.alternative-date-option:hover {
+  border-color: #ffcc00;
+  box-shadow: 0 2px 4px rgba(255, 204, 0, 0.1);
+}
+
+.alternative-date-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  flex: 1;
+}
+
+.alternative-date {
+  font-weight: 600;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.alternative-date-info {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.view-alternative-button {
+  padding: 0.5rem 1rem;
+  background-color: #ffcc00;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.view-alternative-button:hover {
+  background-color: #e6b800;
+  transform: translateY(-1px);
+}
+
 /* AutoVaxForm.css 파일 하단에 추가 또는 수정 */
 
 /* 기존 slot-list 스타일은 카드 레이아웃을 위해 수정 */

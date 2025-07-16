@@ -1,0 +1,209 @@
+.autovax-admin-page {
+  padding: 20px;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.autovax-admin-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+}
+
+.autovax-admin-title {
+  text-align: center;
+  color: #333;
+  margin-bottom: 30px;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.filter-section {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+}
+
+.filter-section label {
+  font-weight: bold;
+  color: #555;
+}
+
+.filter-section select {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  font-size: 14px;
+}
+
+.refresh-btn {
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.refresh-btn:hover {
+  background-color: #0056b3;
+}
+
+.reservations-table {
+  overflow-x: auto;
+}
+
+.reservations-table table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  border-radius: 5px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.reservations-table th,
+.reservations-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.reservations-table th {
+  background-color: #f8f9fa;
+  font-weight: bold;
+  color: #333;
+  font-size: 14px;
+}
+
+.reservations-table td {
+  font-size: 14px;
+  color: #555;
+}
+
+.reservations-table tr:hover {
+  background-color: #f8f9fa;
+}
+
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.status-pending {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.status-confirmed {
+  background-color: #cce5ff;
+  color: #004085;
+}
+
+.status-completed {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-cancelled {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-complete,
+.btn-cancel {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.btn-complete {
+  background-color: #28a745;
+  color: white;
+}
+
+.btn-complete:hover {
+  background-color: #218838;
+}
+
+.btn-cancel {
+  background-color: #dc3545;
+  color: white;
+}
+
+.btn-cancel:hover {
+  background-color: #c82333;
+}
+
+.status-completed-text {
+  color: #155724;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.status-cancelled-text {
+  color: #721c24;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.no-action {
+  color: #6c757d;
+  font-style: italic;
+  font-size: 12px;
+}
+
+.no-data {
+  text-align: center;
+  color: #6c757d;
+  font-style: italic;
+  padding: 40px;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .autovax-admin-container {
+    padding: 15px;
+  }
+
+  .filter-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .reservations-table {
+    font-size: 12px;
+  }
+
+  .reservations-table th,
+  .reservations-table td {
+    padding: 8px 10px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    gap: 4px;
+  }
+}

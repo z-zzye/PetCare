@@ -1,17 +1,20 @@
 package com.petory.controller;
 
-import com.petory.dto.autoReservation.PaymentMethodResponseDto;
-import com.petory.service.PaymentService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
+import com.petory.dto.autoReservation.PaymentMethodResponseDto;
+import com.petory.service.PaymentService;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/api/payments/mock") // 경로를 /mock으로 변경하여 명확히 함
@@ -53,6 +56,20 @@ public class PaymentController {
 
     } catch (Exception e) {
       log.error("결제 수단 조회 중 오류 발생", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body(Map.of("error", e.getMessage()));
+    }
+  }
+
+  @DeleteMapping("/my-method")
+  public ResponseEntity<?> deleteMyPaymentMethod() {
+    try {
+      log.info("결제 수단 삭제 API 호출");
+      paymentService.deleteMyPaymentMethod();
+      return ResponseEntity.ok(Map.of("message", "결제 수단이 성공적으로 삭제되었습니다."));
+
+    } catch (Exception e) {
+      log.error("결제 수단 삭제 중 오류 발생", e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
         .body(Map.of("error", e.getMessage()));
     }

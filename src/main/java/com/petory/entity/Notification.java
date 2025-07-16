@@ -1,80 +1,70 @@
 package com.petory.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
+import java.time.LocalDateTime;
+
+import com.petory.constant.NotificationType;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
+@Table(name = "notification")
 @Getter
 @Setter
-@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "notification")
-public class Notification extends BaseEntity {
-    
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "notification_id")
-    private Long notificationId;
-    
-    @Column(name = "member_id", nullable = false)
-    private Long memberId;
-    
-    @Enumerated(EnumType.STRING)
-    @Column(name = "notification_type", nullable = false)
-    private NotificationType notificationType;
-    
-    @Column(name = "title", nullable = false, length = 100)
-    private String title;
-    
-    @Column(name = "message", nullable = false, length = 500)
-    private String message;
-    
-    @Column(name = "auction_item_id")
-    private Long auctionItemId;
-    
-    @Column(name = "is_read", nullable = false)
-    private boolean isRead = false;
-    
-    @Column(name = "is_deleted", nullable = false)
-    private boolean isDeleted = false;
-    
-    // 알림 타입 enum
-    public enum NotificationType {
-        AUCTION_END,    // 경매 종료
-        AUCTION_WIN,    // 낙찰 성공
-        NEW_BID,        // 새로운 입찰 (다른 사용자)
-        BID_SUCCESS,    // 입찰 성공 (본인)
-        BID_FAILED      // 입찰 실패
-    }
-    
-    // 알림 생성 메서드
-    public static Notification createNotification(
-            Long memberId, 
-            NotificationType type, 
-            String title, 
-            String message, 
-            Long auctionItemId) {
-        
-        return Notification.builder()
-                .memberId(memberId)
-                .notificationType(type)
-                .title(title)
-                .message(message)
-                .auctionItemId(auctionItemId)
-                .isRead(false)
-                .isDeleted(false)
-                .build();
-    }
-    
-    // 읽음 처리 메서드
-    public void markAsRead() {
-        this.isRead = true;
-    }
-    
-    // 삭제 처리 메서드
-    public void markAsDeleted() {
-        this.isDeleted = true;
-    }
-} 
+public class Notification extends BaseTimeEntity {
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  // 수신자 (필수)
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "member_id", nullable = false)
+  private Member member;
+
+  // 알림 타입 (필수)
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private NotificationType notificationType;
+
+  // 알림 제목 (필수)
+  @Column(nullable = false, length = 200)
+  private String title;
+
+  // 알림 내용 (필수)
+  @Column(nullable = false, columnDefinition = "TEXT")
+  private String message;
+
+  // 읽음 여부 (기본값: false)
+  @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+  private Boolean isRead = false;
+
+  // 읽은 시간
+  @Column
+  private LocalDateTime readAt;
+
+  // 관련 예약 ID (예약 관련 알림인 경우)
+  @Column
+  private Long reservationId;
+
+  // 관련 펫 ID (펫 관련 알림인 경우)
+  @Column
+  private Long petId;
+}

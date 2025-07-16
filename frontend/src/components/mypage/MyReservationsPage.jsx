@@ -1,144 +1,263 @@
-import React, { useState, useEffect } from 'react';
-import axios from '../../api/axios'; // 기존 axios 인스턴스 사용
-import Swal from 'sweetalert2';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from '../../api/axios';
 import './MyReservationsPage.css';
 
-
 const MyReservationsPage = () => {
-    const [reservations, setReservations] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [hasNext, setHasNext] = useState(false);
+  const [hasPrevious, setHasPrevious] = useState(false);
+  const navigate = useNavigate();
 
-    const fetchReservations = () => {
-        setLoading(true);
-        axios.get('/reservations/my-list')
-            .then(response => {
-                setReservations(response.data);
-            })
-            .catch(err => {
-                console.error("예약 목록 조회 실패:", err);
-                setError('예약 목록을 불러오는 데 실패했습니다.');
-            })
-            .finally(() => {
-                setLoading(false);
-            });
-    };
+  // 알림 타입별 아이콘과 색상
+  const getNotificationIcon = (type) => {
+    switch (type) {
+      case 'AUTOVAXCANCEL':
+        return {
+          icon: '❌',
+          color: '#ff4757',
+          label: '예약 취소',
+        };
+      case 'AUTOCVAXOMPLETE':
+        return {
+          icon: '✅',
+          color: '#2ed573',
+          label: '접종 완료',
+        };
+      case 'CLEANBOTDETECTED':
+        return {
+          icon: '⚠️',
+          color: '#ffa502',
+          label: '부적절한 내용',
+        };
+      default:
+        return {
+          icon: '🔔',
+          color: '#007bff',
+          label: '알림',
+        };
+    }
+  };
 
-    useEffect(() => {
-        fetchReservations();
-    }, []); // 컴포넌트가 처음 렌더링될 때 한 번만 실행
+  // 시간 포맷팅
+  const formatTime = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInMinutes = Math.floor((now - date) / (1000 * 60));
 
-    // ✅ [신규] '접종 완료' 버튼 클릭 시 실행될 핸들러 함수
-    const handleComplete = async (reservationId) => {
-        // 사용자에게 재확인 받기
-        const result = await Swal.fire({
-            title: '접종 완료 처리',
-            text: "정말로 접종 완료 처리를 하시겠습니까? 다음 예약이 자동으로 생성됩니다.",
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: '네, 완료했습니다',
-            cancelButtonText: '아니요'
-        });
+    if (diffInMinutes < 1) return '방금 전';
+    if (diffInMinutes < 60) return `${diffInMinutes}분 전`;
 
-        if (result.isConfirmed) {
-            try {
-                // 백엔드의 '접종 완료' API 호출
-                const response = await axios.post(`/reservations/${reservationId}/complete`);
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return `${diffInHours}시간 전`;
 
-                await Swal.fire('처리 완료', response.data.message, 'success');
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 7) return `${diffInDays}일 전`;
 
-                // ✅ [중요] 목록을 새로고침하여 변경사항(기존 예약 완료, 새 예약 생성)을 반영
-                fetchReservations();
+    return date.toLocaleDateString('ko-KR');
+  };
 
-            } catch (err) {
-                console.error("접종 완료 처리 실패:", err);
-                const errorMessage = err.response?.data?.error || '알 수 없는 오류가 발생했습니다.';
-                Swal.fire('오류', errorMessage, 'error');
-            }
-        }
-    };
+  // 알림 목록 조회
+  const fetchNotifications = async (page = 0) => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`/notifications?page=${page}&size=20`);
+      setNotifications(response.data.content || []);
+      setTotalPages(response.data.totalPages || 0);
+      setHasNext(response.data.hasNext || false);
+      setHasPrevious(response.data.hasPrevious || false);
+      setCurrentPage(page);
+    } catch (error) {
+      console.error('알림 목록 조회 실패:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      // '예약 취소' 버튼 클릭 시 실행될 핸들러 함수
-      const handleCancel = async (reservationId) => {
-          const result = await Swal.fire({
-              title: '예약 취소 확인',
-              text: "정말로 예약을 취소하시겠습니까?",
-              icon: 'warning',
-              showCancelButton: true,
-              confirmButtonColor: '#d33',
-              confirmButtonText: '네, 취소할래요',
-              cancelButtonText: '아니요'
+  // 특정 알림 삭제
+  const deleteNotification = async (notificationId, event) => {
+    event.stopPropagation(); // 이벤트 버블링 방지
+    try {
+      await axios.delete(`/notifications/${notificationId}`);
+      // 현재 페이지 다시 로드
+      fetchNotifications(currentPage);
+    } catch (error) {
+      console.error('알림 삭제 실패:', error);
+    }
+  };
+
+  // 모든 알림 삭제
+  const deleteAllNotifications = async () => {
+    try {
+      await axios.delete('/notifications');
+      // 현재 페이지 다시 로드
+      fetchNotifications(currentPage);
+    } catch (error) {
+      console.error('모든 알림 삭제 실패:', error);
+    }
+  };
+
+  // 알림 클릭 시 해당 페이지로 이동
+  const handleNotificationClick = async (notification) => {
+    // 알림 타입에 따라 페이지 이동
+    switch (notification.notificationType) {
+      case 'CLEANBOTDETECTED':
+        // 게시물/댓글 관련 알림인 경우 - 게시판으로 이동
+        navigate('/board');
+        break;
+      case 'AUTOVAXCANCEL':
+      case 'AUTOCVAXOMPLETE':
+        // 접종 관련 알림인 경우 - 마이페이지 건강수첩으로 이동
+        if (notification.petId) {
+          navigate('/members/mypage', {
+            state: {
+              activeTab: 'health',
+              selectedPetId: notification.petId,
+            },
           });
+        } else {
+          navigate('/members/mypage', { state: { activeTab: 'health' } });
+        }
+        break;
+      default:
+        // 기본적으로 마이페이지로 이동
+        navigate('/members/mypage');
+    }
+  };
 
-          if (result.isConfirmed) {
-              try {
-                  // 백엔드의 '사용자 예약 취소' API 호출 (DELETE 메서드)
-                  await axios.delete(`/reservations/${reservationId}`);
+  // 페이지 변경
+  const handlePageChange = (newPage) => {
+    if (newPage >= 0 && newPage < totalPages) {
+      fetchNotifications(newPage);
+    }
+  };
 
-                  await Swal.fire('취소 완료', '예약이 정상적으로 취소되었습니다.', 'success');
+  // 컴포넌트 마운트 시 알림 목록 조회
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
 
-                  // 목록을 새로고침하여 취소된 상태를 반영
-                  fetchReservations();
-
-              } catch (err) {
-                  console.error("예약 취소 처리 실패:", err);
-                  const errorMessage = err.response?.data?.error || '알 수 없는 오류가 발생했습니다.';
-                  Swal.fire('오류', errorMessage, 'error');
-              }
-          }
-      };
-
-
-    if (loading) return <div>로딩 중...</div>;
-    if (error) return <div>{error}</div>;
-
+  if (loading) {
     return (
-        <div className="my-reservations-container">
-            <h2>나의 예약 현황</h2>
-            {reservations.length === 0 ? (
-                <p>예약 내역이 없습니다.</p>
-            ) : (
-                <div className="reservation-list">
-                    {reservations.map(res => (
-                        <div key={res.reservationId} className="reservation-card">
-                            <div className="card-header">
-                                <h3>{res.hospitalName}</h3>
-                                <span className={`status-badge status-${res.reservationStatus.toLowerCase()}`}>
-                                    {res.reservationStatus}
-                                </span>
-                            </div>
-                            <div className="card-body">
-                                <p><strong>펫 이름:</strong> {res.petName}</p>
-                                <p><strong>예약 일시:</strong> {new Date(res.reservationDateTime).toLocaleString()}</p>
-                                <p><strong>접종 항목:</strong> {res.vaccineDescription}</p>
-                                <p><strong>총 금액:</strong> {res.totalAmount?.toLocaleString()}원 (예약금: {res.deposit?.toLocaleString()}원)</p>
-                                {res.reservationStatus === 'PENDING' && (
-                                    <p className="payment-due"><strong>결제 기한:</strong> {new Date(res.paymentDueDate).toLocaleString()}</p>
-                                )}
-                            </div>
-                            <div className="card-actions">
-                                {res.reservationStatus === 'PENDING' && <button className="btn-pay">결제하기</button>}
-                                {res.reservationStatus === 'CONFIRMED' &&
-                                    <button
-                                        className="btn-complete"
-                                        onClick={() => handleComplete(res.reservationId)}>
-                                        접종 완료
-                                    </button>
-                                }
-                                {(res.reservationStatus === 'PENDING' || res.reservationStatus === 'CONFIRMED') &&
-                                    <button
-                                        className="btn-cancel"
-                                        onClick={() => handleCancel(res.reservationId)}>
-                                        예약 취소
-                                    </button>
-                                }
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            )}
+      <div className="reservations-page">
+        <div className="reservations-container">
+          <div className="reservations-header">
+            <h1>알림 목록</h1>
+          </div>
+          <div className="loading-container">
+            <p>로딩 중...</p>
+          </div>
         </div>
+      </div>
     );
+  }
+
+  return (
+    <div className="reservations-page">
+      <div className="reservations-container">
+        <div className="reservations-header">
+          <h1>알림 목록</h1>
+          {notifications.length > 0 && (
+            <button
+              className="mark-all-read-btn"
+              onClick={deleteAllNotifications}
+            >
+              모두 삭제
+            </button>
+          )}
+        </div>
+
+        <div className="notifications-list">
+          {notifications.length > 0 ? (
+            notifications.map((notification) => {
+              const notificationInfo = getNotificationIcon(
+                notification.notificationType
+              );
+              return (
+                <div
+                  key={notification.id}
+                  className={`notification-card ${
+                    !notification.isRead ? 'unread' : ''
+                  }`}
+                  onClick={() => handleNotificationClick(notification)}
+                >
+                  <div className="notification-header">
+                    <div className="notification-type">
+                      <span
+                        className="notification-icon"
+                        style={{ color: notificationInfo.color }}
+                      >
+                        {notificationInfo.icon}
+                      </span>
+                      <span className="notification-label">
+                        {notificationInfo.label}
+                      </span>
+                    </div>
+                    <div className="notification-actions">
+                      <div className="notification-time">
+                        {formatTime(notification.createdAt)}
+                      </div>
+                      <button
+                        className="notification-delete-btn"
+                        onClick={(e) => deleteNotification(notification.id, e)}
+                        title="삭제"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  </div>
+                  <div className="notification-content">
+                    <h3 className="notification-title">{notification.title}</h3>
+                    <p className="notification-message">
+                      {notification.message}
+                    </p>
+                  </div>
+                  {!notification.isRead && (
+                    <div className="unread-indicator">
+                      <span className="unread-dot"></span>
+                      <span>읽지 않음</span>
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          ) : (
+            <div className="empty-notifications">
+              <div className="empty-icon">🔔</div>
+              <h3>알림이 없습니다</h3>
+              <p>새로운 알림이 도착하면 여기에 표시됩니다.</p>
+            </div>
+          )}
+        </div>
+
+        {/* 페이지네이션 */}
+        {totalPages > 1 && (
+          <div className="pagination">
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={!hasPrevious}
+              className="pagination-btn"
+            >
+              이전
+            </button>
+            <span className="pagination-info">
+              {currentPage + 1} / {totalPages}
+            </span>
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={!hasNext}
+              className="pagination-btn"
+            >
+              다음
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default MyReservationsPage;

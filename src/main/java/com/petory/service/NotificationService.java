@@ -1,114 +1,173 @@
 package com.petory.service;
 
-import com.petory.dto.NotificationDto;
-import com.petory.entity.Notification;
-import com.petory.repository.NotificationRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.petory.constant.NotificationType;
+import com.petory.dto.NotificationDto;
+import com.petory.entity.Member;
+import com.petory.entity.Notification;
+import com.petory.repository.MemberRepository;
+import com.petory.repository.NotificationRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 @Service
-@RequiredArgsConstructor
 @Transactional
+@RequiredArgsConstructor
+@Slf4j
 public class NotificationService {
-    
-    private final NotificationRepository notificationRepository;
-    
-    // 알림 생성
-    public Notification createNotification(Long memberId, Notification.NotificationType type, 
-                                        String title, String message, Long auctionItemId) {
-        Notification notification = Notification.createNotification(memberId, type, title, message, auctionItemId);
-        return notificationRepository.save(notification);
+
+  private final NotificationRepository notificationRepository;
+  private final MemberRepository memberRepository;
+
+  /**
+   * 알림 생성
+   */
+  public Notification createNotification(Member member, NotificationType type, String title, String message, Long reservationId, Long petId) {
+    Notification notification = Notification.builder()
+      .member(member)
+      .notificationType(type)
+      .title(title)
+      .message(message)
+      .isRead(false)
+      .reservationId(reservationId)
+      .petId(petId)
+      .build();
+
+    return notificationRepository.save(notification);
+  }
+
+  /**
+   * 회원의 알림 목록 조회 (페이징)
+   */
+  @Transactional(readOnly = true)
+  public Page<NotificationDto> getNotifications(String userEmail, Pageable pageable) {
+    Member member = memberRepository.findByMember_Email(userEmail)
+      .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+    Page<Notification> notifications = notificationRepository.findByMemberOrderByRegDateDesc(member, pageable);
+    return notifications.map(NotificationDto::new);
+  }
+
+  /**
+   * 읽지 않은 알림 개수 조회
+   */
+  @Transactional(readOnly = true)
+  public long getUnreadCount(String userEmail) {
+    Member member = memberRepository.findByMember_Email(userEmail)
+      .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+    return notificationRepository.countByMemberAndIsReadFalse(member);
+  }
+
+  /**
+   * 읽지 않은 알림 목록 조회
+   */
+  @Transactional(readOnly = true)
+  public List<NotificationDto> getUnreadNotifications(String userEmail) {
+    Member member = memberRepository.findByMember_Email(userEmail)
+      .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+    List<Notification> notifications = notificationRepository.findByMemberAndIsReadFalseOrderByRegDateDesc(member);
+    return notifications.stream()
+      .map(NotificationDto::new)
+      .collect(Collectors.toList());
+  }
+
+  /**
+   * 특정 알림 읽음 처리
+   */
+  public void markAsRead(Long notificationId, String userEmail) {
+    Member member = memberRepository.findByMember_Email(userEmail)
+      .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+    Notification notification = notificationRepository.findById(notificationId)
+      .orElseThrow(() -> new IllegalArgumentException("알림을 찾을 수 없습니다."));
+
+    // 권한 확인
+    if (!notification.getMember().getMember_Id().equals(member.getMember_Id())) {
+      throw new SecurityException("해당 알림에 대한 권한이 없습니다.");
     }
-    
-    // 경매 종료 알림 생성 (모든 참여자에게)
-    public void createAuctionEndNotification(Long auctionItemId, List<Long> participantIds) {
-        for (Long memberId : participantIds) {
-            createNotification(
-                memberId,
-                Notification.NotificationType.AUCTION_END,
-                "🏁 경매 종료",
-                "경매가 종료되었습니다. 결과를 확인해보세요!",
-                auctionItemId
-            );
-        }
+
+    notificationRepository.markAsRead(notificationId, LocalDateTime.now());
+  }
+
+  /**
+   * 모든 알림 읽음 처리
+   */
+  public void markAllAsRead(String userEmail) {
+    Member member = memberRepository.findByMember_Email(userEmail)
+      .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+    notificationRepository.markAllAsRead(member, LocalDateTime.now());
+  }
+
+  /**
+   * 특정 알림 삭제
+   */
+  public void deleteNotification(Long notificationId, String userEmail) {
+    Member member = memberRepository.findByMember_Email(userEmail)
+      .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+    Notification notification = notificationRepository.findById(notificationId)
+      .orElseThrow(() -> new IllegalArgumentException("알림을 찾을 수 없습니다."));
+
+    // 권한 확인
+    if (!notification.getMember().getMember_Id().equals(member.getMember_Id())) {
+      throw new SecurityException("해당 알림에 대한 권한이 없습니다.");
     }
-    
-    // 낙찰 성공 알림 생성
-    public void createAuctionWinNotification(Long winnerId, Long auctionItemId) {
-        createNotification(
-            winnerId,
-            Notification.NotificationType.AUCTION_WIN,
-            "🎉 낙찰 성공!",
-            "축하합니다! 경매에서 낙찰되었습니다!",
-            auctionItemId
-        );
-    }
-    
-    // 새로운 입찰 알림 생성 (다른 사용자들에게)
-    public void createNewBidNotification(Long auctionItemId, List<Long> participantIds, Long bidderId) {
-        for (Long memberId : participantIds) {
-            if (!memberId.equals(bidderId)) { // 입찰자 본인 제외
-                createNotification(
-                    memberId,
-                    Notification.NotificationType.NEW_BID,
-                    "🏆 새로운 입찰 발생!",
-                    "다른 사용자가 입찰했습니다. 확인해보세요!",
-                    auctionItemId
-                );
-            }
-        }
-    }
-    
-    // 사용자의 읽지 않은 알림 조회
-    @Transactional(readOnly = true)
-    public List<NotificationDto> getUnreadNotifications(Long memberId) {
-        List<Notification> notifications = notificationRepository.findUnreadByMemberId(memberId);
-        return notifications.stream()
-                .map(NotificationDto::fromEntity)
-                .collect(Collectors.toList());
-    }
-    
-    // 사용자의 모든 알림 조회
-    @Transactional(readOnly = true)
-    public List<NotificationDto> getAllNotifications(Long memberId) {
-        List<Notification> notifications = notificationRepository.findByMemberId(memberId);
-        return notifications.stream()
-                .map(NotificationDto::fromEntity)
-                .collect(Collectors.toList());
-    }
-    
-    // 읽지 않은 알림 개수 조회
-    @Transactional(readOnly = true)
-    public Long getUnreadCount(Long memberId) {
-        return notificationRepository.countUnreadByMemberId(memberId);
-    }
-    
-    // 알림 읽음 처리
-    public void markAsRead(Long notificationId) {
-        Notification notification = notificationRepository.findById(notificationId)
-                .orElseThrow(() -> new IllegalArgumentException("알림을 찾을 수 없습니다: " + notificationId));
-        notification.markAsRead();
-        notificationRepository.save(notification);
-    }
-    
-    // 알림 삭제 처리
-    public void markAsDeleted(Long notificationId) {
-        Notification notification = notificationRepository.findById(notificationId)
-                .orElseThrow(() -> new IllegalArgumentException("알림을 찾을 수 없습니다: " + notificationId));
-        notification.markAsDeleted();
-        notificationRepository.save(notification);
-    }
-    
-    // 모든 알림 읽음 처리
-    public void markAllAsRead(Long memberId) {
-        List<Notification> unreadNotifications = notificationRepository.findUnreadByMemberId(memberId);
-        for (Notification notification : unreadNotifications) {
-            notification.markAsRead();
-        }
-        notificationRepository.saveAll(unreadNotifications);
-    }
-} 
+
+    notificationRepository.delete(notification);
+  }
+
+  /**
+   * 모든 알림 삭제
+   */
+  public void deleteAllNotifications(String userEmail) {
+    Member member = memberRepository.findByMember_Email(userEmail)
+      .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+    notificationRepository.deleteByMember(member);
+  }
+
+  /**
+   * 자동예약 취소 알림 생성
+   */
+  public void createAutoVaxCancelNotification(Member member, Long reservationId, Long petId, String petName, String hospitalName) {
+    String title = "자동예약이 취소되었습니다";
+    String message = String.format("%s의 %s 예약이 취소되었습니다.", petName, hospitalName);
+
+    createNotification(member, NotificationType.AUTOVAXCANCEL, title, message, reservationId, petId);
+    log.info("자동예약 취소 알림 생성: memberId={}, reservationId={}", member.getMember_Id(), reservationId);
+  }
+
+  /**
+   * 자동예약 완료 알림 생성
+   */
+  public void createAutoVaxCompleteNotification(Member member, Long reservationId, Long petId, String petName, String hospitalName) {
+    String title = "접종이 완료되었습니다";
+    String message = String.format("%s의 접종이 완료되어 다음 예약이 자동으로 생성되었습니다.", petName);
+
+    createNotification(member, NotificationType.AUTOCVAXOMPLETE, title, message, reservationId, petId);
+    log.info("자동예약 완료 알림 생성: memberId={}, reservationId={}", member.getMember_Id(), reservationId);
+  }
+
+  /**
+   * 클린봇 감지 알림 생성
+   */
+  public void createCleanBotDetectedNotification(Member member, String content) {
+    String title = "부적절한 내용이 감지되었습니다";
+    String message = String.format("작성하신 내용에서 부적절한 표현이 감지되어 블라인드 처리되었습니다 : %s", content);
+
+    createNotification(member, NotificationType.CLEANBOTDETECTED, title, message, null, null);
+    log.info("클린봇 감지 알림 생성: memberId={}", member.getMember_Id());
+  }
+}

@@ -42,6 +42,10 @@ const AdminPage = () => {
             <div className="admin-menu-icon">🏷️</div>
             <h3>관심 태그 관리</h3>
             <p>해시태그를 추가하고 삭제합니다</p>
+          <Link to="/admin/autovax" className="admin-menu-item">
+            <div className="admin-menu-icon">💉</div>
+            <h3>자동 예약 관리</h3>
+            <p>자동 예약 현황을 확인하고 접종 완료/취소를 처리합니다</p>
           </Link>
         </div>
       </div>

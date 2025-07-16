@@ -9,9 +9,9 @@ import CalendarPage from './CalendarPage';
 import HealthNotePage from './HealthNotePage';
 import './Mypage.css';
 import MyPostsPage from './MyPostsPage';
-import MyReservationsPage from './MyReservationsPage';
-import Sidebar from './Sidebar'; // 따로 분리한 사이드바 컴포넌트
+
 import axios from '../../api/axios';
+import Sidebar from './Sidebar'; // 따로 분리한 사이드바 컴포넌트
 //import './MainPage.css';         // 스타일 분리 (선택)
 
 Modal.setAppElement('#root');
@@ -83,6 +83,20 @@ const Mypage = () => {
       }
       window.history.replaceState({}, document.title);
     }
+
+    // 알림에서 특정 펫으로 이동하는 경우
+    if (location.state?.activeTab) {
+      setActiveTab(location.state.activeTab);
+
+      // 특정 펫이 선택된 경우 HealthNotePage에 전달
+      if (location.state.selectedPetId) {
+        // HealthNotePage에서 선택된 펫을 처리할 수 있도록 상태 전달
+        // (HealthNotePage에서 location.state를 확인하여 처리)
+      }
+
+      // 상태 초기화
+      window.history.replaceState({}, document.title);
+    }
   }, [location, navigate]);
 
   const [activeTab, setActiveTab] = useState('calendar');
@@ -94,8 +108,6 @@ const Mypage = () => {
         return <HealthNotePage />;
       case 'posts':
         return <MyPostsPage />;
-      case 'reservations':
-        return <MyReservationsPage />;
       default:
         return <div>탭을 선택하세요.</div>;
     }

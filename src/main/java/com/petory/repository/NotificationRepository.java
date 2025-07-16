@@ -1,37 +1,41 @@
 package com.petory.repository;
 
-import com.petory.entity.Notification;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
-
+import java.time.LocalDateTime;
 import java.util.List;
 
-@Repository
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import com.petory.entity.Member;
+import com.petory.entity.Notification;
+
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
-    
-    // 특정 사용자의 읽지 않은 알림 조회 (최신순)
-    @Query("SELECT n FROM Notification n WHERE n.memberId = :memberId AND n.isRead = false AND n.isDeleted = false ORDER BY n.regDate DESC")
-    List<Notification> findUnreadByMemberId(@Param("memberId") Long memberId);
-    
-    // 특정 사용자의 모든 알림 조회 (최신순)
-    @Query("SELECT n FROM Notification n WHERE n.memberId = :memberId AND n.isDeleted = false ORDER BY n.regDate DESC")
-    List<Notification> findByMemberId(@Param("memberId") Long memberId);
-    
-    // 특정 사용자의 읽지 않은 알림 개수 조회
-    @Query("SELECT COUNT(n) FROM Notification n WHERE n.memberId = :memberId AND n.isRead = false AND n.isDeleted = false")
-    Long countUnreadByMemberId(@Param("memberId") Long memberId);
-    
-    // 특정 경매에 참여한 사용자들의 알림 조회
-    @Query("SELECT DISTINCT n.memberId FROM Notification n WHERE n.auctionItemId = :auctionItemId AND n.isDeleted = false")
-    List<Long> findMemberIdsByAuctionItemId(@Param("auctionItemId") Long auctionItemId);
-    
-    // 특정 경매의 특정 타입 알림 조회
-    @Query("SELECT n FROM Notification n WHERE n.auctionItemId = :auctionItemId AND n.notificationType = :type AND n.isDeleted = false")
-    List<Notification> findByAuctionItemIdAndType(@Param("auctionItemId") Long auctionItemId, @Param("type") Notification.NotificationType type);
-    
-    // 특정 사용자의 특정 타입 알림 조회
-    @Query("SELECT n FROM Notification n WHERE n.memberId = :memberId AND n.notificationType = :type AND n.isDeleted = false ORDER BY n.regDate DESC")
-    List<Notification> findByMemberIdAndType(@Param("memberId") Long memberId, @Param("type") Notification.NotificationType type);
+  
+  // 특정 회원의 모든 알림 조회 (최신순)
+  Page<Notification> findByMemberOrderByRegDateDesc(Member member, Pageable pageable);
+  
+  // 특정 회원의 읽지 않은 알림 개수 조회
+  long countByMemberAndIsReadFalse(Member member);
+  
+  // 특정 회원의 읽지 않은 알림 목록 조회
+  List<Notification> findByMemberAndIsReadFalseOrderByRegDateDesc(Member member);
+  
+  // 특정 회원의 모든 알림을 읽음 처리
+  @Modifying
+  @Query("UPDATE Notification n SET n.isRead = true, n.readAt = :readAt WHERE n.member = :member AND n.isRead = false")
+  void markAllAsRead(@Param("member") Member member, @Param("readAt") LocalDateTime readAt);
+  
+  // 특정 알림을 읽음 처리
+  @Modifying
+  @Query("UPDATE Notification n SET n.isRead = true, n.readAt = :readAt WHERE n.id = :notificationId")
+  void markAsRead(@Param("notificationId") Long notificationId, @Param("readAt") LocalDateTime readAt);
+  
+  // 특정 회원의 모든 알림 삭제
+  @Modifying
+  @Query("DELETE FROM Notification n WHERE n.member = :member")
+  void deleteByMember(@Param("member") Member member);
 } 
