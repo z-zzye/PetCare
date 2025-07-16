@@ -11,22 +11,11 @@ import MainPage from './components/MainPage.jsx';
 import FindId from './components/FindId.jsx';
 import FindPw from './components/FindPw.jsx';
 import ResetPw from './components/ResetPw.jsx';
-import ItemRegister from './components/shop/ItemRegister.jsx';
-import ItemDetail from './components/shop/ItemDetail.jsx';
-import WhatsInMyCart from './components/shop/WhatsInMyCart.jsx';
-import ItemModify from './components/shop/ItemModify.jsx';
-import OrderPage from './components/shop/OrderPage.jsx';
-import OrderDetail from './components/shop/OrderDetail.jsx';
-import MyOrders from './components/shop/MyOrders.jsx';
-import ShopAdminPage from './components/admin/ShopAdminPage.jsx';
-import OrderCompletePage from './components/shop/OrderCompletePage.jsx';
 import WalkingTrailListPage from './components/WalkingTrailListPage';
 import WalkingTrailDetailPage from './components/WalkingTrailDetailPage';
 import WalkingTrailCreatePage from './components/WalkingTrailCreatePage';
 import MyPage from './components/mypage/Mypage.jsx';
 import OAuthRedirect from './components/OAuthRedirect.jsx';
-import AuctionPage from './components/shop/Auction.jsx'; // 경로 및 대소문자 재확인
-import ShoppingPage from './components/shop/Shopping.jsx'; // 경로 및 대소문자 재확인
 import PetRegister from './components/mypage/PetRegister.jsx';
 import PetUpdate from './components/mypage/PetUpdate.jsx';
 import MapServicePage from './pages/MapServicePage';
@@ -34,7 +23,22 @@ import PaymentFailPage from './pages/PaymentFailPage.jsx'; //토스페이먼츠 
 import PaymentMethodPage from './components/mypage/PaymentMethodPage';
 import ChatPage from './components/chat/ChatPage.jsx'; //채팅창
 
-import BoardAdminPage from './components/admin/boards/BoardAdminPage';
+//쇼핑/경매
+import ItemRegister from './components/shop/ItemRegister.jsx';
+import ItemDetail from './components/shop/ItemDetail.jsx';
+import WhatsInMyCart from './components/shop/WhatsInMyCart.jsx';
+import ItemModify from './components/shop/ItemModify.jsx';
+import OrderPage from './components/shop/OrderPage.jsx';
+import OrderCompletePage from './components/shop/OrderCompletePage.jsx';
+import OrderDetail from './components/shop/OrderDetail.jsx';
+import MyOrders from './components/shop/MyOrders.jsx';
+import AuctionPage from './components/shop/Auction.jsx';
+import ShoppingPage from './components/shop/Shopping.jsx';
+import AuctionItemRegister from './components/shop/AuctionItemRegister.jsx';
+import AuctionRoom from './components/shop/AuctionRoom.jsx';
+import AuctionDeliveryPage from './components/shop/AuctionDeliveryPage.jsx';
+import MyAuctionHistory from './components/shop/MyAuctionHistory.jsx';
+
 import {
   BoardDetail,
   BoardEdit,
@@ -48,6 +52,9 @@ import AdminPage from './components/admin/AdminPage.jsx';
 import AdminRoute from './components/admin/AdminRoute.jsx';
 import ProfanityManagePage from './components/admin/ProfanityManagePage.jsx';
 import UserAdminPage from './components/admin/UserAdminPage';
+import ShopAdminPage from './components/admin/ShopAdminPage.jsx';
+import AuctionAdminPage from './components/admin/AuctionAdminPage.jsx';
+import BoardAdminPage from './components/admin/boards/BoardAdminPage.jsx';
 
 function App() {
   return (
@@ -97,6 +104,14 @@ function App() {
         <Route path="/shop/order" element={<OrderPage />} />
         <Route path="/shop/my-orders" element={<MyOrders />} />
 
+        {/* 경매 */}
+        <Route path="/shop/auction" element={<AuctionPage />} />
+        <Route path="/shop/auction/register" element={<AuctionItemRegister />} />
+        <Route path="/shop/auction/register/:itemId" element={<AuctionItemRegister />} />
+        <Route path="/auction/:auctionItemId" element={<AuctionRoom />} />
+        <Route path="/auction/delivery" element={<AuctionDeliveryPage />} />
+        <Route path="/shop/my-auction-history" element={<MyAuctionHistory />} />
+
         <Route path="/trails" element={<WalkingTrailListPage />} />
         <Route path="/trails/:trailId" element={<WalkingTrailDetailPage />} />
         <Route path="/create-trail" element={<WalkingTrailCreatePage />} />
@@ -135,6 +150,8 @@ function App() {
             />
             <Route path="/admin/users" element={<UserAdminPage />} />
             <Route path="/admin/shop" element={<AdminRoute><ShopAdminPage /></AdminRoute>} />
+            <Route path="/admin/auction" element={<AdminRoute><AuctionAdminPage /></AdminRoute>} />
+            <Route path="/admin/auction/register" element={<AdminRoute><ItemRegister /></AdminRoute>} />
           </Routes>
         </BrowserRouter>
       </KakaoMapsScriptProvider>
