@@ -43,4 +43,7 @@ public interface AuctionBidRepository extends JpaRepository<AuctionBid, Long> {
     // 특정 경매의 특정 사용자 최고 입찰가 조회
     @Query("SELECT MAX(b.bidAmount) FROM AuctionBid b WHERE b.auctionItem = :auctionItem AND b.member = :member")
     Optional<Integer> findMaxBidAmountByAuctionItemAndMember(@Param("auctionItem") AuctionItem auctionItem, @Param("member") Member member);
+
+    @Query("SELECT DISTINCT b.member FROM AuctionBid b WHERE b.auctionItem = :auctionItem")
+    List<Member> findAllParticipantsByAuctionItem(@Param("auctionItem") AuctionItem auctionItem);
 } 

@@ -10,19 +10,34 @@ import com.petory.repository.shop.AuctionBidRepository;
 import com.petory.repository.shop.ItemRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.petory.constant.AuctionStatus;
+import com.petory.service.shop.AuctionSessionService;
+import com.petory.service.shop.AuctionHistoryService;
+import com.petory.constant.AuctionWinStatus;
+import com.petory.service.shop.AuctionDeliveryService;
+import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import com.petory.entity.shop.AuctionHistory;
+import com.petory.repository.shop.AuctionSessionRepository;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuctionService {
 
   private final AuctionItemRepository auctionItemRepository;
+  private final AuctionSessionRepository auctionSessionRepository;
   private final AuctionBidRepository auctionBidRepository;
   private final ItemRepository itemRepository;
+  private final AuctionSessionService auctionSessionService;
+  private final AuctionBidService auctionBidService;
+  private final AuctionHistoryService auctionHistoryService;
+  private final AuctionDeliveryService auctionDeliveryService;
 
   @Transactional
   public Long saveAuctionItem(AuctionItemDto auctionItemDto) { //경매상품등록
@@ -57,6 +72,75 @@ public class AuctionService {
     auctionItem.setAuctionDescription(auctionItemDto.getAuction_description());
     // 필요시 상태 등 추가 필드 업데이트
     // JPA 변경감지로 자동 반영
+  }
+
+  @Transactional
+  public void startAuction(Long auctionItemId, String startTime, String endTime) {
+    AuctionItem auctionItem = auctionItemRepository.findById(auctionItemId)
+      .orElseThrow(() -> new IllegalArgumentException("해당 경매 상품이 존재하지 않습니다."));
+    auctionItem.setStartTime(LocalDateTime.parse(startTime));
+    auctionItem.setEndTime(LocalDateTime.parse(endTime));
+    auctionItem.setAuctionStatus(AuctionStatus.ACTIVE);
+    auctionItemRepository.save(auctionItem);
+
+    // 세션 즉시 생성 (강제 시작이므로 ACTIVE로)
+    auctionSessionService.createSession(auctionItem, true);
+  }
+
+  @Transactional
+  public void endAuction(Long auctionItemId, String endTime) {
+    AuctionItem auctionItem = auctionItemRepository.findById(auctionItemId)
+      .orElseThrow(() -> new IllegalArgumentException("해당 경매 상품이 존재하지 않습니다."));
+    auctionItem.setEndTime(LocalDateTime.parse(endTime));
+    auctionItem.setAuctionStatus(AuctionStatus.ENDED);
+    auctionItemRepository.save(auctionItem);
+
+    // 1. 모든 입찰자 조회
+    List<Member> participants = auctionBidRepository.findAllParticipantsByAuctionItem(auctionItem);
+
+    // 2. 최고 입찰자(낙찰자) 선정
+    Member winner = auctionBidRepository.findCurrentWinnerByAuctionItem(auctionItem).orElse(null);
+    Integer finalPrice = auctionBidRepository.findMaxBidAmountByAuctionItem(auctionItem).orElse(auctionItem.getStartPrice());
+
+    for (Member participant : participants) {
+      boolean isWinner = winner != null && participant.getMemberId().equals(winner.getMemberId());
+      com.petory.constant.AuctionWinStatus status = isWinner ? AuctionWinStatus.WIN : null;
+      AuctionHistory history = auctionHistoryService.createHistory(
+        auctionItem, participant, finalPrice, isWinner, status
+      );
+      
+      // 낙찰자인 경우 AuctionDelivery 생성
+      if (isWinner && history != null) {
+        auctionDeliveryService.createDelivery(history, LocalDateTime.now().plusDays(5));
+      }
+    }
+
+    // 세션도 ENDED로 변경
+    auctionSessionService.getSessionByAuctionItem(auctionItem)
+        .ifPresent(session -> auctionSessionService.endSession(session.getId()));
+  }
+
+  @Transactional
+  public void forceEndAuction(Long auctionItemId) {
+    AuctionItem auctionItem = auctionItemRepository.findById(auctionItemId)
+      .orElseThrow(() -> new IllegalArgumentException("해당 경매 상품이 존재하지 않습니다."));
+    
+    // 경매 상태를 ENDED로 변경
+    auctionItem.setEndTime(LocalDateTime.now());
+    auctionItem.setAuctionStatus(AuctionStatus.ENDED);
+    auctionItemRepository.save(auctionItem);
+
+    // 모든 입찰을 CANCELED 상태로 변경 (유찰 처리)
+    auctionBidService.cancelAllBidsForAuction(auctionItemId);
+
+    // 세션도 ENDED로 변경
+    auctionSessionService.getSessionByAuctionItem(auctionItem)
+        .ifPresent(session -> auctionSessionService.endSession(session.getId()));
+  }
+
+  @Transactional
+  public void deleteAuctionItem(Long auctionItemId) {
+    auctionItemRepository.deleteById(auctionItemId);
   }
 
   public List<AuctionItemResponseDto> getAuctionList() { //경매 상품 목록 조회
@@ -131,4 +215,6 @@ public class AuctionService {
       .currentWinnerId(currentWinner != null ? currentWinner.getMemberId() : null)
       .build();
   }
+
+
 }

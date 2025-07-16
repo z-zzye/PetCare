@@ -39,8 +39,15 @@ public interface AuctionHistoryRepository extends JpaRepository<AuctionHistory, 
     // 특정 경매의 참여자들 히스토리 조회 (낙찰자 제외)
     List<AuctionHistory> findByAuctionItemAndIsWinnerFalse(AuctionItem auctionItem);
     
-    // 특정 경매의 특정 사용자 히스토리 조회
-    Optional<AuctionHistory> findByAuctionItemAndMember(AuctionItem auctionItem, Member member);
+    // 특정 경매의 특정 사용자 히스토리 조회 (기존)
+    // Optional<AuctionHistory> findByAuctionItemAndMember(AuctionItem auctionItem, Member member);
+
+    // 특정 경매의 특정 사용자 히스토리 조회 (id 기반)
+    // Optional<AuctionHistory> findByAuctionItem_IdAndMember_Member_Id(Long auctionItemId, Long member_Id); // JPA 네이밍 규칙 문제로 사용 안 함
+
+    // 언더스코어 필드명(member_Id) 문제 해결: @Query 직접 작성
+    @Query("SELECT h FROM AuctionHistory h WHERE h.auctionItem.id = :auctionItemId AND h.member.member_Id = :memberId")
+    Optional<AuctionHistory> findByAuctionItemIdAndMemberId(@Param("auctionItemId") Long auctionItemId, @Param("memberId") Long memberId);
     
     // 특정 시간 범위의 경매 히스토리 조회
     List<AuctionHistory> findByRegDateBetween(LocalDateTime startTime, LocalDateTime endTime);

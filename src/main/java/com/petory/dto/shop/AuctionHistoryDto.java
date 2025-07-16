@@ -22,7 +22,7 @@ public class AuctionHistoryDto {
     
     // 경매 결과 정보
     private Integer finalPrice; // 최종 낙찰가
-    private String winnerNickname; // 낙찰자 닉네임
+    // winnerNickname 필드 제거
     
     // 시간 정보
     private LocalDateTime createdAt; // 히스토리 생성 시간
@@ -30,4 +30,9 @@ public class AuctionHistoryDto {
     
     // 결과 메시지
     private String resultMessage; // 결과 메시지 (낙찰 성공, 실패 등)
+
+    private String deliveryAddress; // 배송지 입력값
+    private LocalDateTime deliveryInputAt; // 배송지 입력 시각
+    private LocalDateTime deliveryDeadline; // 배송지 입력 마감 시각
+    private com.petory.constant.AuctionWinStatus auctionWinStatus; // 낙찰 상태(WIN, DELIVERED, CANCELLED 등)
 } 

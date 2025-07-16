@@ -61,9 +61,7 @@ function Shopping() {
     //fetchItems(undefined, newPage); // useEffect로 자동 호출됨
   };
 
-  const handleRegisterClick = () => {
-    navigate('/shop/item/register');
-  };
+
 
   // 검색 버튼/엔터 처리
   const handleSearch = () => {
@@ -509,27 +507,15 @@ function Shopping() {
               </div>
             </div>
           </div>
-          {/* 오른쪽: 장바구니/상품등록 버튼 */}
+          {/* 오른쪽: 장바구니 버튼 */}
           <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
-            <div className="register-button-container" style={{ display: 'flex', alignItems: 'center', zIndex: 2, gap: '0.7rem', marginBottom: 0 }}>
-              <button
-                className="register-button cart-button"
-                style={{ background: '#223A5E', color: '#fff', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem', height: '38px', width: '38px', justifyContent: 'center', padding: 0 }}
-                onClick={() => navigate('/shop/cart')}
-              >
-                <MdShoppingCart style={{ fontSize: '1.2rem' }} />
-              </button>
-              {memberRole === 'ADMIN' && (
-                <button
-                  className="register-button"
-                  onClick={handleRegisterClick}
-                  style={{ height: '38px', display: 'flex', alignItems: 'center' }}
-                >
-                  <span className="register-icon">+</span>
-                  상품 등록
-                </button>
-              )}
-            </div>
+            <button
+              className="register-button cart-button"
+              style={{ background: '#223A5E', color: '#fff', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem', height: '38px', width: '38px', justifyContent: 'center', padding: 0 }}
+              onClick={() => navigate('/shop/cart')}
+            >
+              <MdShoppingCart style={{ fontSize: '1.2rem' }} />
+            </button>
           </div>
         </div>
 

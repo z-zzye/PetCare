@@ -10,6 +10,8 @@ import com.petory.repository.shop.AuctionParticipantRepository;
 import com.petory.repository.shop.AuctionBidRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,14 +21,25 @@ import java.util.Optional;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class AuctionParticipantService {
 
     private final AuctionParticipantRepository auctionParticipantRepository;
-    private final AuctionSessionService auctionSessionService;
     private final AuctionItemRepository auctionItemRepository;
     private final AuctionBidRepository auctionBidRepository;
+    private final AuctionSessionService auctionSessionService;
+
+    @Autowired
+    public AuctionParticipantService(
+            AuctionParticipantRepository auctionParticipantRepository,
+            AuctionItemRepository auctionItemRepository,
+            AuctionBidRepository auctionBidRepository,
+            @Lazy AuctionSessionService auctionSessionService) {
+        this.auctionParticipantRepository = auctionParticipantRepository;
+        this.auctionItemRepository = auctionItemRepository;
+        this.auctionBidRepository = auctionBidRepository;
+        this.auctionSessionService = auctionSessionService;
+    }
 
     /**
      * 참여자 입장

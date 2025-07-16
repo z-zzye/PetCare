@@ -10,6 +10,47 @@
   height: 70vh;
 }
 
+/* 캐릭터 일러스트 */
+.character-illustrations {
+  position: absolute;
+  bottom: -80px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.character-illustration {
+  width: 180px;
+  height: auto;
+  opacity: 0.8;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.character-illustration:hover {
+  transform: scale(1.1);
+  opacity: 1;
+}
+
+.left-character {
+  transform: translateX(-20px);
+}
+
+.right-character {
+  transform: translateX(20px);
+}
+
+.left-character:hover {
+  transform: translateX(-20px) scale(1.1);
+}
+
+.right-character:hover {
+  transform: translateX(20px) scale(1.1);
+}
+
 .carousel-arrow {
   background: #fff;
   border: none;
@@ -86,7 +127,7 @@
 .carousel-card {
   position: relative;
   box-shadow: 0 4px 24px #0001;
-  border-radius: 18px;
+  border-radius: 12px;
   background: #fff;
   overflow: hidden;
   z-index: 1;
@@ -99,10 +140,10 @@
   height: 520px;
   z-index: 3;
   opacity: 1;
-  /* 플립 효과 */
   perspective: 1200px;
-  background: none;
-  box-shadow: none;
+  background: #fff;
+  box-shadow: 0 4px 24px #0001;
+  border-radius: 12px;
 }
 .carousel-card.center .flip-card-inner {
   width: 100%;
@@ -121,7 +162,7 @@
   position: absolute;
   top: 0; left: 0;
   backface-visibility: hidden;
-  border-radius: 18px;
+  border-radius: 12px;
   box-shadow: 0 4px 24px #0001;
   z-index: 2;
   display: flex;
@@ -136,8 +177,8 @@
 .carousel-card.center .flip-card-back {
   transform: rotateY(180deg);
   z-index: 3;
-  background: #E6B800;
-  color: #223A5E;
+  background: #223A5E;
+  color: #fff;
   box-shadow: 0 8px 32px #0002;
   display: flex;
   align-items: center;
@@ -174,7 +215,7 @@
   position: absolute;
   top: 0; left: 0;
   backface-visibility: hidden;
-  border-radius: 18px;
+  border-radius: 12px;
 }
 .flip-card-front {
   z-index: 2;
@@ -195,14 +236,17 @@
 }
 
 .auction-card-content {
-  width: 100%;
-  height: 100%;
+  width: 92%;
+  max-width: 380px;
+  height: auto;
+  min-height: 320px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
   padding: 24px 16px 16px 16px;
   box-sizing: border-box;
+  background: transparent;
 }
 .auction-card-img {
   width: 92%;
@@ -211,7 +255,7 @@
   max-width: 100%;
   max-height: 100%;
   object-fit: cover;
-  border-radius: 12px;
+  border-radius: 8px;
   margin: 0 auto;
   margin-bottom: 0;
   box-shadow: 0 2px 8px #0001;
@@ -223,10 +267,19 @@
   margin-top: 10px;
 }
 .auction-card-title {
-  font-size: 1.3rem;
+  font-size: 1.5rem;
   font-weight: bold;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
   color: inherit;
+}
+
+/* 양 옆 카드의 텍스트 크기 조정 */
+.carousel-card.side .auction-card-title {
+  font-size: 1.1rem;
+}
+
+.carousel-card.side .auction-card-date {
+  font-size: 0.9rem;
 }
 .auction-card-price {
   font-size: 1.08rem;

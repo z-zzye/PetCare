@@ -14,8 +14,12 @@ const OAuth2RedirectHandler = () => {
 
   useEffect(() => {
     const params = getQueryParams(location.search);
-    const { token, role, profileImg, nickname, needPhoneInput } = params;
-
+    const { token, role, profileImg, nickname, needPhoneInput, memberId } = params;
+    
+    if (memberId) {
+      localStorage.setItem('memberId', memberId);
+    }
+    
     if (!token) return; // token 없으면 아무것도 하지 않음
 
     // 로그인 이미 되어 있으면 재로그인 방지
@@ -46,8 +50,13 @@ const OAuth2RedirectHandler = () => {
         }
       });
       if (response.ok) {
-        return await response.json();
+        const memberInfo = await response.json();
+      // 여기서 memberId 저장!
+      if (memberInfo.memberId) {
+        localStorage.setItem('memberId', memberInfo.memberId);
       }
+      return memberInfo;
+    }
       throw new Error('회원 정보 가져오기 실패');
     } catch (error) {
       console.error('회원 정보 API 호출 실패:', error);

@@ -109,10 +109,10 @@ public class AuctionBidController { //입찰 처리
     }
 
 
-     /* 입찰 내역 조회*/
-    @GetMapping("/{auctionItemId}/history")
-    public ResponseEntity<List<AuctionBidDto>> getBidHistory(@PathVariable Long auctionItemId) {
-        log.info("입찰 내역 조회 요청: auctionItemId={}", auctionItemId);
+     /* 입찰 내역 조회 (프론트엔드용) */
+    @GetMapping("/{auctionItemId}")
+    public ResponseEntity<List<AuctionBidDto>> getBidHistoryForAuction(@PathVariable Long auctionItemId) {
+        log.info("입찰 내역 조회 요청 (프론트엔드): auctionItemId={}", auctionItemId);
 
         try {
             Optional<AuctionItem> auctionItemOpt = auctionItemRepository.findById(auctionItemId);

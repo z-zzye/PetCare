@@ -1,6 +1,7 @@
 package com.petory.entity.shop;
 
 import com.petory.entity.Member;
+import com.petory.constant.AuctionBidStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -31,4 +32,8 @@ public class AuctionBid {
 
   @Column(name = "bid_time", nullable = false)
   private LocalDateTime bidTime; // 입찰 시간
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "bid_status", nullable = false)
+  private AuctionBidStatus bidStatus = AuctionBidStatus.SUCCESS; // 입찰 상태 (기본값: SUCCESS)
 }

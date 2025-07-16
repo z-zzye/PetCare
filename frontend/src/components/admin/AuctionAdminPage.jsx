@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Header from '../Header.jsx';
 import './AdminPage.css';
 import axios from '../../api/axios';
+import { FaTrash } from 'react-icons/fa';
 
 const AuctionDetailModal = ({ auction, onClose, onEdit }) => (
   <div style={{
@@ -91,17 +92,63 @@ const AuctionEditModal = ({ auction, onClose, onSave }) => {
   );
 };
 
+// 토스트 팝업 컴포넌트
+const ConfirmToast = ({ open, message, subMessage, nowString, onConfirm, onCancel }) => {
+  if (!open) return null;
+  return (
+    <div style={{
+      position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+      background: 'rgba(0,0,0,0.15)', zIndex: 10001, display: 'flex', alignItems: 'center', justifyContent: 'center'
+    }}>
+      <div style={{
+        background: '#fff', borderRadius: 10, minWidth: 320, maxWidth: 400, padding: 28,
+        boxShadow: '0 8px 32px #0003', border: '2px solid #e53935', position: 'relative',
+        display: 'flex', flexDirection: 'column', alignItems: 'center'
+      }}>
+        <div style={{ color: '#e53935', fontWeight: 700, fontSize: '1.1rem', marginBottom: 8 }}>{message}</div>
+        {subMessage && <div style={{ color: '#b71c1c', marginBottom: 6, fontSize: '0.98rem' }}>{subMessage}</div>}
+        {nowString && <div style={{ color: '#b71c1c', marginBottom: 18, fontSize: '0.98rem' }}>현재 시각: {nowString}</div>}
+        <div style={{ display: 'flex', gap: 16, marginTop: 8 }}>
+          <button onClick={onCancel} style={{ padding: '7px 18px', borderRadius: 6, background: '#eee', color: '#333', border: 'none', fontWeight: 600, cursor: 'pointer' }}>취소</button>
+          <button onClick={onConfirm} style={{ padding: '7px 18px', borderRadius: 6, background: '#e53935', color: '#fff', border: 'none', fontWeight: 600, cursor: 'pointer' }}>확인</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const AuctionAdminPage = () => {
   const [auctionItems, setAuctionItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedAuction, setSelectedAuction] = useState(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editAuction, setEditAuction] = useState(null);
+  const [confirmToast, setConfirmToast] = useState({ open: false, auction: null });
+  const [confirmEndToast, setConfirmEndToast] = useState({ open: false, auction: null });
+  const [nowString, setNowString] = useState('');
+  const [confirmDeleteToast, setConfirmDeleteToast] = useState({ open: false, auction: null });
 
   useEffect(() => {
     // 경매 상품 목록을 가져오는 로직
     fetchAuctionItems();
   }, []);
+
+  useEffect(() => {
+    if (confirmToast.open || confirmEndToast.open) {
+      const updateNow = () => {
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const MM = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        const hh = String(now.getHours()).padStart(2, '0');
+        const mm = String(now.getMinutes()).padStart(2, '0');
+        setNowString(`${yyyy}-${MM}-${dd} ${hh}:${mm}`);
+      };
+      updateNow();
+      const interval = setInterval(updateNow, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [confirmToast.open, confirmEndToast.open]);
 
   const fetchAuctionItems = async () => {
     try {
@@ -114,14 +161,47 @@ const AuctionAdminPage = () => {
     }
   };
 
-  // 카드 하단 버튼 핸들러 함수 추가
-  function handleStartAuction(auctionItemId) {
-    // TODO: 경매 시작 API 연동
-    alert(`경매 시작: ${auctionItemId}`);
+  // 로컬 타임존 기준 ISO 문자열 생성 함수
+  function toLocalISOString(dt) {
+    const pad = n => n.toString().padStart(2, '0');
+    return `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}T${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
   }
-  function handleEndAuction(auctionItemId) {
-    // TODO: 경매 종료 API 연동
-    alert(`경매 종료: ${auctionItemId}`);
+
+  // 카드 하단 버튼 핸들러 함수 추가
+  async function handleStartAuction(auctionItemId) {
+    try {
+      const now = new Date();
+      const startTime = toLocalISOString(now);
+      const endTime = toLocalISOString(new Date(now.getTime() + 5 * 60 * 1000));
+      await axios.post(`/auctions/${auctionItemId}/start`, {
+        start_time: startTime,
+        end_time: endTime
+      });
+      alert('경매가 시작되었습니다!');
+      fetchAuctionItems(); // 목록 새로고침
+    } catch (err) {
+      alert('경매 시작 실패: ' + (err.response?.data?.message || '오류'));
+    }
+  }
+  async function handleEndAuction(auctionItemId) {
+    try {
+      await axios.post(`/auctions/${auctionItemId}/force-end`);
+      alert('경매가 강제 종료(유찰)되었습니다!');
+      fetchAuctionItems(); // 목록 새로고침
+    } catch (err) {
+      alert('경매 강제 종료 실패: ' + (err.response?.data?.message || '오류'));
+    }
+  }
+
+  // 경매 상품 삭제 함수
+  async function handleDeleteAuction(auctionItemId) {
+    try {
+      await axios.delete(`/auctions/${auctionItemId}`);
+      alert('경매 상품이 삭제되었습니다!');
+      fetchAuctionItems(); // 목록 새로고침
+    } catch (err) {
+      alert('삭제 실패: ' + (err.response?.data?.message || '오류'));
+    }
   }
 
   function handleCardClick(item) {
@@ -239,8 +319,71 @@ const AuctionAdminPage = () => {
                             )}
                           </div>
                           <div className="auction-item-actions" style={{marginTop: 12, display: 'flex', gap: 8, justifyContent: 'center'}}>
-                            <button onClick={e => { e.stopPropagation(); handleStartAuction(item.auction_item_id); }} disabled={item.auction_status !== 'SCHEDULED'} style={{padding: '6px 14px', borderRadius: 6, border: 'none', background: '#6c63ff', color: '#fff', fontWeight: 600, cursor: item.auction_status !== 'SCHEDULED' ? 'not-allowed' : 'pointer', opacity: item.auction_status !== 'SCHEDULED' ? 0.5 : 1}}>경매 시작</button>
-                            <button onClick={e => { e.stopPropagation(); handleEndAuction(item.auction_item_id); }} disabled={item.auction_status !== 'ACTIVE'} style={{padding: '6px 14px', borderRadius: 6, border: 'none', background: '#636e72', color: '#fff', fontWeight: 600, cursor: item.auction_status !== 'ACTIVE' ? 'not-allowed' : 'pointer', opacity: item.auction_status !== 'ACTIVE' ? 0.5 : 1}}>경매 종료</button>
+                            <button
+                              onClick={e => {
+                                e.stopPropagation();
+                                setConfirmToast({ open: true, auction: item });
+                              }}
+                              disabled={item.auction_status !== 'SCHEDULED'}
+                              style={{
+                                padding: '4px 10px',
+                                borderRadius: 6,
+                                border: 'none',
+                                background: '#6c63ff',
+                                color: '#fff',
+                                fontWeight: 600,
+                                fontSize: '0.92rem',
+                                height: 28,
+                                minWidth: 0,
+                                cursor: item.auction_status !== 'SCHEDULED' ? 'not-allowed' : 'pointer',
+                                opacity: item.auction_status !== 'SCHEDULED' ? 0.5 : 1
+                              }}
+                            >경매 시작</button>
+                            <button
+                              onClick={e => {
+                                e.stopPropagation();
+                                setConfirmEndToast({ open: true, auction: item });
+                              }}
+                              disabled={item.auction_status !== 'ACTIVE'}
+                              style={{
+                                padding: '4px 10px',
+                                borderRadius: 6,
+                                border: 'none',
+                                background: '#636e72',
+                                color: '#fff',
+                                fontWeight: 600,
+                                fontSize: '0.92rem',
+                                height: 28,
+                                minWidth: 0,
+                                cursor: item.auction_status !== 'ACTIVE' ? 'not-allowed' : 'pointer',
+                                opacity: item.auction_status !== 'ACTIVE' ? 0.5 : 1
+                              }}
+                            >경매 종료</button>
+                            {item.auction_status === 'SCHEDULED' && (
+                              <button
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  setConfirmDeleteToast({ open: true, auction: item });
+                                }}
+                                style={{
+                                  width: 28,
+                                  height: 28,
+                                  borderRadius: 6,
+                                  border: 'none',
+                                  background: '#e53935',
+                                  color: '#fff',
+                                  fontWeight: 600,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  padding: 0,
+                                  cursor: 'pointer'
+                                }}
+                                title="경매 상품 삭제"
+                              >
+                                <FaTrash style={{ margin: 0, fontSize: '1.1rem' }} />
+                              </button>
+                            )}
                           </div>
                         </div>
                       );
@@ -259,6 +402,38 @@ const AuctionAdminPage = () => {
     {editModalOpen && editAuction && (
       <AuctionEditModal auction={editAuction} onClose={() => setEditModalOpen(false)} onSave={fetchAuctionItems} />
     )}
+    <ConfirmToast
+      open={confirmToast.open}
+      message="정말 경매를 시작하시겠습니까?"
+      subMessage={confirmToast.auction ? `예정 시작일: ${confirmToast.auction.start_time?.slice(0,16).replace('T',' ')}` : ''}
+      nowString={nowString}
+      onConfirm={() => {
+        setConfirmToast({ open: false, auction: null });
+        if (confirmToast.auction) handleStartAuction(confirmToast.auction.auction_item_id);
+      }}
+      onCancel={() => setConfirmToast({ open: false, auction: null })}
+    />
+    <ConfirmToast
+      open={confirmEndToast.open}
+      message="정말 종료하시겠습니까?"
+      subMessage={confirmEndToast.auction ? `예정된 경매 종료 시간: ${confirmEndToast.auction.end_time?.slice(0,16).replace('T',' ')}` : ''}
+      nowString={nowString}
+      onConfirm={() => {
+        setConfirmEndToast({ open: false, auction: null });
+        if (confirmEndToast.auction) handleEndAuction(confirmEndToast.auction.auction_item_id);
+      }}
+      onCancel={() => setConfirmEndToast({ open: false, auction: null })}
+    />
+    <ConfirmToast
+      open={confirmDeleteToast.open}
+      message={`‘${confirmDeleteToast.auction?.itemName}’ 경매를 삭제하시겠습니까?`}
+      nowString={nowString}
+      onConfirm={() => {
+        setConfirmDeleteToast({ open: false, auction: null });
+        if (confirmDeleteToast.auction) handleDeleteAuction(confirmDeleteToast.auction.auction_item_id);
+      }}
+      onCancel={() => setConfirmDeleteToast({ open: false, auction: null })}
+    />
     </>
   );
 };

@@ -34,6 +34,8 @@ import AuctionPage from './components/shop/Auction.jsx';
 import ShoppingPage from './components/shop/Shopping.jsx';
 import AuctionItemRegister from './components/shop/AuctionItemRegister.jsx';
 import AuctionRoom from './components/shop/AuctionRoom.jsx';
+import AuctionDeliveryPage from './components/shop/AuctionDeliveryPage';
+import MyAuctionHistory from './components/shop/MyAuctionHistory';
 
 // 산책로
 import WalkingTrailListPage from './components/WalkingTrailListPage.jsx';
@@ -103,6 +105,8 @@ function App() {
              <Route path="/orders/:orderId" element={<OrderDetail />} />
              <Route path="/shop/my-orders" element={<MyOrders />} />
             <Route path="/auction/:auctionItemId" element={<AuctionRoom />} />
+            <Route path="/auction/delivery" element={<AuctionDeliveryPage />} />
+            <Route path="/shop/my-auction-history" element={<MyAuctionHistory />} />
 
             {/* 산책 */}
             <Route path="/trails" element={<WalkingTrailListPage />} />

@@ -2,6 +2,7 @@ package com.petory.entity.shop;
 
 import com.petory.entity.Member;
 import com.petory.entity.BaseTimeEntity;
+import com.petory.constant.AuctionWinStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -37,4 +38,8 @@ public class AuctionHistory extends BaseTimeEntity {
 
   @Column(name = "final_price")
   private Integer finalPrice; // 최종 낙찰가
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "auction_win_status")
+  private AuctionWinStatus auctionWinStatus; // 낙찰 상태(WIN, DELIVERED, CANCELLED 등)
 }

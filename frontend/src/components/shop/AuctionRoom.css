@@ -1,0 +1,673 @@
+/* AuctionRoom.css */
+
+/* 기본 레이아웃 */
+.auction-room-layout {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  background: #fff;
+  min-height: 100vh;
+}
+
+/* 상품명 전체 너비 */
+.product-title-full {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px 24px 0 24px;
+  margin-bottom: 8px;
+}
+
+/* 2x2 그리드 레이아웃 */
+.auction-room-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.auction-room-image-section {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.auction-room-info-section {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.auction-room-graph-section {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.auction-room-bid-section {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.auction-room-history-section {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  margin-top: 16px;
+}
+
+.auction-room-top-detail {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* 왼쪽 컬럼: 이미지 + 상품 정보 */
+.auction-room-photo-big {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 400px;
+}
+
+.image-container {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.breadcrumb-icon {
+  font-size: 1rem;
+  color: #888;
+  display: flex;
+  align-items: center;
+}
+
+.breadcrumb-separator {
+  color: #bbb;
+  font-weight: bold;
+}
+
+.breadcrumb-category {
+  color: #888;
+  font-weight: bold;
+}
+
+.auction-room-photo-img {
+  width: 100%;
+  max-width: 500px;
+  height: 500px;
+  border-radius: 6px;
+  object-fit: cover;
+  background: #ffffff;
+  padding: 24px;
+}
+
+/* 오른쪽 컬럼: 그래프 + 입찰 + 내역 */
+.auction-room-info-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 400px;
+}
+
+/* 카드 공통 스타일 */
+.auction-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 0;
+}
+
+/* 상품명 카드 */
+.product-title-card {
+  width: 100%;
+  max-width: 500px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 8px;
+}
+
+/* 상품 정보 카드 */
+.product-info-card {
+  width: 100%;
+  max-width: 500px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+}
+
+/* 상품 제목 */
+.item-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 16px;
+  color: #223A5E;
+}
+
+.item-divider {
+  border: none;
+  border-top: 1px solid #b0b0b0;
+  margin: 16px 0;
+}
+
+.full-width-divider {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* 가격 정보 스타일 */
+.price-info {
+  margin-bottom: 12px;
+}
+
+.price-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding: 8px 0;
+}
+
+.price-label {
+  font-weight: bold;
+  color: #223A5E;
+  font-size: 0.9rem;
+}
+
+.price-label.current-price-label {
+  color: #223A5E;
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.price-value {
+  color: #666;
+  font-size: 0.9rem;
+  text-align: right;
+  font-weight: bold;
+}
+
+.price-value.current-price-value {
+  color: #223A5E;
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.current-price {
+  color: #223A5E;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.bid-unit {
+  color: #666;
+  font-size: 0.95rem;
+}
+
+/* 경매 시간 정보 스타일 */
+.auction-time-info {
+  margin-top: 8px;
+}
+
+.time-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  padding: 8px 0;
+}
+
+.time-label {
+  font-weight: bold;
+  color: #223A5E;
+  font-size: 0.9rem;
+}
+
+.time-value {
+  color: #666;
+  font-size: 0.9rem;
+  text-align: right;
+}
+
+/* 타이머 스타일 */
+.timer-container {
+  background: #223A5E;
+  color: #ffc107;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 1.1rem;
+  text-align: center;
+  margin: 16px 0;
+  box-shadow: 0 2px 8px rgba(34, 58, 94, 0.2);
+}
+
+.timer-label {
+  font-size: 0.9rem;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.timer-value {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #ffc107;
+}
+
+/* 알림 상태 */
+.notification-status {
+  font-size: 0.9rem;
+  margin-top: 8px;
+}
+
+.notification-status.granted {
+  color: #4caf50;
+}
+
+.notification-status.denied {
+  color: #f44336;
+}
+
+.notification-status.default {
+  color: #666;
+}
+
+/* 입찰 섹션 */
+.bid-section {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.bid-title {
+  margin: 0 0 20px 0;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #223A5E;
+}
+
+.bid-form {
+  display: flex;
+  gap: 0;
+  align-items: stretch;
+  margin-bottom: 16px;
+  border: 2px solid #ffc107;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.bid-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 0;
+  font-size: 1rem;
+  outline: none;
+  background: #fff;
+}
+
+.bid-input:focus {
+  background: #fff8e1;
+}
+
+.bid-button {
+  padding: 12px 24px;
+  background: #ffc107;
+  color: #223A5E;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: all 0.2s ease;
+  min-width: 100px;
+}
+
+.bid-button:hover:not(:disabled) {
+  background: #223A5E;
+  color: #ffc107;
+}
+
+.bid-button:disabled {
+  background: #e0e0e0;
+  color: #999;
+  cursor: not-allowed;
+}
+
+.bid-info {
+  font-size: 0.8rem;
+  color: #999;
+  margin-top: 8px;
+  line-height: 1.4;
+}
+
+.bid-info .min-bid {
+  font-weight: normal;
+  color: #888;
+}
+
+.bid-info .description {
+  font-size: 0.75rem;
+  color: #aaa;
+  font-style: italic;
+  margin-top: 4px;
+}
+
+.bid-info .error {
+  color: #d32f2f;
+  font-weight: bold;
+}
+
+/* 경매 종료 알림 */
+.auction-ended-alert {
+  color: #f44336;
+  margin-top: 8px;
+  font-weight: bold;
+  padding: 8px 12px;
+  background-color: #ffebee;
+  border-radius: 4px;
+  border: 1px solid #f44336;
+}
+
+/* 낙찰 성공 알림 */
+.winner-alert {
+  color: #2e7d32;
+  margin-top: 8px;
+  font-weight: bold;
+  padding: 12px 16px;
+  background-color: #e8f5e8;
+  border-radius: 8px;
+  border: 1px solid #2e7d32;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(46, 125, 50, 0.2);
+}
+
+.delivery-button {
+  margin-left: 8px;
+  padding: 6px 16px;
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+/* 입찰 내역 */
+.bid-history-section {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.bid-history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.bid-history-title {
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: #223A5E;
+  margin-bottom: 0;
+}
+
+.bid-history-container {
+  max-height: 250px;
+  overflow-y: auto;
+  margin-bottom: 16px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: #fff;
+}
+
+.bid-history-item {
+  padding: 10px 16px;
+  border-radius: 12px;
+  margin-bottom: 0;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.bid-history-item:hover {
+  transform: translateY(-2px);
+}
+
+.bid-history-item.highest {
+  background: #ffc107;
+  border: 2px solid #ffc107;
+}
+
+.bid-history-item.highest:hover {
+  /* 호버 효과 유지 */
+}
+
+.bid-history-item .bidder-info {
+  font-weight: bold;
+  color: #223A5E;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.bid-history-item.highest .bidder-info {
+  color: #223A5E;
+}
+
+.bid-history-item .bidder-icon {
+  font-size: 1rem;
+  margin-right: 8px;
+}
+
+.bid-history-item.highest .bidder-icon {
+  font-size: 1.1rem;
+}
+
+.bid-history-item .bid-amount {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 2px;
+}
+
+.bid-history-item.highest .bid-amount {
+  color: #223A5E;
+}
+
+.bid-history-item .bid-time {
+  font-size: 0.8rem;
+  color: #888;
+  font-style: italic;
+}
+
+.bid-history-item.highest .bid-time {
+  color: #223A5E;
+  opacity: 0.8;
+}
+
+.bid-history-empty {
+  color: #666;
+  font-style: italic;
+  margin-bottom: 16px;
+  text-align: center;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 2px dashed #ddd;
+}
+
+/* 참여자 정보 */
+.participant-info {
+  margin-bottom: 8px;
+}
+
+.my-bid-info {
+  margin-top: 8px;
+}
+
+/* 그래프 컨테이너 */
+.graph-container {
+  width: 100%;
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.graph-title {
+  margin-bottom: 20px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #223A5E;
+}
+
+/* 그래프 범례 */
+.graph-legend {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #666;
+  font-style: italic;
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #ffc107;
+}
+
+/* 토스트 애니메이션 */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* 토스트 메시지 */
+.toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  color: white;
+  font-weight: 500;
+  z-index: 9999;
+  animation: slideIn 0.3s ease-out;
+  max-width: 300px;
+  word-wrap: break-word;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease;
+}
+
+.toast.clickable {
+  cursor: pointer;
+}
+
+.toast.clickable:hover {
+  transform: scale(1.05);
+}
+
+.toast.success {
+  background: #4caf50;
+}
+
+.toast.warning {
+  background: #ff9800;
+}
+
+.toast.error {
+  background: #f44336;
+}
+
+.toast.info {
+  background: #2196f3;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 900px) {
+  .auction-room-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto auto;
+  }
+  
+  .auction-room-image-section {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  
+  .auction-room-info-section {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  
+  .auction-room-graph-section {
+    grid-column: 1;
+    grid-row: 3;
+  }
+  
+  .auction-room-bid-section {
+    grid-column: 1;
+    grid-row: 4;
+  }
+  
+  .auction-room-history-section {
+    grid-column: 1;
+    grid-row: 5;
+  }
+  
+  .auction-room-top-detail {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .auction-room-photo-big {
+    flex: none;
+  }
+  
+  .auction-room-info-card {
+    min-width: 0;
+  }
+} 

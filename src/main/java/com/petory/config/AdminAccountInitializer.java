@@ -26,7 +26,7 @@ public class AdminAccountInitializer {
         .member_NickName("관리자")
         .member_Phone("010-0000-0000")
         .member_ProfileImg(null)
-        .member_Mileage(0)
+        .member_Mileage(100000)
         .member_Address("서울")
         .build();
       memberRepository.save(admin);

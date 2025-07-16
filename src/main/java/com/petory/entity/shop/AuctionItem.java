@@ -38,6 +38,9 @@ public class AuctionItem extends BaseTimeEntity {
   @Column(name = "bid_unit")
   private Integer bidUnit; // 최소 입찰 단위 (100, 500 등)
 
+  @Column(name = "current_price")
+  private Integer currentPrice; // 현재 최고 입찰가
+
   @Enumerated(EnumType.STRING)
   @Column(name = "auction_status", nullable = false)
   private AuctionStatus auctionStatus; // 경매 상태 (예정, 진행, 종료, 취소)
@@ -45,4 +48,8 @@ public class AuctionItem extends BaseTimeEntity {
   @Lob
   @Column(name = "auction_description")
   private String auctionDescription; // 관리자 메모/경매 설명 (nullable)
+
+  @Version
+  @Column(name = "version")
+  private Long version; // 낙관적 락을 위한 버전 필드
 }

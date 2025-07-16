@@ -11,18 +11,19 @@ import org.springframework.data.domain.Pageable;
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
 
-    // 전체 상품 목록
+    // 전체 상품 목록 (경매 상품 제외)
     @Query("""
     SELECT new com.petory.dto.shop.ItemListDto(
       i.itemId, i.itemName, i.itemPrice,
       (SELECT img.itemImageUrl FROM ItemImage img WHERE img.item = i AND img.isRepresentative = true)
     )
     FROM Item i
+    WHERE i.itemStatus != 'AUCTION'
     ORDER BY i.regDate DESC
     """)
     List<ItemListDto> findAllItemList();
 
-    // 전체 상품 목록 (검색)
+    // 전체 상품 목록 (검색, 경매 상품 제외)
     @Query("""
     SELECT new com.petory.dto.shop.ItemListDto(
       i.itemId, i.itemName, i.itemPrice,
@@ -30,11 +31,12 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     )
     FROM Item i
     WHERE LOWER(i.itemName) LIKE LOWER(CONCAT('%', :search, '%'))
+      AND i.itemStatus != 'AUCTION'
     ORDER BY i.regDate DESC
     """)
     List<ItemListDto> findAllItemListBySearch(@Param("search") String search);
 
-    // 대분류(메인 카테고리)로 상품 목록 - 해당 대분류의 소분류들에 속한 상품들만 조회
+    // 대분류(메인 카테고리)로 상품 목록 - 해당 대분류의 소분류들에 속한 상품들만 조회 (경매 상품 제외)
     @Query("""
     SELECT new com.petory.dto.shop.ItemListDto(
       i.itemId, i.itemName, i.itemPrice,
@@ -42,11 +44,12 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     )
     FROM Item i
     WHERE i.category.parentOption = :mainCategoryId
+      AND i.itemStatus != 'AUCTION'
     ORDER BY i.regDate DESC
     """)
     List<ItemListDto> findByMainCategory(@Param("mainCategoryId") Long mainCategoryId);
 
-    // 대분류(메인 카테고리) + 검색
+    // 대분류(메인 카테고리) + 검색 (경매 상품 제외)
     @Query("""
     SELECT new com.petory.dto.shop.ItemListDto(
       i.itemId, i.itemName, i.itemPrice,
@@ -55,11 +58,12 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     FROM Item i
     WHERE i.category.parentOption = :mainCategoryId
       AND LOWER(i.itemName) LIKE LOWER(CONCAT('%', :search, '%'))
+      AND i.itemStatus != 'AUCTION'
     ORDER BY i.regDate DESC
     """)
     List<ItemListDto> findByMainCategoryAndSearch(@Param("mainCategoryId") Long mainCategoryId, @Param("search") String search);
 
-    // 소분류(서브 카테고리)로 상품 목록
+    // 소분류(서브 카테고리)로 상품 목록 (경매 상품 제외)
     @Query("""
     SELECT new com.petory.dto.shop.ItemListDto(
       i.itemId, i.itemName, i.itemPrice,
@@ -67,11 +71,12 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     )
     FROM Item i
     WHERE i.category.categoryId = :subCategoryId
+      AND i.itemStatus != 'AUCTION'
     ORDER BY i.regDate DESC
     """)
     List<ItemListDto> findBySubCategory(@Param("subCategoryId") Long subCategoryId);
 
-    // 소분류(서브 카테고리) + 검색
+    // 소분류(서브 카테고리) + 검색 (경매 상품 제외)
     @Query("""
     SELECT new com.petory.dto.shop.ItemListDto(
       i.itemId, i.itemName, i.itemPrice,
@@ -80,6 +85,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     FROM Item i
     WHERE i.category.categoryId = :subCategoryId
       AND LOWER(i.itemName) LIKE LOWER(CONCAT('%', :search, '%'))
+      AND i.itemStatus != 'AUCTION'
     ORDER BY i.regDate DESC
     """)
     List<ItemListDto> findBySubCategoryAndSearch(@Param("subCategoryId") Long subCategoryId, @Param("search") String search);
@@ -119,7 +125,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     @Query("SELECT img.itemImageUrl FROM ItemImage img WHERE img.item.itemId = :itemId AND img.isRepresentative = true")
     String findRepresentativeImageUrlByItemId(@Param("itemId") Long itemId);
 
-    // 페이지네이션 상품 목록 (카테고리/검색 조건 모두 지원)
+    // 페이지네이션 상품 목록 (카테고리/검색 조건 모두 지원, 경매 상품 제외)
     @Query("""
     SELECT new com.petory.dto.shop.ItemListDto(
       i.itemId, i.itemName, i.itemPrice,
@@ -129,6 +135,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     WHERE (:subCategoryId IS NULL OR i.category.categoryId = :subCategoryId)
       AND (:mainCategoryId IS NULL OR i.category.parentOption = :mainCategoryId)
       AND (:search IS NULL OR LOWER(i.itemName) LIKE LOWER(CONCAT('%', :search, '%')))
+      AND i.itemStatus != 'AUCTION'
     ORDER BY i.regDate DESC
     """)
     Page<ItemListDto> findPagedItems(
