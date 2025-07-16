@@ -1,0 +1,228 @@
+.payment-method-page {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  padding: 2rem 0;
+}
+
+.payment-method-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e3a8a;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.info-section {
+  margin-bottom: 2rem;
+}
+
+.info-card {
+  background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+  color: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.info-card h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.info-card p {
+  margin: 0;
+  line-height: 1.6;
+  opacity: 0.9;
+}
+
+.mock-notice {
+  opacity: 0.8;
+  font-style: italic;
+}
+
+.payment-method-content {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+/* 등록된 카드가 있는 경우 */
+.registered-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  border-radius: 12px;
+  color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.card-icon {
+  font-size: 2rem;
+  background: rgba(255, 255, 255, 0.3);
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-details h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.card-number {
+  margin: 0 0 0.25rem 0;
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+.registration-date {
+  margin: 0;
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.card-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* 등록된 카드가 없는 경우 */
+.no-card {
+  text-align: center;
+  padding: 3rem 2rem;
+}
+
+.no-card-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.7;
+  color: #1e3a8a;
+}
+
+.no-card h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.5rem;
+  color: #666;
+  font-weight: 600;
+}
+
+.no-card p {
+  margin: 0 0 2rem 0;
+  color: #888;
+  line-height: 1.6;
+}
+
+/* 버튼 스타일 */
+.btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-secondary {
+  background: #dc3545;
+  color: white;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #c82333;
+  transform: translateY(-1px);
+}
+
+/* 사용 안내 섹션 */
+.usage-info {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.usage-info h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.2rem;
+  color: #1e3a8a;
+  font-weight: 600;
+}
+
+.usage-info ul {
+  margin: 0;
+  padding-left: 1.5rem;
+  color: #666;
+  line-height: 1.8;
+}
+
+.usage-info li {
+  margin-bottom: 0.5rem;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .payment-method-container {
+    padding: 0 1rem;
+  }
+
+  .page-title {
+    font-size: 1.5rem;
+  }
+
+  .registered-card {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .card-actions {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .no-card {
+    padding: 2rem 1rem;
+  }
+
+  .no-card-icon {
+    font-size: 3rem;
+  }
+}

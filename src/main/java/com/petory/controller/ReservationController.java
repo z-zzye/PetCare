@@ -1,19 +1,26 @@
 package com.petory.controller;
 
+import java.security.Principal;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.petory.dto.autoReservation.ReservationDetailDto;
 import com.petory.entity.Member;
 import com.petory.repository.MemberRepository;
 import com.petory.service.ReservationService; // ✅ AutoReservationService가 아닌 일반 ReservationService를 사용
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-
-import java.security.Principal;
-import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/reservations") // ✅ 베이스 경로를 /api/reservations로 설정
@@ -74,6 +81,8 @@ public class ReservationController {
       return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
     } catch (SecurityException e) { // 권한 없는 사용자의 접근
       return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
+    } catch (IllegalStateException e) { // 결제 수단 관련 예외
+      return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
     } catch (Exception e) { // 그 외 모든 예외
       log.error("접종 완료 처리 중 오류 발생: reservationId={}", reservationId, e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "서버 내부 오류가 발생했습니다."));

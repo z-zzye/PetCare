@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 import axios from '../../api/axios';
 import './HealthNotePage.css';
-import './MyReservationsPage.css'; // 예약 카드 스타일을 위해 CSS를 함께 사용합니다.
 
 const getPetEmoji = (category) => {
   if (!category) return '';
@@ -19,7 +18,6 @@ const HealthNotePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // --- 1. 데이터 로딩 ---
   const fetchData = () => {
     setLoading(true);
     const token = localStorage.getItem('token');
@@ -39,7 +37,7 @@ const HealthNotePage = () => {
         ]).then(([petsResponse, reservationsResponse]) => {
           setAllPets(petsResponse.data);
           setAllReservations(reservationsResponse.data);
-          if (petsResponse.data.length > 0 && !selectedPetId) {
+          if (petsResponse.data.length > 0 && selectedPetId === '') {
             setSelectedPetId(petsResponse.data[0].petNum);
           }
           setLoading(false);
@@ -54,11 +52,9 @@ const HealthNotePage = () => {
 
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // --- 2. 버튼 핸들러 함수들 ---
-
-  // ✅ '결제하기' 핸들러 (PENDING -> CONFIRMED)
   const handlePay = async (reservation) => {
     const result = await Swal.fire({
       title: '예약금 결제',
@@ -71,7 +67,6 @@ const HealthNotePage = () => {
 
     if (result.isConfirmed) {
       try {
-        // 백엔드 API가 요구하는 ReservationConfirmRequestDto 형식에 맞게 데이터를 재구성합니다.
         const requestData = {
           petId: reservation.petId,
           hospitalId: reservation.reservedHospitalId,
@@ -81,31 +76,24 @@ const HealthNotePage = () => {
             .toISOString()
             .split('T')[0],
           timeSlot: reservation.reservedTimeSlot,
-          // '접종항목' 설명에서 백신 이름을 재구성합니다.
-          // 임시로 Enum 이름과 같다고 가정하고 변환합니다.
           vaccineTypes: reservation.vaccineDescription
             .split(', ')
             .map((desc) => `DOG_${desc.replace('강아지 ', '')}`),
           totalAmount: reservation.totalAmount,
         };
-
         await axios.post('/auto-reservations/confirm-and-pay', requestData);
-        await Swal.fire(
-          '결제 완료',
-          '예약이 정상적으로 확정되었습니다.',
-          'success'
-        );
-        fetchData(); // 목록 새로고침
+        Swal.fire('결제 완료', '예약이 정상적으로 확정되었습니다.', 'success');
+        fetchData();
       } catch (err) {
-        console.error('결제 처리 실패:', err);
-        const errorMessage =
-          err.response?.data?.error || '알 수 없는 오류가 발생했습니다.';
-        Swal.fire('오류', errorMessage, 'error');
+        Swal.fire(
+          '오류',
+          err.response?.data?.error || '알 수 없는 오류가 발생했습니다.',
+          'error'
+        );
       }
     }
   };
 
-  // ✅ '접종 완료' 핸들러 (CONFIRMED -> COMPLETED + 다음 예약 생성)
   const handleComplete = async (reservationId) => {
     const result = await Swal.fire({
       title: '접종 완료 처리',
@@ -121,18 +109,34 @@ const HealthNotePage = () => {
         const response = await axios.post(
           `/reservations/${reservationId}/complete`
         );
-        await Swal.fire('처리 완료', response.data.message, 'success');
-        fetchData(); // 목록 새로고침
+        Swal.fire('처리 완료', response.data.message, 'success');
+        fetchData();
       } catch (err) {
-        console.error('접종 완료 처리 실패:', err);
-        const errorMessage =
-          err.response?.data?.error || '알 수 없는 오류가 발생했습니다.';
-        Swal.fire('오류', errorMessage, 'error');
+        if (
+          err.response?.data?.error?.includes('결제 수단이 등록되어 있지 않습니다')
+        ) {
+          const paymentResult = await Swal.fire({
+            title: '결제 수단 등록 필요',
+            text: '다음 예약을 생성하려면 결제 수단을 등록해야 합니다. 지금 등록하시겠습니까?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: '결제 수단 등록',
+            cancelButtonText: '나중에',
+          });
+          if (paymentResult.isConfirmed) {
+            window.location.href = '/members/payment-management';
+          }
+        } else {
+          Swal.fire(
+            '오류',
+            err.response?.data?.error || '알 수 없는 오류가 발생했습니다.',
+            'error'
+          );
+        }
       }
     }
   };
 
-  // ✅ '예약 취소' 핸들러 (-> CANCELED)
   const handleCancel = async (reservationId) => {
     const result = await Swal.fire({
       title: '예약 취소 확인',
@@ -147,55 +151,47 @@ const HealthNotePage = () => {
     if (result.isConfirmed) {
       try {
         await axios.delete(`/reservations/${reservationId}`);
-        await Swal.fire(
-          '취소 완료',
-          '예약이 정상적으로 취소되었습니다.',
-          'success'
-        );
-        fetchData(); // 목록 새로고침
+        Swal.fire('취소 완료', '예약이 정상적으로 취소되었습니다.', 'success');
+        fetchData();
       } catch (err) {
-        console.error('예약 취소 처리 실패:', err);
-        const errorMessage =
-          err.response?.data?.error || '알 수 없는 오류가 발생했습니다.';
-        Swal.fire('오류', errorMessage, 'error');
+        Swal.fire(
+          '오류',
+          err.response?.data?.error || '알 수 없는 오류가 발생했습니다.',
+          'error'
+        );
       }
     }
   };
 
-  // --- 3. 렌더링을 위한 데이터 가공 ---
-  const selectedPet = allPets.find((p) => p.petNum === selectedPetId);
+  const selectedPet = allPets.find((p) => p.petNum == selectedPetId);
   const reservationsForSelectedPet = allReservations.filter(
-    (r) => r.petId === selectedPetId
+    (r) => r.petId == selectedPetId
   );
-
-  // 상태 카드 데이터 (더미 데이터)
-  const statusCards = [
-    { id: 1, icon: '💊', label: '복약' },
-    { id: 2, icon: '🏃', label: '운동' },
-    { id: 3, icon: '🍚', label: '식사' },
-  ];
-
-  // 백신 카드 데이터 (완료된 예약에서 추출)
   const completedReservations = reservationsForSelectedPet.filter(
     (r) => r.reservationStatus === 'COMPLETED'
   );
-  const vaccineCards = completedReservations.map((res, index) => ({
-    id: index + 1,
-    title: res.vaccineDescription.split(', ')[0] || '접종',
-    desc: `${new Date(res.reservationDateTime).toLocaleDateString()} 접종 완료`,
-  }));
 
-  // 히스토리 데이터 (완료된 예약에서 추출)
-  const historyList = completedReservations.map((res, index) => ({
-    id: index + 1,
-    date: new Date(res.reservationDateTime).toLocaleDateString(),
-    event: `${res.vaccineDescription} - ${res.hospitalName}`,
-  }));
+  const vaccineProgress = {
+    종합백신: { completed: 0, total: 6 },
+    광견병: { completed: 0, total: 1 },
+    항체검사: { completed: 0, total: 1 },
+  };
+
+  completedReservations.forEach((res) => {
+    const vaccineTypes = res.vaccineDescription.split(', ');
+    vaccineTypes.forEach((vaccineType) => {
+      if (vaccineType.includes('종합백신'))
+        vaccineProgress.종합백신.completed++;
+      else if (vaccineType.includes('광견병'))
+        vaccineProgress.광견병.completed++;
+      else if (vaccineType.includes('항체검사'))
+        vaccineProgress.항체검사.completed++;
+    });
+  });
 
   if (loading) return <div>로딩 중...</div>;
   if (error) return <div>{error}</div>;
 
-  // 등록된 펫이 없을 경우
   if (allPets.length === 0) {
     return (
       <div className="no-pets-message">
@@ -205,33 +201,31 @@ const HealthNotePage = () => {
     );
   }
 
-  // --- 4. 최종 UI 렌더링 ---
   return (
-    <div className="healthnote-container">
-      {/* 펫 프로필 및 선택 UI */}
-      <div className="healthnote-top">
-        {/* 1. 펫 선택: 가로 스크롤 리스트 */}
-        <div className="pet-scroll-list">
-          {allPets.map((pet) => (
-            <div
-              key={pet.petNum}
-              className={`pet-scroll-item${
-                pet.petNum === selectedPetId ? ' selected' : ''
-              }`}
-              onClick={() => setSelectedPetId(pet.petNum)}
+    <div className="healthnote-grid-container">
+      {/* 1번 영역: 펫 선택 드롭다운 */}
+      <div className="grid-area-1">
+        {allPets.length > 1 && (
+          <div className="pet-dropdown-container">
+            <select
+              value={selectedPetId}
+              onChange={(e) => setSelectedPetId(e.target.value)}
+              className="pet-dropdown"
             >
-              <img
-                className="pet-scroll-img"
-                src={pet.petProfileImg || '/images/pet-default.png'}
-                alt="pet profile"
-              />
-              <div className="pet-scroll-name">{pet.petName}</div>
-            </div>
-          ))}
-        </div>
-        {/* 2. 펫 프로필 */}
+              {allPets.map((pet) => (
+                <option key={pet.petNum} value={pet.petNum}>
+                  {pet.petName}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+      </div>
+
+      {/* 2번 영역: 펫 프로필 */}
+      <div className="grid-area-2">
         {selectedPet && (
-          <div className="pet-profile">
+          <div className="pet-profile-section">
             <img
               className="pet-profile-img"
               src={selectedPet.petProfileImg || '/images/pet-default.png'}
@@ -244,125 +238,133 @@ const HealthNotePage = () => {
                   {getPetEmoji(selectedPet.category)}
                 </span>
               </div>
-              <div className="pet-birth">{selectedPet.petBirth}</div>
+              <div className="pet-details">
+                {selectedPet.petBirth} / {selectedPet.category}
+              </div>
             </div>
           </div>
         )}
-        {/* 상태 카드 */}
-        <div className="pet-status-cards">
-          {statusCards.map((card) => (
-            <div className="status-card" key={card.id}>
-              <div className="status-icon">{card.icon}</div>
-              <div className="status-label">{card.label}</div>
-            </div>
-          ))}
+      </div>
+
+      {/* 3번 영역: 백신 자동예약 검진 카드 */}
+      <div className="grid-area-3">
+        <div className="vaccine-check-card">
+          <h3>펫 자동예약 검진 카드</h3>
+          <p className="vaccine-subtitle">(예시 - 모든 강아지 접종)</p>
+          <div className="vaccine-progress-list">
+            {Object.entries(vaccineProgress).map(([vaccineType, progress]) => (
+              <div key={vaccineType} className="vaccine-progress-item">
+                <span className="vaccine-name">{vaccineType}</span>
+                <div className="progress-dots">
+                  {Array.from({ length: progress.total }, (_, index) => (
+                    <span
+                      key={index}
+                      className={`progress-dot ${
+                        index < progress.completed ? 'completed' : ''
+                      }`}
+                    >
+                      ●
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="vaccine-note">
+            (접종 완료된 만큼 체크, 안된 항목은 빈칸처리)
+          </p>
         </div>
       </div>
 
-      {/* 3. 백신 정보 배너: 고정 크기, 가로 스크롤 */}
-      <div className="healthnote-vaccine-banner-scroll">
-        <div className="healthnote-vaccine-banner-inner">
-          {vaccineCards.length > 0 ? (
-            vaccineCards.map((card) => (
-              <div className="vaccine-card fixed" key={card.id}>
-                <div className="vaccine-title">{card.title}</div>
-                <div className="vaccine-desc">{card.desc}</div>
+      {/* 4번 영역: 접종 히스토리 */}
+      <div className="grid-area-4">
+        <div className="vaccine-history-cards">
+          {completedReservations.length > 0 ? (
+            completedReservations.slice(0, 3).map((res, index) => (
+              <div key={index} className="vaccine-history-card">
+                <div className="history-title">접종 히스토리</div>
+                <div className="history-content">
+                  {res.vaccineDescription} -{' '}
+                  {new Date(res.reservationDateTime).toLocaleDateString()}
+                </div>
               </div>
             ))
           ) : (
-            <div className="vaccine-card fixed">
-              <div className="vaccine-title">접종 정보</div>
-              <div className="vaccine-desc">아직 완료된 접종이 없습니다.</div>
+            <div className="vaccine-history-card">
+              <div className="history-title">접종 히스토리</div>
+              <div className="history-content">
+                아직 완료된 접종이 없습니다.
+              </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* 예약 현황 목록 UI */}
-      <div className="reservation-list" style={{ marginTop: '2rem' }}>
-        <h3>예약 현황</h3>
-        {reservationsForSelectedPet.length > 0 ? (
-          reservationsForSelectedPet.map((res) => (
-            <div key={res.reservationId} className="reservation-card">
-              <div className="card-header">
-                <h3>{res.hospitalName}</h3>
-                <span
-                  className={`status-badge status-${res.reservationStatus.toLowerCase()}`}
-                >
-                  {res.reservationStatus}
-                </span>
-              </div>
-              <div className="card-body">
-                <p>
-                  <strong>예약 일시:</strong>{' '}
-                  {new Date(res.reservationDateTime).toLocaleString()}
-                </p>
-                <p>
-                  <strong>접종 항목:</strong> {res.vaccineDescription}
-                </p>
-                <p>
-                  <strong>총 금액:</strong> {res.totalAmount?.toLocaleString()}
-                  원 (예약금: {res.deposit?.toLocaleString()}원)
-                </p>
-                {res.reservationStatus === 'PENDING' && (
-                  <p className="payment-due">
-                    <strong>결제 기한:</strong>{' '}
-                    {new Date(res.paymentDueDate).toLocaleString()}
+      {/* 5번 영역: 자동 예약 관리 */}
+      <div className="grid-area-5">
+        <h3>자동 예약 관리</h3>
+        <div className="reservation-list">
+          {reservationsForSelectedPet.length > 0 ? (
+            reservationsForSelectedPet.map((res) => (
+              <div key={res.reservationId} className="reservation-card">
+                <div className="card-header">
+                  <h3>{res.hospitalName}</h3>
+                  <span
+                    className={`status-badge status-${res.reservationStatus.toLowerCase()}`}
+                  >
+                    {res.reservationStatus}
+                  </span>
+                </div>
+                <div className="card-body">
+                  <p>
+                    <strong>예약 일시:</strong>{' '}
+                    {new Date(res.reservationDateTime).toLocaleString()}
                   </p>
-                )}
+                  <p>
+                    <strong>접종 항목:</strong> {res.vaccineDescription}
+                  </p>
+                  <p>
+                    <strong>총 금액:</strong>{' '}
+                    {res.totalAmount?.toLocaleString()}원 (예약금:{' '}
+                    {res.deposit?.toLocaleString()}원)
+                  </p>
+                  {res.reservationStatus === 'PENDING' && (
+                    <p className="payment-due">
+                      <strong>결제 기한:</strong>{' '}
+                      {new Date(res.paymentDueDate).toLocaleString()}
+                    </p>
+                  )}
+                </div>
+                <div className="card-actions">
+                  {res.reservationStatus === 'PENDING' && (
+                    <button className="btn-pay" onClick={() => handlePay(res)}>
+                      결제하기
+                    </button>
+                  )}
+                  {res.reservationStatus === 'CONFIRMED' && (
+                    <button
+                      className="btn-complete"
+                      onClick={() => handleComplete(res.reservationId)}
+                    >
+                      접종 완료
+                    </button>
+                  )}
+                  {(res.reservationStatus === 'PENDING' ||
+                    res.reservationStatus === 'CONFIRMED') && (
+                    <button
+                      className="btn-cancel"
+                      onClick={() => handleCancel(res.reservationId)}
+                    >
+                      예약 취소
+                    </button>
+                  )}
+                </div>
               </div>
-              <div className="card-actions">
-                {/* ✅ 모든 버튼에 각각의 핸들러 함수를 연결합니다. */}
-                {res.reservationStatus === 'PENDING' && (
-                  <button className="btn-pay" onClick={() => handlePay(res)}>
-                    결제하기
-                  </button>
-                )}
-                {res.reservationStatus === 'CONFIRMED' && (
-                  <button
-                    className="btn-complete"
-                    onClick={() => handleComplete(res.reservationId)}
-                  >
-                    접종 완료
-                  </button>
-                )}
-                {(res.reservationStatus === 'PENDING' ||
-                  res.reservationStatus === 'CONFIRMED') && (
-                  <button
-                    className="btn-cancel"
-                    onClick={() => handleCancel(res.reservationId)}
-                  >
-                    예약 취소
-                  </button>
-                )}
-              </div>
-            </div>
-          ))
-        ) : (
-          <p>선택된 펫의 예약 내역이 없습니다.</p>
-        )}
-      </div>
-
-      {/* 히스토리 섹션 추가 */}
-      <div className="healthnote-history">
-        <div className="history-title">접종 히스토리</div>
-        <ul className="history-list">
-          {historyList.length > 0 ? (
-            historyList.map((item) => (
-              <li key={item.id} className="history-item">
-                <span className="history-date">{item.date}</span>
-                <span className="history-event">{item.event}</span>
-              </li>
             ))
           ) : (
-            <li className="history-item">
-              <span className="history-date">-</span>
-              <span className="history-event">
-                아직 접종 히스토리가 없습니다.
-              </span>
-            </li>
+            <p>선택된 펫의 예약 내역이 없습니다.</p>
           )}
-        </ul>
+        </div>
       </div>
     </div>
   );

@@ -1,16 +1,25 @@
 package com.petory.service;
 
-import com.petory.constant.ReservationStatus;
-import com.petory.constant.VaccineType;
-import com.petory.dto.autoReservation.*;
-import com.petory.entity.Pet;
-import com.petory.entity.Reservation;
-import com.petory.repository.PetRepository;
-import com.petory.repository.ReservationRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.*;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
@@ -18,13 +27,23 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.temporal.TemporalAdjusters;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import com.petory.constant.ReservationStatus;
+import com.petory.constant.VaccineType;
+import com.petory.dto.autoReservation.AvailableSlotResponseDto;
+import com.petory.dto.autoReservation.DetailedSlotSearchResponseDto;
+import com.petory.dto.autoReservation.ReservationConfirmRequestDto;
+import com.petory.dto.autoReservation.SlotSearchRequestDto;
+import com.petory.dto.autoReservation.VaccineDateInfo;
+import com.petory.entity.Member;
+import com.petory.entity.Pet;
+import com.petory.entity.Reservation;
+import com.petory.repository.MemberRepository;
+import com.petory.repository.PaymentMethodRepository;
+import com.petory.repository.PetRepository;
+import com.petory.repository.ReservationRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Transactional
@@ -35,6 +54,8 @@ public class AutoReservationService {
   private final PetRepository petRepository;
   private final ReservationRepository reservationRepository;
   private final RestTemplate restTemplate;
+  private final PaymentMethodRepository paymentMethodRepository;
+  private final MemberRepository memberRepository;
 
   /**
    * [수정] 백신별 예약 가능일과, 가장 빠른 날짜의 병원 목록을 함께 반환합니다.
@@ -94,9 +115,17 @@ public class AutoReservationService {
     Map<VaccineType, Long> completedCounts = getCompletedCounts(pet);
     Optional<Reservation> lastCompleted = reservationRepository.findTopByPetAndReservationStatusOrderByReservationDateTimeDesc(pet, ReservationStatus.COMPLETED);
 
-    return targetVaccineNames.stream()
+    log.info("펫 ID {}의 다음 예약 계산 시작. 대상 백신: {}", pet.getPet_Num(), targetVaccineNames);
+
+    List<VaccineDateInfo> result = targetVaccineNames.stream()
       .map(VaccineType::valueOf)
-      .filter(vaccine -> completedCounts.getOrDefault(vaccine, 0L) < vaccine.getTotalShots())
+      .filter(vaccine -> {
+        long completed = completedCounts.getOrDefault(vaccine, 0L);
+        boolean needsMore = completed < vaccine.getTotalShots();
+        log.info("백신 {}: 완료 {}회 / 총 {}회 필요 -> 다음 예약 필요: {}", 
+                vaccine.name(), completed, vaccine.getTotalShots(), needsMore);
+        return needsMore;
+      })
       .map(vaccine -> {
         long alreadyDone = completedCounts.getOrDefault(vaccine, 0L);
         LocalDate idealDate = pet.getPet_Birth().plusWeeks(vaccine.getStartWeeks()).plusWeeks(alreadyDone * vaccine.getIntervalWeeks());
@@ -105,17 +134,22 @@ public class AutoReservationService {
         LocalDate minIntervalDate = lastCompleted.map(r -> r.getReservationDateTime().toLocalDate().plusWeeks(3)).orElse(today); // 규칙B: 마지막 접종일로부터 최소 3주 간격
         LocalDate earliestPossibleDate = minGracePeriodDate.isAfter(minIntervalDate) ? minGracePeriodDate : minIntervalDate; // 두 규칙 중 더 나중 날짜 선택
         LocalDate finalDate = idealDate.isBefore(earliestPossibleDate) ? earliestPossibleDate : idealDate; // 최종 예약 가능일 조정
+        
+        log.info("백신 {}: {}회차 예약일 계산 완료 -> {}", vaccine.name(), alreadyDone + 1, finalDate);
         return new VaccineDateInfo(vaccine.name(), vaccine.getDescription(), finalDate);
       })
       .sorted(Comparator.comparing(VaccineDateInfo::getDate))
       .collect(Collectors.toList());
+    
+    log.info("펫 ID {}의 다음 예약 계산 완료. 결과: {}개", pet.getPet_Num(), result.size());
+    return result;
   }
 
   /**
    * [공통-private] 완료된 접종 횟수를 계산하는 헬퍼 메서드
    */
   private Map<VaccineType, Long> getCompletedCounts(Pet pet) {
-    return reservationRepository.findByPetAndReservationStatus(pet, ReservationStatus.COMPLETED).stream()
+    Map<VaccineType, Long> counts = reservationRepository.findByPetAndReservationStatus(pet, ReservationStatus.COMPLETED).stream()
       .map(Reservation::getVaccineTypes)
       .filter(Objects::nonNull)
       .flatMap(names -> Arrays.stream(names.split(",")))
@@ -124,6 +158,11 @@ public class AutoReservationService {
       .map(this::getVaccineTypeOrNull)
       .filter(Objects::nonNull)
       .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+    
+    // 디버깅을 위한 로그 추가
+    log.info("펫 ID {}의 완료된 접종 횟수: {}", pet.getPet_Num(), counts);
+    
+    return counts;
   }
 
   private VaccineType getVaccineTypeOrNull(String name) {
@@ -190,9 +229,35 @@ public class AutoReservationService {
     return createReservation(requestDto, ReservationStatus.PENDING);
   }
 
-  // (새로 만든 CONFIRMED 상태로 저장하는 메서드), 현재 상태에선 사용 X
+  // (새로 만든 CONFIRMED 상태로 저장하는 메서드)
   public Reservation confirmAndPayReservation(ReservationConfirmRequestDto requestDto) {
-    return createReservation(requestDto, ReservationStatus.CONFIRMED);
+    // 1. 현재 로그인한 사용자 정보 조회
+    String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+    Member member = memberRepository.findByMember_Email(userEmail)
+      .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+    // 2. 결제 수단 등록 여부 확인
+    if (paymentMethodRepository.findByMember(member).isEmpty()) {
+      throw new IllegalStateException("결제 수단이 등록되어 있지 않습니다. 결제 수단을 먼저 등록해주세요.");
+    }
+
+    // 기존 로직 (PENDING 예약이 있으면 상태만 변경, 없으면 새로 생성)
+    Pet pet = petRepository.findById(requestDto.getPetId())
+      .orElseThrow(() -> new IllegalArgumentException("해당 펫을 찾을 수 없습니다."));
+    Optional<Reservation> existingPendingReservation = reservationRepository.findByPetAndReservationStatus(pet, ReservationStatus.PENDING)
+      .stream()
+      .filter(r -> r.getReservedHospitalId().equals(requestDto.getHospitalId()) &&
+                   r.getReservedDate().equals(LocalDate.parse(requestDto.getTargetDate())) &&
+                   r.getReservedTimeSlot().equals(requestDto.getTimeSlot()))
+      .findFirst();
+    if (existingPendingReservation.isPresent()) {
+      Reservation existingReservation = existingPendingReservation.get();
+      existingReservation.setReservationStatus(ReservationStatus.CONFIRMED);
+      log.info("기존 PENDING 예약(ID: {})을 CONFIRMED로 업데이트했습니다.", existingReservation.getId());
+      return existingReservation;
+    } else {
+      return createReservation(requestDto, ReservationStatus.CONFIRMED);
+    }
   }
 
   private Reservation createReservation(ReservationConfirmRequestDto requestDto, ReservationStatus status) {

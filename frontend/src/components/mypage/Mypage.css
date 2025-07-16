@@ -1,7 +1,8 @@
 .mypage-container {
   display: flex;
   flex-direction: row;
-  min-height: 100vh;
+  min-height: calc(100vh - 200px);
+  height: auto;
 }
 
 .sidebar {
@@ -13,10 +14,14 @@
   flex-direction: column;
   justify-content: flex-start;
   box-sizing: border-box;
+  height: auto;
+  min-height: calc(100vh - 200px);
+  position: relative;
 }
 
 .mypage-content {
   flex: 1;
   padding: 2rem;
   background-color: #f9f9f9;
+  min-height: calc(100vh - 200px);
 }

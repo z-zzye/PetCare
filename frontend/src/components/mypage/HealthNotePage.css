@@ -1,245 +1,277 @@
-.healthnote-container {
+/* --- 메인 그리드 레이아웃 --- */
+.healthnote-grid-container {
+  display: grid;
+  grid-template-areas:
+    'area1 area2 area3'
+    'area4 area4 area3'
+    'area5 area5 area5';
+  /* 템플릿 컬럼 비율을 조정하여 화면에 맞게 설정합니다. */
+  grid-template-columns: 1fr 1.5fr 1.5fr;
+  grid-template-rows: auto auto 1fr; /* 5번 영역이 남은 공간을 채우도록 */
+  gap: 2rem;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: 100vh; /* 페이지 전체 높이를 차지하도록 */
+}
+
+/* --- 그리드 영역 할당 --- */
+.grid-area-1 { grid-area: area1; }
+.grid-area-2 { grid-area: area2; }
+.grid-area-3 { grid-area: area3; }
+.grid-area-4 { grid-area: area4; }
+.grid-area-5 { grid-area: area5; }
+
+/* 각 영역 내부 정렬 (필요시) */
+.grid-area-1, .grid-area-2, .grid-area-3, .grid-area-4 {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  justify-content: center; /* 아이템을 중앙 정렬 */
+}
+
+/* 4번 영역은 히스토리 카드를 중앙에 배치 */
+.grid-area-4 {
   align-items: center;
 }
 
-/* 1. 펫 선택 가로 스크롤 리스트 */
-.pet-scroll-list {
-  display: flex;
-  gap: 1rem;
-  overflow-x: auto;
-  padding-bottom: 0.5rem;
-  margin-bottom: 1rem;
-  scrollbar-width: thin;
-  justify-content: center;
+/* --- 1. 펫 드롭다운 --- */
+.pet-dropdown-container {
+  width: 100%;
 }
-.pet-scroll-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  cursor: pointer;
-  border: 2px solid transparent;
-  border-radius: 16px;
-  padding: 0.5rem 1rem;
-  transition: border 0.2s;
-  min-width: 80px;
-  text-align: center;
-}
-.pet-scroll-item.selected {
+.pet-dropdown {
+  width: 100%;
+  padding: 0.75rem;
   border: 2px solid #3a5ad7;
-  background: #f7faff;
+  border-radius: 8px;
+  background: white;
+  font-size: 1rem;
+  cursor: pointer;
 }
-.pet-scroll-img {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-bottom: 0.3rem;
-}
-.pet-scroll-name {
-  font-size: 0.95rem;
-  font-weight: 500;
-  text-align: center;
+.pet-dropdown:focus {
+  outline: none;
+  border-color: #2c4bb8;
 }
 
-.healthnote-top {
+/* --- 2. 펫 프로필 섹션 --- */
+.pet-profile-section {
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: 1rem;
   justify-content: center;
   width: 100%;
 }
-
-.pet-profile {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  justify-content: center;
-}
-
 .pet-profile-img {
-  width: 100px;
-  height: 100px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   border: 3px solid #222;
   object-fit: cover;
 }
-
 .pet-info {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  align-items: center;
+  align-items: flex-start; /* 왼쪽 정렬 */
 }
-
 .pet-name {
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: bold;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  justify-content: center;
 }
 .pet-emoji {
-  font-size: 1.7rem;
-  margin-left: 0.2rem;
+  font-size: 1.5rem;
+  margin-left: 0.5rem;
 }
-
-.pet-birth {
-  font-size: 1rem;
+.pet-details {
+  font-size: 0.9rem;
   color: #666;
-  text-align: center;
 }
 
-.pet-status-cards {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-}
-
-.status-card {
-  width: 70px;
-  height: 70px;
+/* --- 3. 백신 검진 카드 --- */
+.vaccine-check-card {
   border: 2px solid #3a5ad7;
   border-radius: 16px;
+  padding: 1.5rem;
+  background: #f7faff;
+  text-align: center;
+  height: 100%; /* 부모(area3)의 높이를 꽉 채움 */
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  font-size: 2rem;
-  background: #fff;
-  text-align: center;
 }
-
-.status-icon {
-  font-size: 1.5rem;
-  margin-bottom: 0.2rem;
-}
-
-.status-label {
-  font-size: 0.7rem;
+.vaccine-check-card h3 {
+  margin: 0 0 0.5rem 0;
   color: #3a5ad7;
+  font-size: 1.2rem;
+}
+.vaccine-subtitle, .vaccine-note {
+  color: #666;
+  font-size: 0.9rem;
+}
+.vaccine-progress-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+.vaccine-progress-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.vaccine-name {
   font-weight: bold;
+  color: #333;
+  min-width: 80px;
+  text-align: left;
+}
+.progress-dots {
+  display: flex;
+  gap: 0.3rem;
+}
+.progress-dot {
+  font-size: 1.2rem;
+  color: #ccc;
+}
+.progress-dot.completed {
+  color: #3a5ad7;
 }
 
-/* 2. 접종 완료 카드 고정 크기 및 가로 스크롤 */
-.healthnote-vaccine-banner-scroll {
-  overflow-x: auto;
-  padding-bottom: 0.5rem;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-}
-.healthnote-vaccine-banner-inner {
+/* --- 4. 접종 히스토리 --- */
+.vaccine-history-cards {
   display: flex;
   gap: 1rem;
   justify-content: center;
+  width: 100%;
 }
-.vaccine-card.fixed {
-  min-width: 220px;
-  max-width: 220px;
+.vaccine-history-card {
   border: 2px solid #3a5ad7;
   border-radius: 16px;
   padding: 1rem;
   background: #f7faff;
-  flex: 0 0 auto;
-  box-sizing: border-box;
   text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  flex: 1; /* 가능한 공간을 균등하게 차지 */
+  max-width: 250px; /* 최대 너비 제한 */
 }
-
-.vaccine-title {
+.history-title {
+  font-size: 1rem;
   font-weight: bold;
   margin-bottom: 0.5rem;
-  text-align: center;
+  color: #3a5ad7;
 }
-
-.vaccine-desc {
+.history-content {
   color: #555;
-  text-align: center;
+  font-size: 0.9rem;
 }
 
+/* --- 5. 자동 예약 관리 --- */
+.grid-area-5 h3 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+}
 .reservation-list {
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 1.5rem;
 }
 .reservation-card {
   width: 100%;
-  max-width: 500px;
-  margin: 0 auto 1.5rem auto;
-}
-.card-header,
-.card-body,
-.card-actions {
-  text-align: center;
-}
-
-.healthnote-history {
-  border: 1px solid #ccc;
+  max-width: 800px; /* 너비 확장 */
+  border: 1px solid #ddd;
   border-radius: 12px;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+.card-header {
+  background: #f8f9fa;
   padding: 1rem;
-  background: #fafafa;
-  width: 100%;
-  max-width: 500px;
-  margin: 0 auto;
-  text-align: center;
-}
-
-.history-title {
-  font-size: 1.2rem;
-  font-weight: bold;
-  margin-bottom: 0.5rem;
-  text-align: center;
-}
-
-.history-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.history-item {
   display: flex;
-  gap: 1rem;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid #eee;
-  justify-content: center;
+  justify-content: space-between;
+  align-items: center;
+}
+.card-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+.card-body {
+  padding: 1rem;
+}
+.card-body p {
+  margin: 0.5rem 0;
+}
+.payment-due {
+  color: #dc3545;
+  font-weight: bold;
+}
+.card-actions {
+  padding: 1rem;
+  border-top: 1px solid #ddd;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end; /* 오른쪽 정렬 */
 }
 
-.history-item:last-child {
-  border-bottom: none;
+/* 버튼 스타일 (공통) */
+.btn-pay, .btn-complete, .btn-cancel {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
 }
+.btn-pay { background: #28a745; color: white; }
+.btn-complete { background: #17a2b8; color: white; }
+.btn-cancel { background: #dc3545; color: white; }
 
-.history-date {
-  color: #888;
-  min-width: 90px;
-  text-align: center;
-}
+/* 상태 뱃지 */
+.status-badge { padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
+.status-pending { background: #fff3cd; color: #856404; }
+.status-confirmed { background: #d1ecf1; color: #0c5460; }
+.status-completed { background: #d4edda; color: #155724; }
+.status-canceled { background: #f8d7da; color: #721c24; }
 
-.history-event {
-  color: #222;
-  text-align: center;
-}
-
+/* 등록된 펫이 없을 경우 */
 .no-pets-message {
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 100%;
-  color: #888;
+  height: 80vh;
   text-align: center;
 }
 
-.no-pets-message h2 {
-  font-size: 1.8rem;
-  margin-bottom: 1rem;
-  text-align: center;
+/* --- 반응형 디자인 --- */
+@media (max-width: 992px) {
+  .healthnote-grid-container {
+    grid-template-areas:
+      'area1 area1'
+      'area2 area3'
+      'area4 area4'
+      'area5 area5';
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .healthnote-grid-container {
+    grid-template-areas:
+      'area1'
+      'area2'
+      'area3'
+      'area4'
+      'area5';
+    grid-template-columns: 1fr;
+    padding: 1rem;
+    gap: 1.5rem;
+  }
+  .vaccine-history-cards {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+  .vaccine-history-card {
+    width: 100%;
+    max-width: 100%;
+  }
 }
