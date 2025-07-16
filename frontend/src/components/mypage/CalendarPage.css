@@ -1,28 +1,193 @@
 .calendar-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  padding: 1rem;
+  gap: 2rem;
+  padding: 2rem;
+  background: linear-gradient(135deg, #fff9e6 0%, #f0f8ff 100%);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(11, 49, 93, 0.1);
+  margin: 1rem;
 }
 
 .calendar-form {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.5rem;
+  background: white;
+  padding: 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(254, 182, 56, 0.2);
+  border: 2px solid #fff3cd;
 }
 
 .calendar-form input {
-  padding: 0.4rem 0.8rem;
-  border-radius: 0.5rem;
-  border: 1px solid #ccc;
+  padding: 0.8rem 1.2rem;
+  border-radius: 12px;
+  border: 2px solid #e3e6ef;
   font-size: 1rem;
+  font-family: 'Noto Sans KR', sans-serif;
+  transition: all 0.3s ease;
+  background: #fafafa;
+}
+
+.calendar-form input:focus {
+  outline: none;
+  border-color: #FEB638;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(254, 182, 56, 0.1);
 }
 
 .calendar-form button {
-  background-color: #ffcc00;
+  background: linear-gradient(135deg, #FEB638 0%, #ffcc00 100%);
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
+  padding: 0.8rem 1.5rem;
+  border-radius: 12px;
   cursor: pointer;
   font-weight: bold;
+  font-size: 1rem;
+  color: #0B315D;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(254, 182, 56, 0.3);
+}
+
+.calendar-form button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(254, 182, 56, 0.4);
+}
+
+/* FullCalendar 커스텀 스타일 */
+.fc {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(11, 49, 93, 0.1);
+  overflow: hidden;
+  border: 2px solid #fff3cd;
+}
+
+.fc-header-toolbar {
+  background: linear-gradient(135deg, #0B315D 0%, #1976d2 100%);
+  color: white;
+  padding: 1rem;
+  border-radius: 16px 16px 0 0;
+}
+
+.fc-toolbar-title {
+  font-size: 1.5rem !important;
+  font-weight: bold !important;
+  color: white !important;
+}
+
+.fc-button {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: 12px !important;
+  color: white !important;
+  font-weight: bold !important;
+  transition: all 0.3s ease !important;
+}
+
+.fc-button:hover {
+  background: rgba(255, 255, 255, 0.3) !important;
+  transform: translateY(-1px) !important;
+}
+
+.fc-daygrid-day {
+  border: 1px solid #e3e6ef !important;
+  transition: all 0.3s ease;
+}
+
+.fc-daygrid-day:hover {
+  background: #fff9e6 !important;
+}
+
+.fc-daygrid-day-number {
+  font-weight: bold !important;
+  color: #0B315D !important;
+  padding: 0.5rem !important;
+}
+
+.fc-day-today {
+  background: linear-gradient(135deg, #fff3cd 0%, #fff9e6 100%) !important;
+}
+
+.fc-event {
+  border-radius: 8px !important;
+  border: none !important;
+  font-weight: bold !important;
+  font-size: 0.9rem !important;
+  padding: 0.3rem 0.6rem !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.3s ease !important;
+}
+
+.fc-event:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.fc-daygrid-event-dot {
+  border-color: #FEB638 !important;
+}
+
+.fc-col-header-cell {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+  border: 1px solid #e3e6ef !important;
+  font-weight: bold !important;
+  color: #0B315D !important;
+  padding: 0.8rem !important;
+  text-decoration: none !important;
+}
+
+.fc-col-header-cell a {
+  text-decoration: none !important;
+  color: inherit !important;
+}
+
+/* 토요일 스타일 */
+.fc-col-header-cell:nth-child(7) {
+  color: #1976d2 !important;
+}
+
+.fc-col-header-cell:nth-child(7) a {
+  color: #1976d2 !important;
+}
+
+/* 일요일 스타일 */
+.fc-col-header-cell:first-child {
+  color: #dc3545 !important;
+}
+
+.fc-col-header-cell:first-child a {
+  color: #dc3545 !important;
+}
+
+/* 토요일 날짜 스타일 */
+.fc-daygrid-day.fc-day-sat .fc-daygrid-day-number {
+  color: #1976d2 !important;
+  text-decoration: none !important;
+}
+
+.fc-daygrid-day.fc-day-sat .fc-daygrid-day-number a {
+  text-decoration: none !important;
+  color: #1976d2 !important;
+}
+
+/* 일요일 날짜 스타일 */
+.fc-daygrid-day.fc-day-sun .fc-daygrid-day-number {
+  color: #dc3545 !important;
+  text-decoration: none !important;
+}
+
+.fc-daygrid-day.fc-day-sun .fc-daygrid-day-number a {
+  text-decoration: none !important;
+  color: #dc3545 !important;
+}
+
+/* 모든 날짜에서 언더바 제거 */
+.fc-daygrid-day-number {
+  text-decoration: none !important;
+}
+
+.fc-daygrid-day-number a {
+  text-decoration: none !important;
 }

@@ -154,11 +154,25 @@
       <version>0.11.5</version>
     </dependency>
 
+
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+      <version>20230227</version>
+    </dependency>
+
     <!--채팅 Redis에 브로드캐스팅 할 경우 의존성추가-->
     <!--<dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-redis</artifactId>
     </dependency>-->
+
+    <!--챗봇 KOMORAN-->
+    <dependency>
+      <groupId>com.github.shin285</groupId>
+      <artifactId>KOMORAN</artifactId>
+      <version>3.3.9</version>
+    </dependency>
 
 	</dependencies>
 
@@ -190,5 +204,12 @@
 			</plugin>
 		</plugins>
 	</build>
+
+  <repositories>
+    <repository>
+      <id>jitpack.io</id>
+      <url>https://jitpack.io</url>
+    </repository>
+  </repositories>
 
 </project>
