@@ -55,6 +55,7 @@ import ProfanityManagePage from './components/admin/ProfanityManagePage.jsx';
 import UserAdminPage from './components/admin/UserAdminPage';
 import ShopAdminPage from './components/admin/ShopAdminPage.jsx';
 import AuctionAdminPage from './components/admin/AuctionAdminPage.jsx';
+import AuctionDeliveryAdminPage from './components/admin/AuctionDeliveryAdminPage.jsx';
 import BoardAdminPage from './components/admin/boards/BoardAdminPage.jsx';
 
 // 챗봇 버튼 컴포넌트
@@ -186,6 +187,7 @@ function App() {
             <Route path="/admin/shop" element={<AdminRoute><ShopAdminPage /></AdminRoute>} />
             <Route path="/admin/auction" element={<AdminRoute><AuctionAdminPage /></AdminRoute>} />
             <Route path="/admin/auction/register" element={<AdminRoute><ItemRegister /></AdminRoute>} />
+            <Route path="/admin/auction-delivery" element={<AdminRoute><AuctionDeliveryAdminPage /></AdminRoute>} />
           </Routes>
         </BrowserRouter>
         {/* 로그인한 사용자만 챗봇 버튼 표시 */}

@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
@@ -146,6 +147,88 @@ public class AuctionDeliveryService {
     }
 
     /**
+     * 관리자용 - 모든 배송 정보 조회
+     */
+    public List<AuctionDeliveryDto> getAllDeliveries() {
+        return auctionDeliveryRepository.findAll()
+                .stream()
+                .map(this::convertToDto)
+                .toList();
+    }
+
+    /**
+     * 관리자용 - 배송 통계 조회
+     */
+    public Object getDeliveryStats() {
+        List<AuctionDelivery> allDeliveries = auctionDeliveryRepository.findAll();
+        
+        long totalCount = allDeliveries.size();
+        long waitingCount = allDeliveries.stream()
+                .filter(d -> d.getDeliveryAddress() == null && d.getDeliveryDeadline().isAfter(LocalDateTime.now()))
+                .count();
+        long completedCount = allDeliveries.stream()
+                .filter(d -> d.getDeliveryAddress() != null)
+                .count();
+        long expiredCount = allDeliveries.stream()
+                .filter(d -> d.getDeliveryAddress() == null && d.getDeliveryDeadline().isBefore(LocalDateTime.now()))
+                .count();
+
+        return Map.of(
+            "totalCount", totalCount,
+            "waitingCount", waitingCount,
+            "completedCount", completedCount,
+            "expiredCount", expiredCount
+        );
+    }
+
+    /**
+     * 관리자용 - 조건별 배송 정보 조회
+     */
+    public List<AuctionDeliveryDto> getFilteredDeliveries(String status, String searchTerm) {
+        List<AuctionDelivery> allDeliveries = auctionDeliveryRepository.findAll();
+        
+        return allDeliveries.stream()
+                .filter(delivery -> {
+                    // 상태 필터
+                    if (status != null && !status.isEmpty()) {
+                        switch (status) {
+                            case "WAITING":
+                                if (delivery.getDeliveryAddress() != null || 
+                                    delivery.getDeliveryDeadline().isBefore(LocalDateTime.now())) {
+                                    return false;
+                                }
+                                break;
+                            case "COMPLETED":
+                                if (delivery.getDeliveryAddress() == null) {
+                                    return false;
+                                }
+                                break;
+                            case "EXPIRED":
+                                if (delivery.getDeliveryAddress() != null || 
+                                    delivery.getDeliveryDeadline().isAfter(LocalDateTime.now())) {
+                                    return false;
+                                }
+                                break;
+                        }
+                    }
+                    
+                    // 검색어 필터
+                    if (searchTerm != null && !searchTerm.isEmpty()) {
+                        String search = searchTerm.toLowerCase();
+                        String winnerName = delivery.getAuctionHistory().getMember().getMember_NickName();
+                        String itemName = delivery.getAuctionHistory().getAuctionItem().getItem().getItemName();
+                        
+                        return winnerName.toLowerCase().contains(search) || 
+                               itemName.toLowerCase().contains(search);
+                    }
+                    
+                    return true;
+                })
+                .map(this::convertToDto)
+                .toList();
+    }
+
+    /**
      * 엔티티를 DTO로 변환
      */
     private AuctionDeliveryDto convertToDto(AuctionDelivery delivery) {
@@ -163,6 +246,9 @@ public class AuctionDeliveryService {
                 .deliveryInputAt(delivery.getDeliveryInputAt())
                 .deliveryDeadline(delivery.getDeliveryDeadline())
                 .auctionWinStatus(delivery.getAuctionHistory().getAuctionWinStatus().name())
+                .itemName(delivery.getAuctionHistory().getAuctionItem().getItem().getItemName())
+                .winnerName(delivery.getAuctionHistory().getMember().getMember_NickName())
+                .finalPrice(delivery.getAuctionHistory().getFinalPrice())
                 .build();
     }
 }

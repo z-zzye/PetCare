@@ -87,38 +87,7 @@ public class AuctionService {
     auctionSessionService.createSession(auctionItem, true);
   }
 
-  @Transactional
-  public void endAuction(Long auctionItemId, String endTime) {
-    AuctionItem auctionItem = auctionItemRepository.findById(auctionItemId)
-      .orElseThrow(() -> new IllegalArgumentException("해당 경매 상품이 존재하지 않습니다."));
-    auctionItem.setEndTime(LocalDateTime.parse(endTime));
-    auctionItem.setAuctionStatus(AuctionStatus.ENDED);
-    auctionItemRepository.save(auctionItem);
 
-    // 1. 모든 입찰자 조회
-    List<Member> participants = auctionBidRepository.findAllParticipantsByAuctionItem(auctionItem);
-
-    // 2. 최고 입찰자(낙찰자) 선정
-    Member winner = auctionBidRepository.findCurrentWinnerByAuctionItem(auctionItem).orElse(null);
-    Integer finalPrice = auctionBidRepository.findMaxBidAmountByAuctionItem(auctionItem).orElse(auctionItem.getStartPrice());
-
-    for (Member participant : participants) {
-      boolean isWinner = winner != null && participant.getMemberId().equals(winner.getMemberId());
-      AuctionWinStatus status = isWinner ? AuctionWinStatus.WIN : null;
-      AuctionHistory history = auctionHistoryService.createHistory(
-        auctionItem, participant, finalPrice, isWinner, status
-      );
-
-      // 낙찰자인 경우 AuctionDelivery 생성
-      if (isWinner && history != null) {
-        auctionDeliveryService.createDelivery(history, LocalDateTime.now().plusDays(5));
-      }
-    }
-
-    // 세션도 ENDED로 변경
-    auctionSessionService.getSessionByAuctionItem(auctionItem)
-        .ifPresent(session -> auctionSessionService.endSession(session.getId()));
-  }
 
   @Transactional
   public void forceEndAuction(Long auctionItemId) {

@@ -1,6 +1,6 @@
 package com.petory.constant;
 
-public enum AuctionSessionStatus {
+public enum AuctionSessionStatus { //경매 세션 상태
     WAITING,    // 대기중 (경매 시작 전, 세션은 생성됨)
     ACTIVE,     // 진행중 (실시간 경매 진행)
     PAUSED,     // 일시정지 (관리자가 일시 중단)

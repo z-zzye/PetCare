@@ -163,7 +163,7 @@ public class AuctionBidController { //입찰 처리
     }
 
 
-     /* 입찰 횟수 조회*/
+     /* 한 경매 상품에 대한 총 입찰 횟수 조회*/
     @GetMapping("/{auctionItemId}/count")
     public ResponseEntity<Long> getBidCount(@PathVariable Long auctionItemId) {
         log.info("입찰 횟수 조회 요청: auctionItemId={}", auctionItemId);
@@ -184,7 +184,7 @@ public class AuctionBidController { //입찰 처리
     }
 
 
-     /* 사용자 입찰 횟수 조회*/
+     /* 한 경매 상품에 대한 특정 사용자의 입찰 횟수 조회*/
     @GetMapping("/{auctionItemId}/my-count")
     public ResponseEntity<Long> getMyBidCount(
             @PathVariable Long auctionItemId,
@@ -205,22 +205,6 @@ public class AuctionBidController { //입찰 처리
         } catch (Exception e) {
             log.error("사용자 입찰 횟수 조회 실패: auctionItemId={}, error={}", auctionItemId, e.getMessage());
             return ResponseEntity.internalServerError().build();
-        }
-    }
-
-
-     /* 입찰 취소 (테스트용)*/
-    @DeleteMapping("/{bidId}")
-    public ResponseEntity<Void> cancelBid(@PathVariable Long bidId) {
-        log.info("입찰 취소 요청: bidId={}", bidId);
-
-        try {
-            auctionBidService.cancelBid(bidId);
-            return ResponseEntity.ok().build();
-
-        } catch (Exception e) {
-            log.error("입찰 취소 실패: bidId={}, error={}", bidId, e.getMessage());
-            return ResponseEntity.badRequest().build();
         }
     }
 

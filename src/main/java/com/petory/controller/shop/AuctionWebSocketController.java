@@ -115,17 +115,15 @@ public class AuctionWebSocketController { //실시간 통신
         }
     }
 
-    /*
-     * 입찰 요청을 즉시 처리
-     */
+    /* 입찰 요청을 즉시 처리*/
     private void processBidImmediately(Long auctionItemId, Member member, Integer bidAmount, String sessionId) {
-        log.info("입찰 즉시 처리 시작: auctionItemId={}, memberId={}, bidAmount={}", 
+        log.info("입찰 즉시 처리 시작: auctionItemId={}, memberId={}, bidAmount={}",
                 auctionItemId, member.getMemberId(), bidAmount);
-        
+
         try {
             // 실제 입찰 처리
             AuctionBidDto bidDto = auctionBidService.placeBidAndReturnDto(auctionItemId, member, bidAmount);
-            
+
             // 성공 알림 전송
             String sessionKey = getSessionKey(auctionItemId);
             messagingTemplate.convertAndSend("/topic/auction/" + sessionKey,
@@ -134,22 +132,22 @@ public class AuctionWebSocketController { //실시간 통신
             // 개별 성공 알림
             messagingTemplate.convertAndSend("/queue/auction/" + member.getMemberId(),
                     createBidNotification(bidDto, "입찰이 성공적으로 처리되었습니다."));
-                    
-            log.info("입찰 처리 완료: auctionItemId={}, memberId={}, bidAmount={}", 
+
+            log.info("입찰 처리 완료: auctionItemId={}, memberId={}, bidAmount={}",
                     auctionItemId, member.getMemberId(), bidAmount);
-                    
+
         } catch (IllegalArgumentException e) {
-            log.warn("입찰 실패 (유효성 검사): auctionItemId={}, memberId={}, error={}", 
+            log.warn("입찰 실패 (유효성 검사): auctionItemId={}, memberId={}, error={}",
                     auctionItemId, member.getMemberId(), e.getMessage());
             messagingTemplate.convertAndSend("/queue/auction/" + member.getMemberId(),
                     createErrorNotification("입찰 실패: " + e.getMessage()));
         } catch (IllegalStateException e) {
-            log.warn("입찰 실패 (상태 오류): auctionItemId={}, memberId={}, error={}", 
+            log.warn("입찰 실패 (상태 오류): auctionItemId={}, memberId={}, error={}",
                     auctionItemId, member.getMemberId(), e.getMessage());
             messagingTemplate.convertAndSend("/queue/auction/" + member.getMemberId(),
                     createErrorNotification("입찰 실패: " + e.getMessage()));
         } catch (Exception e) {
-            log.error("입찰 처리 실패: auctionItemId={}, memberId={}, error={}", 
+            log.error("입찰 처리 실패: auctionItemId={}, memberId={}, error={}",
                     auctionItemId, member.getMemberId(), e.getMessage());
             messagingTemplate.convertAndSend("/queue/auction/" + member.getMemberId(),
                     createErrorNotification("입찰 처리 중 오류가 발생했습니다: " + e.getMessage()));
@@ -268,7 +266,7 @@ public class AuctionWebSocketController { //실시간 통신
     }
 
 
-          /* 경매 종료 알림 */
+     /* 경매 종료 알림 */
      @MessageMapping("/auction.end")
      public void handleAuctionEnd(@Payload Long auctionItemId, Principal principal) {
          String email = principal != null ? principal.getName() : null;

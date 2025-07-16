@@ -19,7 +19,7 @@ public class AuctionController {  //기본 경매 CRUD
 
   private final AuctionService auctionService;
 
-  @PostMapping("/new") //경매 상품 등록
+  @PostMapping("/new") //경매 상품 등록(프론트에서)
   public ResponseEntity<?> registerAuction(@RequestBody AuctionItemDto auctionItemDto) {
     try {
       Long auctionId = auctionService.saveAuctionItem(auctionItemDto);
@@ -33,13 +33,13 @@ public class AuctionController {  //기본 경매 CRUD
     }
   }
 
-  @GetMapping("/list") //경매 상품목록 조회
+  @GetMapping("/list") // 경매 상품 목록 조회(메인,관리자페이지에서 사용)
   public ResponseEntity<List<AuctionItemResponseDto>> getAuctionList() {
     List<AuctionItemResponseDto> list = auctionService.getAuctionList();
     return ResponseEntity.ok(list);
   }
 
-  @GetMapping("/{auctionItemId}") // 경매 상품 단건 조회
+  @GetMapping("/{auctionItemId}") // 경매 상품 단건 조회(경매방에서 사용)
   public ResponseEntity<AuctionItemResponseDto> getAuctionItem(@PathVariable Long auctionItemId) {
     AuctionItemResponseDto item = auctionService.getAuctionItem(auctionItemId);
     if (item == null) {
@@ -50,7 +50,7 @@ public class AuctionController {  //기본 경매 CRUD
 
 
 
-  @PutMapping("/{auctionItemId}") //경매 상품 수정
+  @PutMapping("/{auctionItemId}") // 경매 상품 수정(관리자페이지에서 사용)
   public ResponseEntity<?> updateAuction(
       @PathVariable Long auctionItemId,
       @RequestBody AuctionItemDto auctionItemDto
@@ -63,7 +63,7 @@ public class AuctionController {  //기본 경매 CRUD
     }
   }
 
-  @PostMapping("/{auctionItemId}/start")
+  @PostMapping("/{auctionItemId}/start") // 경매 시작(관리자 페이지에서 사용)
   public ResponseEntity<?> startAuction(
       @PathVariable Long auctionItemId,
       @RequestBody Map<String, String> body
@@ -78,21 +78,9 @@ public class AuctionController {  //기본 경매 CRUD
     }
   }
 
-  @PostMapping("/{auctionItemId}/end")
-  public ResponseEntity<?> endAuction(
-      @PathVariable Long auctionItemId,
-      @RequestBody Map<String, String> body
-  ) {
-    try {
-      String endTime = body.get("end_time");
-      auctionService.endAuction(auctionItemId, endTime);
-      return ResponseEntity.ok("경매가 종료되었습니다.");
-    } catch (Exception e) {
-      return ResponseEntity.internalServerError().body("경매 종료 중 오류 발생: " + e.getMessage());
-    }
-  }
 
-  @PostMapping("/{auctionItemId}/force-end")
+
+  @PostMapping("/{auctionItemId}/force-end") // 경매 강제 종료 - 유찰 처리(관리자 페이지에서 사용)
   public ResponseEntity<?> forceEndAuction(@PathVariable Long auctionItemId) {
     try {
       auctionService.forceEndAuction(auctionItemId);
@@ -102,7 +90,7 @@ public class AuctionController {  //기본 경매 CRUD
     }
   }
 
-  @DeleteMapping("/{auctionItemId}")
+  @DeleteMapping("/{auctionItemId}") // 경매 상품 삭제 (관리자 페이지에서 사용)
   public ResponseEntity<?> deleteAuction(@PathVariable Long auctionItemId) {
     try {
       auctionService.deleteAuctionItem(auctionItemId);

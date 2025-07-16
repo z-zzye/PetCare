@@ -6,7 +6,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AuctionDeliveryRequestDto {
+public class AuctionDeliveryRequestDto { //입력용
     private String receiverName;
     private String receiverPhone;
     private String deliveryAddress;

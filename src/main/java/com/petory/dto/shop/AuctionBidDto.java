@@ -1,7 +1,6 @@
 package com.petory.dto.shop;
 
 import com.petory.constant.AuctionBidStatus;
-import com.petory.constant.AuctionBidFailureReason;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -27,5 +26,4 @@ public class AuctionBidDto {
     // 추가 정보
     private boolean isHighest; // 현재 최고가인지
     private AuctionBidStatus status; // 입찰 상태
-    private AuctionBidFailureReason failureReason; // 실패 사유 (status가 FAILED일 때)
 } 

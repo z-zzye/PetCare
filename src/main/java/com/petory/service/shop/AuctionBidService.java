@@ -247,14 +247,7 @@ public class AuctionBidService {
         return maxBid.map(max -> bid.getBidAmount().equals(max)).orElse(false);
     }
 
-    /*
-     * 입찰 취소 (테스트용)
-     */
-    @Transactional
-    public void cancelBid(Long bidId) {
-        log.info("입찰 취소: bidId={}", bidId);
-        auctionBidRepository.deleteById(bidId);
-    }
+
 
     /*
      * 경매 강제 종료 시 모든 입찰을 CANCELED 상태로 변경
