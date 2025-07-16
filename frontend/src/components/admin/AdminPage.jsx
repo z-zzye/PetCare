@@ -38,6 +38,11 @@ const AdminPage = () => {
             <h3>경매 관리</h3>
             <p>경매 상품과 입찰 현황을 관리합니다</p>
           </Link>
+          <Link to="/admin/hashtags" className="admin-menu-item">
+            <div className="admin-menu-icon">🏷️</div>
+            <h3>관심 태그 관리</h3>
+            <p>해시태그를 추가하고 삭제합니다</p>
+          </Link>
         </div>
       </div>
     </div>

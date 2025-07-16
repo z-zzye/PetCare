@@ -57,6 +57,7 @@ import ShopAdminPage from './components/admin/ShopAdminPage.jsx';
 import AuctionAdminPage from './components/admin/AuctionAdminPage.jsx';
 import AuctionDeliveryAdminPage from './components/admin/AuctionDeliveryAdminPage.jsx';
 import BoardAdminPage from './components/admin/boards/BoardAdminPage.jsx';
+import HashtagManagePage from './components/admin/HashtagManagePage.jsx';
 
 // 챗봇 버튼 컴포넌트
 const ChatbotButton = () => {
@@ -70,9 +71,9 @@ const ChatbotButton = () => {
 
   return (
     <>
-      <img 
-        src="/images/chatbotIcon.png" 
-        alt="챗봇" 
+      <img
+        src="/images/chatbotIcon.png"
+        alt="챗봇"
         onClick={() => setShowChatbot(true)}
         style={{
           position: "fixed",
@@ -180,6 +181,14 @@ function App() {
               element={
                 <AdminRoute>
                   <BoardAdminPage />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/hashtags"
+              element={
+                <AdminRoute>
+                  <HashtagManagePage />
                 </AdminRoute>
               }
             />
