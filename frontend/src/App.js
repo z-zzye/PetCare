@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from "react";
 import { BrowserRouter, Routes, Route } from 'react-router-dom';// BrowserRouter를 직접 사용합니다.
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { KakaoMapsScriptProvider } from './contexts/KakaoMapsScriptContext';
 import MemberLogin from './components/MemberLogin.jsx';
 import MemberSignUp from './components/MemberSignUp.jsx';
@@ -33,6 +33,7 @@ import MapServicePage from './pages/MapServicePage';
 import PaymentFailPage from './pages/PaymentFailPage.jsx'; //토스페이먼츠 쇼핑몰 구매 실패창
 import PaymentMethodPage from './components/mypage/PaymentMethodPage';
 import ChatPage from './components/chat/ChatPage.jsx'; //채팅창
+import Chatbot from "./components/chatbot/Chatbot";
 
 import BoardAdminPage from './components/admin/boards/BoardAdminPage';
 import {
@@ -48,6 +49,39 @@ import AdminPage from './components/admin/AdminPage.jsx';
 import AdminRoute from './components/admin/AdminRoute.jsx';
 import ProfanityManagePage from './components/admin/ProfanityManagePage.jsx';
 import UserAdminPage from './components/admin/UserAdminPage';
+
+// 챗봇 버튼 컴포넌트
+const ChatbotButton = () => {
+  const { isLoggedIn } = useAuth();
+  const [showChatbot, setShowChatbot] = useState(false);
+
+  // 로그인하지 않은 경우 버튼을 표시하지 않음
+  if (!isLoggedIn) {
+    return null;
+  }
+
+  return (
+    <>
+      <img 
+        src="/images/chatbotIcon.png" 
+        alt="챗봇" 
+        onClick={() => setShowChatbot(true)}
+        style={{
+          position: "fixed",
+          bottom: 30,
+          right: 30,
+          zIndex: 999,
+          width: '80px',
+          height: '80px',
+          cursor: "pointer",
+          filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.15))'
+        }}
+        aria-label="챗봇 열기"
+      />
+      {showChatbot && <Chatbot onClose={() => setShowChatbot(false)} />}
+    </>
+  );
+};
 
 function App() {
   return (
@@ -138,6 +172,8 @@ function App() {
           </Routes>
         </BrowserRouter>
       </KakaoMapsScriptProvider>
+      {/* 로그인한 사용자만 챗봇 버튼 표시 */}
+      <ChatbotButton />
     </AuthProvider>
   );
 }

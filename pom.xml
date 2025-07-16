@@ -167,6 +167,13 @@
       <artifactId>spring-boot-starter-data-redis</artifactId>
     </dependency>-->
 
+    <!--챗봇 KOMORAN-->
+    <dependency>
+      <groupId>com.github.shin285</groupId>
+      <artifactId>KOMORAN</artifactId>
+      <version>3.3.9</version>
+    </dependency>
+
 	</dependencies>
 
 	<build>
@@ -197,5 +204,12 @@
 			</plugin>
 		</plugins>
 	</build>
+
+  <repositories>
+    <repository>
+      <id>jitpack.io</id>
+      <url>https://jitpack.io</url>
+    </repository>
+  </repositories>
 
 </project>
