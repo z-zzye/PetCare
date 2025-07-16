@@ -49,6 +49,7 @@ import AdminPage from './components/admin/AdminPage.jsx';
 import AdminRoute from './components/admin/AdminRoute.jsx';
 import ProfanityManagePage from './components/admin/ProfanityManagePage.jsx';
 import UserAdminPage from './components/admin/UserAdminPage';
+import HashtagManagePage from './components/admin/HashtagManagePage.jsx';
 
 // 챗봇 버튼 컴포넌트
 const ChatbotButton = () => {
@@ -169,6 +170,14 @@ function App() {
             />
             <Route path="/admin/users" element={<UserAdminPage />} />
             <Route path="/admin/shop" element={<AdminRoute><ShopAdminPage /></AdminRoute>} />
+            <Route
+              path="/admin/hashtags"
+              element={
+                <AdminRoute>
+                  <HashtagManagePage />
+                </AdminRoute>
+              }
+            />
           </Routes>
         </BrowserRouter>
         {/* 로그인한 사용자만 챗봇 버튼 표시 */}
