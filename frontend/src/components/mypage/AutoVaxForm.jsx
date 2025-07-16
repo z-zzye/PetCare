@@ -11,6 +11,7 @@ const AutoVaxForm = ({
   petId,
   onComplete,
   onRequestPaymentRegistration,
+  savedFormData, // ✅ [신규] 저장된 폼 데이터 받기
 }) => {
   const { isLoaded } = useContext(KakaoMapsScriptContext);
   const formContainerRef = useRef(null);
@@ -41,6 +42,24 @@ const AutoVaxForm = ({
   // 상태 추가
   const [isRadiusExpanded, setIsRadiusExpanded] = useState(false);
   const [lastSearchRadius, setLastSearchRadius] = useState(5);
+
+  // ✅ [신규] 저장된 폼 데이터가 있으면 복원하는 useEffect
+  useEffect(() => {
+    if (savedFormData) {
+      console.log('저장된 폼 데이터 복원:', savedFormData);
+      setLocation(savedFormData.location);
+      setPreferredTime(savedFormData.preferredTime);
+      setPreferredDays(savedFormData.preferredDays);
+      setSearchRadius(savedFormData.searchRadius);
+      setSelectedVaccines(savedFormData.selectedVaccines);
+      setVaccineDates(savedFormData.vaccineDates || []);
+      setAvailableSlots(savedFormData.availableSlots || []);
+      setIsExpanded(savedFormData.isExpanded || false);
+      setSelectedSlot(savedFormData.selectedSlot || null);
+      setLastSearchRadius(savedFormData.lastSearchRadius || 5);
+      setIsRadiusExpanded(savedFormData.isRadiusExpanded || false);
+    }
+  }, [savedFormData]);
 
   // 백신 목록 불러오기
   useEffect(() => {
@@ -445,9 +464,21 @@ const AutoVaxForm = ({
         }
         // "다른 수단 등록/사용"을 선택한 경우
         else if (result.isDenied) {
-          // 결제 수단 등록 페이지로 이동시킵니다.
-          // (이후 로직은 해당 페이지에서 처리)
-          onRequestPaymentRegistration();
+          // ✅ [수정] 현재 폼 설정을 저장하고 결제 수단 등록 페이지로 이동
+          const currentFormData = {
+            location,
+            preferredTime,
+            preferredDays,
+            searchRadius,
+            selectedVaccines,
+            vaccineDates,
+            availableSlots,
+            isExpanded,
+            selectedSlot,
+            lastSearchRadius,
+            isRadiusExpanded,
+          };
+          onRequestPaymentRegistration(currentFormData);
         }
       }
       // --- 시나리오 2: 등록해둔 빌링 키가 없는 경우 ---
@@ -465,9 +496,21 @@ const AutoVaxForm = ({
 
         // "지금 등록하고 예약 확정"을 선택한 경우
         if (result.isConfirmed) {
-          // 결제 수단 등록 페이지로 이동시킵니다.
-          // (이후 로직은 해당 페이지에서 처리)
-          onRequestPaymentRegistration();
+          // ✅ [수정] 현재 폼 설정을 저장하고 결제 수단 등록 페이지로 이동
+          const currentFormData = {
+            location,
+            preferredTime,
+            preferredDays,
+            searchRadius,
+            selectedVaccines,
+            vaccineDates,
+            availableSlots,
+            isExpanded,
+            selectedSlot,
+            lastSearchRadius,
+            isRadiusExpanded,
+          };
+          onRequestPaymentRegistration(currentFormData);
         }
         // "나중에 등록 (예약 보류)"를 선택한 경우
         else if (result.isDenied) {

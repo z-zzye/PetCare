@@ -1,105 +1,179 @@
-import React from 'react';
-import { useAuth } from '../../contexts/AuthContext'; // 사용자 정보 가져오기
-import Header from '../Header'; // 헤더 컴포넌트
+import React, { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 import axios from '../../api/axios';
+import { useAuth } from '../../contexts/AuthContext';
+import Header from '../Header';
+import './PaymentMethodPage.css';
 
 const PaymentMethodPage = () => {
-    const { email, nickname } = useAuth();
+  const { email, nickname } = useAuth();
+  const [paymentMethod, setPaymentMethod] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
 
-    const handleRegisterCard = () => {
-        // 1. 함수가 시작되자마자 환경 변수 값을 별도의 변수에 저장합니다.
-        const storeId = process.env.REACT_APP_PORTONE_STORE_ID;
+  // 등록된 결제 수단 조회
+  useEffect(() => {
+    fetchPaymentMethod();
+  }, []);
 
-        // 2. 이 시점의 값을 콘솔에 출력합니다.
-        console.log('[handleRegisterCard] 함수 내부 storeId 값:', storeId);
+  const fetchPaymentMethod = async () => {
+    try {
+      const response = await axios.get('/payments/mock/my-method');
+      if (response.data && response.data.cardName) {
+        setPaymentMethod(response.data);
+      } else {
+        setPaymentMethod(null);
+      }
+    } catch (error) {
+      console.error('결제 수단 조회 실패:', error);
+      setPaymentMethod(null);
+    }
+  };
 
-        // 3. 코드 실행을 여기서 잠시 멈춥니다. (개발자 도구가 열려 있어야 함)
-        debugger;
+  // 새로운 결제 수단 등록
+  const handleRegisterNewCard = async () => {
+    setIsRegistering(true);
+    try {
+      // 백엔드에 저장 요청 (백엔드에서 랜덤 카드 정보 생성)
+      await axios.post('/payments/mock/register');
 
-        // 4. storeId가 문자열이 아니거나 없는 경우, 명확한 오류를 표시하고 중단합니다.
-        if (!storeId || typeof storeId !== 'string') {
-            Swal.fire(
-                '설정 오류!',
-                `가맹점 식별코드가 올바르지 않습니다. 현재 값: ${storeId}`,
-                'error'
-            );
-            return;
-        }
+      // 저장 후 다시 조회
+      await fetchPaymentMethod();
 
-        // --- 이하 로직은 이전과 동일 ---
-        if (!window.IMP) {
-            alert("결제 모듈을 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
-            return;
-        }
-        if (!email) {
-            Swal.fire('오류', '로그인 정보가 없습니다. 다시 로그인해주세요.', 'error');
-            return;
-        }
+      await Swal.fire({
+        title: '등록 완료!',
+        text: '새로운 결제 수단이 성공적으로 등록되었습니다.',
+        icon: 'success',
+        timer: 3000,
+      });
+    } catch (error) {
+      console.error('결제 수단 등록 실패:', error);
+      Swal.fire({
+        title: '등록 실패',
+        text: '결제 수단 등록 중 오류가 발생했습니다.',
+        icon: 'error',
+      });
+    } finally {
+      setIsRegistering(false);
+    }
+  };
 
-        const { IMP } = window;
-        IMP.init(storeId); // 변수에 저장된 값을 사용
+  // 결제 수단 삭제
+  const handleDeleteCard = async () => {
+    const result = await Swal.fire({
+      title: '결제 수단 삭제',
+      text: '등록된 결제 수단을 삭제하시겠습니까?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: '삭제',
+      cancelButtonText: '취소',
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+    });
 
-        const customer_uid = `petory_customer_${email}`;
+    if (result.isConfirmed) {
+      try {
+        // 백엔드에서 삭제
+        await axios.delete('/payments/mock/my-method');
 
-        IMP.request_pay({
-            pg: "html5_inicis",
-            pay_method: 'card',
-            merchant_uid: `mid_${new Date().getTime()}`,
-            name: '최초 인증결제',
-            amount: 0,
-            customer_uid: customer_uid,
-            buyer_email: email,
-            buyer_name: nickname,
-        }, async (rsp) => { // 콜백 함수
-            if (rsp.success) {
-                // 빌링키 발급 성공
-                try {
-                    // 백엔드에 `imp_uid`를 보내 최종 처리 요청
-                    await axios.post('/api/payments/portone/issue-billing-key', {
-                        imp_uid: rsp.imp_uid
-                    }, {
-                        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-                    });
+        // 삭제 후 상태 초기화
+        setPaymentMethod(null);
 
-                    Swal.fire('성공!', '결제 수단이 성공적으로 등록되었습니다.', 'success');
-                } catch (error) {
-                    console.error("서버에 빌링키 발급 요청 실패", error);
-                    Swal.fire('오류', '결제 수단 등록에 실패했습니다.', 'error');
-                }
-            } else {
-                // 빌링키 발급 실패
-                Swal.fire('실패', `카드 정보 인증에 실패했습니다. [${rsp.error_msg}]`, 'error');
-            }
+        Swal.fire({
+          title: '삭제 완료',
+          text: '결제 수단이 삭제되었습니다.',
+          icon: 'success',
+          timer: 2000,
         });
-    };
+      } catch (error) {
+        console.error('결제 수단 삭제 실패:', error);
+        Swal.fire({
+          title: '삭제 실패',
+          text: '결제 수단 삭제 중 오류가 발생했습니다.',
+          icon: 'error',
+        });
+      }
+    }
+  };
 
-    return (
-        <div>
-            <Header />
-            <div style={{ padding: '40px', textAlign: 'center' }}>
-                <h2>결제수단 등록 테스트</h2>
-                <p>자동 결제를 위한 카드 정보를 등록합니다.</p>
-                <div style={{ marginTop: '30px', border: '1px solid #eee', padding: '20px' }}>
-                    <p><strong>사용자:</strong> {nickname} ({email})</p>
-                    <button
-                        onClick={handleRegisterCard}
-                        style={{
-                            padding: '12px 25px',
-                            fontSize: '18px',
-                            cursor: 'pointer',
-                            backgroundColor: '#4CAF50',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '5px'
-                        }}
-                    >
-                        테스트용 카드 등록하기
-                    </button>
-                </div>
+  return (
+    <>
+      <Header />
+      <div className="payment-method-page">
+        <div className="payment-method-container">
+          <h1 className="page-title">{nickname}님의 결제 수단 관리</h1>
+
+          <div className="info-section">
+            <div className="info-card">
+              <h3>💳 결제 수단 관리</h3>
+              <p>
+                자동 예방접종 예약을 위한 결제 수단을 등록하고 관리할 수
+                있습니다.
+                <br />
+                <small className="mock-notice">
+                  ※ 현재는 모의 결제 시스템을 사용하고 있습니다.
+                </small>
+              </p>
             </div>
+          </div>
+
+          <div className="payment-method-content">
+            {paymentMethod ? (
+              // 등록된 결제 수단이 있는 경우
+              <div className="registered-card">
+                <div className="card-info">
+                  <div className="card-icon">💳</div>
+                  <div className="card-details">
+                    <h3>{paymentMethod.cardName}</h3>
+                    <p className="card-number">{paymentMethod.cardNumber}</p>
+                    <p className="registration-date">
+                      등록일: {new Date().toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="card-actions">
+                  <button
+                    className="btn btn-secondary"
+                    onClick={handleDeleteCard}
+                    disabled={isLoading}
+                  >
+                    삭제
+                  </button>
+                </div>
+              </div>
+            ) : (
+              // 등록된 결제 수단이 없는 경우
+              <div className="no-card">
+                <div className="no-card-icon">💳</div>
+                <h3>등록된 결제 수단이 없습니다</h3>
+                <p>자동 예방접종 예약을 위해 결제 수단을 등록해주세요.</p>
+                <button
+                  className="btn btn-primary"
+                  onClick={handleRegisterNewCard}
+                  disabled={isRegistering}
+                >
+                  {isRegistering ? '등록 중...' : '결제 수단 등록하기'}
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="usage-info">
+            <h3>📋 사용 안내</h3>
+            <ul>
+              <li>등록된 결제 수단은 자동 예방접종 예약 시 사용됩니다.</li>
+              <li>예약금과 접종 후 잔액이 자동으로 결제됩니다.</li>
+              <li>결제 수단은 언제든지 변경하거나 삭제할 수 있습니다.</li>
+              <li>
+                현재는 모의 결제 시스템으로 실제 결제가 이루어지지 않습니다.
+              </li>
+            </ul>
+          </div>
         </div>
-    );
+      </div>
+    </>
+  );
 };
 
 export default PaymentMethodPage;

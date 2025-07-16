@@ -1,14 +1,15 @@
 package com.petory.dto.autoReservation; // 패키지 경로는 실제 프로젝트에 맞게 수정하세요.
 
-import com.petory.constant.VaccineType;
-import com.petory.entity.Pet;
-import com.petory.entity.Reservation; //
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.stream.Collectors;
+
+import com.petory.constant.VaccineType;
+import com.petory.entity.Pet;
+import com.petory.entity.Reservation; //
+
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
@@ -37,6 +38,10 @@ public class ReservationDetailDto {
   private Integer deposit;
   private Integer balance;
   private Integer totalAmount;
+
+  // 6. 더미 서버 슬롯 정보 (예약 확정 시 필요)
+  private String reservedHospitalId;
+  private String reservedTimeSlot;
 
   /**
    * Reservation 엔티티를 ReservationDetailDto로 변환하는 생성자
@@ -67,6 +72,10 @@ public class ReservationDetailDto {
     } else {
       this.balance = 0;
     }
+
+    // ✅ [추가] 더미 서버 슬롯 정보 설정
+    this.reservedHospitalId = reservation.getReservedHospitalId();
+    this.reservedTimeSlot = reservation.getReservedTimeSlot();
   }
 
   private String convertVaccineNamesToDescriptions(String vaccineNames) {
