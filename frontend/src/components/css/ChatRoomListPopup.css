@@ -138,4 +138,33 @@
   text-align: center;
   padding: 2rem 0 1.5rem 0;
   font-size: 1.05rem;
+}
+
+/* 안 읽은 메시지 개수 표시 */
+.chatroom-popup-unread-badge {
+  background: #ff4757;
+  color: white;
+  border-radius: 50%;
+  min-width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: 0.5rem;
+  padding: 0 0.3rem;
+}
+
+.chatroom-popup-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.chatroom-popup-info-content {
+  flex: 1;
+  min-width: 0;
 } 
