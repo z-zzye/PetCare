@@ -236,7 +236,7 @@ public class ItemService {
 
     // 4. 옵션 변경 감지 및 soft delete/추가/수정
     List<ItemOption> existingOptions = itemOptionRepository.findByItem_ItemId(itemId);
-    List<com.petory.dto.shop.ItemOptionDto> newOptions = formDto.getOptions();
+    List<ItemOptionDto> newOptions = formDto.getOptions();
 
     boolean optionChanged = isOptionChanged(existingOptions, newOptions);
 
@@ -256,7 +256,7 @@ public class ItemService {
           }
         } else {
           // 가격/재고 변경만 반영
-          com.petory.dto.shop.ItemOptionDto dto = newOptions.stream()
+          ItemOptionDto dto = newOptions.stream()
             .filter(d -> d.getOptionId() != null && d.getOptionId().equals(option.getOptionId()))
             .findFirst().orElse(null);
           if (dto != null) {
@@ -269,7 +269,7 @@ public class ItemService {
         }
       }
       // 2) 새로 추가된 옵션 insert
-      for (com.petory.dto.shop.ItemOptionDto dto : newOptions) {
+      for (ItemOptionDto dto : newOptions) {
         if (dto.getOptionId() == null) { // 새 옵션
           ItemOption option = ItemOption.builder()
             .optionName(dto.getOptionName())
@@ -350,7 +350,7 @@ public class ItemService {
                       .build();
                   itemImageRepository.save(image);
               }
-              
+
               // 새 이미지 중 대표이미지가 있다면, 기존 대표이미지들을 모두 false로 변경
               boolean hasNewRep = imagesIsRep != null && imagesIsRep.stream().anyMatch("true"::equals);
               if (hasNewRep) {
@@ -367,10 +367,10 @@ public class ItemService {
   }
 
   // 옵션 변경 감지: 옵션 개수, 추가/삭제, 가격/재고 변경만 체크
-  private boolean isOptionChanged(List<ItemOption> existingOptions, List<com.petory.dto.shop.ItemOptionDto> newOptions) {
+  private boolean isOptionChanged(List<ItemOption> existingOptions, List<ItemOptionDto> newOptions) {
     if (existingOptions.size() != newOptions.size()) return true;
     for (ItemOption option : existingOptions) {
-      com.petory.dto.shop.ItemOptionDto dto = newOptions.stream()
+      ItemOptionDto dto = newOptions.stream()
         .filter(d -> d.getOptionId() != null && d.getOptionId().equals(option.getOptionId()))
         .findFirst().orElse(null);
       if (dto == null) return true; // 삭제됨
@@ -379,7 +379,7 @@ public class ItemService {
       }
     }
     // 새로 추가된 옵션이 있는지
-    for (com.petory.dto.shop.ItemOptionDto dto : newOptions) {
+    for (ItemOptionDto dto : newOptions) {
       if (dto.getOptionId() == null) return true;
     }
     return false;

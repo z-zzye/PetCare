@@ -4,7 +4,7 @@ import SockJS from 'sockjs-client';
 import { Stomp } from '@stomp/stompjs';
 import Header from '../Header.jsx';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { FaGavel } from 'react-icons/fa';
+import { FaGavel, FaPaw, FaPlay, FaStop, FaFlag, FaClock, FaChartBar, FaChartLine, FaUser, FaGem, FaTrophy, FaUsers } from 'react-icons/fa';
 import './AuctionRoom.css';
 
 const AuctionRoom = () => {
@@ -151,8 +151,19 @@ const AuctionRoom = () => {
 
   useEffect(() => {
     // 상품 상세 정보 fetch
-    fetch(`/api/auctions/${auctionItemId}`)
-      .then(res => res.json())
+    const token = localStorage.getItem('token');
+    fetch(`/api/auctions/${auctionItemId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    })
+      .then(res => {
+        if (res.ok) {
+          return res.json();
+        }
+        throw new Error('상품 정보 조회 실패');
+      })
       .then(data => setItem(data))
       .catch(err => console.error('상품 정보 조회 실패:', err));
   }, [auctionItemId]);
@@ -718,11 +729,17 @@ const AuctionRoom = () => {
               <hr className="item-divider" />
               <div className="auction-time-info">
                 <div className="time-item">
-                  <span className="time-label">🏁 경매 시작:</span>
+                  <span className="time-label">
+                    <FaFlag style={{ marginRight: '6px', color: '#223A5E' }} />
+                    경매 시작
+                  </span>
                   <span className="time-value">{item.start_time ? new Date(item.start_time).toLocaleString() : '정보 없음'}</span>
                 </div>
                 <div className="time-item">
-                  <span className="time-label">⏰ 경매 종료:</span>
+                  <span className="time-label">
+                    <FaClock style={{ marginRight: '6px', color: '#223A5E' }} />
+                    경매 종료
+                  </span>
                   <span className="time-value">{item.end_time ? new Date(item.end_time).toLocaleString() : '정보 없음'}</span>
                 </div>
               </div>
@@ -752,7 +769,7 @@ const AuctionRoom = () => {
                             fontWeight: 'normal'
                           }}>
                             <div style={{ marginBottom: '3px' }}>💰 {bid.입찰가.toLocaleString()}P</div>
-                            <div style={{ marginBottom: '3px' }}>👤 {bid.name}</div>
+                            <div style={{ marginBottom: '3px' }}><FaUser style={{ marginRight: '4px', color: '#223A5E' }} />{bid.name}</div>
                             <div>🕐 {bid.시간}</div>
                           </div>
                         );
@@ -781,7 +798,7 @@ const AuctionRoom = () => {
                 </LineChart>
               </ResponsiveContainer>
               <div className="graph-legend">
-                📈 입찰 시간별 변동 추이
+                 입찰 시간별 변동 추이
               </div>
             </div>
           </div>
@@ -790,7 +807,7 @@ const AuctionRoom = () => {
           <div className="auction-room-bid-section">
             <div className="bid-section">
               <h3 className="bid-title">
-                {!isAuctionEnded && '💰 마일리지 입찰하기'}
+                {!isAuctionEnded && <><FaPaw style={{ marginRight: '8px', color: '#223A5E' }} />마일리지 입찰하기</>}
               </h3>
               <div className="timer-container">
                 <div className="timer-label">남은 시간</div>
@@ -871,9 +888,12 @@ const AuctionRoom = () => {
         <div className="auction-room-history-section">
           <div className="bid-history-section">
             <div className="bid-history-header">
-              <div className="bid-history-title">📊 입찰 내역 ({bidHistory.length}건)</div>
+              <div className="bid-history-title">
+                <FaChartLine style={{ marginRight: '8px', color: '#223A5E' }} />
+                입찰 내역 ({bidHistory.length}건)
+              </div>
               <div className={`notification-status ${notificationPermission}`}>
-                🔔 알림: {notificationPermission === 'granted' ? '허용됨' : notificationPermission === 'denied' ? '거부됨' : '요청 대기 중'}
+                🔔 알림: {notificationPermission === 'granted' ? '허용' : notificationPermission === 'denied' ? '거부' : '요청 대기 중'}
               </div>
             </div>
             {bidHistory.length > 0 ? (
@@ -887,7 +907,7 @@ const AuctionRoom = () => {
                     <div key={index} className={`bid-history-item ${isHighestBid ? 'highest' : ''}`}>
                       <div className="bidder-info">
                         <span className="bidder-icon">
-                          {isHighestBid ? '🏆' : '👤'}
+                          {isHighestBid ? <FaTrophy style={{ color: '#223A5E' }} /> : <FaUser style={{ color: '#223A5E' }} />}
                         </span>
                         {bid.memberNickname || '익명'}
                       </div>
@@ -908,10 +928,11 @@ const AuctionRoom = () => {
             )}
             {/* 참여자 수, 내 입찰 정보 */}
             <div className="participant-info">
-              <b>👥 참여자 수</b>: {new Set(bidHistory.map(bid => bid.memberId)).size}명
+              <b><FaUsers style={{ marginRight: '6px', color: '#223A5E' }} />참여자 수</b>
+              <span className="participant-count">: {new Set(bidHistory.map(bid => bid.memberId)).size}명</span>
             </div>
             <div className="my-bid-info">
-              <b>💎 내 입찰 정보</b>
+              <b><FaGem style={{ marginRight: '6px', color: '#223A5E' }} />내 입찰 정보</b>
               {(() => {
                 const myBids = bidHistory.filter(bid => 
                   bid.memberId === parseInt(localStorage.getItem('memberId'))
@@ -919,7 +940,7 @@ const AuctionRoom = () => {
                 const myHighestBid = myBids.length > 0 ? 
                   Math.max(...myBids.map(bid => bid.bidAmount)) : 0;
                 return (
-                  <div>
+                  <div className="bid-detail">
                     <div>내 최고 입찰가: <b>{myHighestBid.toLocaleString()}P</b></div>
                     <div>내 입찰 횟수: <b>{myBids.length}회</b></div>
                   </div>

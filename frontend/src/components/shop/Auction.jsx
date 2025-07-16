@@ -92,8 +92,8 @@ const Auction = () => {
           <div 
             style={{
               position: 'fixed',
-              right: '2rem',
-              bottom: '6rem', // 마일리지 위젯 위에 위치
+              right: '3rem',
+              bottom: '7rem', 
               background: '#223A5E',
               color: '#fff',
               borderRadius: '1.2rem',
@@ -126,8 +126,8 @@ const Auction = () => {
           {/* 오른쪽 상단 플로팅 마일리지 위젯 */}
           <div style={{
             position: 'fixed',
-            right: '2rem',
-            top: '2rem',
+            right: '3rem',
+            top: '15rem',
             background: '#FFB300',
             color: '#223A5E',
             borderRadius: '1.2rem',

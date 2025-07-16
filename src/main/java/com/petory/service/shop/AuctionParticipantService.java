@@ -8,6 +8,7 @@ import com.petory.entity.shop.AuctionSession;
 import com.petory.repository.shop.AuctionItemRepository;
 import com.petory.repository.shop.AuctionParticipantRepository;
 import com.petory.repository.shop.AuctionBidRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -46,15 +47,15 @@ public class AuctionParticipantService {
     @Transactional
     public AuctionParticipant joinSession(Long sessionId, Member member, String connectionId) {
         log.info("참여자 입장: sessionId={}, memberId={}, connectionId={}", sessionId, member.getMemberId(), connectionId);
-
+        
         // 세션 존재 확인
         Optional<AuctionSession> sessionOpt = auctionSessionService.getSessionById(sessionId);
         if (sessionOpt.isEmpty()) {
             throw new IllegalArgumentException("존재하지 않는 세션입니다: " + sessionId);
         }
-
+        
         AuctionSession session = sessionOpt.get();
-
+        
         // 이미 참여 중인지 확인
         Optional<AuctionParticipant> existingParticipant = auctionParticipantRepository.findBySessionAndMember(session, member);
         if (existingParticipant.isPresent()) {
@@ -66,7 +67,7 @@ public class AuctionParticipantService {
             log.info("기존 참여자 재접속: participantId={}", participant.getId());
             return auctionParticipantRepository.save(participant);
         }
-
+        
         // 새로운 참여자 생성
         AuctionParticipant participant = AuctionParticipant.builder()
                 .session(session)
@@ -76,7 +77,7 @@ public class AuctionParticipantService {
                 .lastActivity(LocalDateTime.now())
                 .isActive(true)
                 .build();
-
+        
         AuctionParticipant savedParticipant = auctionParticipantRepository.save(participant);
         log.info("새로운 참여자 입장: participantId={}", savedParticipant.getId());
         return savedParticipant;
@@ -88,10 +89,10 @@ public class AuctionParticipantService {
     @Transactional
     public void leaveSession(Long sessionId, Member member) {
         log.info("참여자 퇴장: sessionId={}, memberId={}", sessionId, member.getMemberId());
-
+        
         Optional<AuctionSession> sessionOpt = auctionSessionService.getSessionById(sessionId);
         if (sessionOpt.isEmpty()) return;
-
+        
         AuctionSession session = sessionOpt.get();
         Optional<AuctionParticipant> participantOpt = auctionParticipantRepository.findBySessionAndMember(session, member);
         if (participantOpt.isPresent()) {
@@ -109,16 +110,16 @@ public class AuctionParticipantService {
     @Transactional
     public void updateBidInfo(Long sessionId, Member member, Integer bidAmount) {
         log.info("입찰 정보 업데이트: sessionId={}, memberId={}, bidAmount={}", sessionId, member.getMemberId(), bidAmount);
-
+        
         Optional<AuctionSession> sessionOpt = auctionSessionService.getSessionById(sessionId);
         if (sessionOpt.isEmpty()) return;
-
+        
         AuctionSession session = sessionOpt.get();
         auctionParticipantRepository.findBySessionAndMember(session, member)
                 .ifPresent(participant -> {
                     participant.setLastActivity(LocalDateTime.now());
                     auctionParticipantRepository.save(participant);
-
+                    
                     log.info("참여자 활동 시간 업데이트 완료: participantId={}", participant.getId());
                 });
     }
@@ -129,7 +130,7 @@ public class AuctionParticipantService {
     public List<AuctionParticipant> getActiveParticipants(Long sessionId) {
         Optional<AuctionSession> sessionOpt = auctionSessionService.getSessionById(sessionId);
         if (sessionOpt.isEmpty()) return List.of();
-
+        
         return auctionParticipantRepository.findBySessionAndIsActiveTrue(sessionOpt.get());
     }
 
@@ -139,7 +140,7 @@ public class AuctionParticipantService {
     public long getActiveParticipantCount(Long sessionId) {
         Optional<AuctionSession> sessionOpt = auctionSessionService.getSessionById(sessionId);
         if (sessionOpt.isEmpty()) return 0;
-
+        
         return auctionParticipantRepository.countBySessionAndIsActiveTrue(sessionOpt.get());
     }
 
@@ -156,17 +157,17 @@ public class AuctionParticipantService {
     @Transactional
     public AuctionParticipantDto joinSessionByAuctionItem(Long auctionItemId, Member member, String connectionId) {
         log.info("경매 상품으로 세션 참여: auctionItemId={}, memberId={}", auctionItemId, member.getMemberId());
-
+        
         // 경매 상품 존재 확인
         AuctionItem auctionItem = auctionItemRepository.findById(auctionItemId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 경매입니다: " + auctionItemId));
-
+        
         // 경매 상품으로 세션 조회
         Optional<AuctionSession> sessionOpt = auctionSessionService.getSessionByAuctionItem(auctionItem);
         if (sessionOpt.isEmpty()) {
             throw new IllegalArgumentException("경매 세션이 생성되지 않았습니다. 관리자에게 문의해주세요: " + auctionItemId);
         }
-
+        
         AuctionSession session = sessionOpt.get();
         AuctionParticipant participant = joinSession(session.getId(), member, connectionId);
         return convertToDto(participant);
@@ -177,13 +178,13 @@ public class AuctionParticipantService {
      */
     public AuctionParticipantDto convertToDto(AuctionParticipant participant) {
         if (participant == null) return null;
-
+        
         // 실시간으로 입찰 정보 계산
         Long totalBids = auctionBidRepository.countByAuctionItemAndMember(
             participant.getSession().getAuctionItem(), participant.getMember());
         Integer highestBidAmount = auctionBidRepository.findMaxBidAmountByAuctionItemAndMember(
             participant.getSession().getAuctionItem(), participant.getMember()).orElse(0);
-
+        
         return AuctionParticipantDto.builder()
                 .participantId(participant.getId())
                 .sessionId(participant.getSession().getId())
@@ -204,4 +205,4 @@ public class AuctionParticipantService {
                 .totalParticipants((int) getActiveParticipantCount(participant.getSession().getId()))
                 .build();
     }
-}
+} 

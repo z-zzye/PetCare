@@ -5,7 +5,7 @@
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 40px 20px;
+  padding: 20px 20px;
   background: #fff;
   min-height: 100vh;
 }
@@ -17,7 +17,7 @@
   margin: 0 auto;
   background: #fff;
   border-radius: 16px;
-  padding: 24px 24px 0 24px;
+  padding: 0 24px 0 24px;
   margin-bottom: 8px;
 }
 
@@ -29,11 +29,15 @@
   gap: 16px;
   max-width: 1200px;
   margin: 0 auto;
+  padding-top: 10px;
 }
 
 .auction-room-image-section {
   grid-column: 1;
   grid-row: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .auction-room-info-section {
@@ -110,10 +114,9 @@
   width: 100%;
   max-width: 500px;
   height: 500px;
-  border-radius: 6px;
+  border-radius: 4px;
   object-fit: cover;
   background: #ffffff;
-  padding: 24px;
 }
 
 /* 오른쪽 컬럼: 그래프 + 입찰 + 내역 */
@@ -146,7 +149,6 @@
 /* 상품 정보 카드 */
 .product-info-card {
   width: 100%;
-  max-width: 500px;
   background: #fff;
   border-radius: 16px;
   padding: 24px;
@@ -157,6 +159,7 @@
   font-size: 24px;
   font-weight: bold;
   margin-bottom: 16px;
+  padding-top: 10px;
   color: #223A5E;
 }
 
@@ -278,7 +281,7 @@
 }
 
 .notification-status.granted {
-  color: #4caf50;
+  color: #223A5E;
 }
 
 .notification-status.denied {
@@ -389,30 +392,35 @@
 
 /* 낙찰 성공 알림 */
 .winner-alert {
-  color: #2e7d32;
+  color: #223A5E;
   margin-top: 8px;
   font-weight: bold;
   padding: 12px 16px;
-  background-color: #e8f5e8;
+  background-color: #ffffff;
   border-radius: 8px;
-  border: 1px solid #2e7d32;
+  border: 2px solid #223A5E;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 12px;
   text-align: center;
-  box-shadow: 0 2px 8px rgba(46, 125, 50, 0.2);
 }
 
 .delivery-button {
   margin-left: 8px;
   padding: 6px 16px;
-  background: #1976d2;
+  background: #223A5E;
   color: white;
   border: none;
   border-radius: 4px;
   font-weight: bold;
   cursor: pointer;
   font-size: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.delivery-button:hover {
+  background: #4A5F7A;
 }
 
 /* 입찰 내역 */
@@ -506,7 +514,6 @@
 .bid-history-item .bid-time {
   font-size: 0.8rem;
   color: #888;
-  font-style: italic;
 }
 
 .bid-history-item.highest .bid-time {
@@ -527,11 +534,40 @@
 
 /* 참여자 정보 */
 .participant-info {
-  margin-bottom: 8px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.participant-info b {
+  color: #223A5E;
+  font-weight: bold;
+}
+
+.participant-info .participant-count {
+  color: #666;
+  font-weight: normal;
 }
 
 .my-bid-info {
+  margin-top: 16px;
+}
+
+.my-bid-info b {
+  color: #223A5E;
+  font-weight: bold;
+}
+
+.my-bid-info .bid-detail {
   margin-top: 8px;
+  color: #666;
+  padding-left: 20px;
+}
+
+.my-bid-info .bid-detail b {
+  color: #223A5E;
+  font-weight: bold;
 }
 
 /* 그래프 컨테이너 */
@@ -555,7 +591,6 @@
   text-align: center;
   font-size: 0.9rem;
   color: #666;
-  font-style: italic;
   padding: 8px;
   background: #f8f9fa;
   border-radius: 8px;

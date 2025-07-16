@@ -6,10 +6,12 @@ import com.petory.entity.shop.AuctionHistory;
 import com.petory.entity.shop.AuctionItem;
 import com.petory.repository.shop.AuctionHistoryRepository;
 import com.petory.repository.shop.ItemRepository;
+import com.petory.constant.AuctionWinStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,7 +32,7 @@ public class AuctionHistoryService {
      * 경매 히스토리 생성 (경매 종료 시)
      */
     @Transactional
-    public AuctionHistory createHistory(AuctionItem auctionItem, Member member, Integer finalPrice, boolean isWinner, com.petory.constant.AuctionWinStatus auctionWinStatus) {
+    public AuctionHistory createHistory(AuctionItem auctionItem, Member member, Integer finalPrice, boolean isWinner, AuctionWinStatus auctionWinStatus) {
         log.info("경매 히스토리 생성: auctionItemId={}, memberId={}, finalPrice={}, isWinner={}",
                 auctionItem.getId(), member.getMemberId(), finalPrice, isWinner);
 

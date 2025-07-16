@@ -1,5 +1,6 @@
 package com.petory.entity.shop;
 
+import com.petory.entity.shop.CartItem;
 import com.petory.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;

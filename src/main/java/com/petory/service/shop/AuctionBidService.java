@@ -8,9 +8,14 @@ import com.petory.entity.shop.AuctionItem;
 import com.petory.repository.shop.AuctionBidRepository;
 import com.petory.repository.shop.AuctionItemRepository;
 import com.petory.repository.MemberRepository;
+import com.petory.service.shop.AuctionHistoryService;
+import com.petory.service.shop.AuctionDeliveryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,11 +61,11 @@ public class AuctionBidService {
                 retryCount++;
                 log.warn("동시 입찰 감지 - 재시도 {}: auctionItemId={}, memberId={}, error={}",
                         retryCount, auctionItemId, member.getMemberId(), e.getMessage());
-
+                
                 if (retryCount >= MAX_RETRY_COUNT) {
                     throw new IllegalStateException("동시 입찰이 너무 많습니다. 잠시 후 다시 시도해주세요.");
                 }
-
+                
                 // 잠시 대기 후 재시도
                 try {
                     Thread.sleep(100 * retryCount); // 재시도마다 대기 시간 증가
@@ -70,7 +75,7 @@ public class AuctionBidService {
                 }
             }
         }
-
+        
         throw new IllegalStateException("입찰 처리에 실패했습니다.");
     }
 
@@ -331,7 +336,7 @@ public class AuctionBidService {
             // 최종 낙찰가 (경매의 최고 입찰가)
             Integer finalPrice = winningBidAmount;
             AuctionHistory history = auctionHistoryService.createHistory(auctionItem, member, finalPrice, isWinner, isWinner ? com.petory.constant.AuctionWinStatus.WIN : null);
-
+            
             // 낙찰자인 경우 AuctionDelivery 생성
             if (isWinner && history != null) {
                 auctionDeliveryService.createDelivery(history, LocalDateTime.now().plusDays(5));

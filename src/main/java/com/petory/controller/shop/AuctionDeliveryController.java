@@ -3,6 +3,7 @@ package com.petory.controller.shop;
 import com.petory.config.CustomUserDetails;
 import com.petory.dto.shop.AuctionDeliveryDto;
 import com.petory.dto.shop.AuctionDeliveryRequestDto;
+import com.petory.entity.Member;
 import com.petory.service.shop.AuctionDeliveryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

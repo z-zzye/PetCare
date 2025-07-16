@@ -10,9 +10,13 @@ import com.petory.repository.shop.AuctionBidRepository;
 import com.petory.repository.shop.ItemRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.petory.constant.AuctionStatus;
+import com.petory.service.shop.AuctionSessionService;
+import com.petory.service.shop.AuctionHistoryService;
 import com.petory.constant.AuctionWinStatus;
+import com.petory.service.shop.AuctionDeliveryService;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
@@ -100,7 +104,7 @@ public class AuctionService {
 
     for (Member participant : participants) {
       boolean isWinner = winner != null && participant.getMemberId().equals(winner.getMemberId());
-      com.petory.constant.AuctionWinStatus status = isWinner ? AuctionWinStatus.WIN : null;
+      AuctionWinStatus status = isWinner ? AuctionWinStatus.WIN : null;
       AuctionHistory history = auctionHistoryService.createHistory(
         auctionItem, participant, finalPrice, isWinner, status
       );
