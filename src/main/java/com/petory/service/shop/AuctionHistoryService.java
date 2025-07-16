@@ -6,12 +6,10 @@ import com.petory.entity.shop.AuctionHistory;
 import com.petory.entity.shop.AuctionItem;
 import com.petory.repository.shop.AuctionHistoryRepository;
 import com.petory.repository.shop.ItemRepository;
-import com.petory.constant.AuctionWinStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.scheduling.annotation.Scheduled;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -59,7 +57,7 @@ public class AuctionHistoryService {
                 .build();
 
         AuctionHistory savedHistory = auctionHistoryRepository.save(history);
-        log.info("경매 히스토리 생성 완료: historyId={}, myHighestBid={}, finalPrice={}", 
+        log.info("경매 히스토리 생성 완료: historyId={}, myHighestBid={}, finalPrice={}",
                 savedHistory.getId(), myHighestBid, finalPrice);
 
         return savedHistory;

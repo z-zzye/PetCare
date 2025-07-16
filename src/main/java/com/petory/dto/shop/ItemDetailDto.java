@@ -2,8 +2,6 @@ package com.petory.dto.shop;
 
 import lombok.*;
 import java.util.List;
-import com.petory.dto.shop.ItemOptionDto;
-import com.petory.dto.shop.ItemImageDto;
 
 @Getter
 @Setter

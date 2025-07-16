@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +35,7 @@ public class CartService {
     // 2. 장바구니에 상품 추가
     public void addItemToCart(Member member, CartItemDto dto) {
         Cart cart = getOrCreateCart(member);
-        
+
         // 옵션 엔티티 조회 (optionId로)
         final ItemOption option;
         if (dto.getOption() != null && dto.getOption().getOptionId() != null) {
@@ -45,22 +44,22 @@ public class CartService {
         } else {
             option = null;
         }
-        
+
         // 이미 담긴 상품+옵션인지 확인
         CartItem exist = cart.getCartItems().stream()
             .filter(ci -> ci.getItem().getItemId().equals(dto.getItem().getItemId())
-                && ((option == null && ci.getOption() == null) || 
+                && ((option == null && ci.getOption() == null) ||
                     (option != null && ci.getOption() != null && ci.getOption().getOptionId().equals(option.getOptionId()))))
             .findFirst()
             .orElse(null);
-            
+
         if (exist != null) {
             exist.setQuantity(exist.getQuantity() + dto.getQuantity());
         } else {
             // Item 엔티티 조회
             var item = itemRepository.findById(dto.getItem().getItemId())
                 .orElseThrow(() -> new IllegalArgumentException("Item not found: " + dto.getItem().getItemId()));
-                
+
             CartItem newItem = CartItem.builder()
                 .cart(cart)
                 .item(item)
@@ -111,4 +110,4 @@ public class CartService {
                 .build())
             .toList();
     }
-} 
+}

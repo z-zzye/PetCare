@@ -1,7 +1,6 @@
 package com.petory.controller.shop;
 
 import com.petory.dto.shop.AuctionSessionDto;
-import com.petory.entity.Member;
 import com.petory.entity.shop.AuctionItem;
 import com.petory.entity.shop.AuctionSession;
 import com.petory.service.shop.AuctionSessionService;
@@ -10,7 +9,6 @@ import com.petory.constant.AuctionSessionStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

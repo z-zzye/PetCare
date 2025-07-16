@@ -35,7 +35,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
       .addInterceptors(jwtHandshakeInterceptor)
       .setAllowedOriginPatterns("*")  // 프론트 React와 연결 가능
       .withSockJS();  // SockJS fallback 허용
-    
+
     // 경매용 WebSocket 엔드포인트
     registry.addEndpoint("/ws/auction")
       .addInterceptors(jwtHandshakeInterceptor)
@@ -59,7 +59,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         System.out.println("preSend - accessor.getCommand(): " + accessor.getCommand());
         System.out.println("preSend - accessor.getDestination(): " + accessor.getDestination());
         System.out.println("preSend - accessor.getUser(): " + accessor.getUser());
-        
+
         if (accessor.getUser() == null) {
           // Handshake에서 저장한 token을 꺼냄
           String token = (String) accessor.getSessionAttributes().get("token");

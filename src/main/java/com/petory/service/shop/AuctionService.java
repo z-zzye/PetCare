@@ -10,13 +10,9 @@ import com.petory.repository.shop.AuctionBidRepository;
 import com.petory.repository.shop.ItemRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.petory.constant.AuctionStatus;
-import com.petory.service.shop.AuctionSessionService;
-import com.petory.service.shop.AuctionHistoryService;
 import com.petory.constant.AuctionWinStatus;
-import com.petory.service.shop.AuctionDeliveryService;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
@@ -108,7 +104,7 @@ public class AuctionService {
       AuctionHistory history = auctionHistoryService.createHistory(
         auctionItem, participant, finalPrice, isWinner, status
       );
-      
+
       // 낙찰자인 경우 AuctionDelivery 생성
       if (isWinner && history != null) {
         auctionDeliveryService.createDelivery(history, LocalDateTime.now().plusDays(5));
@@ -124,7 +120,7 @@ public class AuctionService {
   public void forceEndAuction(Long auctionItemId) {
     AuctionItem auctionItem = auctionItemRepository.findById(auctionItemId)
       .orElseThrow(() -> new IllegalArgumentException("해당 경매 상품이 존재하지 않습니다."));
-    
+
     // 경매 상태를 ENDED로 변경
     auctionItem.setEndTime(LocalDateTime.now());
     auctionItem.setAuctionStatus(AuctionStatus.ENDED);
@@ -149,11 +145,11 @@ public class AuctionService {
       // 현재 최고 입찰가 조회
       Integer currentPrice = auctionBidRepository.findMaxBidAmountByAuctionItem(auctionItem)
           .orElse(auctionItem.getStartPrice());
-      
+
       // 현재 최고 입찰자 조회
       Member currentWinner = auctionBidRepository.findCurrentWinnerByAuctionItem(auctionItem)
           .orElse(null);
-      
+
       String rawThumbnailUrl = itemRepository.findRepresentativeImageUrlByItemId(auctionItem.getItem().getItemId());
       String thumbnailUrl = null;
       if (rawThumbnailUrl != null && !rawThumbnailUrl.startsWith("/")) {

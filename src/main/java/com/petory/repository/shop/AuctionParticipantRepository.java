@@ -4,8 +4,6 @@ import com.petory.entity.shop.AuctionParticipant;
 import com.petory.entity.shop.AuctionSession;
 import com.petory.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -15,7 +13,7 @@ import java.util.Optional;
 @Repository
 public interface AuctionParticipantRepository extends JpaRepository<AuctionParticipant, Long> {
 
-    
+
     // 특정 세션의 모든 참여자 조회
     List<AuctionParticipant> findBySession(AuctionSession session);
 

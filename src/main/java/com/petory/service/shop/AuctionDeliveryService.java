@@ -2,7 +2,6 @@ package com.petory.service.shop;
 
 import com.petory.dto.shop.AuctionDeliveryDto;
 import com.petory.dto.shop.AuctionDeliveryRequestDto;
-import com.petory.entity.Member;
 import com.petory.entity.shop.AuctionDelivery;
 import com.petory.entity.shop.AuctionHistory;
 import com.petory.repository.shop.AuctionDeliveryRepository;
@@ -135,8 +134,8 @@ public class AuctionDeliveryService {
             AuctionHistory history = delivery.getAuctionHistory();
             history.setAuctionWinStatus(AuctionWinStatus.CANCELLED);
             auctionHistoryRepository.save(history);
-            
-            log.info("배송지 미입력으로 인한 취소: historyId={}, deliveryId={}", 
+
+            log.info("배송지 미입력으로 인한 취소: historyId={}, deliveryId={}",
                     history.getId(), delivery.getId());
         }
 

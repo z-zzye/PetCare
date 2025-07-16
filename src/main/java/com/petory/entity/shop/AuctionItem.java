@@ -2,7 +2,6 @@ package com.petory.entity.shop;
 
 
 import com.petory.entity.BaseTimeEntity;
-import com.petory.entity.Member;
 import com.petory.constant.AuctionStatus;
 import jakarta.persistence.*;
 import lombok.*;

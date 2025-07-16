@@ -2,7 +2,6 @@ package com.petory.entity.shop;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.util.List;
 
 @Entity
 @Getter
