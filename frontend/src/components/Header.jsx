@@ -1,9 +1,9 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
-import './Header.css';
-import { FaBell, FaComments, FaBars, FaTimes } from 'react-icons/fa';
-import { useAuth } from '../contexts/AuthContext';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { FaBars, FaBell, FaComments, FaTimes } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import ChatRoomListPopup from './ChatRoomListPopup';
+import './Header.css';
 
 const baseMenu = [
   {
@@ -53,7 +53,7 @@ const Header = () => {
   const menu = useMemo(() => {
     if (isAdmin) {
       // 관리자일 경우, '마이페이지'를 '관리 페이지'로 교체한 새 배열을 반환
-      return baseMenu.map(item =>
+      return baseMenu.map((item) =>
         item.name === '마이페이지'
           ? { name: '관리 페이지', link: '/admin', submenu: [] } // 링크도 /admin으로 변경
           : item
@@ -78,7 +78,7 @@ const Header = () => {
   }, [showDropdown]);
 
   // 모바일 아코디언 토글
-  const handleAccordion = idx => {
+  const handleAccordion = (idx) => {
     setAccordionOpen(accordionOpen === idx ? null : idx);
   };
 
@@ -104,26 +104,53 @@ const Header = () => {
           {menu.map((item, idx) => (
             <li
               key={item.name}
-              className={`main-navbar-item${item.submenu.length ? ' has-dropdown' : ''}${item.disabled ? ' disabled' : ''}${openMenu === idx ? ' open' : ''}`}
+              className={`main-navbar-item${
+                item.submenu.length ? ' has-dropdown' : ''
+              }${item.disabled ? ' disabled' : ''}${
+                openMenu === idx ? ' open' : ''
+              }`}
               onMouseEnter={() => setOpenMenu(idx)}
               onMouseLeave={() => setOpenMenu(null)}
             >
               {item.disabled ? (
-                <span className="main-navbar-link" style={{ cursor: 'default' }} onClick={e => e.preventDefault()}>{item.name}</span>
+                <span
+                  className="main-navbar-link"
+                  style={{ cursor: 'default' }}
+                  onClick={(e) => e.preventDefault()}
+                >
+                  {item.name}
+                </span>
               ) : item.link ? (
-                <Link to={item.link} className="main-navbar-link">{item.name}</Link>
+                <Link to={item.link} className="main-navbar-link">
+                  {item.name}
+                </Link>
               ) : (
-                <a href="#" className="main-navbar-link">{item.name}</a>
+                <a href="#" className="main-navbar-link">
+                  {item.name}
+                </a>
               )}
               {item.submenu.length > 0 && openMenu === idx && (
                 <div className="main-navbar-dropdown">
-                  {item.submenu.map(sub => (
+                  {item.submenu.map((sub) =>
                     typeof sub === 'string' ? (
-                      <a key={sub} href="#" className="main-navbar-dropdown-link">{sub}</a>
+                      <a
+                        key={sub}
+                        href="#"
+                        className="main-navbar-dropdown-link"
+                      >
+                        {sub}
+                      </a>
                     ) : (
-                      <Link key={sub.name} to={sub.link} className="main-navbar-dropdown-link" style={{ pointerEvents: 'auto' }}>{sub.name}</Link>
+                      <Link
+                        key={sub.name}
+                        to={sub.link}
+                        className="main-navbar-dropdown-link"
+                        style={{ pointerEvents: 'auto' }}
+                      >
+                        {sub.name}
+                      </Link>
                     )
-                  ))}
+                  )}
                 </div>
               )}
             </li>
@@ -132,17 +159,29 @@ const Header = () => {
         {/* 우측 아이콘/프로필 (로그인 상태) */}
         {isLoggedIn ? (
           <div className="main-navbar-right desktop-menu">
-            <button className="main-navbar-icon-btn" onClick={() => setIsChatListOpen(true)}>
+            <button
+              className="main-navbar-icon-btn"
+              onClick={() => setIsChatListOpen(true)}
+            >
               <FaComments size={26} color="#223A5E" />
             </button>
-            <button className="main-navbar-icon-btn"><FaBell size={26} color="#223A5E" />{hasNewNotification && <span className="main-navbar-badge-dot" />}</button>
+            <button className="main-navbar-icon-btn">
+              <FaBell size={26} color="#223A5E" />
+              {hasNewNotification && <span className="main-navbar-badge-dot" />}
+            </button>
             <div className="main-navbar-profile-container">
               <div
                 className="main-navbar-profile"
                 style={{ cursor: 'pointer' }}
                 onClick={() => setShowProfileModal(true)}
               >
-                <img src={profileImg} alt="프로필" onError={(e) => e.target.src = '/images/profile-default.png'} />
+                <img
+                  src={profileImg}
+                  alt="프로필"
+                  onError={(e) =>
+                    (e.target.src = '/images/profile-default.png')
+                  }
+                />
               </div>
               {nickname && (
                 <div className="profile-nickname-dropdown" ref={dropdownRef}>
@@ -154,10 +193,14 @@ const Header = () => {
                   </span>
                   {showDropdown && (
                     <div className="profile-dropdown-menu">
-                      <button onClick={handleLogout} className="logout-btn">Logout</button>
+                      <button onClick={handleLogout} className="logout-btn">
+                        Logout
+                      </button>
                       <button
                         className="logout-btn"
-                        onClick={() => window.location.href = '/shop/my-orders'}
+                        onClick={() =>
+                          (window.location.href = '/shop/my-orders')
+                        }
                         type="button"
                       >
                         구매내역
@@ -170,25 +213,40 @@ const Header = () => {
           </div>
         ) : (
           <div className="main-navbar-right desktop-menu">
-            <Link to="/members/login" className="main-navbar-login-btn">Login</Link>
+            <Link to="/members/login" className="main-navbar-login-btn">
+              Login
+            </Link>
           </div>
         )}
         {/* 햄버거 버튼 (모바일) */}
-        <button className="main-navbar-hamburger mobile-menu" onClick={() => setMobileNavOpen(true)}>
+        <button
+          className="main-navbar-hamburger mobile-menu"
+          onClick={() => setMobileNavOpen(true)}
+        >
           <FaBars size={28} />
         </button>
       </div>
       {/* 모바일 오버레이 네비게이션 */}
       <div className={`mobile-nav-overlay${mobileNavOpen ? ' open' : ''}`}>
-        <button className="mobile-nav-close" onClick={() => setMobileNavOpen(false)}>
+        <button
+          className="mobile-nav-close"
+          onClick={() => setMobileNavOpen(false)}
+        >
           <FaTimes size={28} />
         </button>
         <ul className="mobile-nav-menu">
           {menu.map((item, idx) => (
-            <li key={item.name} className={`mobile-nav-item${item.disabled ? ' disabled' : ''}`}>
+            <li
+              key={item.name}
+              className={`mobile-nav-item${item.disabled ? ' disabled' : ''}`}
+            >
               <div
-                className={`mobile-nav-link${accordionOpen === idx ? ' open' : ''}`}
-                onClick={() => item.submenu.length > 0 ? handleAccordion(idx) : undefined}
+                className={`mobile-nav-link${
+                  accordionOpen === idx ? ' open' : ''
+                }`}
+                onClick={() =>
+                  item.submenu.length > 0 ? handleAccordion(idx) : undefined
+                }
                 style={{ cursor: item.disabled ? 'default' : 'pointer' }}
                 onMouseEnter={() => setHoveredIdx(idx)}
                 onMouseLeave={() => setHoveredIdx(null)}
@@ -201,18 +259,39 @@ const Header = () => {
                   <span>{item.name}</span>
                 )}
                 {item.submenu.length > 0 && (
-                  <span className={`accordion-arrow${accordionOpen === idx ? ' open' : ''}`} style={{ fontSize: '0.95rem' }}>▼</span>
+                  <span
+                    className={`accordion-arrow${
+                      accordionOpen === idx ? ' open' : ''
+                    }`}
+                    style={{ fontSize: '0.95rem' }}
+                  >
+                    ▼
+                  </span>
                 )}
               </div>
               {item.submenu.length > 0 && (
-                <ul className={`mobile-nav-submenu${accordionOpen === idx ? ' open' : ''}`} style={{ maxHeight: accordionOpen === idx ? '300px' : '0', opacity: accordionOpen === idx ? 1 : 0, overflow: 'hidden', transition: 'all 0.3s cubic-bezier(0.4,0,0.2,1)' }}>
-                  {item.submenu.map(sub => (
+                <ul
+                  className={`mobile-nav-submenu${
+                    accordionOpen === idx ? ' open' : ''
+                  }`}
+                  style={{
+                    maxHeight: accordionOpen === idx ? '300px' : '0',
+                    opacity: accordionOpen === idx ? 1 : 0,
+                    overflow: 'hidden',
+                    transition: 'all 0.3s cubic-bezier(0.4,0,0.2,1)',
+                  }}
+                >
+                  {item.submenu.map((sub) =>
                     typeof sub === 'string' ? (
-                      <li key={sub}><span>{sub}</span></li>
+                      <li key={sub}>
+                        <span>{sub}</span>
+                      </li>
                     ) : (
-                      <li key={sub.name}><Link to={sub.link}>{sub.name}</Link></li>
+                      <li key={sub.name}>
+                        <Link to={sub.link}>{sub.name}</Link>
+                      </li>
                     )
-                  ))}
+                  )}
                 </ul>
               )}
             </li>
@@ -221,20 +300,27 @@ const Header = () => {
         <div className="mobile-nav-bottom">
           {isLoggedIn ? (
             <>
-              <button className="main-navbar-icon-btn" onClick={() => setIsChatListOpen(true)}>
+              <button
+                className="main-navbar-icon-btn"
+                onClick={() => setIsChatListOpen(true)}
+              >
                 <FaComments size={26} color="#223A5E" />
               </button>
               <button className="main-navbar-icon-btn">
                 <FaBell size={26} color="#223A5E" />
-                {hasNewNotification && <span className="main-navbar-badge-dot" />}
+                {hasNewNotification && (
+                  <span className="main-navbar-badge-dot" />
+                )}
               </button>
               <div className="mobile-profile-section">
                 <span className="main-navbar-profile">
                   <img
-                        src={profileImg}
-                        alt="프로필"
-                        onError={(e) => e.target.src = '/images/profile-default.png'} // 이미지 에러 대비
-                      />
+                    src={profileImg}
+                    alt="프로필"
+                    onError={(e) =>
+                      (e.target.src = '/images/profile-default.png')
+                    } // 이미지 에러 대비
+                  />
                 </span>
                 <button onClick={handleLogout} className="mobile-logout-btn">
                   Logout
@@ -242,17 +328,33 @@ const Header = () => {
               </div>
             </>
           ) : (
-            <Link to="/members/login" className="main-navbar-login-btn">Login</Link>
+            <Link to="/members/login" className="main-navbar-login-btn">
+              Login
+            </Link>
           )}
         </div>
       </div>
       {showProfileModal && (
-        <div className="profile-modal-overlay" onClick={() => setShowProfileModal(false)}>
-          <div className="profile-modal-content" onClick={e => e.stopPropagation()}>
-            <button className="profile-modal-close" onClick={() => setShowProfileModal(false)} aria-label="닫기">
+        <div
+          className="profile-modal-overlay"
+          onClick={() => setShowProfileModal(false)}
+        >
+          <div
+            className="profile-modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="profile-modal-close"
+              onClick={() => setShowProfileModal(false)}
+              aria-label="닫기"
+            >
               &times;
             </button>
-            <img src={profileImg} alt="프로필 확대" className="profile-modal-img" />
+            <img
+              src={profileImg}
+              alt="프로필 확대"
+              className="profile-modal-img"
+            />
           </div>
         </div>
       )}

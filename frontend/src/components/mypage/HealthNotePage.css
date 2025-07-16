@@ -5,51 +5,87 @@
     'area1 area2 area3'
     'area4 area4 area3'
     'area5 area5 area5';
-  /* 템플릿 컬럼 비율을 조정하여 화면에 맞게 설정합니다. */
   grid-template-columns: 1fr 1.5fr 1.5fr;
-  grid-template-rows: auto auto 1fr; /* 5번 영역이 남은 공간을 채우도록 */
-  gap: 2rem;
+  grid-template-rows: auto auto 1fr;
+  gap: 1.5rem; /* 일관된 간격 */
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
-  min-height: 100vh; /* 페이지 전체 높이를 차지하도록 */
+  min-height: 100vh;
 }
 
 /* --- 그리드 영역 할당 --- */
-.grid-area-1 { grid-area: area1; }
-.grid-area-2 { grid-area: area2; }
-.grid-area-3 { grid-area: area3; }
-.grid-area-4 { grid-area: area4; }
-.grid-area-5 { grid-area: area5; }
+.grid-area-1 {
+  grid-area: area1;
+}
+.grid-area-2 {
+  grid-area: area2;
+}
+.grid-area-3 {
+  grid-area: area3;
+}
+.grid-area-4 {
+  grid-area: area4;
+}
+.grid-area-5 {
+  grid-area: area5;
+}
 
-/* 각 영역 내부 정렬 (필요시) */
-.grid-area-1, .grid-area-2, .grid-area-3, .grid-area-4 {
+/* 각 영역 내부 정렬 통일 */
+.grid-area-1,
+.grid-area-2,
+.grid-area-3,
+.grid-area-4 {
   display: flex;
   flex-direction: column;
-  justify-content: center; /* 아이템을 중앙 정렬 */
+  justify-content: flex-start; /* 상단 정렬로 통일 */
+  align-items: center;
 }
 
 /* 4번 영역은 히스토리 카드를 중앙에 배치 */
 .grid-area-4 {
-  align-items: center;
+  display: flex;
+  flex-direction: column; /* 세로 방향으로 정렬 */
+  align-items: center; /* 가로 중앙 정렬 */
+  justify-content: center;
+}
+
+/* --- 공통 카드 스타일 --- */
+.card-common {
+  border: 2px solid #1e3a8a; /* 로고 남색으로 변경 */
+  border-radius: 12px;
+  background: #f8fafc; /* 연한 남색 배경 */
+  box-shadow: 0 2px 8px rgba(30, 58, 138, 0.1);
+  transition: box-shadow 0.2s ease;
+}
+
+.card-common:hover {
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.15);
 }
 
 /* --- 1. 펫 드롭다운 --- */
 .pet-dropdown-container {
   width: 100%;
+  padding: 1rem; /* 일관된 패딩 */
 }
+
 .pet-dropdown {
   width: 100%;
-  padding: 0.75rem;
-  border: 2px solid #3a5ad7;
+  padding: 0.875rem 1rem; /* 패딩 증가 */
+  border: 2px solid #1e3a8a; /* 로고 남색으로 변경 */
   border-radius: 8px;
   background: white;
   font-size: 1rem;
+  font-weight: 500; /* 중간 굵기 */
   cursor: pointer;
+  transition: border-color 0.2s ease;
+  font-family: inherit;
 }
+
 .pet-dropdown:focus {
   outline: none;
-  border-color: #2c4bb8;
+  border-color: #f59e0b; /* 로고 주황색으로 포커스 */
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
 }
 
 /* --- 2. 펫 프로필 섹션 --- */
@@ -59,81 +95,106 @@
   gap: 1rem;
   justify-content: center;
   width: 100%;
+  padding: 1.5rem; /* 일관된 패딩 */
+  border: 2px solid #1e3a8a; /* 로고 남색으로 변경 */
+  border-radius: 12px;
+  background: #f8fafc; /* 연한 남색 배경 */
+  box-shadow: 0 2px 8px rgba(30, 58, 138, 0.1);
 }
+
 .pet-profile-img {
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  border: 3px solid #222;
+  border: 3px solid #1e3a8a; /* 로고 남색으로 변경 */
   object-fit: cover;
 }
+
 .pet-info {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  align-items: flex-start; /* 왼쪽 정렬 */
+  align-items: flex-start;
 }
+
 .pet-name {
   font-size: 1.3rem;
   font-weight: bold;
+  color: #1e3a8a; /* 로고 남색으로 변경 */
 }
+
 .pet-emoji {
   font-size: 1.5rem;
   margin-left: 0.5rem;
 }
+
 .pet-details {
   font-size: 0.9rem;
-  color: #666;
+  color: #64748b; /* 남색 계열 회색 */
 }
 
 /* --- 3. 백신 검진 카드 --- */
 .vaccine-check-card {
-  border: 2px solid #3a5ad7;
-  border-radius: 16px;
-  padding: 1.5rem;
-  background: #f7faff;
+  border: 2px solid #1e3a8a; /* 로고 남색으로 변경 */
+  border-radius: 12px;
+  padding: 1.5rem; /* 일관된 패딩 */
+  background: #f8fafc; /* 연한 남색 배경 */
   text-align: center;
-  height: 100%; /* 부모(area3)의 높이를 꽉 채움 */
+  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  box-shadow: 0 2px 8px rgba(30, 58, 138, 0.1);
 }
+
 .vaccine-check-card h3 {
   margin: 0 0 0.5rem 0;
-  color: #3a5ad7;
+  color: #1e3a8a; /* 로고 남색으로 변경 */
   font-size: 1.2rem;
+  font-weight: bold;
 }
-.vaccine-subtitle, .vaccine-note {
-  color: #666;
+
+.vaccine-subtitle,
+.vaccine-note {
+  color: #64748b; /* 남색 계열 회색 */
   font-size: 0.9rem;
+  margin: 0.5rem 0; /* 일관된 마진 */
 }
+
 .vaccine-progress-list {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  margin: 1.5rem 0;
+  margin: 1.5rem 0; /* 일관된 마진 */
 }
+
 .vaccine-progress-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 0.5rem 0; /* 일관된 패딩 */
 }
+
 .vaccine-name {
   font-weight: bold;
-  color: #333;
+  color: #1e3a8a; /* 로고 남색으로 변경 */
   min-width: 80px;
   text-align: left;
 }
+
 .progress-dots {
   display: flex;
   gap: 0.3rem;
 }
+
 .progress-dot {
   font-size: 1.2rem;
-  color: #ccc;
+  color: #cbd5e1; /* 연한 회색 */
+  transition: color 0.2s ease;
 }
+
 .progress-dot.completed {
-  color: #3a5ad7;
+  color: #f59e0b; /* 로고 주황색으로 변경 */
 }
 
 /* --- 4. 접종 히스토리 --- */
@@ -142,114 +203,238 @@
   gap: 1rem;
   justify-content: center;
   width: 100%;
+  padding: 0 1rem; /* 일관된 패딩 */
 }
+
+/* 새로 추가된 메인 제목 스타일 */
+.history-main-title {
+  font-size: 1.5rem; /* 제목 폰트 크기 */
+  font-weight: bold;
+  margin-bottom: 1rem; /* 카드 목록과의 간격 */
+  color: #333;
+}
+
 .vaccine-history-card {
-  border: 2px solid #3a5ad7;
-  border-radius: 16px;
-  padding: 1rem;
-  background: #f7faff;
+  border: 2px solid #1e3a8a; /* 로고 남색으로 변경 */
+  border-radius: 12px;
+  padding: 1rem; /* 일관된 패딩 */
+  background: #f8fafc; /* 연한 남색 배경 */
   text-align: center;
-  flex: 1; /* 가능한 공간을 균등하게 차지 */
-  max-width: 250px; /* 최대 너비 제한 */
+  flex: 1;
+  max-width: 250px;
+  box-shadow: 0 2px 8px rgba(30, 58, 138, 0.1);
+  transition: box-shadow 0.2s ease;
 }
+
+.vaccine-history-card:hover {
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.15);
+}
+
 .history-title {
   font-size: 1rem;
   font-weight: bold;
   margin-bottom: 0.5rem;
-  color: #3a5ad7;
+  color: #1e3a8a; /* 로고 남색으로 변경 */
 }
+
 .history-content {
-  color: #555;
+  color: #475569; /* 남색 계열 회색 */
   font-size: 0.9rem;
+  line-height: 1.4;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.vaccine-type {
+  font-size: 1rem; /* 백신 종류를 적당히 크게 */
+  font-weight: 600; /* 중간 굵기로 강조 */
+  color: #1e3a8a; /* 로고 남색으로 강조 */
+  line-height: 1.3;
+}
+
+.vaccine-date {
+  font-size: 0.85rem; /* 날짜는 조금 더 작게 */
+  font-weight: 400; /* 일반 굵기 */
+  color: #64748b; /* 연한 회색 */
+  line-height: 1.4;
 }
 
 /* --- 5. 자동 예약 관리 --- */
 .grid-area-5 h3 {
   text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.5rem; /* 일관된 마진 */
   font-size: 1.5rem;
+  color: #1e3a8a; /* 로고 남색으로 변경 */
+  font-weight: bold;
 }
+
 .reservation-list {
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1.5rem; /* 일관된 간격 */
 }
+
 .reservation-card {
   width: 100%;
-  max-width: 800px; /* 너비 확장 */
-  border: 1px solid #ddd;
-  border-radius: 12px;
+  max-width: 800px;
+  border: 2px solid #1e3a8a; /* 로고 남색으로 변경 */
+  border-radius: 12px; /* 일관된 둥근 모서리 */
   background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(30, 58, 138, 0.1);
+  transition: box-shadow 0.2s ease;
+  overflow: hidden; /* 내부 요소가 둥근 모서리를 벗어나지 않도록 */
 }
+
+.reservation-card:hover {
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.15);
+}
+
 .card-header {
-  background: #f8f9fa;
-  padding: 1rem;
+  background: #f8fafc; /* 연한 남색 배경 */
+  padding: 1rem; /* 일관된 패딩 */
+  border-bottom: 1px solid #1e3a8a; /* 로고 남색으로 변경 */
   display: flex;
   justify-content: space-between;
   align-items: center;
+  border-radius: 0; /* border-radius 제거 */
 }
+
 .card-header h3 {
   margin: 0;
   font-size: 1.2rem;
-}
-.card-body {
-  padding: 1rem;
-}
-.card-body p {
-  margin: 0.5rem 0;
-}
-.payment-due {
-  color: #dc3545;
+  color: #1e3a8a; /* 로고 남색으로 변경 */
   font-weight: bold;
 }
-.card-actions {
-  padding: 1rem;
-  border-top: 1px solid #ddd;
-  display: flex;
-  gap: 0.5rem;
-  justify-content: flex-end; /* 오른쪽 정렬 */
+
+.card-body {
+  padding: 1rem; /* 일관된 패딩 */
 }
 
-/* 버튼 스타일 (공통) */
-.btn-pay, .btn-complete, .btn-cancel {
-  padding: 0.5rem 1rem;
+.card-body p {
+  margin: 0.5rem 0; /* 일관된 마진 */
+  color: #475569; /* 남색 계열 회색 */
+  line-height: 1.4;
+}
+
+.card-body strong {
+  color: #1e3a8a; /* 로고 남색으로 변경 */
+  font-weight: bold;
+}
+
+.payment-due {
+  color: #dc3545; /* 기존 빨간색 유지 */
+  font-weight: bold;
+}
+
+.card-actions {
+  padding: 1rem; /* 일관된 패딩 */
+  border-top: 1px solid #1e3a8a; /* 로고 남색으로 변경 */
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  border-radius: 0; /* border-radius 제거 */
+}
+
+.btn-pay,
+.btn-complete,
+.btn-cancel {
+  padding: 0.5rem 1rem; /* 일관된 패딩 */
   border: none;
   border-radius: 6px;
   cursor: pointer;
   font-weight: bold;
+  transition: all 0.2s ease;
 }
-.btn-pay { background: #28a745; color: white; }
-.btn-complete { background: #17a2b8; color: white; }
-.btn-cancel { background: #dc3545; color: white; }
 
-/* 상태 뱃지 */
-.status-badge { padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
-.status-pending { background: #fff3cd; color: #856404; }
-.status-confirmed { background: #d1ecf1; color: #0c5460; }
-.status-completed { background: #d4edda; color: #155724; }
-.status-canceled { background: #f8d7da; color: #721c24; }
+.btn-pay {
+  background: #f59e0b; /* 로고 주황색으로 변경 */
+  color: white;
+}
 
-/* 등록된 펫이 없을 경우 */
+.btn-pay:hover {
+  background: #d97706; /* 어두운 주황색 */
+  transform: translateY(-1px);
+}
+
+.btn-complete {
+  background: #17a2b8; /* 기존 청록색 유지 */
+  color: white;
+}
+
+.btn-complete:hover {
+  background: #138496;
+  transform: translateY(-1px);
+}
+
+.btn-cancel {
+  background: #dc3545; /* 기존 빨간색 유지 */
+  color: white;
+}
+
+.btn-cancel:hover {
+  background: #c82333;
+  transform: translateY(-1px);
+}
+
+.status-badge {
+  padding: 0.25rem 0.75rem; /* 일관된 패딩 */
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.status-pending {
+  background: #fef3c7; /* 연한 주황색 배경 */
+  color: #92400e; /* 어두운 주황색 텍스트 */
+}
+
+.status-confirmed {
+  background: #dbeafe; /* 연한 남색 배경 */
+  color: #1e3a8a; /* 로고 남색 텍스트 */
+}
+
+.status-completed {
+  background: #d4edda; /* 기존 초록색 유지 */
+  color: #155724;
+}
+
+.status-canceled {
+  background: #f8d7da; /* 기존 빨간색 유지 */
+  color: #721c24;
+}
+
 .no-pets-message {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 80vh;
+  height: 100%;
+  color: #64748b; /* 남색 계열 회색 */
   text-align: center;
+  padding: 2rem; /* 일관된 패딩 */
 }
 
-/* --- 반응형 디자인 --- */
+.no-pets-message h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1rem; /* 일관된 마진 */
+  text-align: center;
+  color: #1e3a8a; /* 로고 남색으로 변경 */
+}
+
+/* 반응형 디자인 */
 @media (max-width: 992px) {
   .healthnote-grid-container {
     grid-template-areas:
-      'area1 area1'
-      'area2 area3'
+      'area1 area2'
+      'area3 area3'
       'area4 area4'
       'area5 area5';
     grid-template-columns: 1fr 1fr;
+    gap: 1rem; /* 일관된 간격 */
   }
 }
 
@@ -262,16 +447,16 @@
       'area4'
       'area5';
     grid-template-columns: 1fr;
-    padding: 1rem;
-    gap: 1.5rem;
+    gap: 1rem; /* 일관된 간격 */
+    padding: 1rem; /* 일관된 패딩 */
   }
+
   .vaccine-history-cards {
     flex-direction: column;
     align-items: center;
-    width: 100%;
   }
+
   .vaccine-history-card {
-    width: 100%;
-    max-width: 100%;
+    min-width: 250px;
   }
 }

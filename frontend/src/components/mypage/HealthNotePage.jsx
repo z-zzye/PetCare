@@ -11,10 +11,13 @@ const getPetEmoji = (category) => {
   return '';
 };
 
+// 백엔드와 완전히 연동된 백신 정보 사용
+
 const HealthNotePage = () => {
   const [allPets, setAllPets] = useState([]);
   const [selectedPetId, setSelectedPetId] = useState('');
   const [allReservations, setAllReservations] = useState([]);
+  const [vaccineInfo, setVaccineInfo] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -48,6 +51,25 @@ const HealthNotePage = () => {
         setError('데이터를 불러오는 데 실패했습니다.');
         setLoading(false);
       });
+  };
+
+  // 선택된 펫이 변경될 때 백신 정보를 가져오는 useEffect
+  useEffect(() => {
+    if (selectedPetId) {
+      fetchVaccineInfo(selectedPetId);
+    }
+  }, [selectedPetId]);
+
+  // 백신 정보를 백엔드에서 가져오는 함수
+  const fetchVaccineInfo = async (petId) => {
+    try {
+      const response = await axios.get(`/vaccines/pet/${petId}`);
+      console.log('백신 정보 로드:', response.data);
+      setVaccineInfo(response.data);
+    } catch (err) {
+      console.error('백신 정보 로딩 실패:', err);
+      setVaccineInfo([]);
+    }
   };
 
   useEffect(() => {
@@ -113,7 +135,9 @@ const HealthNotePage = () => {
         fetchData();
       } catch (err) {
         if (
-          err.response?.data?.error?.includes('결제 수단이 등록되어 있지 않습니다')
+          err.response?.data?.error?.includes(
+            '결제 수단이 등록되어 있지 않습니다'
+          )
         ) {
           const paymentResult = await Swal.fire({
             title: '결제 수단 등록 필요',
@@ -171,23 +195,35 @@ const HealthNotePage = () => {
     (r) => r.reservationStatus === 'COMPLETED'
   );
 
-  const vaccineProgress = {
-    종합백신: { completed: 0, total: 6 },
-    광견병: { completed: 0, total: 1 },
-    항체검사: { completed: 0, total: 1 },
+  // 백신 진행상황 계산 함수
+  const calculateVaccineProgress = () => {
+    const progress = {};
+
+    // 백엔드에서 받은 백신 정보를 기반으로 진행상황 계산
+    vaccineInfo.forEach((vaccine) => {
+      const total = vaccine.totalShots; // 백엔드에서 받은 총 접종 횟수
+      let completed = 0;
+
+      // 완료된 예약에서 해당 백신의 접종 횟수 계산
+      completedReservations.forEach((res) => {
+        const types = res.vaccineDescription.split(', ');
+        types.forEach((type) => {
+          // 백신 이름 매칭 (예: "강아지 종합백신" -> vaccine.description)
+          if (type === vaccine.description) {
+            completed++;
+          }
+        });
+      });
+
+      progress[vaccine.description] = { completed, total };
+    });
+
+    return progress;
   };
 
-  completedReservations.forEach((res) => {
-    const vaccineTypes = res.vaccineDescription.split(', ');
-    vaccineTypes.forEach((vaccineType) => {
-      if (vaccineType.includes('종합백신'))
-        vaccineProgress.종합백신.completed++;
-      else if (vaccineType.includes('광견병'))
-        vaccineProgress.광견병.completed++;
-      else if (vaccineType.includes('항체검사'))
-        vaccineProgress.항체검사.completed++;
-    });
-  });
+  // 백신 진행상황 계산
+  const vaccineProgress =
+    vaccineInfo.length > 0 ? calculateVaccineProgress() : {};
 
   if (loading) return <div>로딩 중...</div>;
   if (error) return <div>{error}</div>;
@@ -235,12 +271,10 @@ const HealthNotePage = () => {
               <div className="pet-name">
                 {selectedPet.petName}
                 <span className="pet-emoji">
-                  {getPetEmoji(selectedPet.category)}
+                  {getPetEmoji(selectedPet.petCategory)}
                 </span>
               </div>
-              <div className="pet-details">
-                {selectedPet.petBirth} / {selectedPet.category}
-              </div>
+              <div className="pet-details">{selectedPet.petBirth}</div>
             </div>
           </div>
         )}
@@ -250,25 +284,49 @@ const HealthNotePage = () => {
       <div className="grid-area-3">
         <div className="vaccine-check-card">
           <h3>펫 자동예약 검진 카드</h3>
-          <p className="vaccine-subtitle">(예시 - 모든 강아지 접종)</p>
+          <p className="vaccine-subtitle">
+            {selectedPet
+              ? `(${selectedPet.petName}의 신청 접종)`
+              : '(펫을 선택해주세요)'}
+          </p>
           <div className="vaccine-progress-list">
-            {Object.entries(vaccineProgress).map(([vaccineType, progress]) => (
-              <div key={vaccineType} className="vaccine-progress-item">
-                <span className="vaccine-name">{vaccineType}</span>
+            {vaccineInfo.length > 0 ? (
+              Object.keys(vaccineProgress).length > 0 ? (
+                Object.entries(vaccineProgress).map(
+                  ([vaccineName, progress]) => (
+                    <div key={vaccineName} className="vaccine-progress-item">
+                      <span className="vaccine-name">{vaccineName}</span>
+                      <div className="progress-dots">
+                        {Array.from({ length: progress.total }, (_, index) => (
+                          <span
+                            key={index}
+                            className={`progress-dot ${
+                              index < progress.completed ? 'completed' : ''
+                            }`}
+                          >
+                            ●
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                )
+              ) : (
+                <div className="vaccine-progress-item">
+                  <span className="vaccine-name">신청된 접종이 없습니다</span>
+                  <div className="progress-dots">
+                    <span className="progress-dot">-</span>
+                  </div>
+                </div>
+              )
+            ) : (
+              <div className="vaccine-progress-item">
+                <span className="vaccine-name">백신 정보 로딩 중...</span>
                 <div className="progress-dots">
-                  {Array.from({ length: progress.total }, (_, index) => (
-                    <span
-                      key={index}
-                      className={`progress-dot ${
-                        index < progress.completed ? 'completed' : ''
-                      }`}
-                    >
-                      ●
-                    </span>
-                  ))}
+                  <span className="progress-dot">-</span>
                 </div>
               </div>
-            ))}
+            )}
           </div>
           <p className="vaccine-note">
             (접종 완료된 만큼 체크, 안된 항목은 빈칸처리)
@@ -278,22 +336,26 @@ const HealthNotePage = () => {
 
       {/* 4번 영역: 접종 히스토리 */}
       <div className="grid-area-4">
+        {/* 제목을 이 위치로 이동시켜 한 번만 표시되도록 합니다. */}
+        <h3 className="history-main-title">접종 히스토리</h3>
         <div className="vaccine-history-cards">
           {completedReservations.length > 0 ? (
             completedReservations.slice(0, 3).map((res, index) => (
               <div key={index} className="vaccine-history-card">
-                <div className="history-title">접종 히스토리</div>
+                {/* 카드 내부의 반복되던 제목은 삭제합니다. */}
                 <div className="history-content">
-                  {res.vaccineDescription} -{' '}
-                  {new Date(res.reservationDateTime).toLocaleDateString()}
+                  <div className="vaccine-type">{res.vaccineDescription}</div>
+                  <div className="vaccine-date">
+                    {new Date(res.reservationDateTime).toLocaleDateString()}
+                  </div>
                 </div>
               </div>
             ))
           ) : (
+            // 접종 기록이 없을 때도 카드 스타일을 유지합니다.
             <div className="vaccine-history-card">
-              <div className="history-title">접종 히스토리</div>
               <div className="history-content">
-                아직 완료된 접종이 없습니다.
+                <div className="vaccine-type">아직 완료된 접종이 없습니다.</div>
               </div>
             </div>
           )}

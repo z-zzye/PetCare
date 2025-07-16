@@ -1,5 +1,8 @@
 package com.petory.service;
 
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.petory.dto.CommentCreateDto;
 import com.petory.entity.Board;
 import com.petory.entity.Comment;
@@ -7,9 +10,8 @@ import com.petory.entity.Member;
 import com.petory.repository.BoardRepository;
 import com.petory.repository.CommentRepository;
 import com.petory.repository.MemberRepository;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
