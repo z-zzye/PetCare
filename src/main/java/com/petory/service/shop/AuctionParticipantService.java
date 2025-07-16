@@ -80,6 +80,11 @@ public class AuctionParticipantService {
         
         AuctionParticipant savedParticipant = auctionParticipantRepository.save(participant);
         log.info("새로운 참여자 입장: participantId={}", savedParticipant.getId());
+        
+        // 참여자 수 업데이트
+        long activeCount = auctionParticipantRepository.countBySessionAndIsActiveTrue(session);
+        auctionSessionService.updateParticipantCount(sessionId, (int) activeCount);
+        
         return savedParticipant;
     }
 
@@ -101,6 +106,10 @@ public class AuctionParticipantService {
             participant.setLastActivity(LocalDateTime.now());
             auctionParticipantRepository.save(participant);
             log.info("참여자 퇴장 완료: participantId={}", participant.getId());
+            
+            // 참여자 수 업데이트
+            long activeCount = auctionParticipantRepository.countBySessionAndIsActiveTrue(session);
+            auctionSessionService.updateParticipantCount(sessionId, (int) activeCount);
         }
     }
 
