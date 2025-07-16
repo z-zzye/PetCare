@@ -66,5 +66,13 @@ public class ChatController {
     List<ChatRoomListDto> rooms = chatService.getChatRoomsForMember(myId);
     return ResponseEntity.ok(rooms);
   }
+
+  // ✅ 전체 안 읽은 메시지 개수 조회
+  @GetMapping("/unread-count")
+  public ResponseEntity<Integer> getTotalUnreadCount(@AuthenticationPrincipal CustomUserDetails user) {
+    Long myId = user.getMember().getMember_Id();
+    int totalUnreadCount = chatService.getTotalUnreadCount(myId);
+    return ResponseEntity.ok(totalUnreadCount);
+  }
 }
 

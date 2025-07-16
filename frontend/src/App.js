@@ -188,9 +188,9 @@ function App() {
             <Route path="/admin/auction/register" element={<AdminRoute><ItemRegister /></AdminRoute>} />
           </Routes>
         </BrowserRouter>
+        {/* 로그인한 사용자만 챗봇 버튼 표시 */}
+        <ChatbotButton />
       </KakaoMapsScriptProvider>
-      {/* 로그인한 사용자만 챗봇 버튼 표시 */}
-      <ChatbotButton />
     </AuthProvider>
   );
 }

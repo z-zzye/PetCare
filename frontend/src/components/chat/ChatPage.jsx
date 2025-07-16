@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import ChatSocket from './ChatSocket';
 import { useParams } from 'react-router-dom';
 import axios from '../../api/axios';
@@ -77,21 +77,21 @@ const ChatPage = (props) => {
   })();
 
   // 새 메시지 추가 함수
-  const handleNewMessage = (newMsg) => {
+  const handleNewMessage = useCallback((newMsg) => {
     setMessages(prev => [
       ...prev,
       { ...newMsg, read: newMsg.read === true || newMsg.read === 1 }
     ]);
-  };
+  }, []);
 
   // 읽음 알림 수신 시 메시지 상태 갱신
-  const handleReadReceived = ({ chatRoomId, readMessageIds }) => {
+  const handleReadReceived = useCallback(({ chatRoomId, readMessageIds }) => {
     setMessages(prevMsgs => prevMsgs.map(msg =>
       readMessageIds.includes(msg.id)
         ? { ...msg, read: true }
         : msg
     ));
-  };
+  }, []);
 
   // messages가 바뀔 때마다 스크롤을 맨 아래로 이동
   useEffect(() => {
