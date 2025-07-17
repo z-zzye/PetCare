@@ -170,4 +170,44 @@ public class NotificationService {
     createNotification(member, NotificationType.CLEANBOTDETECTED, title, message, null, null);
     log.info("클린봇 감지 알림 생성: memberId={}", member.getMember_Id());
   }
+
+  /**
+   * 경매 종료 알림 생성
+   */
+  public void createAuctionEndNotification(Member member, String itemName, Long auctionItemId) {
+    String title = "경매가 종료되었습니다";
+    String message = String.format("%s 경매가 종료되었습니다. 결과를 확인해보세요.", itemName);
+
+    Notification notification = Notification.builder()
+      .member(member)
+      .notificationType(NotificationType.AUCTION_END)
+      .title(title)
+      .message(message)
+      .isRead(false)
+      .auctionId(auctionItemId)
+      .build();
+
+    notificationRepository.save(notification);
+    log.info("경매 종료 알림 생성: memberId={}, auctionItemId={}", member.getMember_Id(), auctionItemId);
+  }
+
+  /**
+   * 경매 낙찰 알림 생성
+   */
+  public void createAuctionWinNotification(Member member, String itemName, Long auctionItemId, Integer finalPrice) {
+    String title = "🎉 경매에서 낙찰되었습니다!";
+    String message = String.format("%s 경매에서 %dP로 낙찰되었습니다. 축하합니다!", itemName, finalPrice);
+
+    Notification notification = Notification.builder()
+      .member(member)
+      .notificationType(NotificationType.AUCTION_WIN)
+      .title(title)
+      .message(message)
+      .isRead(false)
+      .auctionId(auctionItemId)
+      .build();
+
+    notificationRepository.save(notification);
+    log.info("경매 낙찰 알림 생성: memberId={}, auctionItemId={}, finalPrice={}", member.getMember_Id(), auctionItemId, finalPrice);
+  }
 }

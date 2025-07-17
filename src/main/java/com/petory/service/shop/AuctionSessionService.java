@@ -1,14 +1,16 @@
 package com.petory.service.shop;
 
+import com.petory.constant.AuctionSessionStatus;
+import com.petory.constant.AuctionStatus;
 import com.petory.dto.shop.AuctionSessionDto;
 import com.petory.entity.Member;
 import com.petory.entity.shop.AuctionItem;
+import com.petory.entity.shop.AuctionParticipant;
 import com.petory.entity.shop.AuctionSession;
-import com.petory.repository.shop.AuctionSessionRepository;
 import com.petory.repository.shop.AuctionItemRepository;
 import com.petory.repository.shop.AuctionParticipantRepository;
-import com.petory.constant.AuctionSessionStatus;
-import com.petory.constant.AuctionStatus;
+import com.petory.repository.shop.AuctionSessionRepository;
+import com.petory.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,15 +19,9 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -37,6 +33,7 @@ public class AuctionSessionService {
     private final AuctionParticipantRepository auctionParticipantRepository;
     private final AuctionBidService auctionBidService;
     private final SimpMessagingTemplate messagingTemplate;
+    private final NotificationService notificationService;
 
     @Autowired
     public AuctionSessionService(
@@ -44,12 +41,14 @@ public class AuctionSessionService {
             AuctionItemRepository auctionItemRepository,
             AuctionParticipantRepository auctionParticipantRepository,
             @Lazy AuctionBidService auctionBidService,
-            SimpMessagingTemplate messagingTemplate) {
+            SimpMessagingTemplate messagingTemplate,
+            NotificationService notificationService) {
         this.auctionSessionRepository = auctionSessionRepository;
         this.auctionItemRepository = auctionItemRepository;
         this.auctionParticipantRepository = auctionParticipantRepository;
         this.auctionBidService = auctionBidService;
         this.messagingTemplate = messagingTemplate;
+        this.notificationService = notificationService;
     }
 
 
@@ -390,6 +389,9 @@ public class AuctionSessionService {
                     } catch (Exception e) {
                         log.error("경매 종료 WebSocket 메시지 전송 실패: auctionItemId={}", item.getId(), e);
                     }
+
+                    // 로그아웃한 참여자들에게 알림 보내기
+                    sendNotificationsToInactiveParticipants(session, item);
                 } catch (Exception e) {
                     log.error("경매 종료 처리 중 오류 발생: sessionId={}", session.getId(), e);
                 }
@@ -421,5 +423,66 @@ public class AuctionSessionService {
         return notification;
     }
 
+    /* 로그아웃한 참여자들에게 알림 보내기 */
+    private void sendNotificationsToInactiveParticipants(AuctionSession session, AuctionItem item) {
+        try {
+            log.info("📧 로그아웃한 참여자들에게 알림 전송 시작: sessionId={}, auctionItemId={}", 
+                session.getId(), item.getId());
+
+            // 해당 세션의 모든 참여자 조회
+            List<AuctionParticipant> allParticipants = auctionParticipantRepository.findBySession(session);
+            
+            // 비활성화된 참여자들만 필터링 (로그아웃한 사용자들)
+            List<AuctionParticipant> inactiveParticipants = allParticipants.stream()
+                .filter(participant -> !participant.getIsActive())
+                .toList();
+
+            log.info("📧 비활성화된 참여자 수: {}명", inactiveParticipants.size());
+
+            // 낙찰자 정보 조회
+            Optional<Member> winnerOpt = auctionBidService.getCurrentHighestBidder(item);
+            Member winner = winnerOpt.orElse(null);
+
+            for (AuctionParticipant participant : inactiveParticipants) {
+                try {
+                    Member member = participant.getMember();
+                    
+                    // 경매 종료 알림 (모든 비활성화된 참여자에게)
+                    notificationService.createAuctionEndNotification(
+                        member, 
+                        item.getItem().getItemName(), 
+                        item.getId()
+                    );
+
+                    // 낙찰자에게는 추가로 낙찰 알림
+                    if (winner != null && winner.getMemberId().equals(member.getMemberId())) {
+                        notificationService.createAuctionWinNotification(
+                            member,
+                            item.getItem().getItemName(),
+                            item.getId(),
+                            item.getCurrentPrice()
+                        );
+                        log.info("🏆 낙찰자에게 낙찰 알림 전송: memberId={}", member.getMemberId());
+                    }
+
+                    log.info("📧 알림 전송 완료: memberId={}, isWinner={}", 
+                        member.getMemberId(), 
+                        winner != null && winner.getMemberId().equals(member.getMemberId()));
+
+                } catch (Exception e) {
+                    log.error("❌ 개별 참여자 알림 전송 실패: participantId={}, memberId={}, error={}", 
+                        participant.getId(), 
+                        participant.getMember().getMemberId(), 
+                        e.getMessage());
+                }
+            }
+
+            log.info("✅ 로그아웃한 참여자들에게 알림 전송 완료: {}명", inactiveParticipants.size());
+
+        } catch (Exception e) {
+            log.error("❌ 로그아웃한 참여자들에게 알림 전송 중 오류 발생: sessionId={}, error={}", 
+                session.getId(), e.getMessage(), e);
+        }
+    }
 
 }

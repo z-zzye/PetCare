@@ -191,6 +191,10 @@
   color: #ffa502;
 }
 
+.notification-type-auction {
+  color: #ff6b35;
+}
+
 /* 알림 삭제 버튼 */
 .notification-delete-btn {
   background: none;
