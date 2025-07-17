@@ -248,21 +248,7 @@ public class AuctionWebSocketController { //실시간 통신
     }
 
 
-     /* 경매 상태 업데이트 (관리자용)*/
-    @MessageMapping("/auction.status")
-    public void handleStatusUpdate(@Payload String statusUpdate, Principal principal) {
-        String email = principal != null ? principal.getName() : null;
-        if (email == null) {
-            log.error("인증 정보 없음: 상태 업데이트 불가");
-            return;
-        }
-        Member member = memberRepository.findByMember_Email(email)
-            .orElseThrow(() -> new IllegalArgumentException("사용자 정보 없음: " + email));
-        log.info("경매 상태 업데이트: memberId={}, status={}", member.getMemberId(), statusUpdate);
-        // TODO: 관리자 권한 확인
-        // TODO: 경매 상태 업데이트 로직
-        messagingTemplate.convertAndSend("/topic/auction/status", statusUpdate);
-    }
+
 
 
      /* 경매 종료 알림 */
