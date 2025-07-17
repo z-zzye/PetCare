@@ -6,6 +6,7 @@ import { jwtDecode } from 'jwt-decode';
 import axios from '../../api/axios'; // ✅ axios 인스턴스 사용
 import { useAuth } from '../../contexts/AuthContext';
 import HashtagSelectionModal from '../HashtagSelectionModal';
+import './Sidebar.css'
 
 const Sidebar = ({ onTabChange }) => {
   const navigate = useNavigate();

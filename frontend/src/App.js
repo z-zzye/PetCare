@@ -58,6 +58,7 @@ import AuctionAdminPage from './components/admin/AuctionAdminPage.jsx';
 import AuctionDeliveryAdminPage from './components/admin/AuctionDeliveryAdminPage.jsx';
 import BoardAdminPage from './components/admin/boards/BoardAdminPage.jsx';
 import HashtagManagePage from './components/admin/HashtagManagePage.jsx';
+import AutoVaxAdminPage from './components/admin/AutoVaxAdminPage.jsx';
 
 // 챗봇 버튼 컴포넌트
 const ChatbotButton = () => {
@@ -197,6 +198,7 @@ function App() {
             <Route path="/admin/auction" element={<AdminRoute><AuctionAdminPage /></AdminRoute>} />
             <Route path="/admin/auction/register" element={<AdminRoute><ItemRegister /></AdminRoute>} />
             <Route path="/admin/auction-delivery" element={<AdminRoute><AuctionDeliveryAdminPage /></AdminRoute>} />
+            <Route path="/admin/autovax" element={<AdminRoute><AutoVaxAdminPage /></AdminRoute>} />
           </Routes>
         </BrowserRouter>
         {/* 로그인한 사용자만 챗봇 버튼 표시 */}

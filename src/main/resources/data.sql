@@ -1,5 +1,3 @@
--- 자동 생성된 더미 데이터
--- 기존 데이터가 없을 때만 삽입하도록 조건부 삽입
 
 -- 기존 쇼핑 데이터
 INSERT INTO item_category (parent_option, option_value) VALUES (NULL, '강아지');
