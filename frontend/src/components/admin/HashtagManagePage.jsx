@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import axios from '../../api/axios';
 import './HashtagManagePage.css';
 import Swal from 'sweetalert2';
+import Header from '../Header.jsx';
 
 const HashtagManagePage = () => {
   const [hashtags, setHashtags] = useState([]);
@@ -41,13 +42,13 @@ const HashtagManagePage = () => {
       });
       const newHashtags = response.data.content; // Page 객체의 content 필드
       const totalPages = response.data.totalPages;
-      
+
       if (append) {
         setHashtags(prev => [...prev, ...newHashtags]);
       } else {
         setHashtags(newHashtags);
       }
-      
+
       setHasMore(pageNum < totalPages - 1);
     } catch (error) {
       console.error('해시태그 로드 실패:', error);
@@ -99,13 +100,13 @@ const HashtagManagePage = () => {
     try {
       setIsAdding(true);
       await axios.post('/hashtags', { tagName: newHashtag.trim() });
-      
+
       Swal.fire({
         icon: 'success',
         title: '성공',
         text: '해시태그가 추가되었습니다.'
       });
-      
+
       setNewHashtag('');
       // 무한 스크롤 상태 초기화 후 목록 새로고침
       setPage(0);
@@ -139,13 +140,13 @@ const HashtagManagePage = () => {
     if (result.isConfirmed) {
       try {
         await axios.delete(`/hashtags/${hashtag.tagId}`);
-        
+
         Swal.fire({
           icon: 'success',
           title: '성공',
           text: '해시태그가 삭제되었습니다.'
         });
-        
+
         // 무한 스크롤 상태 초기화 후 목록 새로고침
         setPage(0);
         setHasMore(true);
@@ -169,10 +170,12 @@ const HashtagManagePage = () => {
   };
 
   return (
+    <>
+    <Header />
     <div className="hashtag-manage-page">
       <div className="hashtag-manage-container">
         <h1 className="hashtag-manage-title">관심 태그 관리</h1>
-        
+
         {/* 검색 및 추가 섹션 */}
         <div className="hashtag-control-section">
           <div className="hashtag-search-add">
@@ -224,14 +227,14 @@ const HashtagManagePage = () => {
               </div>
             ))}
           </div>
-          
+
           {loading && (
             <div className="hashtag-loading">
               <div className="loading-spinner"></div>
               <p>해시태그를 불러오는 중...</p>
             </div>
           )}
-          
+
           {!loading && filteredHashtags.length === 0 && (
             <div className="hashtag-empty">
               <p>표시할 해시태그가 없습니다.</p>
@@ -240,7 +243,8 @@ const HashtagManagePage = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
-export default HashtagManagePage; 
+export default HashtagManagePage;

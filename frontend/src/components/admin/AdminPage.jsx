@@ -1,9 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import './AdminPage.css';
+import Header from '../Header.jsx';
 
 const AdminPage = () => {
   return (
+    <>
+    <Header />
     <div className="admin-page">
       <div className="admin-container">
         <h1 className="admin-title">관리자 페이지</h1>
@@ -51,6 +54,7 @@ const AdminPage = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
