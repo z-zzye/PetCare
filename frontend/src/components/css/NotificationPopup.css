@@ -23,6 +23,17 @@
   color: #333;
 }
 
+/* 로그인되지 않은 상태의 알림 아이콘 */
+.notification-icon.not-logged-in {
+  opacity: 0.6;
+  cursor: pointer;
+}
+
+.notification-icon.not-logged-in:hover {
+  opacity: 0.8;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
 /* 알림 카운트 배지 */
 .notification-badge {
   position: absolute;

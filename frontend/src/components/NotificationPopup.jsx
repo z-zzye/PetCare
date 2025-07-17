@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from '../api/axios';
+import { useAuth } from '../contexts/AuthContext';
 import './css/NotificationPopup.css';
 
 const NotificationPopup = () => {
@@ -10,6 +11,7 @@ const NotificationPopup = () => {
   const [loading, setLoading] = useState(false);
   const popupRef = useRef(null);
   const navigate = useNavigate();
+  const { isLoggedIn } = useAuth();
 
   // 알림 타입별 아이콘
   const getNotificationIcon = (type) => {
@@ -88,12 +90,24 @@ const NotificationPopup = () => {
 
   // 알림 목록 조회
   const fetchNotifications = async () => {
+    if (!isLoggedIn) {
+      setNotifications([]);
+      setLoading(false);
+      return;
+    }
+    
     try {
       setLoading(true);
       const response = await axios.get('/notifications?size=10');
       setNotifications(response.data.content || []);
     } catch (error) {
       console.error('알림 목록 조회 실패:', error);
+      // 인증 오류인 경우 빈 배열로 설정
+      if (error.response?.status === 401) {
+        setNotifications([]);
+      } else {
+        setNotifications([]);
+      }
     } finally {
       setLoading(false);
     }
@@ -101,11 +115,27 @@ const NotificationPopup = () => {
 
   // 읽지 않은 알림 개수 조회
   const fetchUnreadCount = async () => {
+    console.log('fetchUnreadCount 호출 - isLoggedIn:', isLoggedIn);
+    console.log('localStorage token:', localStorage.getItem('token'));
+    
+    if (!isLoggedIn) {
+      console.log('로그인되지 않음 - 알림 개수를 0으로 설정');
+      setUnreadCount(0);
+      return;
+    }
+    
     try {
+      console.log('알림 개수 조회 요청 시작');
       const response = await axios.get('/notifications/unread-count');
+      console.log('알림 개수 조회 응답:', response.data);
       setUnreadCount(response.data.unreadCount || 0);
     } catch (error) {
       console.error('읽지 않은 알림 개수 조회 실패:', error);
+      console.error('에러 응답:', error.response);
+      // 인증 오류인 경우 알림 개수를 0으로 설정
+      if (error.response?.status === 401) {
+        setUnreadCount(0);
+      }
     }
   };
 
@@ -118,6 +148,10 @@ const NotificationPopup = () => {
       fetchUnreadCount();
     } catch (error) {
       console.error('알림 읽음 처리 실패:', error);
+      // 인증 오류가 아닌 경우에만 에러 처리
+      if (error.response?.status !== 401) {
+        // 에러 처리 로직 추가 가능
+      }
     }
   };
 
@@ -131,6 +165,10 @@ const NotificationPopup = () => {
       fetchUnreadCount();
     } catch (error) {
       console.error('알림 삭제 실패:', error);
+      // 인증 오류가 아닌 경우에만 에러 처리
+      if (error.response?.status !== 401) {
+        // 에러 처리 로직 추가 가능
+      }
     }
   };
 
@@ -143,6 +181,10 @@ const NotificationPopup = () => {
       fetchUnreadCount();
     } catch (error) {
       console.error('모든 알림 삭제 실패:', error);
+      // 인증 오류가 아닌 경우에만 에러 처리
+      if (error.response?.status !== 401) {
+        // 에러 처리 로직 추가 가능
+      }
     }
   };
 
@@ -189,6 +231,12 @@ const NotificationPopup = () => {
 
   // 팝업 토글
   const togglePopup = async () => {
+    if (!isLoggedIn) {
+      // 로그인되지 않은 경우 로그인 페이지로 이동
+      navigate('/members/login');
+      return;
+    }
+    
     const newIsOpen = !isOpen;
     setIsOpen(newIsOpen);
 
@@ -206,6 +254,10 @@ const NotificationPopup = () => {
           await fetchNotifications();
         } catch (error) {
           console.error('알림 자동 읽음 처리 실패:', error);
+          // 인증 오류가 아닌 경우에만 에러 처리
+          if (error.response?.status !== 401) {
+            // 에러 처리 로직 추가 가능
+          }
         }
       }
     }
@@ -236,16 +288,20 @@ const NotificationPopup = () => {
     const interval = setInterval(fetchUnreadCount, 5 * 60 * 1000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [isLoggedIn]); // isLoggedIn이 변경될 때마다 실행
 
   return (
     <div className="notification-container" ref={popupRef}>
       {/* 알림 아이콘 */}
-      <div className="notification-icon" onClick={togglePopup}>
+      <div 
+        className={`notification-icon ${!isLoggedIn ? 'not-logged-in' : ''}`} 
+        onClick={togglePopup}
+        title={!isLoggedIn ? '로그인이 필요합니다' : '알림'}
+      >
         <svg viewBox="0 0 24 24" fill="currentColor">
           <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />
         </svg>
-        {unreadCount > 0 && (
+        {isLoggedIn && unreadCount > 0 && (
           <div className="notification-badge">
             {unreadCount > 99 ? '99+' : unreadCount}
           </div>

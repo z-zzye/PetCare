@@ -62,10 +62,18 @@ public class NotificationService {
    */
   @Transactional(readOnly = true)
   public long getUnreadCount(String userEmail) {
+    log.info("읽지 않은 알림 개수 조회 시작 - userEmail: {}", userEmail);
+    
     Member member = memberRepository.findByMember_Email(userEmail)
-      .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+      .orElseThrow(() -> {
+        log.error("사용자를 찾을 수 없습니다 - userEmail: {}", userEmail);
+        return new IllegalArgumentException("사용자를 찾을 수 없습니다.");
+      });
 
-    return notificationRepository.countByMemberAndIsReadFalse(member);
+    long count = notificationRepository.countByMemberAndIsReadFalse(member);
+    log.info("읽지 않은 알림 개수 조회 완료 - userEmail: {}, count: {}", userEmail, count);
+    
+    return count;
   }
 
   /**
