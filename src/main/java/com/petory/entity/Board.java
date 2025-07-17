@@ -37,7 +37,7 @@ public class Board extends BaseEntity { // BaseTimeEntity가 @CreatedDate, @Last
   private BoardKind boardKind; // 게시판 종류 (ENUM 타입)
 
   @Lob // 대용량 텍스트를 위한 어노테이션
-  @Column(nullable = false)
+  @Column(nullable = false, columnDefinition = "LONGTEXT")
   private String content;
 
   @Column(columnDefinition = "integer default 0", nullable = false)
@@ -54,6 +54,7 @@ public class Board extends BaseEntity { // BaseTimeEntity가 @CreatedDate, @Last
   private boolean blinded = false; // 클린봇에 의한 블라인드 여부
 
   @Lob
+  @Column(columnDefinition = "LONGTEXT")
   private String originalContent; // 블라인드 처리 시 원본 내용 보관용 필드
 
   private String originalTitle; // 블라인드 처리 시 원본 제목 보관용 필드

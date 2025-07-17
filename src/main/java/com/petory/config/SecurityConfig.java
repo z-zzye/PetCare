@@ -44,6 +44,7 @@ public class SecurityConfig {
           .authorizeHttpRequests(auth -> auth
             .requestMatchers(
               "/", "/favicon.ico", "/css/**", "/js/**", "/img/**", "/images/**", "/profile/**",
+              "/api/main/**", // 메인 화면
               "/api/members/signup", //회원가입
               "/api/members/login", //로그인
               "/oauth2/**",
