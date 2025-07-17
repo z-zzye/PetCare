@@ -193,6 +193,8 @@ const Sidebar = ({ onTabChange }) => {
         <button onClick={() => onTabChange('health')}>🩺건강수첩</button>
         <button onClick={() => onTabChange('posts')}>📝내가쓴글</button>
         <button onClick={() => onTabChange('reservations')}>🎟️예약현황</button>
+        <button onClick={() => onTabChange('orders')}>🛒구매내역</button>
+        <button onClick={() => onTabChange('auctions')}>🏷️입찰내역</button>
       </div>
 
       <HashtagSelectionModal

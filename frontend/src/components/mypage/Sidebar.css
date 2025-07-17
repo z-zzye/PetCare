@@ -1,12 +1,28 @@
 .sidebar {
   width: 250px;
   padding: 20px;
-  background-color: #ffcc00;
-  border-right: 2px solid #eee;
-  min-height: 100vh; /* 뷰포트 전체 높이를 최소로 */
+  background: linear-gradient(135deg, #ffcc00 0%, #ffd633 100%);
+  border-right: 3px solid #e6b800; /* 왼쪽에 위치하므로 오른쪽 테두리로 변경 */
+  min-height: 100vh;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  position: relative;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1); /* 그림자 방향 변경 */
+  border-radius: 0 15px 15px 0; /* 왼쪽 모서리 둥글게 */
+}
+
+/* 다이어리 페이지 효과 */
+.sidebar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent; /* 줄무늬 제거하고 투명하게 */
+  pointer-events: none;
+  border-radius: 0 15px 15px 0; /* 왼쪽 모서리 둥글게 */
 }
 .sidebar-wrapper {
   position: relative;
@@ -63,40 +79,92 @@
   border: 1px dashed #aaa;
 }
 
-/* 탭: 사이드바 오른쪽 바깥 */
+/* 다이어리 인덱스 탭 스타일 */
 .sidebar-tabs {
-  background-color: transparent; /* ✅ 배경 투명 */
-  border: none; /* ✅ 테두리 제거 */
-  box-shadow: none;
   position: absolute;
-  top: 15%;
-  left: 99.8%;
-  transform: translateY(-50%);
+  top: 5%; /* 8%에서 5%로 더 위쪽으로 이동 */
+  left: 100%; /* 오른쪽으로 돌출 */
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  height: auto; /* 높이 자동 */
-  min-height: 2.2rem; /* 너무 작지 않도록 */
-  width: fit-content; /* 내용에 따라 자동 가로 길이 */
-  max-width: 100%; /* 너무 길어지지 않게 제한 */
-  white-space: nowrap; /* 줄 바꿈 금지 */
-  align-items: left;
-  justify-content: left;
-  background-color: white;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  font-size: 1rem; /* 아이콘 크기 */
-  margin-bottom: 0.5rem;
+  gap: 0.5rem; /* 간격을 0.15rem에서 0.5rem으로 넓힘 */
+  padding: 0;
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+  z-index: 10;
 }
+
 .sidebar-tabs button {
   border: none;
-  background-color: #0a315e;
-  color: white;
+  background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%); /* 흰색 배경 */
+  color: #2c3e50; /* 짙은 네이비 텍스트 */
+  padding: 0.5rem 0.8rem; /* 패딩을 줄임 */
+  font-size: 0.75rem; /* 글자 크기를 줄임 */
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 0 6px 6px 0; /* 오른쪽 모서리 둥글게 */
+  position: relative;
+  white-space: nowrap;
+  min-width: 75px; /* 85px에서 75px로 더 좁힘 */
+  box-shadow: 2px 1px 4px rgba(0, 0, 0, 0.1); /* 그림자 방향 */
+  border: 1px solid #dee2e6; /* 연한 네이비 테두리 */
+  border-left: none; /* 왼쪽 테두리 제거 */
+  margin-left: 0;
+  transform: translateX(0);
+  z-index: 1;
 }
+
 .sidebar-tabs button:hover {
-  background-color: white;
-  color: #0a315e;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); /* 호버 시 약간 회색 */
+  color: #1a252f; /* 호버 시 더 진한 네이비 텍스트 */
+  transform: translateX(2px); /* 오른쪽으로 이동 */
+  box-shadow: 3px 2px 6px rgba(0, 0, 0, 0.15);
+  z-index: 2;
 }
+
+.sidebar-tabs button.active {
+  background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%); /* 활성 상태는 짙은 네이비 */
+  color: white;
+  box-shadow: 3px 2px 6px rgba(44, 62, 80, 0.25);
+  transform: translateX(3px); /* 오른쪽으로 더 이동 */
+  z-index: 3;
+}
+
+/* 각 탭별 고유 색상 - 네이비 포인트 */
+.sidebar-tabs button:nth-child(1) { 
+  border-right: 3px solid #34495e; /* 짙은 네이비 포인트 */
+  background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+}
+.sidebar-tabs button:nth-child(2) { 
+  border-right: 3px solid #2c3e50; 
+  background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+}
+.sidebar-tabs button:nth-child(3) { 
+  border-right: 3px solid #1a252f; 
+  background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+}
+.sidebar-tabs button:nth-child(4) { 
+  border-right: 3px solid #34495e; 
+  background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+}
+.sidebar-tabs button:nth-child(5) { 
+  border-right: 3px solid #2c3e50; 
+  background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+}
+.sidebar-tabs button:nth-child(6) { 
+  border-right: 3px solid #1a252f; 
+  background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+}
+
+/* 활성 상태일 때 색상 변경 - 네이비 계열로 통일 */
+.sidebar-tabs button.active:nth-child(1) { background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%); }
+.sidebar-tabs button.active:nth-child(2) { background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%); }
+.sidebar-tabs button.active:nth-child(3) { background: linear-gradient(135deg, #1a252f 0%, #0f1419 100%); }
+.sidebar-tabs button.active:nth-child(4) { background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%); }
+.sidebar-tabs button.active:nth-child(5) { background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%); }
+.sidebar-tabs button.active:nth-child(6) { background: linear-gradient(135deg, #1a252f 0%, #0f1419 100%); }
 
 .user-interests {
   margin-top: 0.5rem;

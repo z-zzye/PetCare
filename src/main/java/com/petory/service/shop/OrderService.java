@@ -195,12 +195,12 @@ public class OrderService {
     }
   }
 
-  // email로 memberId 조회
-  public Long getMemberIdByEmail(String email) {
-    Member member = memberRepository.findByMember_Email(email)
-      .orElseThrow(() -> new RuntimeException("회원 정보를 찾을 수 없습니다."));
-    return member.getMemberId();
-  }
+    // 회원의 전체 보유 마일리지와 주문 내역 리스트 반환 (MyOrders용)
+    public OrderListResponseDto getOrderListResponseByMemberId(Long memberId) {
+        // 1. 회원 정보 조회
+        Member member = memberRepository.findById(memberId)
+            .orElseThrow(() -> new RuntimeException("회원 정보가 존재하지 않습니다."));
+        int memberMileage = member.getMember_Mileage();
 
   // 회원의 전체 보유 마일리지와 주문 내역 리스트 반환 (MyOrders용)
   public OrderListResponseDto getOrderListResponseByMemberId(Long memberId) {
@@ -299,8 +299,6 @@ public class OrderService {
       orderRepository.save(order);
       return true;
     }
-    return false;
-  }
 
   // 관리자용 전체 주문 목록 조회
   public List<OrderListDto> getAllOrdersForAdmin() {

@@ -9,6 +9,8 @@ import CalendarPage from './CalendarPage';
 import HealthNotePage from './HealthNotePage';
 import './Mypage.css';
 import MyPostsPage from './MyPostsPage';
+import MyOrders from '../shop/MyOrders.jsx';
+import MyAuctionHistory from '../shop/MyAuctionHistory.jsx';
 
 import axios from '../../api/axios';
 import Sidebar from './Sidebar'; // 따로 분리한 사이드바 컴포넌트
@@ -108,6 +110,12 @@ const Mypage = () => {
         return <HealthNotePage />;
       case 'posts':
         return <MyPostsPage />;
+      case 'orders':
+        return <MyOrders showHeader={false} />;
+      case 'auctions':
+        return <MyAuctionHistory showHeader={false} />;
+      case 'reservations':
+        return <div>예약현황 페이지 (추후 구현)</div>;
       default:
         return <div>탭을 선택하세요.</div>;
     }
@@ -122,7 +130,7 @@ const Mypage = () => {
         <div
           className="mypage-content"
           style={{
-            marginLeft: '5rem', // 사이드탭이 차지하는 폭만큼 조정
+            marginLeft: '5rem', // 사이드탭이 차지하는 폭만큼 왼쪽 마진으로 조정
           }}
         >
           {renderContent()}

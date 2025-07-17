@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from '../../api/axios';
 import Header from '../Header.jsx';
 
-const MyAuctionHistory = () => {
+const MyAuctionHistory = ({ showHeader = true }) => {
   const navigate = useNavigate();
   const [histories, setHistories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -334,7 +334,7 @@ const MyAuctionHistory = () => {
 
   return (
     <>
-      <Header />
+      {showHeader && <Header />}
       {toast && (
         <div style={styles.toast}>{toast}</div>
       )}
