@@ -141,7 +141,18 @@ function AuctionCard({ item, isBack, currentTime }) {
   const isAuctionStarted = () => {
     if (!item.start_time) return false;
     const startTime = new Date(item.start_time);
-    return currentTime >= startTime;
+    const isStarted = currentTime >= startTime;
+    
+    // 디버깅용 로그
+    console.log('경매 시간 체크:', {
+      itemName: item.itemName,
+      startTime: item.start_time,
+      parsedStartTime: startTime,
+      currentTime: currentTime,
+      isStarted: isStarted
+    });
+    
+    return isStarted;
   };
 
   // 경매 시작까지 남은 시간 계산

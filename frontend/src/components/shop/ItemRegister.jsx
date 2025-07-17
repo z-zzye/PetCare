@@ -219,7 +219,7 @@ const ItemRegister = () => {
         <div className="item-register-container">
           <form onSubmit={handleSubmit} encType="multipart/form-data" className="item-register-form">
             <h2>{location.pathname === '/admin/auction/register' ? '경매 상품 등록' : '상품 등록'}</h2>
-            <div className="form-section">
+            <div className="form-section category-group">
               <label>카테고리</label>
               <select
                 name="categoryId"
@@ -242,11 +242,11 @@ const ItemRegister = () => {
                 ))}
               </select>
             </div>
-            <div className="form-section">
+            <div className="form-section item-name-group">
               <label>상품명</label>
               <input name="itemName" value={form.itemName} onChange={handleChange} placeholder="상품명" required ref={itemNameRef} />
             </div>
-            <div className="form-section">
+            <div className="form-section description-group">
               <label>상세 설명</label>
               <textarea 
                 name="itemDescription" 
@@ -263,7 +263,7 @@ const ItemRegister = () => {
               />
             </div>
             <div className="form-row">
-              <div className="form-section">
+              <div className="form-section price-group">
                 <label>가격</label>
                 <input 
                   name="itemPrice" 
@@ -281,7 +281,7 @@ const ItemRegister = () => {
                   }}
                 />
               </div>
-              <div className="form-section">
+              <div className="form-section status-group">
                 <label>상태</label>
                 <select name="itemStatus" value={form.itemStatus} onChange={handleChange}>
                   {location.pathname === '/shop/item/register' ? (
@@ -304,7 +304,7 @@ const ItemRegister = () => {
               </div>
             </div>
             <hr className="section-divider" />
-            <div className="form-section">
+            <div className="form-section option-group">
               <label>옵션</label>
               <div className="option-label-row">
                 <span className="option-label">옵션명</span>
@@ -371,7 +371,7 @@ const ItemRegister = () => {
               )}
             </div>
             <hr className="section-divider" />
-            <div className="form-section">
+            <div className="form-section image-group">
               <label>이미지 업로드</label>
               <input type="file" name="images" multiple onChange={handleImageChange} />
               <div className="image-preview-list">
@@ -382,7 +382,13 @@ const ItemRegister = () => {
                       alt={file.name}
                       className="image-preview-img"
                     />
-                    <button type="button" className="image-remove-btn" onClick={() => removeImage(idx)}>×</button>
+                    <button type="button" className="image-remove-btn" onClick={() => removeImage(idx)}>
+                      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M3 6h18"></path>
+                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                      </svg>
+                    </button>
                     <div className="image-radio-row">
                       <input
                         type="radio"
@@ -390,7 +396,6 @@ const ItemRegister = () => {
                         checked={!!file.isRepresentative}
                         onChange={() => handleRepChange(idx)}
                       />
-                      <label>대표 이미지</label>
                     </div>
                   </div>
                 ))}
@@ -417,12 +422,6 @@ const ItemRegister = () => {
                   type="button" 
                   className="action-btn auction-btn" 
                   onClick={handleAuctionRegister}
-                  style={{
-                    background: form.itemStatus === 'AUCTION' ? 'linear-gradient(90deg, #667eea, #764ba2)' : '#cccccc',
-                    color: form.itemStatus === 'AUCTION' ? '#fff' : '#666666',
-                    cursor: form.itemStatus === 'AUCTION' ? 'pointer' : 'not-allowed',
-                    boxShadow: form.itemStatus === 'AUCTION' ? '0 2px 8px #667eea22' : 'none'
-                  }}
                   disabled={form.itemStatus !== 'AUCTION'}
                 >
                   경매 등록
@@ -436,12 +435,13 @@ const ItemRegister = () => {
               background: #fff;
               width: 100vw;
               margin-top: 0 !important;
-              padding-top: 0 !important;
+              padding-top: 40px !important;
+              padding-bottom: 40px;
             }
             .item-register-container {
               max-width: 700px;
               margin: 0 auto 2rem auto;
-              background: #fafbfc;
+              background: #fff;
               border-radius: 16px;
               box-shadow: 0 2px 16px #0001;
               padding: 2.5rem 2rem 2rem 2rem;
@@ -450,6 +450,9 @@ const ItemRegister = () => {
               text-align: center;
               margin-bottom: 2rem;
               color: #223A5E;
+              font-size: 1.7rem;
+              border-bottom: 1px solid #e0e0e0;
+              padding-bottom: 20px;
             }
             .form-section {
               display: flex;
@@ -480,6 +483,12 @@ const ItemRegister = () => {
               font-size: 1rem;
               background: #fff;
               margin-bottom: 0.2rem;
+            }
+            .form-section input:focus,
+            .form-section select:focus,
+            .form-section textarea:focus {
+              border-color: #f6ad55;
+              outline: 1.5px solid #f6ad55;
             }
             .form-section textarea {
               min-height: 80px;
@@ -574,6 +583,10 @@ const ItemRegister = () => {
               align-items: center;
               justify-content: flex-start;
               padding: 0.5rem 0.2rem 0.7rem 0.2rem;
+              transition: border-color 0.2s;
+            }
+            .image-preview-item:has(input[type="radio"]:checked) {
+              border: 2px solid #1a365d;
             }
             .image-preview-img {
               width: 100px;
@@ -581,16 +594,18 @@ const ItemRegister = () => {
               object-fit: cover;
               border-radius: 8px;
               border: 1px solid #eee;
+              transition: border-color 0.2s;
             }
+
             .image-remove-btn {
               position: absolute;
-              top: 4px;
-              right: 4px;
-              background: #fff;
-              border: 1px solid #ccc;
+              top: -2px;
+              right: -2px;
+              background: transparent;
+              border: none;
               border-radius: 50%;
-              width: 22px;
-              height: 22px;
+              width: 32px;
+              height: 32px;
               cursor: pointer;
               font-weight: bold;
               color: #d32f2f;
@@ -609,6 +624,14 @@ const ItemRegister = () => {
               align-items: center;
               gap: 0.3rem;
               margin-top: 0.3rem;
+            }
+            .image-radio-row input[type="radio"] {
+              transform: scale(0.8);
+              accent-color: #1a365d;
+            }
+            .image-radio-row label {
+              font-size: 1rem;
+              font-weight: normal;
             }
             .action-btn {
               width: 200px;
@@ -636,12 +659,18 @@ const ItemRegister = () => {
               background: linear-gradient(90deg, #ffd54f, #ffc107);
             }
             .auction-btn {
-              background: linear-gradient(90deg, #667eea, #764ba2);
+              background: #1a365d;
               color: #fff;
-              box-shadow: 0 2px 8px #667eea22;
+              box-shadow: 0 2px 8px #1a365d22;
             }
             .auction-btn:hover {
-              background: linear-gradient(90deg, #5a6fd8, #667eea);
+              background: #2d3748;
+            }
+            .auction-btn:disabled {
+              background: #cccccc;
+              color: #666666;
+              cursor: not-allowed;
+              box-shadow: none;
             }
             .button-row {
               display: flex;
@@ -650,6 +679,107 @@ const ItemRegister = () => {
               width: 100%;
               gap: 2.5rem;
               margin-top: 2rem;
+            }
+            
+            /* 각 섹션별 네이비 테두리 스타일 */
+            .category-group {
+              border-left: 4px solid #1a365d;
+              padding-left: 12px;
+              margin-bottom: 20px;
+            }
+            
+            .item-name-group {
+              border-left: 4px solid #1a365d;
+              padding-left: 12px;
+              margin-bottom: 20px;
+            }
+            
+            .description-group {
+              border-left: 4px solid #1a365d;
+              padding-left: 12px;
+              margin-bottom: 20px;
+            }
+            
+            .price-group {
+              border-left: 4px solid #1a365d;
+              padding-left: 12px;
+              margin-bottom: 20px;
+            }
+            
+            .status-group {
+              border-left: 4px solid #1a365d;
+              padding-left: 12px;
+              margin-bottom: 20px;
+            }
+            
+            .option-group {
+              border-left: 4px solid #1a365d;
+              padding-left: 12px;
+              margin-bottom: 20px;
+            }
+            
+            .image-group {
+              border-left: 4px solid #1a365d;
+              padding-left: 12px;
+              margin-bottom: 20px;
+            }
+            
+            /* 파일 입력란 스타일 */
+            .form-section input[type="file"] {
+              width: 100%;
+              padding: 12px 16px;
+              border: 2px solid #e1e5e9;
+              border-radius: 8px;
+              font-size: 1rem;
+              background: #ffffff;
+              color: #333;
+              transition: all 0.3s ease;
+              cursor: pointer;
+            }
+            
+            .form-section input[type="file"]:hover {
+              border-color: #f6ad55;
+            }
+            
+            .form-section input[type="file"]:focus {
+              border-color: #f6ad55;
+              outline: 1.5px solid #f6ad55;
+            }
+            
+            /* 파일 입력란 내부 버튼 스타일 */
+            .form-section input[type="file"]::-webkit-file-upload-button {
+              background: #1a365d;
+              color: white;
+              border: none;
+              padding: 6px 12px;
+              border-radius: 4px;
+              font-weight: normal;
+              font-size: 0.9rem;
+              cursor: pointer;
+              transition: background 0.2s;
+              margin-right: 12px;
+            }
+            
+            .form-section input[type="file"]::-webkit-file-upload-button:hover {
+              background: #2d3748;
+            }
+            
+            /* Firefox용 파일 버튼 스타일 */
+            .form-section input[type="file"]::file-selector-button {
+              background: #1a365d;
+              color: white;
+              border: none;
+              padding: 6px 12px;
+              border-radius: 4px;
+              font-weight: normal;
+              font-size: 0.9rem;
+              cursor: pointer;
+              transition: background 0.2s;
+              margin-right: 12px;
+            }
+            
+            .form-section input[type="file"]::file-selector-button:hover {
+              background: #2d3748;
             }
             @media (max-width: 700px) {
               .item-register-container {
