@@ -134,7 +134,6 @@ public class OrderService {
                 .orderMemo(dto.getOrderMemo() != null ? dto.getOrderMemo() : "")
                 .member(member)
                 .build();
-        // TODO: member, orderItems 등 추가 세팅 필요
 
         // 3. OrderItem 엔티티 생성 및 저장 (주문 상품 개수만큼 반복)
         for (OrderItemDto itemDto : dto.getOrderItems()) {
@@ -203,7 +202,7 @@ public class OrderService {
     }
 
     // 회원의 전체 보유 마일리지와 주문 내역 리스트 반환 (MyOrders용)
-    public OrderListResponseDto getOrderListResponseByMemberId(Long memberId) {
+    public com.petory.dto.shop.OrderListResponseDto getOrderListResponseByMemberId(Long memberId) {
         // 1. 회원 정보 조회
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new RuntimeException("회원 정보가 존재하지 않습니다."));
@@ -300,63 +299,5 @@ public class OrderService {
             return true;
         }
         return false;
-    }
-
-    // 관리자용 전체 주문 목록 조회
-    public List<OrderListDto> getAllOrdersForAdmin() {
-        List<Order> orders = orderRepository.findAll();
-
-        return orders.stream().map(order -> {
-            List<OrderItemDto> orderItemDtos = order.getOrderItems().stream().map(orderItem -> {
-                return OrderItemDto.builder()
-                    .itemId(orderItem.getItem().getItemId())
-                    .itemName(orderItem.getItemName())
-                    .thumbnailUrl(orderItem.getItemImage())
-                    .optionId(null)
-                    .optionName(orderItem.getOptionName())
-                    .quantity(orderItem.getCount())
-                    .orderPrice(orderItem.getOrderPrice())
-                    .optionAddPrice(orderItem.getOptionAddPrice())
-                    .build();
-            }).collect(java.util.stream.Collectors.toList());
-
-            return OrderListDto.builder()
-                .merchantUid(order.getMerchantUid())
-                .orderStatus(order.getOrderStatus().name())
-                .orderDate(order.getRegDate())
-                .totalPrice(order.getTotalPrice())
-                .deliveryFee(order.getDeliveryFee())
-                .usedMileage(order.getUsedMileage())
-                .orderItems(orderItemDtos)
-                .build();
-        }).collect(java.util.stream.Collectors.toList());
-    }
-
-    // 관리자용 주문 상세 조회 (memberId 검증 없이)
-    public com.petory.dto.shop.OrderDetailDto getOrderDetailForAdmin(String merchantUid) {
-        // 주문 조회 (merchantUid만으로)
-        Order order = orderRepository.findByMerchantUid(merchantUid)
-            .orElseThrow(() -> new RuntimeException("주문 정보를 찾을 수 없습니다."));
-
-        // 주문 상품 DTO 변환
-        List<OrderItemDto> orderItems = getOrderItemDtosFromOrderItems(order.getOrderItems());
-
-        // OrderDetailDto 생성 및 반환
-        return com.petory.dto.shop.OrderDetailDto.builder()
-            .merchantUid(order.getMerchantUid())
-            .orderStatus(order.getOrderStatus().name())
-            .orderDate(order.getRegDate())
-            .totalPrice(order.getTotalPrice())
-            .usedMileage(order.getUsedMileage())
-            .deliveryFee(order.getDeliveryFee())
-            .paymentMethod(order.getPaymentMethod())
-            .memberEmail(order.getMember().getMember_Email()) // 회원 이메일 추가
-            .orderMemo(order.getOrderMemo())
-            .receiverName(order.getReceiverName())
-            .receiverPhone(order.getReceiverPhone())
-            .address(order.getAddress())
-            .deliveryName(order.getDeliveryName().name())
-            .orderItems(orderItems)
-            .build();
     }
 }
