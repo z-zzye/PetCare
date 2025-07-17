@@ -50,24 +50,35 @@ const BoardDetail = () => {
   }
 
   // 내 이메일 추출 및 작성자 비교
-  let isWriter = false;
-  let tokenExpiredOrInvalid = false;
-  try {
-    const token = localStorage.getItem('accessToken');
-    const payload = parseJwt(token);
-    // JWT의 sub(이메일)과 게시글 작성자 이메일 비교
-    if (payload && post && post.authorEmail) {
-      isWriter = payload.sub === post.authorEmail;
+  const [isWriter, setIsWriter] = useState(false);
+  const [tokenExpiredOrInvalid, setTokenExpiredOrInvalid] = useState(false);
+
+  useEffect(() => {
+    if (!post) return;
+    
+    try {
+      const token = localStorage.getItem('token'); // accessToken -> token으로 통일
+      const payload = parseJwt(token);
+      
+      // JWT의 sub(이메일)과 게시글 작성자 이메일 비교
+      if (payload && post && post.authorEmail) {
+        setIsWriter(payload.sub === post.authorEmail);
+      } else {
+        setIsWriter(false);
+      }
+      
+      // 토큰 만료 확인 (exp: 초 단위)
+      if (payload && payload.exp) {
+        const now = Math.floor(Date.now() / 1000);
+        setTokenExpiredOrInvalid(payload.exp < now);
+      } else {
+        setTokenExpiredOrInvalid(true);
+      }
+    } catch (e) {
+      setTokenExpiredOrInvalid(true);
+      setIsWriter(false);
     }
-    // 토큰 만료 확인 (exp: 초 단위)
-    if (payload && payload.exp) {
-      const now = Math.floor(Date.now() / 1000);
-      if (payload.exp < now) tokenExpiredOrInvalid = true;
-    }
-    if (!payload) tokenExpiredOrInvalid = true;
-  } catch (e) {
-    tokenExpiredOrInvalid = true;
-  }
+  }, [post]); // post가 변경될 때만 실행
 
   // 추천 처리 핸들러
   const handleRecommend = () => {
