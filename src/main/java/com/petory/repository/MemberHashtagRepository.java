@@ -3,6 +3,7 @@ package com.petory.repository;
 import com.petory.entity.MemberHashtag;
 import com.petory.entity.MemberHashtagId;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.util.List;
@@ -14,6 +15,7 @@ public interface MemberHashtagRepository extends JpaRepository<MemberHashtag, Me
     List<MemberHashtag> findByMemberId(@Param("memberId") Long memberId);
     
     // 사용자 ID로 모든 관심 태그 삭제
+    @Modifying
     @Query("DELETE FROM MemberHashtag mh WHERE mh.member.member_Id = :memberId")
     void deleteByMemberId(@Param("memberId") Long memberId);
     

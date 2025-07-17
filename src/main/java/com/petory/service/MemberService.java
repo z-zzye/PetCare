@@ -22,6 +22,14 @@ import com.petory.dto.PhoneUpdateDto;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
+import com.petory.repository.HashtagRepository;
+import com.petory.repository.MemberHashtagRepository;
+import com.petory.entity.Hashtag;
+import com.petory.entity.MemberHashtag;
+import com.petory.entity.MemberHashtagId;
+import java.util.Arrays;
+import java.util.List;
+import com.petory.dto.HashtagDto;
 
 @Service
 @Transactional
@@ -30,6 +38,8 @@ public class MemberService implements UserDetailsService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final ImageService imageService;
+    private final HashtagRepository hashtagRepository;
+    private final MemberHashtagRepository memberHashtagRepository;
 
     public Member join(MemberFormDto memberFormDto) {
         validateDuplicateMember(memberFormDto); // 1. 중복 회원 검사
@@ -51,7 +61,14 @@ public class MemberService implements UserDetailsService {
         Member member = Member.createMember(memberFormDto, passwordEncoder, savedProfileImgPath);
 
         // 4. DB에 최종 저장
-        return memberRepository.save(member);
+        member = memberRepository.save(member);
+        
+        // 5. 해시태그 처리
+        if (memberFormDto.getHashtags() != null && memberFormDto.getHashtags().length > 0) {
+            saveMemberHashtags(member, memberFormDto.getHashtags());
+        }
+        
+        return member;
     }
 
     /**
@@ -217,5 +234,91 @@ public class MemberService implements UserDetailsService {
     );
   }
 
+  /**
+   * 회원의 관심 해시태그를 저장하는 메서드
+   */
+  private void saveMemberHashtags(Member member, String[] hashtagNames) {
+    for (String hashtagName : hashtagNames) {
+      if (hashtagName != null && !hashtagName.trim().isEmpty()) {
+        // 해시태그가 존재하는지 확인하고, 없으면 생성
+        Hashtag hashtag = hashtagRepository.findByTagName(hashtagName.trim())
+          .orElseGet(() -> {
+            Hashtag newHashtag = Hashtag.builder()
+              .tagName(hashtagName.trim())
+              .tagCount(0)
+              .build();
+            return hashtagRepository.save(newHashtag);
+          });
+        
+        // MemberHashtag 생성
+        MemberHashtagId memberHashtagId = new MemberHashtagId();
+        memberHashtagId.setMemberId(member.getMember_Id());
+        memberHashtagId.setTagId(hashtag.getTagId());
+        
+        MemberHashtag memberHashtag = MemberHashtag.builder()
+          .id(memberHashtagId)
+          .member(member)
+          .hashtag(hashtag)
+          .build();
+        
+        memberHashtagRepository.save(memberHashtag);
+      }
+    }
+  }
 
+  /**
+   * 회원 ID로 해시태그를 저장하는 메서드 (API용)
+   */
+  public void saveMemberHashtags(Long memberId, List<String> hashtagNames) {
+    Member member = getMemberById(memberId);
+    if (member == null) {
+      throw new IllegalStateException("존재하지 않는 회원입니다.");
+    }
+    
+    // 기존 해시태그 삭제
+    memberHashtagRepository.deleteByMemberId(memberId);
+    
+    // 새로운 해시태그 저장
+    for (String hashtagName : hashtagNames) {
+      if (hashtagName != null && !hashtagName.trim().isEmpty()) {
+        // 해시태그가 존재하는지 확인하고, 없으면 생성
+        Hashtag hashtag = hashtagRepository.findByTagName(hashtagName.trim())
+          .orElseGet(() -> {
+            Hashtag newHashtag = Hashtag.builder()
+              .tagName(hashtagName.trim())
+              .tagCount(0)
+              .build();
+            return hashtagRepository.save(newHashtag);
+          });
+        
+        // MemberHashtag 생성
+        MemberHashtagId memberHashtagId = new MemberHashtagId();
+        memberHashtagId.setMemberId(memberId);
+        memberHashtagId.setTagId(hashtag.getTagId());
+        
+        MemberHashtag memberHashtag = MemberHashtag.builder()
+          .id(memberHashtagId)
+          .member(member)
+          .hashtag(hashtag)
+          .build();
+        
+        memberHashtagRepository.save(memberHashtag);
+      }
+    }
+  }
+
+  /**
+   * 회원 ID로 해시태그를 조회하는 메서드 (API용)
+   */
+  public List<HashtagDto> getMemberHashtags(Long memberId) {
+    Member member = getMemberById(memberId);
+    if (member == null) {
+      throw new IllegalStateException("존재하지 않는 회원입니다.");
+    }
+    
+    List<MemberHashtag> memberHashtags = memberHashtagRepository.findByMemberId(memberId);
+    return memberHashtags.stream()
+      .map(memberHashtag -> HashtagDto.fromEntity(memberHashtag.getHashtag()))
+      .collect(Collectors.toList());
+  }
 }

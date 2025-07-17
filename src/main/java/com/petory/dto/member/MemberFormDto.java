@@ -35,4 +35,7 @@ public class MemberFormDto {
 
     // 마일리지는 선택사항이므로 null 허용
     private Integer member_Mileage;
+    
+    // 관심 해시태그 리스트 (선택사항)
+    private String[] hashtags;
 }

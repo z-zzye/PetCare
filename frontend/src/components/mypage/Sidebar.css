@@ -97,3 +97,25 @@
   background-color: white;
   color: #0a315e;
 }
+
+.user-interests {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.18em;
+  justify-content: center;
+}
+
+.interest-tag {
+  display: inline-block;
+  background: #fffbe6;
+  color: #ff9800;
+  border-radius: 12px;
+  padding: 0.13em 0.65em;
+  font-size: 0.83em;
+  font-weight: 500;
+  border: 1px solid #ffe0b2;
+  box-shadow: 0 1px 2px rgba(255, 193, 7, 0.08);
+  letter-spacing: 0.01em;
+  margin-bottom: 0.15em;
+}

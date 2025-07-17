@@ -18,6 +18,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.petory.config.JwtTokenProvider;
 import java.util.Map;
+import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -47,8 +48,11 @@ public class MemberApiController {
         }
         try {
             memberFormDto.setMember_ProfileImgFile(profileImgFile);
-            memberService.join(memberFormDto);
-            return ResponseEntity.ok("회원가입이 완료되었습니다!");
+            Member savedMember = memberService.join(memberFormDto);
+            return ResponseEntity.ok(Map.of(
+                "message", "회원가입이 완료되었습니다!",
+                "memberId", savedMember.getMember_Id()
+            ));
         } catch (IllegalStateException e) {
             return ResponseEntity.status(409).body(e.getMessage());
         } catch (Exception e) {
@@ -198,10 +202,44 @@ public class MemberApiController {
 
       try {
         dto.setMember_ProfileImgFile(file);
-        memberService.updateMember(dto); // ✅ service에 MultipartFile 포함된 dto 그대로 넘김
-        return ResponseEntity.ok("회원 정보 수정 완료");
+        
+        memberService.updateMember(dto);
+        return ResponseEntity.ok("회원 정보가 성공적으로 업데이트되었습니다.");
+      } catch (IllegalStateException e) {
+        return ResponseEntity.status(409).body(e.getMessage());
       } catch (Exception e) {
-        return ResponseEntity.status(500).body("회원 정보 수정 중 오류 발생: " + e.getMessage());
+        return ResponseEntity.status(500).body("회원 정보 업데이트 중 오류가 발생했습니다.");
+      }
+    }
+
+    // 회원 해시태그 저장
+    @PostMapping("/{memberId}/hashtags")
+    public ResponseEntity<?> saveMemberHashtags(
+      @PathVariable Long memberId,
+      @RequestBody Map<String, Object> request
+    ) {
+      try {
+        @SuppressWarnings("unchecked")
+        List<String> hashtagNames = (List<String>) request.get("hashtags");
+        memberService.saveMemberHashtags(memberId, hashtagNames);
+        return ResponseEntity.ok("관심사항이 성공적으로 저장되었습니다.");
+      } catch (IllegalStateException e) {
+        return ResponseEntity.status(404).body(e.getMessage());
+      } catch (Exception e) {
+        return ResponseEntity.status(500).body("관심사항 저장 중 오류가 발생했습니다.");
+      }
+    }
+
+    // 회원 해시태그 조회
+    @GetMapping("/{memberId}/hashtags")
+    public ResponseEntity<?> getMemberHashtags(@PathVariable Long memberId) {
+      try {
+        List<HashtagDto> hashtags = memberService.getMemberHashtags(memberId);
+        return ResponseEntity.ok(hashtags);
+      } catch (IllegalStateException e) {
+        return ResponseEntity.status(404).body(e.getMessage());
+      } catch (Exception e) {
+        return ResponseEntity.status(500).body("관심사항 조회 중 오류가 발생했습니다.");
       }
     }
 
