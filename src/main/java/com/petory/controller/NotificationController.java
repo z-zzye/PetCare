@@ -1,6 +1,5 @@
 package com.petory.controller;
 
-import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
@@ -8,6 +7,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import com.petory.config.CustomUserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,17 +36,17 @@ public class NotificationController {
    */
   @GetMapping
   public ResponseEntity<?> getNotifications(
-    Principal principal,
+    @AuthenticationPrincipal CustomUserDetails userDetails,
     @RequestParam(defaultValue = "0") int page,
     @RequestParam(defaultValue = "20") int size
   ) {
-    if (principal == null) {
+    if (userDetails == null) {
       return ResponseEntity.status(401).body(Map.of("error", "로그인이 필요합니다."));
     }
 
     try {
       Pageable pageable = PageRequest.of(page, size);
-      Page<NotificationDto> notifications = notificationService.getNotifications(principal.getName(), pageable);
+      Page<NotificationDto> notifications = notificationService.getNotifications(userDetails.getUsername(), pageable);
       return ResponseEntity.ok(notifications);
     } catch (Exception e) {
       log.error("알림 목록 조회 중 오류 발생", e);
@@ -57,16 +58,22 @@ public class NotificationController {
    * 읽지 않은 알림 개수 조회
    */
   @GetMapping("/unread-count")
-  public ResponseEntity<?> getUnreadCount(Principal principal) {
-    if (principal == null) {
+  public ResponseEntity<?> getUnreadCount(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    log.info("읽지 않은 알림 개수 조회 요청 - userDetails: {}", userDetails);
+    log.info("읽지 않은 알림 개수 조회 요청 - userDetails가 null인지: {}", userDetails == null);
+    
+    if (userDetails == null) {
+      log.warn("읽지 않은 알림 개수 조회 실패: 로그인이 필요합니다.");
       return ResponseEntity.status(401).body(Map.of("error", "로그인이 필요합니다."));
     }
 
     try {
-      long count = notificationService.getUnreadCount(principal.getName());
+      log.info("읽지 않은 알림 개수 조회 시작 - userEmail: {}", userDetails.getUsername());
+      long count = notificationService.getUnreadCount(userDetails.getUsername());
+      log.info("읽지 않은 알림 개수 조회 완료 - count: {}", count);
       return ResponseEntity.ok(Map.of("unreadCount", count));
     } catch (Exception e) {
-      log.error("읽지 않은 알림 개수 조회 중 오류 발생", e);
+      log.error("읽지 않은 알림 개수 조회 중 오류 발생 - userEmail: {}", userDetails.getUsername(), e);
       return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
     }
   }
@@ -75,13 +82,13 @@ public class NotificationController {
    * 읽지 않은 알림 목록 조회
    */
   @GetMapping("/unread")
-  public ResponseEntity<?> getUnreadNotifications(Principal principal) {
-    if (principal == null) {
+  public ResponseEntity<?> getUnreadNotifications(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    if (userDetails == null) {
       return ResponseEntity.status(401).body(Map.of("error", "로그인이 필요합니다."));
     }
 
     try {
-      List<NotificationDto> notifications = notificationService.getUnreadNotifications(principal.getName());
+      List<NotificationDto> notifications = notificationService.getUnreadNotifications(userDetails.getUsername());
       return ResponseEntity.ok(notifications);
     } catch (Exception e) {
       log.error("읽지 않은 알림 목록 조회 중 오류 발생", e);
@@ -95,14 +102,14 @@ public class NotificationController {
   @PutMapping("/{notificationId}/read")
   public ResponseEntity<?> markAsRead(
     @PathVariable Long notificationId,
-    Principal principal
+    @AuthenticationPrincipal CustomUserDetails userDetails
   ) {
-    if (principal == null) {
+    if (userDetails == null) {
       return ResponseEntity.status(401).body(Map.of("error", "로그인이 필요합니다."));
     }
 
     try {
-      notificationService.markAsRead(notificationId, principal.getName());
+      notificationService.markAsRead(notificationId, userDetails.getUsername());
       return ResponseEntity.ok(Map.of("message", "알림을 읽음 처리했습니다."));
     } catch (Exception e) {
       log.error("알림 읽음 처리 중 오류 발생", e);
@@ -114,13 +121,13 @@ public class NotificationController {
    * 모든 알림 읽음 처리
    */
   @PutMapping("/read-all")
-  public ResponseEntity<?> markAllAsRead(Principal principal) {
-    if (principal == null) {
+  public ResponseEntity<?> markAllAsRead(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    if (userDetails == null) {
       return ResponseEntity.status(401).body(Map.of("error", "로그인이 필요합니다."));
     }
 
     try {
-      notificationService.markAllAsRead(principal.getName());
+      notificationService.markAllAsRead(userDetails.getUsername());
       return ResponseEntity.ok(Map.of("message", "모든 알림을 읽음 처리했습니다."));
     } catch (Exception e) {
       log.error("모든 알림 읽음 처리 중 오류 발생", e);
@@ -134,14 +141,14 @@ public class NotificationController {
   @DeleteMapping("/{notificationId}")
   public ResponseEntity<?> deleteNotification(
     @PathVariable Long notificationId,
-    Principal principal
+    @AuthenticationPrincipal CustomUserDetails userDetails
   ) {
-    if (principal == null) {
+    if (userDetails == null) {
       return ResponseEntity.status(401).body(Map.of("error", "로그인이 필요합니다."));
     }
 
     try {
-      notificationService.deleteNotification(notificationId, principal.getName());
+      notificationService.deleteNotification(notificationId, userDetails.getUsername());
       return ResponseEntity.ok(Map.of("message", "알림을 삭제했습니다."));
     } catch (Exception e) {
       log.error("알림 삭제 중 오류 발생", e);
@@ -153,13 +160,13 @@ public class NotificationController {
    * 모든 알림 삭제
    */
   @DeleteMapping
-  public ResponseEntity<?> deleteAllNotifications(Principal principal) {
-    if (principal == null) {
+  public ResponseEntity<?> deleteAllNotifications(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    if (userDetails == null) {
       return ResponseEntity.status(401).body(Map.of("error", "로그인이 필요합니다."));
     }
 
     try {
-      notificationService.deleteAllNotifications(principal.getName());
+      notificationService.deleteAllNotifications(userDetails.getUsername());
       return ResponseEntity.ok(Map.of("message", "모든 알림을 삭제했습니다."));
     } catch (Exception e) {
       log.error("모든 알림 삭제 중 오류 발생", e);

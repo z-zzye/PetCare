@@ -142,10 +142,7 @@ const AuctionRoom = () => {
         notification.close();
       };
       
-      // 알림이 표시될 때 소리 재생
-      const audio = new Audio('/notification.mp3'); // 알림음 파일이 있다면
-      audio.volume = 0.5;
-      audio.play().catch(err => console.log('알림음 재생 실패:', err));
+
       
       return notification;
     }
@@ -281,7 +278,7 @@ const AuctionRoom = () => {
       if (!token) {
         console.error('❌ 토큰이 없습니다. 로그인이 필요합니다.');
         alert('로그인이 필요합니다.');
-        navigate('/login');
+        navigate('/members/login');
         setIsConnecting(false);
         return;
       }
@@ -405,12 +402,17 @@ const AuctionRoom = () => {
                 const fetchMyHistory = async () => {
                   try {
                     const token = localStorage.getItem('token');
+                    console.log('🔍 내 히스토리 조회 시작:', auctionItemId);
+                    console.log('🔑 토큰 존재:', !!token);
+                    
                     const response = await fetch(`/api/auction/history/auction/${auctionItemId}/my`, {
                       headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                       }
                     });
+
+                    console.log('📡 히스토리 API 응답 상태:', response.status, response.statusText);
 
                     if (response.ok) {
                       const myHistory = await response.json();
@@ -421,11 +423,19 @@ const AuctionRoom = () => {
                     } else {
                       setIsWinner(false);
                       setMyHistory(null);
-                      console.log('내 히스토리가 없습니다.');
+                      console.log('❌ 내 히스토리 조회 실패:', response.status, response.statusText);
+                      
+                      // 응답 내용 확인
+                      const errorText = await response.text();
+                      console.log('📄 에러 응답 내용:', errorText);
                     }
                   } catch (error) {
                     setIsWinner(false);
-                    console.error('내 히스토리 조회 실패:', error);
+                    console.error('❌ 내 히스토리 조회 중 예외 발생:', error);
+                    console.error('🔍 에러 상세:', {
+                      message: error.message,
+                      stack: error.stack
+                    });
                   }
                 };
 

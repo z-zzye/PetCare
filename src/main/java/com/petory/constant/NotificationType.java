@@ -13,7 +13,13 @@ public enum NotificationType {
   AUTOCVAXOMPLETE("자동예약 완료"),
   
   // 클린봇 감지 알림 (부적절한 내용이 감지된 경우)
-  CLEANBOTDETECTED("부적절한 내용 감지");
+  CLEANBOTDETECTED("부적절한 내용 감지"),
+  
+  // 경매 종료 알림 (경매가 종료된 경우)
+  AUCTION_END("경매 종료"),
+  
+  // 경매 낙찰 알림 (경매에서 낙찰된 경우)
+  AUCTION_WIN("경매 낙찰");
 
   private final String description;
 }

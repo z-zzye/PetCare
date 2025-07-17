@@ -258,7 +258,8 @@ const AuctionAdminPage = () => {
       <div className="admin-page">
         <div className="admin-container">
           <div className="admin-header">
-            <h1 className="admin-title">경매 관리</h1>
+            <div className="admin-title" style={{ fontSize: '1.375rem', fontWeight: '500', lineheight: '1.2', color: '#333', margin: 0, padding
+              : 0 }}>경매 관리</div>
             <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
               <Link to="/admin/auction-delivery" className="admin-button" style={{ backgroundColor: '#28a745' }}>
                 🚚 배송관리

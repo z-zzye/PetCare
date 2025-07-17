@@ -111,6 +111,7 @@ body {
   border-color: #223a5e; /* 네이비 색상으로 변경 */
   box-shadow: 0 2px 8px rgba(34, 58, 94, 0.1);
   transform: translateY(-2px);
+  cursor: pointer;
 }
 
 /* 카테고리 태그 색상 변경 */
@@ -134,8 +135,18 @@ body {
 .post-meta {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   font-size: 0.9rem;
   color: #6c757d;
+}
+
+.post-author {
+  flex: 1;
+}
+
+.post-views,
+.post-likes {
+  margin-left: 10px;
 }
 
 /* --- 정보글 섹션 --- */
@@ -220,4 +231,126 @@ body {
   .info-posts-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* --- 스켈레톤 UI 스타일 --- */
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+/* 배너 스켈레톤 */
+.skeleton-title {
+  height: 40px;
+  width: 80%;
+  margin-bottom: 15px;
+}
+
+.skeleton-subtitle {
+  height: 24px;
+  width: 60%;
+  margin-bottom: 20px;
+}
+
+.skeleton-button {
+  height: 44px;
+  width: 120px;
+}
+
+.skeleton-image {
+  width: 200px;
+  height: 200px;
+  border-radius: 15px;
+}
+
+/* 게시물 스켈레톤 */
+.skeleton-post {
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  padding: 15px;
+}
+
+.skeleton-category {
+  height: 20px;
+  width: 60px;
+  margin-bottom: 8px;
+}
+
+.skeleton-post-title {
+  height: 20px;
+  width: 90%;
+  margin-bottom: 8px;
+}
+
+.skeleton-post-meta {
+  height: 16px;
+  width: 70%;
+}
+
+/* 정보글 스켈레톤 */
+.skeleton-info-post {
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.skeleton-info-title {
+  height: 24px;
+  width: 80%;
+  margin-bottom: 15px;
+}
+
+.skeleton-info-content {
+  height: 16px;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.skeleton-info-content:last-of-type {
+  width: 60%;
+  margin-bottom: 20px;
+}
+
+/* --- 에러 메시지 스타일 --- */
+.error-message {
+  text-align: center;
+  padding: 40px 20px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  border: 1px solid #e9ecef;
+}
+
+.error-message p {
+  color: #dc3545;
+  font-size: 1.1rem;
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+
+.retry-button {
+  background: #223a5e;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.retry-button:hover {
+  background: #1a2c47;
+  transform: translateY(-2px);
 }

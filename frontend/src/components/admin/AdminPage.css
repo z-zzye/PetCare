@@ -9,16 +9,17 @@
   margin: 0 auto;
   background: white;
   border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  padding: 40px;
+  padding: 20px 0;
 }
 
 .admin-title {
-  text-align: center;
   color: #333;
-  font-size: 2.5rem;
-  margin-bottom: 40px;
+  font-size: 0.9rem;
   font-weight: 700;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  margin-bottom: 40px;
 }
 
 .admin-menu-grid {
@@ -42,7 +43,6 @@
 
 .admin-menu-item:hover {
   transform: translateY(-5px);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
   border-color: #667eea;
   background: white;
 }
@@ -95,7 +95,6 @@
 .admin-button:hover {
   background: #5a6fd8;
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
 }
 
 .admin-content {
@@ -116,23 +115,24 @@
 }
 
 .stat-card {
-  background: #f8f9fa;
-  padding: 20px;
-  border-radius: 10px;
+  background: #fff;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px #0001;
+  min-width: 120px;
   text-align: center;
-  border: 1px solid #e9ecef;
 }
 
 .stat-card h3 {
   color: #666;
-  font-size: 1rem;
+  font-size: 0.9rem;
   margin-bottom: 10px;
   font-weight: 500;
 }
 
 .stat-number {
   color: #333;
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 700;
   margin: 0;
 }

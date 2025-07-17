@@ -19,19 +19,17 @@ const Sidebar = ({ onTabChange }) => {
   const [userHashtags, setUserHashtags] = useState([]);
 
   const handleRunSchedulerTest = async () => {
-    const confirmed = window.confirm(
-      '정말로 스케줄러를 수동 실행하시겠습니까?'
-    );
-    if (confirmed) {
-      try {
-        alert('스케줄러를 수동으로 실행합니다. 백엔드 로그를 확인해주세요.');
-        // 컨트롤러에 만들어둔 임시 API 호출
-        await axios.post('/auto-reservations/test/run-scheduler');
-      } catch (error) {
-        alert('스케줄러 실행 요청에 실패했습니다.');
-        console.error(error);
+      const confirmed = window.confirm("정말로 스케줄러를 수동 실행하시겠습니까?");
+      if (confirmed) {
+          try {
+              alert('스케줄러를 수동으로 실행합니다. 백엔드 로그를 확인해주세요.');
+              // 컨트롤러에 만들어둔 임시 API 호출
+              await axios.post('/auto-reservations/test/run-scheduler');
+          } catch (error) {
+              alert('스케줄러 실행 요청에 실패했습니다.');
+              console.error(error);
+          }
       }
-    }
   };
 
   // ✅ 토큰 디코딩 → 이메일 → 소셜회원 여부 + 멤버ID 조회

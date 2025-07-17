@@ -62,10 +62,18 @@ public class NotificationService {
    */
   @Transactional(readOnly = true)
   public long getUnreadCount(String userEmail) {
+    log.info("읽지 않은 알림 개수 조회 시작 - userEmail: {}", userEmail);
+    
     Member member = memberRepository.findByMember_Email(userEmail)
-      .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+      .orElseThrow(() -> {
+        log.error("사용자를 찾을 수 없습니다 - userEmail: {}", userEmail);
+        return new IllegalArgumentException("사용자를 찾을 수 없습니다.");
+      });
 
-    return notificationRepository.countByMemberAndIsReadFalse(member);
+    long count = notificationRepository.countByMemberAndIsReadFalse(member);
+    log.info("읽지 않은 알림 개수 조회 완료 - userEmail: {}, count: {}", userEmail, count);
+    
+    return count;
   }
 
   /**
@@ -169,5 +177,45 @@ public class NotificationService {
 
     createNotification(member, NotificationType.CLEANBOTDETECTED, title, message, null, null);
     log.info("클린봇 감지 알림 생성: memberId={}", member.getMember_Id());
+  }
+
+  /**
+   * 경매 종료 알림 생성
+   */
+  public void createAuctionEndNotification(Member member, String itemName, Long auctionItemId) {
+    String title = "경매가 종료되었습니다";
+    String message = String.format("%s 경매가 종료되었습니다. 결과를 확인해보세요.", itemName);
+
+    Notification notification = Notification.builder()
+      .member(member)
+      .notificationType(NotificationType.AUCTION_END)
+      .title(title)
+      .message(message)
+      .isRead(false)
+      .auctionId(auctionItemId)
+      .build();
+
+    notificationRepository.save(notification);
+    log.info("경매 종료 알림 생성: memberId={}, auctionItemId={}", member.getMember_Id(), auctionItemId);
+  }
+
+  /**
+   * 경매 낙찰 알림 생성
+   */
+  public void createAuctionWinNotification(Member member, String itemName, Long auctionItemId, Integer finalPrice) {
+    String title = "🎉 경매에서 낙찰되었습니다!";
+    String message = String.format("%s 경매에서 %dP로 낙찰되었습니다. 축하합니다!", itemName, finalPrice);
+
+    Notification notification = Notification.builder()
+      .member(member)
+      .notificationType(NotificationType.AUCTION_WIN)
+      .title(title)
+      .message(message)
+      .isRead(false)
+      .auctionId(auctionItemId)
+      .build();
+
+    notificationRepository.save(notification);
+    log.info("경매 낙찰 알림 생성: memberId={}, auctionItemId={}, finalPrice={}", member.getMember_Id(), auctionItemId, finalPrice);
   }
 }

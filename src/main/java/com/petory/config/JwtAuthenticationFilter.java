@@ -34,13 +34,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     throws ServletException, IOException {
 
     System.out.println("==== [JWT Filter] API 요청 필터링 시작: " + request.getRequestURI() + " ====");
+    System.out.println("[JWT Filter] Authorization 헤더: " + request.getHeader("Authorization"));
 
     // 1. 헤더에서 토큰을 가져옵니다.
     String token = resolveToken(request);
 
     if (token != null) {
-      System.out.println("[JWT Filter] 토큰 발견: " + token);
-      jwtTokenProvider.validateToken(token);
+      System.out.println("[JWT Filter] 토큰 발견: " + token.substring(0, Math.min(20, token.length())) + "...");
 
       // 2. 토큰 유효성 검사
       if (jwtTokenProvider.validateToken(token)) {
@@ -51,7 +51,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         System.out.println("[JWT Filter] 토큰에서 이메일 추출: " + email);
 
         // 4. 이메일로 DB에서 사용자 정보 조회
-        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+        CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(email);
         System.out.println("[JWT Filter] DB에서 사용자 정보 조회 성공: " + userDetails.getUsername());
 
         // 5. 인증 객체 생성 및 SecurityContext에 저장

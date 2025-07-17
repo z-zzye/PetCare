@@ -67,4 +67,8 @@ public class Notification extends BaseTimeEntity {
   // 관련 펫 ID (펫 관련 알림인 경우)
   @Column
   private Long petId;
+
+  // 관련 경매 ID (경매 관련 알림인 경우)
+  @Column
+  private Long auctionId;
 }
