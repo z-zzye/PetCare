@@ -276,15 +276,6 @@ const Header = () => {
                       <button onClick={handleLogout} className="logout-btn">
                         Logout
                       </button>
-                      <button
-                        className="logout-btn"
-                        onClick={() =>
-                          (window.location.href = '/shop/my-orders')
-                        }
-                        type="button"
-                      >
-                        구매내역
-                      </button>
                     </div>
                   )}
                 </div>

@@ -10,7 +10,7 @@ const orderStatusList = [
     { key: 'CONFIRMED', label: '구매확정' },
 ];
 
-const MyOrders = () => {
+const MyOrders = ({ showHeader = true }) => {
     const navigate = useNavigate();
     const [orders, setOrders] = useState([]);
     const [memberMileage, setMemberMileage] = useState(0);
@@ -463,7 +463,7 @@ const MyOrders = () => {
 
     return (
         <>
-            <Header />
+            {showHeader && <Header />}
             {toast && (
               <div style={{
                 position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
