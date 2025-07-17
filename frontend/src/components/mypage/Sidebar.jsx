@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
+import './Sidebar.css';
 import { jwtDecode } from 'jwt-decode';
 import axios from '../../api/axios'; // ✅ axios 인스턴스 사용
 import { useAuth } from '../../contexts/AuthContext';
@@ -41,19 +42,17 @@ const Sidebar = ({ onTabChange }) => {
       const decoded = jwtDecode(token);
       const email = decoded.sub || decoded.email;
 
-      axios
-        .get(`/members/check-social/${email}`)
-        .then((res) => {
+      axios.get(`/members/check-social/${email}`)
+        .then(res => {
           if (res.data.social) setIsSocialUser(true);
         })
-        .catch((err) => console.error('소셜 여부 조회 실패:', err));
+        .catch(err => console.error('소셜 여부 조회 실패:', err));
 
-      axios
-        .get(`/members/id-by-email?email=${email}`)
-        .then((res) => {
+      axios.get(`/members/id-by-email?email=${email}`)
+        .then(res => {
           setMemberId(res.data);
         })
-        .catch((err) => console.error('멤버 ID 조회 실패:', err));
+        .catch(err => console.error('멤버 ID 조회 실패:', err));
     } catch (err) {
       console.error('JWT 디코딩 실패:', err);
     }
@@ -63,12 +62,11 @@ const Sidebar = ({ onTabChange }) => {
   useEffect(() => {
     if (memberId === null) return;
 
-    axios
-      .get(`/pets/member/${memberId}`)
-      .then((res) => {
+    axios.get(`/pets/member/${memberId}`)
+      .then(res => {
         setPets(res.data);
       })
-      .catch((err) => {
+      .catch(err => {
         console.error('펫 리스트 조회 실패:', err);
       });
   }, [memberId]);
@@ -137,10 +135,7 @@ const Sidebar = ({ onTabChange }) => {
         </div>
 
         {/* 버튼 영역 */}
-        <button
-          className="info-btn"
-          onClick={() => navigate('/members/pet-register')}
-        >
+        <button className="info-btn" onClick={() => navigate('/members/pet-register')}>
           펫 등록
         </button>
 
@@ -160,10 +155,7 @@ const Sidebar = ({ onTabChange }) => {
         {/* 크리에이터 섹션 */}
         <div className="creator-section">
           {!isCreator ? (
-            <button
-              className="creator-btn"
-              onClick={() => navigate('/creator-apply')}
-            >
+            <button className="creator-btn" onClick={() => navigate('/creator-apply')}>
               크리에이터 신청
             </button>
           ) : (
@@ -171,47 +163,28 @@ const Sidebar = ({ onTabChange }) => {
           )}
 
           {/* ✅ [추가] 결제수단 관리 버튼 */}
-          <button
-            className="info-btn"
-            onClick={() => navigate('/members/payment-management')}
-          >
+          <button className="info-btn" onClick={() => navigate('/payment-management')}>
             결제수단 관리
           </button>
         </div>
 
-        <div
-          className="developer-menu"
-          style={{
-            marginTop: 'auto',
-            paddingTop: '1rem',
-            borderTop: '1px solid #555',
-          }}
-        >
-          <p
-            style={{
-              fontSize: '10px',
-              color: '#333',
-              textAlign: 'center',
-              margin: '0 0 5px 0',
-            }}
-          >
-            - Developer Menu -
-          </p>
-          <button
-            onClick={handleRunSchedulerTest}
-            style={{
-              width: '100%',
-              padding: '8px',
-              fontSize: '12px',
-              backgroundColor: '#c9302c',
-              color: 'white',
-              border: '1px solid #ac2925',
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
-          >
-            스케줄러 강제 실행
-          </button>
+        <div className="developer-menu" style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid #555' }}>
+            <p style={{fontSize: '10px', color: '#ccc', textAlign: 'center', margin: '0 0 5px 0' }}>- Developer Menu -</p>
+            <button
+                onClick={handleRunSchedulerTest}
+                style={{
+                    width: '100%',
+                    padding: '8px',
+                    fontSize: '12px',
+                    backgroundColor: '#c9302c',
+                    color: 'white',
+                    border: '1px solid #ac2925',
+                    borderRadius: '4px',
+                    cursor: 'pointer'
+                }}
+            >
+                스케줄러 강제 실행
+            </button>
         </div>
       </div>
 
@@ -220,6 +193,7 @@ const Sidebar = ({ onTabChange }) => {
         <button onClick={() => onTabChange('calendar')}>📅캘린더</button>
         <button onClick={() => onTabChange('health')}>🩺건강수첩</button>
         <button onClick={() => onTabChange('posts')}>📝내가쓴글</button>
+        <button onClick={() => onTabChange('reservations')}>🎟️예약현황</button>
       </div>
 
       <HashtagSelectionModal
