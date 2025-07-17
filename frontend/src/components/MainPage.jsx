@@ -1,10 +1,42 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from '../api/axios';
 import Header from './Header';
 import './MainPage.css';
 
 const MainPage = () => {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
+  const [popularPosts, setPopularPosts] = useState([]);
+  const [error, setError] = useState(null);
+
+  // 카테고리 영어 -> 한글 매핑 함수
+  const getCategoryInKorean = (category) => {
+    const categoryMap = {
+      INFO: '정보',
+      FREE: '자유',
+      QNA: 'Q&A',
+      WALKWITH: '산책모임',
+    };
+    return categoryMap[category] || category;
+  };
+
+  // 카테고리 영어 -> 라우팅 경로 매핑 함수
+  const getCategoryRoute = (category) => {
+    const routeMap = {
+      INFO: 'info',
+      FREE: 'free',
+      QNA: 'qna',
+      WALKWITH: 'walkwith',
+    };
+    return routeMap[category] || 'free';
+  };
+
+  // 게시물 클릭 핸들러
+  const handlePostClick = (post) => {
+    const category = getCategoryRoute(post.category);
+    navigate(`/board/${category}/${post.id}`);
+  };
 
   // 더미 데이터
   const bannerData = {
@@ -13,43 +45,13 @@ const MainPage = () => {
     image: '/images/pet-default.png',
   };
 
-  const popularPosts = [
-    {
-      id: 1,
-      title: '강아지 산책 시 주의사항 10지',
-      author: '펫러버',
-      views: 1234,
-      category: '정보',
-    },
-    {
-      id: 2,
-      title: '고양이 영양제 추천해주세요',
-      author: '냥이맘',
-      views: 987,
-      category: 'Q&A',
-    },
-    {
-      id: 3,
-      title: '반려동물 병원 예약 팁',
-      author: '동물병원직원',
-      views: 756,
-      category: '정보',
-    },
-    {
-      id: 4,
-      title: '우리 강아지 첫 산책 후기',
-      author: '멍멍이아빠',
-      views: 543,
-      category: '후기',
-    },
-  ];
-
   const recommendedPosts = [
     {
       id: 5,
       title: '고양이 스트레스 해소 방법',
       author: '고양이전문가',
       views: 432,
+      likes: 28,
       category: '정보',
     },
     {
@@ -57,6 +59,7 @@ const MainPage = () => {
       title: '강아지 훈련 성공 사례',
       author: '훈련사',
       views: 321,
+      likes: 15,
       category: '정보',
     },
     {
@@ -64,6 +67,7 @@ const MainPage = () => {
       title: '반려동물 건강검진 꼭 받아야 할까요?',
       author: '수의사',
       views: 298,
+      likes: 42,
       category: 'Q&A',
     },
     {
@@ -71,6 +75,15 @@ const MainPage = () => {
       title: '우리 고양이 사진 공유합니다',
       author: '고양이맘',
       views: 187,
+      likes: 33,
+      category: '자유',
+    },
+    {
+      id: 12,
+      title: '살려주세요',
+      author: 'NO_YAE',
+      views: 3000,
+      likes: 11,
       category: '자유',
     },
   ];
@@ -92,6 +105,61 @@ const MainPage = () => {
       content: '갑작스러운 상황에서 침착하게 대응하는 방법...',
     },
   ];
+
+  // 인기 게시글 API 호출
+  useEffect(() => {
+    const fetchPopularPosts = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const response = await axios.get('/main/popular?limit=5');
+        setPopularPosts(response.data);
+
+        console.log('인기 게시글 조회 성공:', response.data);
+      } catch (err) {
+        console.error('인기 게시글 조회 실패:', err);
+        setError('인기 게시글을 불러오는데 실패했습니다.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPopularPosts();
+  }, []);
+
+  // 스켈레톤 컴포넌트들
+  const BannerSkeleton = () => (
+    <section className="banner-section">
+      <div className="banner-content">
+        <div className="banner-text">
+          <div className="skeleton skeleton-title"></div>
+          <div className="skeleton skeleton-subtitle"></div>
+          <div className="skeleton skeleton-button"></div>
+        </div>
+        <div className="banner-image">
+          <div className="skeleton skeleton-image"></div>
+        </div>
+      </div>
+    </section>
+  );
+
+  const PostSkeleton = () => (
+    <div className="post-item skeleton-post">
+      <div className="skeleton skeleton-category"></div>
+      <div className="skeleton skeleton-post-title"></div>
+      <div className="skeleton skeleton-post-meta"></div>
+    </div>
+  );
+
+  const InfoPostSkeleton = () => (
+    <div className="info-post-item skeleton-info-post">
+      <div className="skeleton skeleton-info-title"></div>
+      <div className="skeleton skeleton-info-content"></div>
+      <div className="skeleton skeleton-info-content"></div>
+      <div className="skeleton skeleton-button"></div>
+    </div>
+  );
 
   return (
     <>
@@ -121,16 +189,45 @@ const MainPage = () => {
           <div className="popular-posts">
             <h2>🔥 인기글</h2>
             <div className="posts-list">
-              {popularPosts.map((post) => (
-                <div key={post.id} className="post-item">
-                  <div className="post-category">{post.category}</div>
-                  <h3 className="post-title">{post.title}</h3>
-                  <div className="post-meta">
-                    <span className="post-author">{post.author}</span>
-                    <span className="post-views">👁️ {post.views}</span>
-                  </div>
+              {isLoading ? (
+                // 로딩 중일 때 스켈레톤 UI
+                [...Array(4)].map((_, index) => <PostSkeleton key={index} />)
+              ) : error ? (
+                // 에러 메시지 표시
+                <div className="error-message">
+                  <p>{error}</p>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="retry-button"
+                  >
+                    다시 시도
+                  </button>
                 </div>
-              ))}
+              ) : (
+                // 실제 데이터 표시
+                popularPosts.map((post) => (
+                  <div
+                    key={post.id}
+                    className="post-item"
+                    onClick={() => handlePostClick(post)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <div className="post-category">
+                      {getCategoryInKorean(post.category)}
+                    </div>
+                    <h3 className="post-title">{post.title}</h3>
+                    <div className="post-meta">
+                      <span className="post-author">{post.author}</span>
+                      <span className="post-views">
+                        조회수 : {post.viewCount}
+                      </span>
+                      <span className="post-likes">
+                        추천수 : {post.likeCount}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
@@ -138,12 +235,22 @@ const MainPage = () => {
             <h2>💡 관심사 추천 게시물</h2>
             <div className="posts-list">
               {recommendedPosts.map((post) => (
-                <div key={post.id} className="post-item">
-                  <div className="post-category">{post.category}</div>
+                <div
+                  key={post.id}
+                  className="post-item"
+                  onClick={() => handlePostClick(post)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <div className="post-category">
+                    {getCategoryInKorean(post.category)}
+                  </div>
                   <h3 className="post-title">{post.title}</h3>
                   <div className="post-meta">
                     <span className="post-author">{post.author}</span>
-                    <span className="post-views">👁️ {post.views}</span>
+                    <span className="post-views">조회수 : {post.views}</span>
+                    <span className="post-likes">
+                      추천수 : {post.likes || 0}
+                    </span>
                   </div>
                 </div>
               ))}
