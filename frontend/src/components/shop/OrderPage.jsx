@@ -187,12 +187,19 @@ function OrderPage() {
           <section style={{ marginBottom: 32 }}>
             <h2 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: 12 }}>마일리지 사용</h2>
             <div style={{ marginBottom: 8, color: '#888' }}>사용 가능: {availableMileage.toLocaleString()}P</div>
+            <div style={{ marginBottom: 8, color: '#666', fontSize: '0.9rem' }}>
+              최대 사용 가능: {Math.min(availableMileage, totalPrice).toLocaleString()}P (배송비 제외)
+            </div>
             <input
               type="number"
               min={0}
-              max={availableMileage}
+              max={Math.min(availableMileage, totalPrice)}
               value={usedMileage}
-              onChange={e => setUsedMileage(Math.max(0, Math.min(availableMileage, Number(e.target.value))))}
+              onChange={e => {
+                const inputValue = Number(e.target.value);
+                const maxMileage = Math.min(availableMileage, totalPrice);
+                setUsedMileage(Math.max(0, Math.min(maxMileage, inputValue)));
+              }}
               style={{ width: 120, padding: 8, borderRadius: 6, border: '1px solid #ddd' }}
             /> P
           </section>
