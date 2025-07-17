@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import axios from '../../api/axios';
 import { useAuth } from '../../contexts/AuthContext';
@@ -7,9 +8,30 @@ import './PaymentMethodPage.css';
 
 const PaymentMethodPage = () => {
   const { email, nickname } = useAuth();
+  const navigate = useNavigate();
   const [paymentMethod, setPaymentMethod] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
+
+  // 로그인 체크
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      Swal.fire({
+        icon: 'warning',
+        title: '로그인이 필요합니다',
+        text: '결제 수단 관리 페이지는 로그인 후 이용 가능합니다.',
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: '로그인 페이지로 이동',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate('/members/login', { replace: true });
+        }
+      });
+    }
+  }, [navigate]);
 
   // 등록된 결제 수단 조회
   useEffect(() => {

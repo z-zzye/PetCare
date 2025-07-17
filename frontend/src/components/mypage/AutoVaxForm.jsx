@@ -703,7 +703,63 @@ const AutoVaxForm = ({
           ))}
         </div>
 
-        {/* 대안 날짜 옵션들 표시 */}
+        {availableSlots.length > 0 && (
+          <h5 className="hospital-list-title">
+            예약 가능일 ({availableSlots[0].targetDate})의 병원 목록
+          </h5>
+        )}
+
+        <div className="slot-list">
+          {availableSlots.map((slot) => {
+            // 선택된 백신들의 가격 합계 계산
+            let totalPrice = 0;
+            if (slot.priceList && selectedVaccines.length > 0) {
+              selectedVaccines.forEach((vaccineName) => {
+                totalPrice += slot.priceList[vaccineName] || 0;
+              });
+            }
+            return (
+              <label
+                key={`${slot.hospitalId}-${slot.timeSlot}`}
+                className={`hospital-card ${
+                  selectedSlot?.hospitalId === slot.hospitalId ? 'selected' : ''
+                }`}
+              >
+                <div className="hospital-info">
+                  <span className="hospital-name">
+                    {slot.hospitalName} ({slot.distance.toFixed(1)}km)
+                  </span>
+                  <span className="hospital-total-price">
+                    총 접종 비용: {totalPrice.toLocaleString()}원
+                  </span>
+                  <span className="hospital-phone">{slot.phone}</span>
+                  <span className="hospital-address">{slot.address}</span>
+                </div>
+                <div className="hospital-actions">
+                  <input
+                    type="radio"
+                    name="selected-slot"
+                    checked={selectedSlot?.hospitalId === slot.hospitalId}
+                    onChange={() => setSelectedSlot(slot)}
+                  />
+                  <a
+                    href={`https://map.kakao.com/link/search/${encodeURIComponent(
+                      slot.address
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="map-link"
+                    onClick={(e) => e.stopPropagation()} // 라벨 클릭 이벤트 전파 방지
+                  >
+                    지도보기
+                  </a>
+                </div>
+              </label>
+            );
+          })}
+        </div>
+
+        {/* 대안 날짜 옵션들 표시 - 병원 목록 아래로 이동 */}
         {alternativeDates && alternativeDates.length > 1 && (
           <div className="alternative-dates-section">
             <h5 className="alternative-dates-title">다른 날짜 옵션들</h5>
@@ -723,10 +779,8 @@ const AutoVaxForm = ({
                   <button
                     className="view-alternative-button"
                     onClick={() => {
-                      // 백엔드에서 이미 필터링된 슬롯들이므로 그대로 사용
                       setAvailableSlots(option.availableSlots);
                       setSelectedSlot(null);
-                      // 스크롤을 결과 영역으로 이동
                       if (formContainerRef.current) {
                         const modalContent = formContainerRef.current.closest(
                           '.ReactModal__Content'
@@ -744,50 +798,6 @@ const AutoVaxForm = ({
             </div>
           </div>
         )}
-
-        {availableSlots.length > 0 && (
-          <h5 className="hospital-list-title">
-            예약 가능일 ({availableSlots[0].targetDate})의 병원 목록
-          </h5>
-        )}
-
-        <div className="slot-list">
-          {availableSlots.map((slot) => (
-            <label
-              key={`${slot.hospitalId}-${slot.timeSlot}`}
-              className={`hospital-card ${
-                selectedSlot?.hospitalId === slot.hospitalId ? 'selected' : ''
-              }`}
-            >
-              <div className="hospital-info">
-                <span className="hospital-name">
-                  {slot.hospitalName} ({slot.distance.toFixed(1)}km)
-                </span>
-                <span className="hospital-phone">{slot.phone}</span>
-                <span className="hospital-address">{slot.address}</span>
-              </div>
-              <div className="hospital-actions">
-                <input
-                  type="radio"
-                  name="selected-slot"
-                  checked={selectedSlot?.hospitalId === slot.hospitalId}
-                  onChange={() => setSelectedSlot(slot)}
-                />
-                <a
-                  href={`https://map.kakao.com/link/search/${encodeURIComponent(
-                    slot.address
-                  )}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="map-link"
-                  onClick={(e) => e.stopPropagation()} // 라벨 클릭 이벤트 전파 방지
-                >
-                  지도보기
-                </a>
-              </div>
-            </label>
-          ))}
-        </div>
 
         <button
           className="submit-button"
