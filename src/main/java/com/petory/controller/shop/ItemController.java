@@ -14,6 +14,8 @@ import com.petory.dto.shop.ItemListDto;
 import com.petory.dto.shop.ItemDetailDto;
 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/items")
@@ -31,8 +33,12 @@ public class ItemController {
     try {
       ObjectMapper objectMapper = new ObjectMapper();
       ItemFormDto formDto = objectMapper.readValue(itemDtoJson, ItemFormDto.class);
-      itemService.saveItem(formDto, images, imagesIsRep);
-      return ResponseEntity.ok("상품 등록 성공");
+      Long itemId = itemService.saveItem(formDto, images, imagesIsRep); // itemId 반환하도록 수정
+      Map<String, Object> result = new HashMap<>();
+      result.put("item_id", itemId);
+      result.put("id", itemId); // id도 함께 반환
+      result.put("message", "상품 등록 성공");
+      return ResponseEntity.ok(result);
     } catch (MultipartException e) {
       return ResponseEntity.badRequest().body("파일 업로드 실패: " + e.getMessage());
     } catch (Exception e) {

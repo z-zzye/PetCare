@@ -1,23 +1,34 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from '../../api/axios'; // 경로 수정
 import Header from '../Header.jsx';
 
 const ItemRegister = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [categories, setCategories] = useState([]);
+  
+  // 경로에 따라 초기 상태 설정
+  const isAuctionRegister = location.pathname === '/admin/auction/register';
+  const isShopItemRegister = location.pathname === '/shop/item/register';
+  
   const [form, setForm] = useState({
     categoryId: '',
     itemName: '',
-    itemDescription: '',
-    itemPrice: '',
-    itemStatus: 'SELL',
-    options: [],
+    itemDescription: isAuctionRegister ? '경매 상품' : '',
+    itemPrice: isAuctionRegister ? '0' : '',
+    itemStatus: isAuctionRegister ? 'AUCTION' : 'SELL',
+    options: isAuctionRegister ? [{ optionName: '경매상품', optionAddPrice: 0, optionStock: 1 }] : [],
     images: []
   });
   const [toast, setToast] = useState('');
 
   const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
+
+  // 필드 참조를 위한 ref들
+  const categoryRef = useRef(null);
+  const itemNameRef = useRef(null);
+  const itemPriceRef = useRef(null);
 
   useEffect(() => {
     // 카테고리 전체 조회
@@ -93,6 +104,65 @@ const ItemRegister = () => {
   // 대표 이미지 유효성 검사 추가
   const hasRepresentative = form.images.some(img => img.isRepresentative);
 
+  const handleAuctionRegister = async () => {
+    // 필수 입력 항목 검사
+    if (!form.categoryId) {
+      categoryRef.current?.focus();
+      return;
+    }
+    if (!form.itemName.trim()) {
+      itemNameRef.current?.focus();
+      return;
+    }
+    if (!form.itemPrice) {
+      itemPriceRef.current?.focus();
+      return;
+    }
+    
+    // 옵션 유효성 검사
+    if (form.options.length === 0) {
+      setToast('옵션을 작성해주세요');
+      return;
+    }
+    
+    // 대표 이미지 유효성 검사
+    if (!hasRepresentative) {
+      setToast('대표 이미지를 반드시 선택해야 합니다.');
+      return;
+    }
+
+    const data = new FormData();
+    const itemDto = {
+      categoryId: form.categoryId,
+      itemName: form.itemName,
+      itemDescription: form.itemDescription,
+      itemStatus: 'AUCTION', // 경매 상태로 설정
+      itemPrice: form.itemPrice,
+      options: form.options
+    };
+    
+    data.append('itemDto', JSON.stringify(itemDto));
+    form.images.forEach((file) => {
+      data.append('images', file);
+      data.append('imagesIsRep', file.isRepresentative ? 'true' : 'false');
+    });
+
+    try {
+      const response = await axios.post('/items/new', data);
+      console.log('상품 등록 응답:', response.data); // 응답 전체 콘솔 출력
+      const itemId = response.data.item_id; // item_id로 변경
+      
+      setToast('상품이 등록되었습니다. 경매 정보를 입력해주세요.');
+      setTimeout(() => {
+        navigate(`/shop/auction/register/${itemId}`);
+      }, 1200);
+      
+    } catch (err) {
+      console.error('❌ 상품 등록 실패:', err);
+      setToast('상품 등록 실패: ' + (err.response?.data?.message || '오류 발생'));
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -148,7 +218,7 @@ const ItemRegister = () => {
       <div className="item-register-bg">
         <div className="item-register-container">
           <form onSubmit={handleSubmit} encType="multipart/form-data" className="item-register-form">
-            <h2>상품 등록</h2>
+            <h2>{location.pathname === '/admin/auction/register' ? '경매 상품 등록' : '상품 등록'}</h2>
             <div className="form-section">
               <label>카테고리</label>
               <select
@@ -156,6 +226,7 @@ const ItemRegister = () => {
                 value={form.categoryId}
                 onChange={handleChange}
                 required
+                ref={categoryRef}
               >
                 <option value="">카테고리 선택</option>
                 {mainCategories.map(main => (
@@ -173,23 +244,62 @@ const ItemRegister = () => {
             </div>
             <div className="form-section">
               <label>상품명</label>
-              <input name="itemName" value={form.itemName} onChange={handleChange} placeholder="상품명" required />
+              <input name="itemName" value={form.itemName} onChange={handleChange} placeholder="상품명" required ref={itemNameRef} />
             </div>
             <div className="form-section">
               <label>상세 설명</label>
-              <textarea name="itemDescription" value={form.itemDescription} onChange={handleChange} placeholder="상세 설명" required />
+              <textarea 
+                name="itemDescription" 
+                value={form.itemDescription} 
+                onChange={handleChange} 
+                placeholder="상세 설명" 
+                required 
+                disabled={location.pathname === '/admin/auction/register'}
+                style={{
+                  backgroundColor: location.pathname === '/admin/auction/register' ? '#f5f5f5' : '#fff',
+                  color: location.pathname === '/admin/auction/register' ? '#666' : '#000',
+                  cursor: location.pathname === '/admin/auction/register' ? 'not-allowed' : 'text'
+                }}
+              />
             </div>
             <div className="form-row">
               <div className="form-section">
                 <label>가격</label>
-                <input name="itemPrice" type="number" value={form.itemPrice} onChange={handleChange} placeholder="가격" required />
+                <input 
+                  name="itemPrice" 
+                  type="number" 
+                  value={form.itemPrice} 
+                  onChange={handleChange} 
+                  placeholder="가격" 
+                  required 
+                  ref={itemPriceRef}
+                  disabled={location.pathname === '/admin/auction/register'}
+                  style={{
+                    backgroundColor: location.pathname === '/admin/auction/register' ? '#f5f5f5' : '#fff',
+                    color: location.pathname === '/admin/auction/register' ? '#666' : '#000',
+                    cursor: location.pathname === '/admin/auction/register' ? 'not-allowed' : 'text'
+                  }}
+                />
               </div>
               <div className="form-section">
                 <label>상태</label>
                 <select name="itemStatus" value={form.itemStatus} onChange={handleChange}>
-                  <option value="SELL">판매중</option>
-                  <option value="SOLD_OUT">품절</option>
-                  <option value="AUCTION">경매 상품</option>
+                  {location.pathname === '/shop/item/register' ? (
+                    <>
+                      <option value="SELL">판매중</option>
+                      <option value="SOLD_OUT">품절</option>
+                    </>
+                  ) : location.pathname === '/admin/auction/register' ? (
+                    <>
+                      <option value="AUCTION">경매 상품</option>
+                    </>
+                  ) : (
+                    <>
+                      <option value="SELL">판매중</option>
+                      <option value="SOLD_OUT">품절</option>
+                      <option value="AUCTION">경매 상품</option>
+                    </>
+                  )}
                 </select>
               </div>
             </div>
@@ -204,13 +314,61 @@ const ItemRegister = () => {
               </div>
               {form.options.map((opt, idx) => (
                 <div key={idx} className="option-row">
-                  <input value={opt.optionName} onChange={(e) => handleOptionChange(idx, 'optionName', e.target.value)} placeholder="옵션명" />
-                  <input type="number" value={opt.optionAddPrice} onChange={(e) => handleOptionChange(idx, 'optionAddPrice', e.target.value)} placeholder="추가금액" />
-                  <input type="number" value={opt.optionStock} min={1} onChange={(e) => handleOptionChange(idx, 'optionStock', Math.max(1, Number(e.target.value)))} placeholder="재고수량" />
-                  <button type="button" className="option-remove-btn" onClick={() => removeOption(idx)}>삭제</button>
+                  <input 
+                    value={opt.optionName} 
+                    onChange={(e) => handleOptionChange(idx, 'optionName', e.target.value)} 
+                    placeholder="옵션명" 
+                    disabled={location.pathname === '/admin/auction/register'}
+                    style={{
+                      backgroundColor: location.pathname === '/admin/auction/register' ? '#f5f5f5' : '#fff',
+                      color: location.pathname === '/admin/auction/register' ? '#666' : '#000',
+                      cursor: location.pathname === '/admin/auction/register' ? 'not-allowed' : 'text'
+                    }}
+                  />
+                  <input 
+                    type="number" 
+                    value={opt.optionAddPrice} 
+                    onChange={(e) => handleOptionChange(idx, 'optionAddPrice', e.target.value)} 
+                    placeholder="추가금액" 
+                    disabled={location.pathname === '/admin/auction/register'}
+                    style={{
+                      backgroundColor: location.pathname === '/admin/auction/register' ? '#f5f5f5' : '#fff',
+                      color: location.pathname === '/admin/auction/register' ? '#666' : '#000',
+                      cursor: location.pathname === '/admin/auction/register' ? 'not-allowed' : 'text'
+                    }}
+                  />
+                  <input 
+                    type="number" 
+                    value={opt.optionStock} 
+                    min={1} 
+                    onChange={(e) => handleOptionChange(idx, 'optionStock', Math.max(1, Number(e.target.value)))} 
+                    placeholder="재고수량" 
+                    disabled={location.pathname === '/admin/auction/register'}
+                    style={{
+                      backgroundColor: location.pathname === '/admin/auction/register' ? '#f5f5f5' : '#fff',
+                      color: location.pathname === '/admin/auction/register' ? '#666' : '#000',
+                      cursor: location.pathname === '/admin/auction/register' ? 'not-allowed' : 'text'
+                    }}
+                  />
+                  <button 
+                    type="button" 
+                    className="option-remove-btn" 
+                    onClick={() => removeOption(idx)}
+                    disabled={location.pathname === '/admin/auction/register'}
+                    style={{
+                      backgroundColor: location.pathname === '/admin/auction/register' ? '#f5f5f5' : '#fff',
+                      color: location.pathname === '/admin/auction/register' ? '#d32f2f' : '#d32f2f',
+                      cursor: location.pathname === '/admin/auction/register' ? 'not-allowed' : 'pointer',
+                      opacity: location.pathname === '/admin/auction/register' ? 0.5 : 1
+                    }}
+                  >
+                    삭제
+                  </button>
                 </div>
               ))}
-              <button type="button" className="option-add-btn" onClick={addOption}>옵션 추가</button>
+              {location.pathname !== '/admin/auction/register' && (
+                <button type="button" className="option-add-btn" onClick={addOption}>옵션 추가</button>
+              )}
             </div>
             <hr className="section-divider" />
             <div className="form-section">
@@ -239,8 +397,37 @@ const ItemRegister = () => {
               </div>
             </div>
             <div className="button-row">
-              <button type="submit" className="action-btn" disabled={form.itemStatus === 'AUCTION'}>상품 등록</button>
-              <button type="button" className="action-btn auction-btn" onClick={() => window.location.href='/admin/auction/register'}>경매 등록</button>
+              {location.pathname !== '/admin/auction/register' && (
+                <button 
+                  type="submit" 
+                  className="action-btn" 
+                  disabled={form.itemStatus === 'AUCTION'}
+                  style={{
+                    background: form.itemStatus === 'AUCTION' ? '#cccccc' : 'linear-gradient(90deg, #ffc107, #ff9800)',
+                    color: form.itemStatus === 'AUCTION' ? '#666666' : '#223A5E',
+                    cursor: form.itemStatus === 'AUCTION' ? 'not-allowed' : 'pointer',
+                    boxShadow: form.itemStatus === 'AUCTION' ? 'none' : '0 2px 8px #ffc10722'
+                  }}
+                >
+                  상품 등록
+                </button>
+              )}
+              {location.pathname !== '/shop/item/register' && (
+                <button 
+                  type="button" 
+                  className="action-btn auction-btn" 
+                  onClick={handleAuctionRegister}
+                  style={{
+                    background: form.itemStatus === 'AUCTION' ? 'linear-gradient(90deg, #667eea, #764ba2)' : '#cccccc',
+                    color: form.itemStatus === 'AUCTION' ? '#fff' : '#666666',
+                    cursor: form.itemStatus === 'AUCTION' ? 'pointer' : 'not-allowed',
+                    boxShadow: form.itemStatus === 'AUCTION' ? '0 2px 8px #667eea22' : 'none'
+                  }}
+                  disabled={form.itemStatus !== 'AUCTION'}
+                >
+                  경매 등록
+                </button>
+              )}
             </div>
           </form>
           <style>{`

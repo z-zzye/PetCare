@@ -1,7 +1,8 @@
 package com.petory.service;
 
-import com.petory.dto.autoReservation.PaymentMethodResponseDto;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+import java.util.UUID;
+
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -14,13 +15,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import com.petory.dto.autoReservation.PaymentMethodResponseDto;
 import com.petory.entity.Member;
+import com.petory.entity.PaymentMethod;
 import com.petory.repository.MemberRepository;
 import com.petory.repository.PaymentMethodRepository;
 
 import lombok.RequiredArgsConstructor;
-
-import java.util.UUID;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +31,7 @@ import java.util.UUID;
 public class PaymentService {
 
   private final MemberRepository memberRepository;
+  private final PaymentMethodRepository paymentMethodRepository;
 
   @Value("${portone.api-key}")
   private String apiKey;
@@ -100,34 +103,54 @@ public class PaymentService {
     // 아임포트 환불 성공 시 response에 "response" 객체가 포함됨
     return response.getStatusCode().is2xxSuccessful() && !json.isNull("response");
   }
+  
   //////////////////////////////////////////////////////
   // 포트원이 말아먹은 자동 결제 시스템 모방 처리 메서드들/////////
   //////////////////////////////////////////////////////
   public void registerMockBillingKeyForCurrentUser() {
     // 1. 현재 로그인한 사용자 정보 조회
     String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-    Member member = memberRepository.findByMember_Email(userEmail) // 메서드명 확인 필요
+    Member member = memberRepository.findByMember_Email(userEmail)
       .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
-    // 2. 이미 등록된 정보가 있는지 확인 (선택 사항)
-    if (member.getCustomerUid() != null && !member.getCustomerUid().isBlank()) {
+    // 2. 이미 등록된 결제 수단이 있는지 확인
+    List<PaymentMethod> existingMethods = paymentMethodRepository.findByMember(member);
+    if (!existingMethods.isEmpty()) {
       log.info("사용자(email: {})는 이미 결제 수단이 등록되어 있습니다.", userEmail);
-      // 이미 키가 있다면 아무것도 하지 않거나, 필요시 예외를 발생시킬 수 있습니다.
-      // 여기서는 그냥 성공한 것처럼 처리합니다.
       return;
     }
 
-    // 3. 가짜 빌링키 생성 (예: mock_billing_랜덤UUID)
+    // 3. 가짜 빌링키 생성
     String mockBillingKey = "mock_billing_" + UUID.randomUUID().toString();
-    log.info("사용자(email: {})에게 모의 빌링키 생성: {}", userEmail, mockBillingKey);
+    
+    // 4. 랜덤 카드 정보 생성
+    String[] cardTypes = {"신한카드", "KB국민카드", "삼성카드", "현대카드", "BC카드", "NH농협카드", "롯데카드", "우리카드"};
+    String randomCardType = cardTypes[(int) (Math.random() * cardTypes.length)];
+    
+    // 랜덤 카드번호 생성 (4자리씩 4그룹)
+    StringBuilder cardNumber = new StringBuilder();
+    for (int i = 0; i < 4; i++) {
+      if (i > 0) cardNumber.append(" ");
+      cardNumber.append(String.format("%04d", (int) (Math.random() * 10000)));
+    }
+    
+    String cardInfo = randomCardType + " (" + cardNumber.toString() + ")";
+    
+    log.info("사용자(email: {})에게 모의 결제 수단 생성: {}", userEmail, cardInfo);
 
-    // 4. Member 엔티티에 customer_uid(빌링키) 저장
-    member.setCustomerUid(mockBillingKey); // Member 엔티티에 setCustomerUid 필요
-    memberRepository.save(member);
+    // 5. PaymentMethod 엔티티에 저장
+    PaymentMethod paymentMethod = PaymentMethod.builder()
+      .member(member)
+      .billingKey(mockBillingKey)
+      .cardInfo(cardInfo)
+      .isDefault(true)
+      .build();
+    
+    paymentMethodRepository.save(paymentMethod);
   }
 
   /**
-   * [신규 로직] 현재 사용자의 등록된 결제수단 정보를 조회하여 DTO로 반환합니다.
+   * 현재 사용자의 등록된 결제수단 정보를 조회하여 DTO로 반환합니다.
    * @return 등록된 정보가 있으면 DTO를, 없으면 null을 반환합니다.
    */
   @Transactional(readOnly = true)
@@ -136,16 +159,52 @@ public class PaymentService {
     Member member = memberRepository.findByMember_Email(userEmail)
       .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
-    String customerUid = member.getCustomerUid();
-
-    if (customerUid != null && !customerUid.isBlank()) {
-      // 실제라면 DB나 포트원에서 카드 정보를 가져오겠지만, 지금은 모킹이므로 가짜 정보를 만듭니다.
+    List<PaymentMethod> paymentMethods = paymentMethodRepository.findByMember(member);
+    
+    if (!paymentMethods.isEmpty()) {
+      PaymentMethod defaultMethod = paymentMethods.stream()
+        .filter(PaymentMethod::isDefault)
+        .findFirst()
+        .orElse(paymentMethods.get(0));
+      
       log.info("사용자(email: {})의 등록된 결제 수단 정보를 찾았습니다.", userEmail);
-      return new PaymentMethodResponseDto("등록된 카드", "**** 1234");
+      
+      // cardInfo에서 카드명과 카드번호 분리
+      String cardInfo = defaultMethod.getCardInfo();
+      String cardName = cardInfo;
+      String cardNumber = "**** **** **** ****";
+      
+      if (cardInfo.contains("(") && cardInfo.contains(")")) {
+        int startIndex = cardInfo.indexOf("(");
+        int endIndex = cardInfo.indexOf(")");
+        cardName = cardInfo.substring(0, startIndex).trim();
+        String fullCardNumber = cardInfo.substring(startIndex + 1, endIndex);
+        // 마지막 4자리만 표시
+        String[] parts = fullCardNumber.split(" ");
+        if (parts.length == 4) {
+          cardNumber = "**** **** **** " + parts[3];
+        }
+      }
+      
+      return new PaymentMethodResponseDto(cardName, cardNumber);
     } else {
       log.info("사용자(email: {})에게 등록된 결제 수단이 없습니다.", userEmail);
       return null;
     }
   }
 
+  /**
+   * 현재 사용자의 결제 수단을 삭제합니다.
+   */
+  public void deleteMyPaymentMethod() {
+    String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+    Member member = memberRepository.findByMember_Email(userEmail)
+      .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+    List<PaymentMethod> paymentMethods = paymentMethodRepository.findByMember(member);
+    if (!paymentMethods.isEmpty()) {
+      paymentMethodRepository.deleteAll(paymentMethods);
+      log.info("사용자(email: {})의 결제 수단이 삭제되었습니다.", userEmail);
+    }
+  }
 }

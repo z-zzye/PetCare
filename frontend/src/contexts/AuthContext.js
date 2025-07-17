@@ -45,6 +45,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('member_ProfileImg');
     localStorage.removeItem('member_Nickname');
     localStorage.removeItem('email');
+    localStorage.removeItem('memberId'); // ✅ memberId도 제거
     setIsLoggedIn(false);
     setRole('');
     setProfileImg('/images/profile-default.png');

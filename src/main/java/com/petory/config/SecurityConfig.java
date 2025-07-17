@@ -1,8 +1,7 @@
 package com.petory.config;
 
-import com.petory.config.JwtAuthenticationFilter;
-import com.petory.config.JwtTokenProvider;
-import lombok.RequiredArgsConstructor;
+import java.util.Arrays;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -19,9 +18,9 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import jakarta.servlet.http.HttpServletResponse;
 
-import java.util.Arrays;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
@@ -59,6 +58,7 @@ public class SecurityConfig {
             ).permitAll()
             .requestMatchers(HttpMethod.GET, "/api/boards", "/api/boards/**").permitAll()
             .requestMatchers("/admin/**").hasRole("ADMIN")
+            .requestMatchers(HttpMethod.DELETE, "/api/**").authenticated() // DELETE 메서드 명시적 허용
             .requestMatchers("/api/**").authenticated()
             // .anyRequest().permitAll()
           )

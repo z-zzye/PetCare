@@ -203,7 +203,7 @@ public class OrderService {
     }
 
     // 회원의 전체 보유 마일리지와 주문 내역 리스트 반환 (MyOrders용)
-    public com.petory.dto.shop.OrderListResponseDto getOrderListResponseByMemberId(Long memberId) {
+    public OrderListResponseDto getOrderListResponseByMemberId(Long memberId) {
         // 1. 회원 정보 조회
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new RuntimeException("회원 정보가 존재하지 않습니다."));
@@ -303,9 +303,9 @@ public class OrderService {
     }
 
     // 관리자용 전체 주문 목록 조회
-    public List<com.petory.dto.shop.OrderListDto> getAllOrdersForAdmin() {
+    public List<OrderListDto> getAllOrdersForAdmin() {
         List<Order> orders = orderRepository.findAll();
-        
+
         return orders.stream().map(order -> {
             List<OrderItemDto> orderItemDtos = order.getOrderItems().stream().map(orderItem -> {
                 return OrderItemDto.builder()
@@ -320,7 +320,7 @@ public class OrderService {
                     .build();
             }).collect(java.util.stream.Collectors.toList());
 
-            return com.petory.dto.shop.OrderListDto.builder()
+            return OrderListDto.builder()
                 .merchantUid(order.getMerchantUid())
                 .orderStatus(order.getOrderStatus().name())
                 .orderDate(order.getRegDate())

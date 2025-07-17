@@ -72,9 +72,14 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
             : "";
         String encodedNickname = URLEncoder.encode(nickname, StandardCharsets.UTF_8);
 
+        String memberIdParam = (member != null && member.getMemberId() != null)
+            ? "&memberId=" + member.getMemberId()
+        : "";
+
         String redirectUrl = "http://localhost:3000/oauth2/redirect?token=" + token
             + "&profileImg=" + encodedProfileImg
-            + "&nickname=" + encodedNickname;
+            + "&nickname=" + encodedNickname
+            + memberIdParam;
 
         if (needPhoneInput != null && needPhoneInput) {
             session.removeAttribute("NEED_PHONE_INPUT");

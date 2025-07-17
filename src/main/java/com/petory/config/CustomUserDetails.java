@@ -18,6 +18,10 @@ public class CustomUserDetails implements UserDetails {
     this.member = member;
   }
 
+  public Long getMemberId() {
+    return member.getMemberId();
+  }
+
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
     // ex) ROLE_USER, ROLE_ADMIN

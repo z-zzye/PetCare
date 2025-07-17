@@ -7,7 +7,7 @@ public enum VaccineType {
 
   // --- 고양이 백신 ---
   CAT_COMPREHENSIVE("고양이 종합백신", PetCategory.CAT, 6, 3, 3),
-  CAT_LEUKEMIA("고양이 백혈병", PetCategory.CAT, 6, 1, 0),
+  CAT_LEUKEMIA("고양이 백혈병", PetCategory.CAT, 8, 2, 3),
   CAT_RABIES("고양이 광견병", PetCategory.CAT, 12, 1, 0), // 3개월 -> 12주
   CAT_ANTIBODY_TEST("고양이 항체검사", PetCategory.CAT, 16, 1, 0), // 4개월 -> 16주
 

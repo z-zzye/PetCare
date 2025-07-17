@@ -1,7 +1,9 @@
 package com.petory.entity.shop;
 
 
+import com.petory.entity.BaseTimeEntity;
 import com.petory.entity.Member;
+import com.petory.constant.AuctionStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -14,7 +16,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AuctionItem {
+public class AuctionItem extends BaseTimeEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "auction_item_id")
@@ -23,10 +25,6 @@ public class AuctionItem {
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "item_id", nullable = false)
   private Item item; // 경매 대상 상품 (1:1 관계)
-
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "member_id")
-  private Member currentWinner; // 최고 입찰자 (nullable)
 
   @Column(name = "start_price", nullable = false)
   private Integer startPrice; // 경매 시작가 (상품가 기준)
@@ -37,15 +35,21 @@ public class AuctionItem {
   @Column(name = "end_time", nullable = false)
   private LocalDateTime endTime; // 경매 종료 시간
 
-  @Column(name = "current_price")
-  private Integer currentPrice; // 현재 최고 입찰가
-
   @Column(name = "bid_unit")
   private Integer bidUnit; // 최소 입찰 단위 (100, 500 등)
 
-  @Column(name = "started", nullable = false)
-  private boolean started; // 경매 시작 여부
+  @Column(name = "current_price")
+  private Integer currentPrice; // 현재 최고 입찰가
 
-  @Column(name = "ended", nullable = false)
-  private boolean ended; // 경매 종료 여부
+  @Enumerated(EnumType.STRING)
+  @Column(name = "auction_status", nullable = false)
+  private AuctionStatus auctionStatus; // 경매 상태 (예정, 진행, 종료, 취소)
+
+  @Lob
+  @Column(name = "auction_description")
+  private String auctionDescription; // 관리자 메모/경매 설명 (nullable)
+
+  @Version
+  @Column(name = "version")
+  private Long version; // 낙관적 락을 위한 버전 필드
 }

@@ -26,13 +26,9 @@ function Shopping() {
       .catch(err => console.error('카테고리 불러오기 실패', err));
   }, []);
 
-  // '경매' 대분류의 categoryId 찾기
-  const auctionMain = categories.find(cat => cat.parentOption === null && cat.optionValue === '경매');
-  const auctionMainId = auctionMain?.categoryId;
-
-  // 대분류/소분류 분리 (경매 제외)
-  const mainCategories = categories.filter(cat => cat.parentOption === null && cat.optionValue !== '경매');
-  const subCategories = categories.filter(cat => cat.parentOption !== null && cat.parentOption !== auctionMainId);
+  // 대분류/소분류 분리 (모든 카테고리 포함)
+  const mainCategories = categories.filter(cat => cat.parentOption === null);
+  const subCategories = categories.filter(cat => cat.parentOption !== null);
 
   // 선택된 대분류의 소분류만 필터링
   const filteredSubs = selectedMain
@@ -65,9 +61,7 @@ function Shopping() {
     //fetchItems(undefined, newPage); // useEffect로 자동 호출됨
   };
 
-  const handleRegisterClick = () => {
-    navigate('/shop/item/register');
-  };
+
 
   // 검색 버튼/엔터 처리
   const handleSearch = () => {
@@ -513,27 +507,15 @@ function Shopping() {
               </div>
             </div>
           </div>
-          {/* 오른쪽: 장바구니/상품등록 버튼 */}
+          {/* 오른쪽: 장바구니 버튼 */}
           <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
-            <div className="register-button-container" style={{ display: 'flex', alignItems: 'center', zIndex: 2, gap: '0.7rem', marginBottom: 0 }}>
-              <button
-                className="register-button cart-button"
-                style={{ background: '#223A5E', color: '#fff', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem', height: '38px', width: '38px', justifyContent: 'center', padding: 0 }}
-                onClick={() => navigate('/shop/cart')}
-              >
-                <MdShoppingCart style={{ fontSize: '1.2rem' }} />
-              </button>
-              {memberRole === 'ADMIN' && (
-                <button
-                  className="register-button"
-                  onClick={handleRegisterClick}
-                  style={{ height: '38px', display: 'flex', alignItems: 'center' }}
-                >
-                  <span className="register-icon">+</span>
-                  상품 등록
-                </button>
-              )}
-            </div>
+            <button
+              className="register-button cart-button"
+              style={{ background: '#223A5E', color: '#fff', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem', height: '38px', width: '38px', justifyContent: 'center', padding: 0 }}
+              onClick={() => navigate('/shop/cart')}
+            >
+              <MdShoppingCart style={{ fontSize: '1.2rem' }} />
+            </button>
           </div>
         </div>
 

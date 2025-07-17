@@ -1,6 +1,7 @@
 package com.petory.entity.shop;
 
 import com.petory.entity.Member;
+import com.petory.constant.AuctionBidStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -24,11 +25,15 @@ public class AuctionBid {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "member_id", nullable = false)
-  private Member bidder; // 입찰한 회원
+  private Member member; // 입찰한 회원
 
   @Column(name = "bid_amount", nullable = false)
   private Integer bidAmount; // 입찰 금액
 
   @Column(name = "bid_time", nullable = false)
   private LocalDateTime bidTime; // 입찰 시간
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "bid_status", nullable = false)
+  private AuctionBidStatus bidStatus = AuctionBidStatus.SUCCESS; // 입찰 상태 (기본값: SUCCESS)
 }

@@ -139,7 +139,7 @@ function ItemDetail() {
     }));
     
     // state로 데이터 전달
-    navigate('/shop/order', { state: { orderItems } });
+    navigate('/order', { state: { orderItems } });
   };
 
   // 관리자용 상품 수정/삭제 핸들러

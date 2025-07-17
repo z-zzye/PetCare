@@ -1,31 +1,61 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import Header from '../Header.jsx';
+import axios from '../../api/axios';
 
 const AuctionItemRegister = () => {
+  const navigate = useNavigate();
+  const { itemId } = useParams(); // URL에서 itemId 받기
+  const [categories, setCategories] = useState([]);
   const [form, setForm] = useState({
-    name: '',
     startPrice: '',
     startDate: '',
     endDate: '',
-    description: '',
-    image: null,
+    bidUnit: '', // 최소 입찰 단위 추가
+    description: ''
   });
-  const [preview, setPreview] = useState(null);
+  const [toast, setToast] = useState('');
+
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(''), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
   const handleChange = (e) => {
-    const { name, value, type, files } = e.target;
-    if (type === 'file') {
-      setForm({ ...form, image: files[0] });
-      setPreview(URL.createObjectURL(files[0]));
-    } else {
-      setForm({ ...form, [name]: value });
-    }
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: 등록 API 연동
-    alert('경매 상품이 등록되었습니다! (실제 등록 기능은 구현 필요)');
+    
+    // 경매 정보 유효성 검사
+    if (!form.startPrice || !form.startDate || !form.endDate || !form.bidUnit) {
+      setToast('경매 정보를 모두 입력해주세요.');
+      return;
+    }
+
+    // TODO: 경매 등록 API 연동 (itemId와 함께)
+    const auctionData = {
+      item_id: itemId,
+      start_price: form.startPrice,
+      start_time: form.startDate,
+      end_time: form.endDate,
+      bid_unit: form.bidUnit, // 최소 입찰 단위 추가
+      auction_description: form.description
+    };
+
+    try {
+      await axios.post('/auctions/new', auctionData);
+      setToast('경매 상품이 등록되었습니다!');
+      setTimeout(() => {
+        navigate('/admin/auction');
+      }, 1200);
+    } catch (err) {
+      console.error('❌ 경매 등록 실패:', err);
+      setToast('경매 등록 실패: ' + (err.response?.data?.message || '오류 발생'));
+    }
   };
 
   return (
@@ -112,15 +142,25 @@ const AuctionItemRegister = () => {
       .auction-register-btn:hover {
         background: #5a6fd8;
       }
+
       `}</style>
       <Header />
+      {toast && (
+        <div style={{
+          position: 'fixed', top: 80, left: '50%', transform: 'translateX(-50%)',
+          background: '#223A5E', color: '#fff', padding: '1rem 2rem', borderRadius: 12,
+          fontSize: '1rem', zIndex: 9999, boxShadow: '0 4px 16px #0003', opacity: 0.95,
+          fontWeight: 'normal'
+        }}>{toast}</div>
+      )}
       <div className="auction-register-page">
         <div className="auction-register-container">
           <h1 className="auction-register-title">경매 상품 등록</h1>
           <form className="auction-register-form" onSubmit={handleSubmit}>
             <div className="form-group">
-              <label htmlFor="name">상품명<span className="required">*</span></label>
-              <input type="text" id="name" name="name" value={form.name} onChange={handleChange} required />
+              <label>상품 ID</label>
+              <input type="text" value={itemId} disabled style={{ background: '#f5f5f5' }} />
+              <small style={{ color: '#666', fontSize: '0.9rem' }}>이미 등록된 상품의 경매 정보를 입력해주세요.</small>
             </div>
             <div className="form-group">
               <label htmlFor="startPrice">시작가<span className="required">*</span></label>
@@ -135,17 +175,21 @@ const AuctionItemRegister = () => {
               <input type="datetime-local" id="endDate" name="endDate" value={form.endDate} onChange={handleChange} required />
             </div>
             <div className="form-group">
-              <label htmlFor="description">상품 설명</label>
-              <textarea id="description" name="description" value={form.description} onChange={handleChange} rows={4} />
+              <label htmlFor="bidUnit">최소 입찰 단위<span className="required">*</span></label>
+              <input
+                type="number"
+                id="bidUnit"
+                name="bidUnit"
+                value={form.bidUnit}
+                onChange={handleChange}
+                required
+                min="1"
+                placeholder="예: 100, 500"
+              />
             </div>
             <div className="form-group">
-              <label htmlFor="image">상품 이미지</label>
-              <input type="file" id="image" name="image" accept="image/*" onChange={handleChange} />
-              {preview && (
-                <div className="image-preview">
-                  <img src={preview} alt="미리보기" />
-                </div>
-              )}
+              <label htmlFor="description">경매 설명</label>
+              <textarea id="description" name="description" value={form.description} onChange={handleChange} rows={4} placeholder="경매에 대한 추가 설명을 입력하세요" />
             </div>
             <button type="submit" className="auction-register-btn">등록하기</button>
           </form>
