@@ -10,11 +10,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/api/hashtags")
+@RequiredArgsConstructor
 public class HashtagController {
     
     private final HashtagService hashtagService;
@@ -57,5 +58,12 @@ public class HashtagController {
     public ResponseEntity<Void> deleteHashtag(@PathVariable Long tagId) {
         hashtagService.deleteHashtag(tagId);
         return ResponseEntity.ok().build();
+    }
+    
+    // 회원가입용 해시태그 목록 조회 (페이징 없이 전체 목록)
+    @GetMapping("/signup")
+    public ResponseEntity<List<HashtagDto>> getHashtagsForSignup() {
+        List<HashtagDto> hashtags = hashtagService.getAllHashtagsForSignup();
+        return ResponseEntity.ok(hashtags);
     }
 } 

@@ -363,3 +363,139 @@
             font-size: 0.8rem;
           }
         }
+
+/* 해시태그 선택 스타일 (회원수정 페이지용) */
+.form-group .hashtag-selection-info {
+  text-align: center;
+  margin-bottom: 1rem;
+  color: #888;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: #f9fafb;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  border: 0.125rem solid #e5e7eb;
+}
+
+.form-group .hashtag-selection-container {
+  border: 0.125rem solid #e5e7eb;
+  border-radius: 0.5rem;
+  background: #fff;
+  max-height: 400px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group .hashtag-search {
+  padding: 1rem;
+  border-bottom: 0.125rem solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.form-group .hashtag-search-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 0.125rem solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+  background: #fff;
+  color: #222;
+  box-sizing: border-box;
+}
+
+.form-group .hashtag-search-input::placeholder {
+  color: #b0b8c1;
+}
+
+.form-group .hashtag-search-input:focus {
+  outline: none;
+  border-color: #ffc107;
+  box-shadow: 0 0 0 0.125rem rgba(255, 233, 183, 0.3);
+  background: #fff;
+}
+
+.form-group .hashtag-grid-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+.form-group .hashtag-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.form-group .hashtag-item {
+  padding: 0.5rem 0.75rem;
+  border: 0.125rem solid #d1d5db;
+  border-radius: 2rem;
+  background: #f9fafb;
+  color: #6b7280;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.form-group .hashtag-item:hover:not(.disabled) {
+  border-color: #ffc107;
+  color: #ffc107;
+  background: #fff;
+  transform: translateY(-0.125rem);
+  box-shadow: 0 0.125rem 0.25rem rgba(255, 193, 7, 0.2);
+}
+
+.form-group .hashtag-item.selected {
+  background: #ffc107;
+  border-color: #ffc107;
+  color: #222;
+  font-weight: 600;
+  transform: translateY(-0.125rem);
+  box-shadow: 0 0.125rem 0.25rem rgba(255, 193, 7, 0.3);
+}
+
+.form-group .hashtag-item.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f0f1f5;
+  border-color: #ddd;
+  color: #999;
+  transform: none;
+  box-shadow: none;
+}
+
+.form-group .error-message {
+  background-color: #fee;
+  color: #c33;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  margin: 0 1rem 1rem 1rem;
+  font-size: 0.875rem;
+  border: 0.125rem solid #fcc;
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-0.25rem); }
+  75% { transform: translateX(0.25rem); }
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .form-group .hashtag-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+  
+  .form-group .hashtag-item {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.75rem;
+  }
+}

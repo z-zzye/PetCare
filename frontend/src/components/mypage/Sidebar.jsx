@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import axios from '../../api/axios'; // ✅ axios 인스턴스 사용
 import { useAuth } from '../../contexts/AuthContext';
-import './Sidebar.css';
+import HashtagSelectionModal from '../HashtagSelectionModal';
 
 const Sidebar = ({ onTabChange }) => {
   const navigate = useNavigate();
@@ -13,6 +13,8 @@ const Sidebar = ({ onTabChange }) => {
   const [isSocialUser, setIsSocialUser] = useState(false);
   const [memberId, setMemberId] = useState(null);
   const [pets, setPets] = useState([]);
+  const [showHashtagModal, setShowHashtagModal] = useState(false);
+  const [userHashtags, setUserHashtags] = useState([]);
 
   const handleRunSchedulerTest = async () => {
     const confirmed = window.confirm(
@@ -71,6 +73,23 @@ const Sidebar = ({ onTabChange }) => {
       });
   }, [memberId]);
 
+  // ✅ 멤버ID 기반 관심사 조회
+  useEffect(() => {
+    if (memberId === null) return;
+    fetchUserHashtags();
+  }, [memberId]);
+
+  const fetchUserHashtags = async () => {
+    if (memberId) {
+      try {
+        const response = await axios.get(`/members/${memberId}/hashtags`);
+        setUserHashtags(response.data);
+      } catch (error) {
+        console.error('관심사 조회 실패:', error);
+      }
+    }
+  };
+
   return (
     <div className="sidebar-wrapper">
       {/* 사이드바 본체 */}
@@ -83,6 +102,14 @@ const Sidebar = ({ onTabChange }) => {
             onError={(e) => (e.target.src = '/images/profile-default.png')}
           />
           <p className="nickname">{nickname || '로그인 필요'}</p>
+          {/* 관심사 해시태그 표시 */}
+          {userHashtags.length > 0 && (
+            <div className="user-interests">
+              {userHashtags.map((hashtag, idx) => (
+                <span key={idx} className="interest-tag">#{hashtag.tagName}</span>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* 펫 리스트 */}
@@ -119,17 +146,15 @@ const Sidebar = ({ onTabChange }) => {
 
         <button
           className="info-btn"
-          disabled={isSocialUser}
-          style={
-            isSocialUser
-              ? { backgroundColor: '#ccc', cursor: 'not-allowed' }
-              : {}
-          }
           onClick={() => {
-            if (!isSocialUser) navigate('/members/update');
+            if (!isSocialUser) {
+              navigate('/members/update');
+            } else {
+              setShowHashtagModal(true);
+            }
           }}
         >
-          {isSocialUser ? '소셜로그인 회원입니다' : '회원정보 수정'}
+          {isSocialUser ? '관심사수정' : '회원정보 수정'}
         </button>
 
         {/* 크리에이터 섹션 */}
@@ -196,6 +221,16 @@ const Sidebar = ({ onTabChange }) => {
         <button onClick={() => onTabChange('health')}>🩺건강수첩</button>
         <button onClick={() => onTabChange('posts')}>📝내가쓴글</button>
       </div>
+
+      <HashtagSelectionModal
+        isOpen={showHashtagModal}
+        onClose={() => setShowHashtagModal(false)}
+        onComplete={() => {
+          setShowHashtagModal(false);
+          fetchUserHashtags(); // 관심사 새로고침
+        }}
+        memberId={memberId}
+      />
     </div>
   );
 };

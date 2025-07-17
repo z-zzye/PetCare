@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import HashtagSelectionModal from './HashtagSelectionModal';
 
 const initialState = {
   email: '',
@@ -33,6 +34,8 @@ const MemberSignUp = () => {
   const [toastMessage, setToastMessage] = useState('');
   const [timer, setTimer] = useState(0);
   const [isCodeExpired, setIsCodeExpired] = useState(false);
+  const [showHashtagModal, setShowHashtagModal] = useState(false);
+  const [newMemberId, setNewMemberId] = useState(null);
   const fileInputRef = useRef();
 
   // 토스트 메시지 자동 제거
@@ -222,6 +225,14 @@ const MemberSignUp = () => {
     setErrors((err) => ({ ...err, [name]: undefined }));
   };
 
+  // 해시태그 모달 완료 후 처리
+  const handleHashtagComplete = () => {
+    setShowHashtagModal(false);
+    setNewMemberId(null);
+    // 로그인 페이지로 이동
+    window.location.href = '/members/login';
+  };
+
   // 폼 제출
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -293,11 +304,10 @@ const MemberSignUp = () => {
       });
 
       if (response.ok) {
+        const responseData = await response.json();
+        setNewMemberId(responseData.memberId);
+        setShowHashtagModal(true);
         setToastMessage('회원가입이 완료되었습니다!');
-        // 로그인 페이지로 이동
-        setTimeout(() => {
-          window.location.href = '/members/login';
-        }, 2000);
       } else {
         const errorText = await response.text();
         setToastMessage(`회원가입 실패: ${errorText}`);
@@ -872,6 +882,12 @@ const MemberSignUp = () => {
           {toastMessage}
         </div>
       )}
+      
+      <HashtagSelectionModal
+        isOpen={showHashtagModal}
+        onComplete={handleHashtagComplete}
+        memberId={newMemberId}
+      />
     </div>
   );
 };

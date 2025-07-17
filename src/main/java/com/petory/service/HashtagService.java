@@ -98,4 +98,12 @@ public class HashtagService {
             hashtagRepository.save(hashtag);
         }
     }
+    
+    // 회원가입용 해시태그 목록 조회 (페이징 없이 전체 목록)
+    @Transactional(readOnly = true)
+    public List<HashtagDto> getAllHashtagsForSignup() {
+        return hashtagRepository.findAllByOrderByTagCountDesc().stream()
+                .map(HashtagDto::fromEntity)
+                .collect(Collectors.toList());
+    }
 } 
