@@ -17,6 +17,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.config.ChannelRegistration;
+import com.petory.service.shop.AuctionParticipantService;
 
 @Configuration
 @EnableWebSocketMessageBroker
@@ -28,6 +29,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
   private UserDetailsService userDetailsService;
   @Autowired
   private JwtHandshakeInterceptor jwtHandshakeInterceptor;
+  @Autowired
+  private AuctionParticipantService auctionParticipantService;
 
   @Override
   public void registerStompEndpoints(StompEndpointRegistry registry) {
@@ -91,8 +94,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
           String sessionId = accessor.getSessionId();
           System.out.println("🔌 WebSocket 연결 해제 감지: sessionId=" + sessionId);
           
-          // 연결 ID로 참여자 조회하여 비활성화
-          // (실제로는 AuctionParticipantService를 주입받아 처리)
+          // 연결 ID로 참여자 조회하여 즉시 비활성화
+          try {
+            auctionParticipantService.deactivateParticipantByConnectionId(sessionId);
+            System.out.println("✅ 참여자 비활성화 완료: connectionId=" + sessionId);
+          } catch (Exception e) {
+            System.err.println("❌ 참여자 비활성화 실패: connectionId=" + sessionId + ", error=" + e.getMessage());
+          }
         }
       }
     });

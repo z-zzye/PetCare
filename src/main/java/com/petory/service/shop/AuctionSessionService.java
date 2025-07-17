@@ -350,7 +350,7 @@ public class AuctionSessionService {
         }
     }
 
-    /* 3단계: 종료 시간이 된 ACTIVE 세션들을 ENDED로 변경*/
+    /*3계: 종료 시간이 된 ACTIVE 세션들을 ENDED로 변경*/
     @Transactional
     protected void endExpiredAuctions(LocalDateTime now) {
         try {
@@ -361,43 +361,65 @@ public class AuctionSessionService {
 
             for (AuctionSession session : sessionsToEnd) {
                 try {
-                    session.setStatus(AuctionSessionStatus.ENDED);
-                    auctionSessionRepository.save(session);
-
-                    // 경매 상품 상태도 ENDED로 변경
-                    AuctionItem item = session.getAuctionItem();
-                    item.setAuctionStatus(AuctionStatus.ENDED);
-                    auctionItemRepository.save(item);
-
-                    log.info("✅ 경매 종료: sessionId={}, auctionItemId={}", session.getId(), item.getId());
-
-                    // 경매 낙찰 처리 (마일리지 차감, 낙찰자 확정)
-                    auctionBidService.processAuctionEnd(item.getId());
-
-                    // WebSocket으로 경매 종료 메시지 전송
-                    try {
-                        String sessionKey = getSessionKey(item.getId());
-                        messagingTemplate.convertAndSend("/topic/auction/" + sessionKey,
-                                createEndNotification(item.getId()));
-
-                        // 낙찰자에게 개별 알림
-                        Optional<Member> winnerOpt = auctionBidService.getCurrentHighestBidder(item);
-                        if (winnerOpt.isPresent()) {
-                            messagingTemplate.convertAndSend("/queue/auction/" + winnerOpt.get().getMemberId(),
-                                    createWinnerNotification(item.getId(), winnerOpt.get()));
-                        }
-                    } catch (Exception e) {
-                        log.error("경매 종료 WebSocket 메시지 전송 실패: auctionItemId={}", item.getId(), e);
-                    }
-
-                    // 로그아웃한 참여자들에게 알림 보내기
-                    sendNotificationsToInactiveParticipants(session, item);
+                    // 각 세션별로 개별 트랜잭션 처리
+                    endSingleAuction(session, now);
                 } catch (Exception e) {
-                    log.error("경매 종료 처리 중 오류 발생: sessionId={}", session.getId(), e);
+                    log.error("❌ 개별 경매 종료 실패: sessionId={}, error=[object Object], session.getId(), e.getMessage(), e");
+                    // 개별 경매 종료 실패가 다른 경매 종료에 영향을 주지 않도록 계속 진행
                 }
             }
         } catch (Exception e) {
-            log.error("경매 종료 단계에서 오류 발생", e);
+            log.error("❌ 경매 종료 단계에서 오류 발생", e);
+        }
+    }
+
+    /* 개별 경매 종료 처리*/
+    @Transactional
+    protected void endSingleAuction(AuctionSession session, LocalDateTime now) {
+        try {
+            session.setStatus(AuctionSessionStatus.ENDED);
+            auctionSessionRepository.save(session);
+
+            // 경매 상품 상태도 ENDED로 변경
+            AuctionItem item = session.getAuctionItem();
+            item.setAuctionStatus(AuctionStatus.ENDED);
+            auctionItemRepository.save(item);
+
+            log.info("✅ 경매 종료: sessionId={}, auctionItemId={}", session.getId(), item.getId());
+
+            // 경매 낙찰 처리 (마일리지 차감, 낙찰자 확정)
+            try {
+                auctionBidService.processAuctionEnd(item.getId());
+            } catch (Exception e) {
+                log.error("❌ 경매 낙찰 처리 실패: auctionItemId={}, error={}, item.getId(), e.getMessage(), e");
+            }
+
+            // WebSocket으로 경매 종료 메시지 전송
+            try {
+                String sessionKey = getSessionKey(item.getId());
+                messagingTemplate.convertAndSend("/topic/auction/" + sessionKey,
+                        createEndNotification(item.getId()));
+
+                // 낙찰자에게 개별 알림
+                Optional<Member> winnerOpt = auctionBidService.getCurrentHighestBidder(item);
+                if (winnerOpt.isPresent()) {
+                    messagingTemplate.convertAndSend("/queue/auction/" + winnerOpt.get().getMemberId(),
+                            createWinnerNotification(item.getId(), winnerOpt.get()));
+                }
+            } catch (Exception e) {
+                log.error("❌ 경매 종료 WebSocket 메시지 전송 실패: auctionItemId={}, error={}, item.getId(), e.getMessage(), e");
+            }
+
+            // 로그아웃한 참여자들에게 알림 보내기
+            try {
+                sendNotificationsToInactiveParticipants(session, item);
+            } catch (Exception e) {
+                log.error("❌ 로그아웃한 참여자들에게 알림 전송 실패: sessionId={}, error={}, session.getId(), e.getMessage(), e");
+            }
+
+        } catch (Exception e) {
+            log.error("❌ 개별 경매 종료 처리 중 오류 발생: sessionId={}, error={}, session.getId(), e.getMessage(), e");
+            throw e; // 상위로 예외 전파
         }
     }
 
@@ -480,8 +502,7 @@ public class AuctionSessionService {
             log.info("✅ 로그아웃한 참여자들에게 알림 전송 완료: {}명", inactiveParticipants.size());
 
         } catch (Exception e) {
-            log.error("❌ 로그아웃한 참여자들에게 알림 전송 중 오류 발생: sessionId={}, error={}", 
-                session.getId(), e.getMessage(), e);
+            log.error("❌ 로그아웃한 참여자들에게 알림 전송 중 오류 발생: sessionId={}, error={}, session.getId(), e.getMessage(), e");
         }
     }
 

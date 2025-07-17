@@ -149,6 +149,29 @@ public class AuctionParticipantService {
         return auctionParticipantRepository.findByConnectionId(connectionId);
     }
 
+    /* 연결 ID로 참여자 비활성화 (WebSocket 연결 해제 시)*/
+    @Transactional
+    public void deactivateParticipantByConnectionId(String connectionId) {
+        log.info("🔌 WebSocket 연결 해제로 인한 참여자 비활성화: connectionId={}", connectionId);
+        
+        Optional<AuctionParticipant> participantOpt = auctionParticipantRepository.findByConnectionId(connectionId);
+        if (participantOpt.isPresent()) {
+            AuctionParticipant participant = participantOpt.get();
+            participant.setIsActive(false);
+            participant.setLastActivity(LocalDateTime.now());
+            auctionParticipantRepository.save(participant);
+            
+            // 참여자 수 업데이트
+            long activeCount = auctionParticipantRepository.countBySessionAndIsActiveTrue(participant.getSession());
+            auctionSessionService.updateParticipantCount(participant.getSession().getId(), (int) activeCount);
+            
+            log.info("✅ 참여자 비활성화 완료: participantId={}, memberId={}, sessionId={}", 
+                participant.getId(), participant.getMember().getMemberId(), participant.getSession().getId());
+        } else {
+            log.warn("⚠️ 연결 ID에 해당하는 참여자를 찾을 수 없음: connectionId={}", connectionId);
+        }
+    }
+
     /* 경매 상품 ID로 세션 참여 (WebSocket용)*/
     @Transactional
     public AuctionParticipantDto joinSessionByAuctionItem(Long auctionItemId, Member member, String connectionId) {
@@ -269,9 +292,21 @@ public class AuctionParticipantService {
     @Scheduled(fixedRate = 60000) // 1분 = 60초 = 60000ms
     public void scheduledDeactivateInactiveParticipants() {
         try {
-            deactivateInactiveParticipants();
+            LocalDateTime cutoffTime = LocalDateTime.now().minusMinutes(3); // 5분 → 3분으로 변경
+            
+            List<AuctionParticipant> inactiveParticipants = 
+                auctionParticipantRepository.findByLastActivityBefore(cutoffTime);
+            
+            for (AuctionParticipant participant : inactiveParticipants) {
+                if (participant.getIsActive()) {
+                    participant.setIsActive(false);
+                    auctionParticipantRepository.save(participant);
+                    log.info("비활성 참여자 자동 비활성화: participantId={}, memberId={}", 
+                        participant.getId(), participant.getMember().getMemberId());
+                }
+            }
         } catch (Exception e) {
-            log.error("❌ 스케줄러 자동 비활성화 실패: {}", e.getMessage(), e);
+            log.error("자동 비활성화 처리 중 오류 발생", e);
         }
     }
     
