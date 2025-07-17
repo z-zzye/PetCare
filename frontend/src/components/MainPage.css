@@ -1,0 +1,223 @@
+body {
+  background: #f8f9fa;
+  margin: 0;
+  padding: 0;
+  font-family: 'Pretendard', sans-serif;
+}
+
+.main-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* --- 배너 섹션 (디자인 통일성 적용) --- */
+.banner-section {
+  /* 보라색 그라데이션 제거 -> 흰색 배경과 테두리로 변경 */
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 15px;
+  padding: 40px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.banner-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* 배너 텍스트 색상 변경 (white -> navy) */
+.banner-text h1 {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+  font-weight: 700;
+  color: #223a5e;
+}
+
+.banner-text p {
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+  opacity: 0.9;
+  color: #495057;
+}
+
+/* 버튼 스타일 통일 */
+.banner-btn {
+  background: #223a5e; /* 메인 네이비 색상으로 변경 */
+  color: white; /* 텍스트 흰색으로 변경 */
+  border: none;
+  padding: 12px 30px;
+  border-radius: 8px; /* 다른 버튼들과 통일감 */
+  font-size: 1.1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.banner-btn:hover {
+  background: #1a2c47; /* 살짝 어둡게 */
+  transform: translateY(-2px);
+}
+
+.banner-image img {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 15px;
+}
+
+/* --- 인기글 & 추천 게시물 섹션 --- */
+.posts-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.popular-posts,
+.recommended-posts {
+  background: white;
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e9ecef;
+}
+
+.popular-posts h2,
+.recommended-posts h2 {
+  color: #223a5e;
+  margin-bottom: 20px;
+  font-size: 1.5em;
+  font-weight: 600;
+}
+
+.posts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.post-item {
+  padding: 15px;
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.post-item:hover {
+  border-color: #223a5e; /* 네이비 색상으로 변경 */
+  box-shadow: 0 2px 8px rgba(34, 58, 94, 0.1);
+  transform: translateY(-2px);
+}
+
+/* 카테고리 태그 색상 변경 */
+.post-category {
+  background: #223a5e; /* 메인 네이비 색상으로 변경 */
+  color: white;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  display: inline-block;
+  margin-bottom: 8px;
+}
+
+.post-title {
+  font-size: 1rem;
+  margin: 8px 0;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.post-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+/* --- 정보글 섹션 --- */
+.info-posts-section {
+  background: white;
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e9ecef;
+}
+
+.info-posts-section h2 {
+  color: #223a5e;
+  margin-bottom: 20px;
+  font-size: 1.5em;
+  font-weight: 600;
+}
+
+.info-posts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.info-post-item {
+  padding: 20px;
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.info-post-item:hover {
+  border-color: #223a5e;
+  box-shadow: 0 2px 8px rgba(34, 58, 94, 0.1);
+}
+
+.info-post-item h3 {
+  color: #2c3e50;
+  margin-bottom: 10px;
+  font-size: 1.1em;
+  font-weight: 600;
+}
+
+.info-post-item p {
+  color: #6c757d;
+  margin-bottom: 15px;
+  line-height: 1.6;
+}
+
+/* 버튼 스타일 통일 */
+.read-more-btn {
+  background: #223a5e; /* 메인 네이비 색상으로 변경 */
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.read-more-btn:hover {
+  background: #1a2c47;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .banner-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+  }
+
+  .banner-text h1 {
+    font-size: 2rem;
+  }
+
+  .posts-section {
+    grid-template-columns: 1fr;
+  }
+
+  .info-posts-grid {
+    grid-template-columns: 1fr;
+  }
+}
