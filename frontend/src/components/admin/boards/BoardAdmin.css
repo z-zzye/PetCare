@@ -1,12 +1,18 @@
 .board-admin-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 50%, #f39c12 100%);
+  padding: 20px;
+  font-family: 'Pretendard', sans-serif;
+}
+
+.board-admin-container {
   max-width: 1200px;
-  margin: 20px auto;
+  margin: 0 auto;
   background: rgba(255, 255, 255, 0.95);
   border-radius: 25px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   border: 2px solid #fdcb6e;
   padding: 40px;
-  font-family: 'Pretendard', sans-serif;
   backdrop-filter: blur(10px);
 }
 

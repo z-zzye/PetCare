@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from '../../api/axios';
 import './ProfanityManagePage.css';
+import Header from '../Header.jsx';
 
 const ProfanityManagePage = () => {
   const [profanityList, setProfanityList] = useState('');
@@ -80,12 +81,11 @@ const ProfanityManagePage = () => {
   };
 
   return (
+    <>
+    <Header />
     <div className="profanity-manage-page">
       <div className="profanity-container">
         <div className="profanity-header">
-          <Link to="/admin" className="back-button">
-            ← 관리자 페이지로 돌아가기
-          </Link>
           <h1 className="profanity-title">비속어 관리</h1>
         </div>
 
@@ -148,6 +148,7 @@ const ProfanityManagePage = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

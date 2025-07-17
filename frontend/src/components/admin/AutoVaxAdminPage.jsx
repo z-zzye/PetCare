@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from '../../api/axios';
 import './AutoVaxAdminPage.css';
+import Header from '../Header.jsx';
 
 const AutoVaxAdminPage = () => {
   const [reservations, setReservations] = useState([]);
@@ -84,14 +85,18 @@ const AutoVaxAdminPage = () => {
   });
 
   if (loading) {
+
     return <div className="autovax-admin-page">로딩 중...</div>;
   }
 
   if (error) {
+
     return <div className="autovax-admin-page">오류: {error}</div>;
   }
 
   return (
+    <>
+    <Header />
     <div className="autovax-admin-page">
       <div className="autovax-admin-container">
         <h1 className="autovax-admin-title">자동 예약 관리</h1>
@@ -211,6 +216,7 @@ const AutoVaxAdminPage = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
