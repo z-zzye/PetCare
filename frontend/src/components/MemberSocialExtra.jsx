@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import HashtagSelectionModal from './HashtagSelectionModal';
 
 function MemberSocialExtra() {
   // member prop 대신 location.state에서 회원 정보를 받아옴
@@ -8,6 +9,8 @@ function MemberSocialExtra() {
   const [phone, setPhone] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [showHashtagModal, setShowHashtagModal] = useState(false);
+  const [memberId, setMemberId] = useState(null);
   const navigate = useNavigate();
 
   const handlePhoneChange = (e) => {
@@ -44,7 +47,10 @@ function MemberSocialExtra() {
         setError(msg);
         return;
       }
-      navigate('/');
+      
+      const data = await res.json();
+      setMemberId(data.memberId);
+      setShowHashtagModal(true);
     } catch (err) {
       setError('전화번호 업데이트 중 오류가 발생했습니다.');
     }
@@ -188,6 +194,13 @@ function MemberSocialExtra() {
         </div>
         <button type="submit" className="submit-btn">가입하기</button>
       </form>
+      
+      <HashtagSelectionModal
+        isOpen={showHashtagModal}
+        onClose={() => setShowHashtagModal(false)}
+        onComplete={() => navigate('/')}
+        memberId={memberId}
+      />
     </div>
   );
 }

@@ -62,10 +62,17 @@ public class MemberApiController {
 
     // 소셜 로그인 후 추가정보(전화번호) 입력
     @PostMapping("/update-phone")
-    public ResponseEntity<?> updatePhone(@RequestBody PhoneUpdateDto phoneUpdateDto) {
+    public ResponseEntity<?> updatePhone(@RequestBody PhoneUpdateDto phoneUpdateDto, @RequestHeader("Authorization") String authHeader) {
         try {
             memberService.updatePhone(phoneUpdateDto);
-            return ResponseEntity.ok("전화번호가 성공적으로 업데이트되었습니다.");
+            // 전화번호 업데이트 후 memberId를 리턴
+            String token = authHeader.substring(7); // "Bearer " 제거
+            String email = jwtTokenProvider.getEmail(token);
+            Member member = memberService.getMemberByEmail(email);
+            return ResponseEntity.ok(Map.of(
+                "message", "전화번호가 성공적으로 업데이트되었습니다.",
+                "memberId", member.getMember_Id()
+            ));
         } catch (IllegalStateException e) {
             return ResponseEntity.status(409).body(e.getMessage());
         } catch (Exception e) {
