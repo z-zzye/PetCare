@@ -13,6 +13,17 @@ const BoardMain = () => {
   const [latestPosts, setLatestPosts] = useState({});
   const [loading, setLoading] = useState(true);
 
+  // 소문자 카테고리를 대문자로 매핑
+  const getBoardConfigKey = (category) => {
+    const categoryMap = {
+      'info': 'INFO',
+      'free': 'FREE', 
+      'qna': 'QNA',
+      'walkwith': 'WALKWITH'
+    };
+    return categoryMap[category] || category;
+  };
+
   // 카테고리별 최신글 가져오기
   useEffect(() => {
     fetchLatestPosts();
@@ -26,7 +37,7 @@ const BoardMain = () => {
       // 각 게시판별로 최신글 3개씩 가져오기
       for (const [category, config] of Object.entries(boardConfig)) {
         try {
-          const response = await fetch(`/api/boards/${category}?page=0&size=3`);
+          const response = await fetch(`/api/boards/${category.toLowerCase()}?page=0&size=3`);
           if (response.ok) {
             const data = await response.json();
             postsData[category] = data.content || [];
@@ -58,7 +69,7 @@ const BoardMain = () => {
       for (const [category, config] of Object.entries(boardConfig)) {
         try {
           const response = await fetch(
-            `/api/boards/${category}?page=0&size=10`
+            `/api/boards/${category.toLowerCase()}?page=0&size=10`
           );
           if (response.ok) {
             const data = await response.json();

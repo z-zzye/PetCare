@@ -497,7 +497,7 @@ const BoardWrite = () => {
       const boardData = {
         title: title,
         content: content,
-        boardKind: category.toUpperCase(), // 소문자를 대문자로 변환
+        boardKind: category, // 이미 대문자이므로 변환 불필요
         hashtags: selectedHashtags
       };
 
@@ -530,10 +530,16 @@ const BoardWrite = () => {
   };
 
   // 크롤링 성공 시 처리
-  const handleCrawlingSuccess = (boardId) => {
+  const handleCrawlingSuccess = (boardId, selectedBoardKind) => {
     setShowCrawlingModal(false);
     alert('크롤링으로 게시글이 성공적으로 작성되었습니다.');
-    navigate(`/board/${category}/${boardId}`);
+    
+    // 크롤링에서 선택된 게시판 정보를 사용하거나, 기본값 사용
+    const boardKind = selectedBoardKind || category || 'FREE';
+    const categoryPath = boardKind.toLowerCase();
+    
+    console.log('크롤링 성공 - boardId:', boardId, 'categoryPath:', categoryPath);
+    navigate(`/board/${categoryPath}/${boardId}`);
   };
 
   return (
@@ -838,7 +844,7 @@ const BoardWrite = () => {
               ×
             </button>
             <CrawlingBoardWrite 
-              boardKind={category}
+              boardKind={category || 'FREE'} // 기본값으로 FREE 설정
               onClose={handleCloseCrawlingModal}
               onSuccess={handleCrawlingSuccess}
             />

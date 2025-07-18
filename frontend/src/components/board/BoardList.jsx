@@ -8,7 +8,19 @@ import { boardConfig } from './boardConfig';
 const BoardList = () => {
   const { category } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
-  const config = boardConfig[category];
+  
+  // 소문자 카테고리를 대문자로 매핑
+  const getBoardConfigKey = (category) => {
+    const categoryMap = {
+      'info': 'INFO',
+      'free': 'FREE', 
+      'qna': 'QNA',
+      'walkwith': 'WALKWITH'
+    };
+    return categoryMap[category] || category;
+  };
+  
+  const config = boardConfig[getBoardConfigKey(category)];
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
