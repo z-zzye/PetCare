@@ -15,12 +15,14 @@ import com.petory.dto.board.BoardUpdateDto;
 import com.petory.entity.Board;
 import com.petory.entity.BoardHashtag;
 import com.petory.entity.BoardHashtagId;
+import com.petory.entity.BoardImage;
 import com.petory.entity.BoardRecommend;
 import com.petory.entity.CleanBotLog;
 import com.petory.entity.Comment;
 import com.petory.entity.Hashtag;
 import com.petory.entity.Member;
 import com.petory.repository.BoardHashtagRepository;
+import com.petory.repository.BoardImageRepository;
 import com.petory.repository.BoardRecommendRepository;
 import com.petory.repository.BoardRepository;
 import com.petory.repository.CleanBotLogRepository;
@@ -49,6 +51,7 @@ public class BoardService {
   private final CleanBotLogRepository cleanBotLogRepository;
   private final HashtagRepository hashtagRepository;
   private final BoardHashtagRepository boardHashtagRepository;
+  private final BoardImageRepository boardImageRepository;
 
   /**
    * 새 게시글 생성
@@ -162,7 +165,10 @@ public class BoardService {
     // 해당 게시글의 해시태그 목록 조회
     List<BoardHashtag> boardHashtags = boardHashtagRepository.findByPostId(boardId);
     
-    return BoardDetailDto.from(board, comments, boardHashtags);
+    // 해당 게시글의 이미지 목록 조회
+    List<BoardImage> boardImages = boardImageRepository.findByBoardIdOrderByDisplayOrderAsc(boardId);
+    
+    return BoardDetailDto.from(board, comments, boardHashtags, boardImages);
   }
 
   /**
@@ -592,6 +598,25 @@ public class BoardService {
         .limit(20) // 상위 20개만 반환
         .map(Hashtag::getTagName)
         .toList();
+  }
+
+  /**
+   * 해시태그 검색 (검색어가 있으면 전체에서 검색, 없으면 인기순 상위 10개)
+   */
+  @Transactional(readOnly = true)
+  public List<String> searchHashtagsForWrite(String searchKeyword) {
+    if (searchKeyword == null || searchKeyword.trim().isEmpty()) {
+      // 검색어가 없으면 인기순 상위 10개 반환
+      return hashtagRepository.findAllByOrderByTagCountDesc().stream()
+          .limit(10)
+          .map(Hashtag::getTagName)
+          .toList();
+    } else {
+      // 검색어가 있으면 전체 해시태그에서 검색 (대소문자 구분 없이)
+      return hashtagRepository.findByTagNameContainingIgnoreCase(searchKeyword.trim()).stream()
+          .map(Hashtag::getTagName)
+          .toList();
+    }
   }
 
   /**

@@ -3,6 +3,8 @@
 package com.petory.controller;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +29,7 @@ import com.petory.dto.board.BoardDetailDto;
 import com.petory.dto.board.BoardListDto;
 import com.petory.dto.board.BoardUpdateDto;
 import com.petory.service.BoardService;
+import com.petory.service.CleanBotService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -36,14 +39,66 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class BoardController {
   private final BoardService boardService;
+  private final CleanBotService cleanBotService;
 
   // 게시글 생성 API
   @PostMapping
-  public ResponseEntity<Long> createBoard(
+  public ResponseEntity<Object> createBoard(
     @Valid @RequestBody BoardCreateDto requestDto,
     @AuthenticationPrincipal UserDetails userDetails) {
+    
+    // 클린 봇 검사: 제목과 내용에서 비속어 검사
+    String originalTitle = requestDto.getTitle();
+    String originalContent = requestDto.getContent();
+    
+    String filteredTitle = cleanBotService.filter(originalTitle);
+    String filteredContent = cleanBotService.filter(originalContent);
+    
+    // 원본과 필터링된 텍스트가 다르면 비속어가 감지된 것
+    if (!originalTitle.equals(filteredTitle) || !originalContent.equals(filteredContent)) {
+      // 감지된 비속어 정보 수집
+      StringBuilder detectedWords = new StringBuilder();
+      
+      if (!originalTitle.equals(filteredTitle)) {
+        detectedWords.append("제목: ").append(findDetectedWords(originalTitle, filteredTitle));
+      }
+      if (!originalContent.equals(filteredContent)) {
+        if (detectedWords.length() > 0) {
+          detectedWords.append(", ");
+        }
+        detectedWords.append("내용: ").append(findDetectedWords(originalContent, filteredContent));
+      }
+      
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        .body(Map.of(
+          "error", "profanity_detected",
+          "message", "비속어가 감지되었습니다.",
+          "detectedWords", detectedWords.toString()
+        ));
+    }
+    
+    // 비속어가 없으면 정상적으로 게시글 생성
     Long savedBoardId = boardService.createBoard(requestDto, userDetails.getUsername());
     return ResponseEntity.status(HttpStatus.CREATED).body(savedBoardId);
+  }
+
+  // 감지된 비속어를 찾는 헬퍼 메서드
+  private String findDetectedWords(String original, String filtered) {
+    if (!original.equals(filtered)) {
+      // HTML 태그 제거 (Quill 에디터에서 온 내용 처리)
+      String cleanOriginal = original.replaceAll("<[^>]*>", "").trim();
+      
+      // CleanBotService에서 실제 감지된 비속어들을 가져오기
+      Set<String> detectedProfanity = cleanBotService.getDetectedProfanity(cleanOriginal);
+      
+      if (!detectedProfanity.isEmpty()) {
+        return String.join(", ", detectedProfanity);
+      } else {
+        // 비속어 목록에서 찾지 못한 경우
+        return "부적절한 표현이 포함되어 있습니다";
+      }
+    }
+    return "";
   }
 
   // 게시글 목록 조회 API
@@ -68,11 +123,43 @@ public class BoardController {
 
   // 게시글 수정 API
   @PatchMapping("/{category}/{boardId}") // 경로를 더 명확하게 변경
-  public ResponseEntity<Void> updateBoard (
+  public ResponseEntity<Object> updateBoard (
     @PathVariable String category,
     @PathVariable Long boardId,
     @RequestBody BoardUpdateDto updateDto,
     @AuthenticationPrincipal UserDetails userDetails) {
+    
+    // 클린 봇 검사: 제목과 내용에서 비속어 검사
+    String originalTitle = updateDto.getTitle();
+    String originalContent = updateDto.getContent();
+    
+    String filteredTitle = cleanBotService.filter(originalTitle);
+    String filteredContent = cleanBotService.filter(originalContent);
+    
+    // 원본과 필터링된 텍스트가 다르면 비속어가 감지된 것
+    if (!originalTitle.equals(filteredTitle) || !originalContent.equals(filteredContent)) {
+      // 감지된 비속어 정보 수집
+      StringBuilder detectedWords = new StringBuilder();
+      
+      if (!originalTitle.equals(filteredTitle)) {
+        detectedWords.append("제목: ").append(findDetectedWords(originalTitle, filteredTitle));
+      }
+      if (!originalContent.equals(filteredContent)) {
+        if (detectedWords.length() > 0) {
+          detectedWords.append(", ");
+        }
+        detectedWords.append("내용: ").append(findDetectedWords(originalContent, filteredContent));
+      }
+      
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        .body(Map.of(
+          "error", "profanity_detected",
+          "message", "비속어가 감지되었습니다.",
+          "detectedWords", detectedWords.toString()
+        ));
+    }
+    
+    // 비속어가 없으면 정상적으로 게시글 수정
     boardService.updateBoard(boardId, updateDto, userDetails.getUsername());
     return ResponseEntity.ok().build();
   }
@@ -157,5 +244,13 @@ public class BoardController {
     // 인기 해시태그 상위 20개 반환 (게시글 작성 시 선택용)
     List<String> popularHashtags = boardService.getPopularHashtagsForWrite();
     return ResponseEntity.ok(popularHashtags);
+  }
+
+  // 해시태그 검색 API (검색어가 있으면 전체에서 검색, 없으면 인기순 상위 10개)
+  @GetMapping("/hashtags/search")
+  public ResponseEntity<List<String>> searchHashtagsForWrite(
+    @RequestParam(required = false) String keyword) {
+    List<String> hashtags = boardService.searchHashtagsForWrite(keyword);
+    return ResponseEntity.ok(hashtags);
   }
 }
