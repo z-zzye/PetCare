@@ -253,4 +253,13 @@ public class BoardController {
     List<String> hashtags = boardService.searchHashtagsForWrite(keyword);
     return ResponseEntity.ok(hashtags);
   }
+
+  // 내가 쓴 글 조회 API
+  @GetMapping("/member/{memberId}")
+  public ResponseEntity<Page<BoardListDto>> getMyPosts(
+    @PathVariable Long memberId,
+    @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+    Page<BoardListDto> boardList = boardService.getMyPosts(memberId, pageable);
+    return ResponseEntity.ok(boardList);
+  }
 }
