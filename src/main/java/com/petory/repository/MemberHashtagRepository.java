@@ -1,18 +1,23 @@
 package com.petory.repository;
 
-import com.petory.entity.MemberHashtag;
-import com.petory.entity.MemberHashtagId;
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import java.util.List;
+
+import com.petory.entity.MemberHashtag;
+import com.petory.entity.MemberHashtagId;
 
 public interface MemberHashtagRepository extends JpaRepository<MemberHashtag, MemberHashtagId> {
     
     // 사용자 ID로 관심 태그 조회
     @Query("SELECT mh FROM MemberHashtag mh WHERE mh.member.member_Id = :memberId")
     List<MemberHashtag> findByMemberId(@Param("memberId") Long memberId);
+    
+    // 사용자 엔티티로 관심 태그 조회
+    List<MemberHashtag> findByMember(com.petory.entity.Member member);
     
     // 사용자 ID로 모든 관심 태그 삭제
     @Modifying

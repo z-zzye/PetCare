@@ -1,6 +1,12 @@
 // frontend/src/components/board/BoardList.jsx
 import React, { useEffect, useState } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import {
+  Link,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import Header from '../Header';
 import './BoardCommon.css';
 import { boardConfig } from './boardConfig';
@@ -8,6 +14,8 @@ import { boardConfig } from './boardConfig';
 const BoardList = () => {
   const { category } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { isLoggedIn } = useAuth();
+  const navigate = useNavigate();
   const config = boardConfig[category];
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -51,11 +59,8 @@ const BoardList = () => {
     setLoading(true);
     try {
       let url = `/api/boards/${category}?page=${currentPage}&size=10`;
-
-      if (searchHashtag.trim()) {
-        url = `/api/boards/${category}/search/hashtag?hashtag=${encodeURIComponent(
-          searchHashtag.trim()
-        )}&page=${currentPage}&size=10`;
+      if (searchHashtag) {
+        url += `&hashtag=${encodeURIComponent(searchHashtag)}`;
       }
 
       const response = await fetch(url);
@@ -65,38 +70,52 @@ const BoardList = () => {
         setTotalPages(data.totalPages || 0);
       }
     } catch (error) {
-      console.error('게시글 목록 로딩 실패:', error);
+      console.error('게시글 로딩 실패:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  // 해시태그 검색
   const handleHashtagSearch = (hashtag) => {
     setSearchHashtag(hashtag);
     setCurrentPage(0);
     setSearchParams({ hashtag, page: '0' });
   };
 
-  // 검색어 초기화
   const handleClearSearch = () => {
     setSearchHashtag('');
     setCurrentPage(0);
     setSearchParams({ page: '0' });
   };
 
-  // 페이지 변경
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-    const params = { page: page.toString() };
-    if (searchHashtag) {
-      params.hashtag = searchHashtag;
-    }
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    const params = new URLSearchParams(searchParams);
+    params.set('page', newPage.toString());
     setSearchParams(params);
   };
 
-  if (!config)
-    return <div className="board-container">존재하지 않는 게시판입니다.</div>;
+  // 글쓰기 버튼 클릭 핸들러
+  const handleWriteClick = (e) => {
+    if (!isLoggedIn) {
+      e.preventDefault();
+      alert('글을 작성하려면 로그인이 필요합니다.');
+      navigate('/members/login');
+      return;
+    }
+    // 로그인된 경우 기존 링크 동작 유지
+  };
+
+  if (!config) {
+    return (
+      <>
+        <Header />
+        <div className="board-container">
+          <h1 className="board-title">존재하지 않는 게시판입니다.</h1>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
@@ -154,112 +173,76 @@ const BoardList = () => {
           to="/board/write"
           className="board-btn"
           style={{ marginBottom: 24, display: 'inline-block' }}
+          onClick={handleWriteClick}
         >
           글 작성하기
         </Link>
 
+        {/* 게시글 목록 */}
         {loading ? (
-          <div className="board-loading">로딩 중...</div>
+          <div className="board-loading">게시글을 불러오는 중...</div>
+        ) : posts.length === 0 ? (
+          <div className="board-empty">게시글이 없습니다.</div>
         ) : (
-          <>
-            <table className="board-table">
-              <thead>
-                <tr>
-                  <th className="th-id">번호</th>
-                  <th className="th-title">제목</th>
-                  <th className="th-author">작성자</th>
-                  <th className="th-date">작성일</th>
-                  <th className="th-views">조회수</th>
-                  <th className="th-likes">추천수</th>
-                </tr>
-              </thead>
-              <tbody>
-                {posts.length > 0 ? (
-                  posts.map((post) => (
-                    <tr key={post.id}>
-                      <td className="th-id">{post.id}</td>
-                      <td className="th-title">
-                        <Link
-                          to={`/board/${category}/${post.id}`}
-                          className="board-link"
-                        >
-                          {post.title} [{post.commentCount}]
-                        </Link>
-                        {/* 해시태그 표시 */}
-                        {post.hashtags && post.hashtags.length > 0 && (
-                          <div className="post-hashtags">
-                            {post.hashtags.slice(0, 5).map((hashtag, index) => (
-                              <span
-                                key={index}
-                                className="post-hashtag"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  handleHashtagSearch(hashtag.tagName);
-                                }}
-                              >
-                                #{hashtag.tagName}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </td>
-                      <td className="th-author">{post.authorNickName}</td>
-                      <td className="th-date">
-                        {new Date(post.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="th-views">{post.viewCount}</td>
-                      <td className="th-likes">{post.likeCount}</td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={6} className="board-empty">
-                      {searchHashtag
-                        ? `"${searchHashtag}" 검색 결과가 없습니다.`
-                        : '게시글이 없습니다.'}
-                    </td>
-                  </tr>
+          <div className="board-posts">
+            {posts.map((post) => (
+              <Link
+                key={post.id}
+                to={`/board/${category}/${post.id}`}
+                className="board-post-item"
+              >
+                <div className="board-post-header">
+                  <h3 className="board-post-title">{post.title}</h3>
+                  <div className="board-post-meta">
+                    <span className="board-post-author">
+                      {post.authorNickName}
+                    </span>
+                    <span className="board-post-date">
+                      {new Date(post.createdAt).toLocaleDateString()}
+                    </span>
+                    <span className="board-post-views">
+                      조회 {post.viewCount}
+                    </span>
+                    <span className="board-post-likes">
+                      추천 {post.likeCount}
+                    </span>
+                  </div>
+                </div>
+                {post.hashtags && post.hashtags.length > 0 && (
+                  <div className="board-post-hashtags">
+                    {post.hashtags.map((hashtag, index) => (
+                      <span key={index} className="board-post-hashtag">
+                        #{hashtag.tagName}
+                      </span>
+                    ))}
+                  </div>
                 )}
-              </tbody>
-            </table>
+              </Link>
+            ))}
+          </div>
+        )}
 
-            {/* 페이징 */}
-            {totalPages > 1 && (
-              <div className="board-pagination">
-                <button
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 0}
-                  className="pagination-btn"
-                >
-                  이전
-                </button>
-
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  const pageNum =
-                    Math.max(0, Math.min(totalPages - 5, currentPage - 2)) + i;
-                  return (
-                    <button
-                      key={pageNum}
-                      onClick={() => handlePageChange(pageNum)}
-                      className={`pagination-btn ${
-                        currentPage === pageNum ? 'active' : ''
-                      }`}
-                    >
-                      {pageNum + 1}
-                    </button>
-                  );
-                })}
-
-                <button
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages - 1}
-                  className="pagination-btn"
-                >
-                  다음
-                </button>
-              </div>
-            )}
-          </>
+        {/* 페이지네이션 */}
+        {totalPages > 1 && (
+          <div className="board-pagination">
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 0}
+              className="board-btn board-btn-secondary"
+            >
+              이전
+            </button>
+            <span className="board-page-info">
+              {currentPage + 1} / {totalPages}
+            </span>
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage >= totalPages - 1}
+              className="board-btn board-btn-secondary"
+            >
+              다음
+            </button>
+          </div>
         )}
       </div>
     </>

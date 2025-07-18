@@ -93,6 +93,162 @@ body {
   font-weight: 600;
 }
 
+/* 추천 정보 스타일 */
+.recommendation-info {
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #223a5e;
+}
+
+.recommendation-message {
+  margin: 0 0 10px 0;
+  color: #495057;
+  font-size: 0.95em;
+  font-weight: 500;
+}
+
+.selected-hashtags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.selected-hashtags span:first-child {
+  color: #6c757d;
+  font-size: 0.9em;
+  font-weight: 500;
+}
+
+.hashtag-tag {
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.85em;
+  font-weight: 500;
+  border: 1px solid #bbdefb;
+}
+
+/* 인기 해시태그 기반 추천을 위한 특별한 스타일 */
+.popular-hashtags-info {
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  border-left: 4px solid #ff9800;
+  border: 1px solid #ffcc80;
+}
+
+.popular-hashtags-info .recommendation-message {
+  color: #e65100;
+  font-weight: 600;
+}
+
+.popular-hashtags-display {
+  margin-top: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 8px;
+  border: 1px solid #ffcc80;
+}
+
+.popular-hashtags-label {
+  display: block;
+  color: #e65100;
+  font-size: 0.9em;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.popular-hashtags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.popular-hashtag-tag {
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.9em;
+  font-weight: 600;
+  border: 1px solid #e65100;
+  box-shadow: 0 2px 4px rgba(255, 152, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.popular-hashtag-tag:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(255, 152, 0, 0.4);
+  background: linear-gradient(135deg, #f57c00 0%, #ef6c00 100%);
+}
+
+/* 인기 해시태그 추천 섹션 내의 작은 로그인 유도 메시지 */
+.login-encouragement-mini {
+  margin-top: 12px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 6px;
+  border: 1px solid #ffcc80;
+  text-align: center;
+}
+
+.login-encouragement-mini p {
+  margin: 0;
+  color: #e65100;
+  font-size: 0.85em;
+  font-weight: 500;
+}
+
+.login-link-btn-mini {
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-left: 4px;
+}
+
+.login-link-btn-mini:hover {
+  background: linear-gradient(135deg, #f57c00 0%, #ef6c00 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(255, 152, 0, 0.3);
+}
+
+/* 로그인 유도 메시지 */
+.login-encouragement {
+  margin-bottom: 20px;
+  padding: 15px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 0.95em;
+}
+
+.login-link-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.9em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-left: 8px;
+}
+
+.login-link-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
 .posts-list {
   display: flex;
   flex-direction: column;
@@ -100,53 +256,102 @@ body {
 }
 
 .post-item {
-  padding: 15px;
+  padding: 20px;
   border: 1px solid #e9ecef;
   border-radius: 10px;
+  background: white;
   transition: all 0.3s ease;
-  cursor: pointer;
+  position: relative;
 }
 
 .post-item:hover {
-  border-color: #223a5e; /* 네이비 색상으로 변경 */
-  box-shadow: 0 2px 8px rgba(34, 58, 94, 0.1);
   transform: translateY(-2px);
-  cursor: pointer;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  border-color: #223a5e;
 }
 
-/* 카테고리 태그 색상 변경 */
 .post-category {
-  background: #223a5e; /* 메인 네이비 색상으로 변경 */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.post-category span {
+  background: #223a5e;
   color: white;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 0.8rem;
-  display: inline-block;
-  margin-bottom: 8px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.8em;
+  font-weight: 600;
+}
+
+.seasonal-badge {
+  background: #ff6b6b !important;
+  font-size: 0.75em !important;
+  padding: 2px 6px !important;
 }
 
 .post-title {
-  font-size: 1rem;
-  margin: 8px 0;
-  color: #2c3e50;
+  margin: 0 0 10px 0;
+  font-size: 1.1em;
+  font-weight: 600;
+  color: #223a5e;
+  line-height: 1.4;
+}
+
+.post-description {
+  margin: 0 0 12px 0;
+  color: #6c757d;
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+
+/* 게시물 해시태그 스타일 */
+.post-hashtags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.post-hashtag {
+  background: #f1f3f4;
+  color: #5f6368;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.8em;
   font-weight: 500;
+  border: 1px solid #e8eaed;
+  transition: all 0.2s ease;
+}
+
+.post-hashtag:hover {
+  background: #e8eaed;
+  color: #3c4043;
+  transform: translateY(-1px);
+}
+
+.post-hashtag-more {
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.8em;
+  font-weight: 600;
+  border: 1px solid #bbdefb;
 }
 
 .post-meta {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.9rem;
+  gap: 15px;
+  font-size: 0.85em;
   color: #6c757d;
 }
 
 .post-author {
-  flex: 1;
-}
-
-.post-views,
-.post-likes {
-  margin-left: 10px;
+  font-weight: 600;
+  color: #495057;
 }
 
 /* --- 정보글 섹션 --- */
@@ -175,96 +380,78 @@ body {
   padding: 20px;
   border: 1px solid #e9ecef;
   border-radius: 10px;
+  background: #f8f9fa;
   transition: all 0.3s ease;
 }
 
 .info-post-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
   border-color: #223a5e;
-  box-shadow: 0 2px 8px rgba(34, 58, 94, 0.1);
 }
 
 .info-post-item h3 {
-  color: #2c3e50;
-  margin-bottom: 10px;
+  margin: 0 0 10px 0;
+  color: #223a5e;
   font-size: 1.1em;
   font-weight: 600;
 }
 
 .info-post-item p {
+  margin: 0 0 15px 0;
   color: #6c757d;
-  margin-bottom: 15px;
-  line-height: 1.6;
+  line-height: 1.5;
+  font-size: 0.9em;
 }
 
-/* 버튼 스타일 통일 */
 .read-more-btn {
-  background: #223a5e; /* 메인 네이비 색상으로 변경 */
+  background: #223a5e;
   color: white;
   border: none;
   padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 0.9rem;
+  border-radius: 6px;
+  font-size: 0.9em;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .read-more-btn:hover {
   background: #1a2c47;
+  transform: translateY(-1px);
 }
 
-/* 반응형 디자인 */
-@media (max-width: 768px) {
-  .banner-content {
-    flex-direction: column;
-    text-align: center;
-    gap: 20px;
-  }
-
-  .banner-text h1 {
-    font-size: 2rem;
-  }
-
-  .posts-section {
-    grid-template-columns: 1fr;
-  }
-
-  .info-posts-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* --- 스켈레톤 UI 스타일 --- */
-@keyframes shimmer {
-  0% {
-    background-position: -200px 0;
-  }
-  100% {
-    background-position: calc(200px + 100%) 0;
-  }
-}
-
+/* --- 스켈레톤 UI --- */
 .skeleton {
   background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 200px 100%;
-  animation: shimmer 1.5s infinite;
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
   border-radius: 4px;
 }
 
-/* 배너 스켈레톤 */
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
 .skeleton-title {
-  height: 40px;
+  height: 32px;
   width: 80%;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
 }
 
 .skeleton-subtitle {
-  height: 24px;
+  height: 20px;
   width: 60%;
   margin-bottom: 20px;
 }
 
 .skeleton-button {
-  height: 44px;
+  height: 40px;
   width: 120px;
 }
 
@@ -274,23 +461,20 @@ body {
   border-radius: 15px;
 }
 
-/* 게시물 스켈레톤 */
 .skeleton-post {
-  border: 1px solid #e9ecef;
-  border-radius: 10px;
-  padding: 15px;
+  height: 120px;
 }
 
 .skeleton-category {
   height: 20px;
   width: 60px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .skeleton-post-title {
-  height: 20px;
+  height: 24px;
   width: 90%;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .skeleton-post-meta {
@@ -298,59 +482,98 @@ body {
   width: 70%;
 }
 
-/* 정보글 스켈레톤 */
 .skeleton-info-post {
-  border: 1px solid #e9ecef;
-  border-radius: 10px;
-  padding: 20px;
+  height: 140px;
 }
 
 .skeleton-info-title {
   height: 24px;
   width: 80%;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
 }
 
 .skeleton-info-content {
   height: 16px;
   width: 100%;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
-.skeleton-info-content:last-of-type {
-  width: 60%;
-  margin-bottom: 20px;
-}
-
-/* --- 에러 메시지 스타일 --- */
+/* --- 에러 메시지 --- */
 .error-message {
   text-align: center;
-  padding: 40px 20px;
-  background: #f8f9fa;
-  border-radius: 10px;
-  border: 1px solid #e9ecef;
-}
-
-.error-message p {
+  padding: 20px;
   color: #dc3545;
-  font-size: 1.1rem;
-  margin-bottom: 20px;
-  font-weight: 500;
 }
 
 .retry-button {
-  background: #223a5e;
+  background: #dc3545;
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-size: 1rem;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.9em;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  margin-top: 10px;
 }
 
 .retry-button:hover {
-  background: #1a2c47;
-  transform: translateY(-2px);
+  background: #c82333;
+  transform: translateY(-1px);
+}
+
+/* --- 반응형 디자인 --- */
+@media (max-width: 768px) {
+  .main-container {
+    padding: 15px;
+  }
+
+  .banner-section {
+    padding: 25px;
+  }
+
+  .banner-text h1 {
+    font-size: 2rem;
+  }
+
+  .banner-text p {
+    font-size: 1rem;
+  }
+
+  .banner-image img {
+    width: 150px;
+    height: 150px;
+  }
+
+  .posts-section {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .info-posts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .post-meta {
+    flex-direction: column;
+    gap: 5px;
+  }
+}
+
+@media (max-width: 480px) {
+  .banner-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+  }
+
+  .banner-text h1 {
+    font-size: 1.8rem;
+  }
+
+  .banner-image img {
+    width: 120px;
+    height: 120px;
+  }
 }

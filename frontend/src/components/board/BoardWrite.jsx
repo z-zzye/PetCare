@@ -10,7 +10,7 @@ import './BoardCommon.css';
 import { boardConfig } from './boardConfig';
 
 const BoardWrite = () => {
-  const { role } = useAuth();
+  const { role, isLoggedIn } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const quillRef = useRef();
@@ -25,8 +25,28 @@ const BoardWrite = () => {
   const [loading, setLoading] = useState(false);
   const [pendingImages, setPendingImages] = useState([]); // 업로드 대기 중인 이미지들
 
+  // 권한별 선택 가능한 카테고리만 노출 (useMemo로 최적화)
+  const availableCategories = useMemo(
+    () =>
+      Object.entries(boardConfig).filter(([key, config]) =>
+        config.allowedRoles.includes(role)
+      ),
+    [role]
+  );
+
+  // 로그인 체크 - 비로그인 사용자는 로그인 페이지로 리다이렉트
+  useEffect(() => {
+    if (!isLoggedIn) {
+      alert('글을 작성하려면 로그인이 필요합니다.');
+      navigate('/members/login');
+      return;
+    }
+  }, [isLoggedIn, navigate]);
+
   // Quill 에디터 초기화
   useEffect(() => {
+    if (!isLoggedIn) return; // 로그인하지 않은 경우 에디터 초기화하지 않음
+
     const initializeQuill = () => {
       if (quillRef.current && !quillInstance.current) {
         console.log('Quill 초기화 시작');
@@ -231,81 +251,18 @@ const BoardWrite = () => {
                     );
                     quillInstance.current.setSelection(range.index + 1);
 
-                    console.log(
-                      '드래그 앤 드롭 이미지 삽입 완료:',
-                      file.name,
-                      '크기:',
-                      file.size
-                    );
-                  };
-
-                  reader.onerror = () => {
-                    console.error('파일 읽기 오류');
-                    alert('이미지 파일을 읽는 중 오류가 발생했습니다.');
+                    console.log('드래그 앤 드롭 이미지 삽입 완료:', file.name);
                   };
 
                   reader.readAsDataURL(file);
                 } catch (error) {
                   console.error('드래그 앤 드롭 이미지 처리 중 오류:', error);
-                  alert('이미지 처리 중 오류가 발생했습니다.');
                 }
               });
             }
           });
 
-          // 에디터가 제대로 렌더링되었는지 확인
           console.log('Quill 에디터 초기화 완료');
-          console.log('에디터 컨테이너:', editorContainer);
-          console.log('에디터 인스턴스:', quillInstance.current);
-
-          // DOM 구조 확인 및 강제 높이 설정
-          setTimeout(() => {
-            const editorElement = editorContainer.querySelector('.ql-editor');
-            const containerElement =
-              editorContainer.querySelector('.ql-container');
-            console.log('에디터 요소:', editorElement);
-            console.log('컨테이너 요소:', containerElement);
-
-            if (editorElement) {
-              console.log('에디터 높이:', editorElement.offsetHeight);
-              console.log(
-                '에디터 스타일:',
-                window.getComputedStyle(editorElement)
-              );
-
-              // 유동적인 높이 설정 (최소 높이만 지정)
-              editorElement.style.cssText = `
-                min-height: 200px !important;
-                height: auto !important;
-                display: block !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-                background: white !important;
-                color: #333 !important;
-                padding: 12px !important;
-                border: none !important;
-                outline: none !important;
-                position: relative !important;
-                z-index: 1 !important;
-                overflow: visible !important;
-              `;
-
-              console.log('에디터 높이 재설정 후:', editorElement.offsetHeight);
-            }
-
-            if (containerElement) {
-              containerElement.style.cssText = `
-                min-height: 200px !important;
-                height: auto !important;
-                display: block !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-                position: relative !important;
-                z-index: 1 !important;
-                overflow: visible !important;
-              `;
-            }
-          }, 100);
         } catch (error) {
           console.error('Quill 초기화 오류:', error);
         }
@@ -324,29 +281,24 @@ const BoardWrite = () => {
         quillRef.current.innerHTML = '';
       }
     };
-  }, []); // 의존성 배열을 빈 배열로 유지
+  }, [isLoggedIn]); // isLoggedIn을 의존성에 추가
 
   // content가 외부에서 변경될 때 에디터 내용 업데이트
   useEffect(() => {
+    if (!isLoggedIn) return; // 로그인하지 않은 경우 처리하지 않음
+
     if (
       quillInstance.current &&
       content !== quillInstance.current.root.innerHTML
     ) {
       quillInstance.current.root.innerHTML = content;
     }
-  }, [content]);
-
-  // 권한별 선택 가능한 카테고리만 노출 (useMemo로 최적화)
-  const availableCategories = useMemo(
-    () =>
-      Object.entries(boardConfig).filter(([key, config]) =>
-        config.allowedRoles.includes(role)
-      ),
-    [role]
-  );
+  }, [content, isLoggedIn]);
 
   // URL 파라미터에서 카테고리 가져오기 (초기 로딩 시에만)
   useEffect(() => {
+    if (!isLoggedIn) return; // 로그인하지 않은 경우 처리하지 않음
+
     const categoryParam = searchParams.get('category');
     console.log('URL 파라미터 카테고리:', categoryParam);
     console.log('현재 사용자 권한:', role);
@@ -363,19 +315,42 @@ const BoardWrite = () => {
         console.log('권한 부족으로 카테고리 설정 실패:', categoryParam);
       }
     }
-  }, [searchParams, role, availableCategories, category]);
+  }, [searchParams, role, availableCategories, category, isLoggedIn]);
 
   // 인기 해시태그 목록 가져오기
   useEffect(() => {
+    if (!isLoggedIn) return; // 로그인하지 않은 경우 처리하지 않음
+
     fetchPopularHashtags();
-  }, []);
+  }, [isLoggedIn]);
 
   // 검색어가 변경될 때마다 해시태그 검색
   useEffect(() => {
+    if (!isLoggedIn) return; // 로그인하지 않은 경우 처리하지 않음
+
     if (showHashtagDropdown) {
       searchHashtags();
     }
-  }, [hashtagSearchTerm, showHashtagDropdown]);
+  }, [hashtagSearchTerm, showHashtagDropdown, isLoggedIn]);
+
+  // 드롭다운 외부 클릭 시 닫기
+  useEffect(() => {
+    if (!isLoggedIn) return; // 로그인하지 않은 경우 처리하지 않음
+
+    const handleClickOutside = (event) => {
+      if (
+        showHashtagDropdown &&
+        !event.target.closest('.hashtag-dropdown-container')
+      ) {
+        setShowHashtagDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showHashtagDropdown, isLoggedIn]);
 
   const fetchPopularHashtags = async () => {
     try {
@@ -428,23 +403,6 @@ const BoardWrite = () => {
   // API에서 이미 필터링된 결과를 받으므로 그대로 사용
   const filteredHashtags = hashtags;
 
-  // 드롭다운 외부 클릭 시 닫기
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        showHashtagDropdown &&
-        !event.target.closest('.hashtag-dropdown-container')
-      ) {
-        setShowHashtagDropdown(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showHashtagDropdown]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!category) {
@@ -473,54 +431,33 @@ const BoardWrite = () => {
 
       // 2. 이미지 업로드 (pendingImages가 있는 경우)
       if (pendingImages.length > 0) {
-        console.log('업로드할 이미지 개수:', pendingImages.length);
-        console.log('게시글 ID:', boardId);
-        console.log('토큰:', token ? '존재' : '없음');
+        console.log('이미지 업로드 시작:', pendingImages.length, '개');
 
-        for (const pendingImage of pendingImages) {
+        for (const imageData of pendingImages) {
           try {
-            console.log('이미지 업로드 시작:', pendingImage.file.name);
-            console.log('파일 크기:', pendingImage.file.size, 'bytes');
-            console.log('파일 타입:', pendingImage.file.type);
-
             const formData = new FormData();
-            formData.append('file', pendingImage.file);
+            formData.append('image', imageData.file);
             formData.append('boardId', boardId);
 
-            // FormData 내용 확인
-            for (let [key, value] of formData.entries()) {
-              console.log('FormData:', key, value);
-            }
-
-            // axiosInstance로 이미지 업로드 (Content-Type 헤더 제거)
             const imageResponse = await axiosInstance.post(
-              '/board-images/upload',
-              formData
+              '/boards/images',
+              formData,
+              {
+                headers: {
+                  'Content-Type': 'multipart/form-data',
+                },
+              }
             );
 
-            console.log(
-              '이미지 업로드 성공:',
-              pendingImage.file.name,
-              '결과:',
-              imageResponse.data
-            );
+            console.log('이미지 업로드 성공:', imageResponse.data);
           } catch (imageError) {
-            console.error(
-              '이미지 업로드 중 오류:',
-              pendingImage.file.name,
-              imageError
-            );
-            if (imageError.response?.data?.errorMessage) {
-              alert(
-                `이미지 업로드 실패: ${imageError.response.data.errorMessage}`
-              );
-            } else {
-              alert(`이미지 업로드 실패: ${pendingImage.file.name}`);
-            }
+            console.error('이미지 업로드 실패:', imageError);
+            // 이미지 업로드 실패해도 게시글은 성공적으로 등록됨
           }
         }
-      } else {
-        console.log('업로드할 이미지가 없습니다.');
+
+        // 업로드 완료 후 pendingImages 초기화
+        setPendingImages([]);
       }
 
       alert('게시글이 성공적으로 등록되었습니다.');
@@ -543,6 +480,11 @@ const BoardWrite = () => {
       setLoading(false);
     }
   };
+
+  // 로그인하지 않은 경우 렌더링하지 않음
+  if (!isLoggedIn) {
+    return null;
+  }
 
   return (
     <>
@@ -642,115 +584,64 @@ const BoardWrite = () => {
                     left: 0,
                     right: 0,
                     backgroundColor: 'white',
-                    border: '1px solid #dee2e6',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                    zIndex: 1000,
+                    border: '1px solid #ddd',
+                    borderRadius: '4px',
                     maxHeight: '200px',
                     overflowY: 'auto',
+                    zIndex: 1000,
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                   }}
                 >
-                  {/* 검색어가 있을 때와 없을 때 구분해서 표시 */}
-                  {hashtagSearchTerm.trim() ? (
-                    // 검색 결과
-                    <>
+                  {filteredHashtags.length > 0 ? (
+                    filteredHashtags.map((hashtag, index) => (
                       <div
+                        key={index}
+                        onClick={() => handleHashtagToggle(hashtag)}
                         style={{
-                          padding: '8px 15px',
-                          backgroundColor: '#f8f9fa',
-                          borderBottom: '1px solid #dee2e6',
-                          fontSize: '0.8rem',
-                          color: '#6c757d',
-                          fontWeight: '500',
+                          padding: '8px 12px',
+                          cursor: 'pointer',
+                          borderBottom: '1px solid #f0f0f0',
+                          backgroundColor: selectedHashtags.includes(hashtag)
+                            ? '#e3f2fd'
+                            : 'white',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.backgroundColor =
+                            selectedHashtags.includes(hashtag)
+                              ? '#bbdefb'
+                              : '#f5f5f5';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.backgroundColor =
+                            selectedHashtags.includes(hashtag)
+                              ? '#e3f2fd'
+                              : 'white';
                         }}
                       >
-                        "{hashtagSearchTerm}" 검색 결과
-                      </div>
-                      {filteredHashtags.length > 0 ? (
-                        filteredHashtags.map((hashtag, index) => (
-                          <div
-                            key={index}
-                            onClick={() => handleHashtagToggle(hashtag)}
+                        #{hashtag}
+                        {selectedHashtags.includes(hashtag) && (
+                          <span
                             style={{
-                              padding: '10px 15px',
-                              cursor: 'pointer',
-                              borderBottom: '1px solid #f1f3f4',
-                              fontSize: '0.9rem',
-                              color: '#495057',
+                              float: 'right',
+                              color: '#1976d2',
+                              fontWeight: 'bold',
                             }}
-                            onMouseEnter={(e) =>
-                              (e.target.style.backgroundColor = '#f8f9fa')
-                            }
-                            onMouseLeave={(e) =>
-                              (e.target.style.backgroundColor = 'white')
-                            }
                           >
-                            #{hashtag}
-                          </div>
-                        ))
-                      ) : (
-                        <div
-                          style={{
-                            padding: '15px',
-                            textAlign: 'center',
-                            color: '#6c757d',
-                            fontSize: '0.9rem',
-                          }}
-                        >
-                          검색 결과가 없습니다.
-                        </div>
-                      )}
-                    </>
+                            ✓
+                          </span>
+                        )}
+                      </div>
+                    ))
                   ) : (
-                    // 인기 해시태그
-                    <>
-                      <div
-                        style={{
-                          padding: '8px 15px',
-                          backgroundColor: '#f8f9fa',
-                          borderBottom: '1px solid #dee2e6',
-                          fontSize: '0.8rem',
-                          color: '#6c757d',
-                          fontWeight: '500',
-                        }}
-                      >
-                        인기 해시태그 (상위 10개)
-                      </div>
-                      {filteredHashtags.length > 0 ? (
-                        filteredHashtags.map((hashtag, index) => (
-                          <div
-                            key={index}
-                            onClick={() => handleHashtagToggle(hashtag)}
-                            style={{
-                              padding: '10px 15px',
-                              cursor: 'pointer',
-                              borderBottom: '1px solid #f1f3f4',
-                              fontSize: '0.9rem',
-                              color: '#495057',
-                            }}
-                            onMouseEnter={(e) =>
-                              (e.target.style.backgroundColor = '#f8f9fa')
-                            }
-                            onMouseLeave={(e) =>
-                              (e.target.style.backgroundColor = 'white')
-                            }
-                          >
-                            #{hashtag}
-                          </div>
-                        ))
-                      ) : (
-                        <div
-                          style={{
-                            padding: '15px',
-                            textAlign: 'center',
-                            color: '#6c757d',
-                            fontSize: '0.9rem',
-                          }}
-                        >
-                          인기 해시태그가 없습니다.
-                        </div>
-                      )}
-                    </>
+                    <div
+                      style={{
+                        padding: '8px 12px',
+                        color: '#666',
+                        fontStyle: 'italic',
+                      }}
+                    >
+                      검색 결과가 없습니다.
+                    </div>
                   )}
                 </div>
               )}
