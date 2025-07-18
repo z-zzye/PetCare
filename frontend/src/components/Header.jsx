@@ -22,7 +22,7 @@ const baseMenu = [
   },
   {
     name: '쇼핑',
-    link: '/shop/shopping',
+    link: '/shop',
     submenu: [
       { name: '쇼핑', link: '/shop/shopping' },
       { name: 'Auction', link: '/shop/auction' },

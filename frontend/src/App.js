@@ -35,6 +35,7 @@ import OrderDetail from './components/shop/OrderDetail.jsx';
 import MyOrders from './components/shop/MyOrders.jsx';
 import AuctionPage from './components/shop/Auction.jsx';
 import ShoppingPage from './components/shop/Shopping.jsx';
+import Shop from './components/shop/Shop.jsx';
 import AuctionItemRegister from './components/shop/AuctionItemRegister.jsx';
 import AuctionRoom from './components/shop/AuctionRoom.jsx';
 import AuctionDeliveryPage from './components/shop/AuctionDeliveryPage.jsx';
@@ -129,6 +130,7 @@ function App() {
         <Route path="/board/edit/:category/:id" element={<BoardEdit />} />
 
         {/* 쇼핑 관련 라우팅 */}
+        <Route path="/shop" element={<Shop />} />
         <Route path="/shop/shopping" element={<ShoppingPage />} />
         <Route path="/shop/auction" element={<AuctionPage />} />
         <Route path="/shop/item/register" element={<ItemRegister />} />
