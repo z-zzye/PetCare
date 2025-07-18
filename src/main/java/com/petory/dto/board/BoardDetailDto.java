@@ -23,6 +23,7 @@ public class BoardDetailDto {
   private String authorNickName;
   private String authorProfileImg;
   private String authorEmail;
+  private Long authorId;
   private LocalDateTime createdAt;
   private int viewCount;
   private int likeCount;
@@ -39,10 +40,12 @@ public class BoardDetailDto {
       dto.setAuthorNickName(author.getMember_NickName());
       dto.setAuthorProfileImg(author.getMember_ProfileImg());
       dto.setAuthorEmail(author.getMember_Email());
+      dto.setAuthorId(author.getMember_Id());
     } else {
       dto.setAuthorNickName("알 수 없는 사용자");
       dto.setAuthorProfileImg(null);
       dto.setAuthorEmail(null);
+      dto.setAuthorId(null);
     }
 
     dto.setCreatedAt(board.getRegDate());

@@ -17,6 +17,8 @@ public class BoardListDto {
   private Long id;
   private String title;
   private String authorNickName;
+  private Long authorId;
+  private String authorEmail;
   private LocalDateTime createdAt;
   private int viewCount;
   private int likeCount;
@@ -30,6 +32,8 @@ public class BoardListDto {
 
     Member author = board.getMember();
     dto.setAuthorNickName(author != null ? author.getMember_NickName() : "알 수 없는 사용자");
+    dto.setAuthorId(author != null ? author.getMember_Id() : null);
+    dto.setAuthorEmail(author != null ? author.getMember_Email() : null);
 
     dto.setCreatedAt(board.getRegDate());
     dto.setViewCount(board.getViewCount());

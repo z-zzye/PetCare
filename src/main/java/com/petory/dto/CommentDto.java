@@ -16,6 +16,7 @@ public class CommentDto {
   private String content;
   private String authorNickName;
   private String authorProfileImg;
+  private Long authorId;
   private LocalDateTime createdAt;
 
   public static CommentDto from(Comment comment) {
@@ -27,9 +28,11 @@ public class CommentDto {
     if (author != null) {
       dto.setAuthorNickName(author.getMember_NickName());
       dto.setAuthorProfileImg(author.getMember_ProfileImg());
+      dto.setAuthorId(author.getMember_Id());
     } else {
       dto.setAuthorNickName("알 수 없는 사용자");
       dto.setAuthorProfileImg(null);
+      dto.setAuthorId(null);
     }
 
     dto.setCreatedAt(comment.getRegDate());
@@ -45,9 +48,11 @@ public class CommentDto {
     if (author != null) {
       dto.setAuthorNickName(author.getMember_NickName());
       dto.setAuthorProfileImg(author.getMember_ProfileImg());
+      dto.setAuthorId(author.getMember_Id());
     } else {
       dto.setAuthorNickName("알 수 없는 사용자");
       dto.setAuthorProfileImg(null); // 혹은 기본 이미지 경로
+      dto.setAuthorId(null);
     }
 
     dto.setCreatedAt(trailComment.getRegDate());

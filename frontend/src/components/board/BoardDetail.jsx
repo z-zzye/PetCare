@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useState } from 'react'; // useCallback 
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import Header from '../Header';
+import UserActionPopup from '../UserActionPopup';
+import ChatPage from '../chat/ChatPage';
 import './BoardCommon.css';
 
 const BoardDetail = () => {
@@ -11,6 +13,15 @@ const BoardDetail = () => {
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
+  
+  // 사용자 액션 팝업 상태
+  const [showUserActionPopup, setShowUserActionPopup] = useState(false);
+  const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 });
+  const [selectedUser, setSelectedUser] = useState(null);
+  
+  // 채팅 모달 상태
+  const [showChatModal, setShowChatModal] = useState(false);
+  const [chatReceiverId, setChatReceiverId] = useState(null);
 
   // ▼▼▼ 1. 누락되었던 fetchPostDetails 함수를 정의합니다. ▼▼▼
   // useCallback을 사용하여 category나 id가 변경될 때만 함수가 새로 생성되도록 최적화합니다.
@@ -52,6 +63,7 @@ const BoardDetail = () => {
   // 내 이메일 추출 및 작성자 비교
   const [isWriter, setIsWriter] = useState(false);
   const [tokenExpiredOrInvalid, setTokenExpiredOrInvalid] = useState(false);
+  const [myEmail, setMyEmail] = useState(null);
 
   useEffect(() => {
     if (!post) return;
@@ -59,6 +71,11 @@ const BoardDetail = () => {
     try {
       const token = localStorage.getItem('token'); // accessToken -> token으로 통일
       const payload = parseJwt(token);
+      
+      // 내 이메일 설정
+      if (payload && payload.sub) {
+        setMyEmail(payload.sub);
+      }
       
       // JWT의 sub(이메일)과 게시글 작성자 이메일 비교
       if (payload && post && post.authorEmail) {
@@ -179,6 +196,45 @@ const BoardDetail = () => {
     }
   };
 
+  // 사용자 닉네임 클릭 핸들러
+  const handleNicknameClick = (authorId, authorNickname, authorEmail, event) => {
+    event.stopPropagation();
+    
+    if (!isLoggedIn) {
+      alert('채팅을 이용하려면 로그인이 필요합니다.');
+      navigate('/members/login');
+      return;
+    }
+
+    // 팝업 위치 계산
+    const rect = event.target.getBoundingClientRect();
+    setPopupPosition({ 
+      x: rect.left, 
+      y: rect.bottom + 5 
+    });
+    setSelectedUser({ id: authorId, nickname: authorNickname, email: authorEmail });
+    setShowUserActionPopup(true);
+  };
+
+  // 팝업 닫기 핸들러
+  const handleClosePopup = () => {
+    setShowUserActionPopup(false);
+    setSelectedUser(null);
+  };
+
+  // 채팅 모달 열기 핸들러
+  const handleOpenChatModal = (receiverId) => {
+    setChatReceiverId(receiverId);
+    setShowChatModal(true);
+    setShowUserActionPopup(false);
+  };
+
+  // 채팅 모달 닫기 핸들러
+  const handleCloseChatModal = () => {
+    setShowChatModal(false);
+    setChatReceiverId(null);
+  };
+
   if (!post) {
     return (
       <>
@@ -195,7 +251,13 @@ const BoardDetail = () => {
         <div className="board-content">
           <h1 className="board-title">{post.title}</h1>
           <div className="board-meta improved-meta">
-            <span className="board-author">작성자: {post.authorNickName}</span>
+            <span 
+              className="board-author clickable-nickname"
+              onClick={(e) => handleNicknameClick(post.authorId, post.authorNickName, post.authorEmail, e)}
+              style={{ cursor: 'pointer', color: '#007bff' }}
+            >
+              작성자: {post.authorNickName}
+            </span>
             <span className="board-date">
               {new Date(post.createdAt).toLocaleString()}
             </span>
@@ -249,7 +311,11 @@ const BoardDetail = () => {
           <ul className="board-comment-list">
             {comments.map((comment) => (
               <li key={comment.id} className="board-comment-item">
-                <div className="board-comment-author">
+                <div 
+                  className="board-comment-author clickable-nickname"
+                  onClick={(e) => handleNicknameClick(comment.authorId, comment.authorNickName, comment.authorEmail, e)}
+                  style={{ cursor: 'pointer', color: '#007bff' }}
+                >
                   {comment.authorNickName}
                 </div>
                 <div className="board-comment-content">{comment.content}</div>
@@ -261,6 +327,29 @@ const BoardDetail = () => {
           </ul>
         </div>
       </div>
+      
+      {/* 사용자 액션 팝업 */}
+      {showUserActionPopup && (
+        <UserActionPopup
+          key={`${selectedUser?.id}`}
+          isVisible={showUserActionPopup}
+          position={popupPosition}
+          user={selectedUser}
+          onClose={handleClosePopup}
+          onOpenChat={handleOpenChatModal}
+          isMyPost={myEmail && selectedUser && selectedUser.email === myEmail}
+        />
+      )}
+
+      {/* 채팅 모달 */}
+      {showChatModal && chatReceiverId && (
+        <div className="user-action-chatroom-popup-overlay" onClick={handleCloseChatModal}>
+          <div className="user-action-chatroom-popup" onClick={e => e.stopPropagation()}>
+            <button className="user-action-chatroom-popup-close" onClick={handleCloseChatModal}>×</button>
+            <ChatPage receiverId={chatReceiverId} />
+          </div>
+        </div>
+      )}
     </>
   );
 };

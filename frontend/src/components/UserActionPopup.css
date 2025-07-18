@@ -1,0 +1,104 @@
+.user-action-popup {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 140px;
+  overflow: hidden;
+  animation: userActionPopupFadeIn 0.2s ease-out;
+}
+
+/* UserActionPopup 전용 채팅 모달 스타일 */
+.user-action-chatroom-popup-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.15);
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-action-chatroom-popup {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.13);
+  max-width: 360px;
+  width: 60vw;
+  min-height: 500px;
+  padding: 2.5rem 0.3rem 1.5rem 0.3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.user-action-chatroom-popup-close {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.2rem;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #222;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.popup-content {
+  padding: 4px 0;
+}
+
+.popup-action-btn {
+  width: 100%;
+  padding: 10px 16px;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.popup-action-btn:hover:not(:disabled) {
+  background: #f5f5f5;
+  color: #1A355B;
+}
+
+.popup-action-btn:disabled {
+  color: #999;
+  cursor: not-allowed;
+  background: #f9f9f9;
+}
+
+.popup-action-btn:active:not(:disabled) {
+  background: #e9e9e9;
+}
+
+@keyframes userActionPopupFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .user-action-popup {
+    min-width: 120px;
+  }
+  
+  .popup-action-btn {
+    padding: 12px 16px;
+    font-size: 16px;
+  }
+} 
