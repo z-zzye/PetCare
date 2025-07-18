@@ -632,7 +632,7 @@ public class BoardService {
         .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 해시태그입니다: " + hashtagName));
     
     // 3. 해당 카테고리와 해시태그를 가진 게시글 ID 목록 조회
-    List<Long> boardIds = boardHashtagRepository.findBoardIdsByTagIdAndBoardKind(hashtag.getTagId(), boardKind.name());
+    List<Long> boardIds = boardHashtagRepository.findBoardIdsByTagIdAndBoardKind(hashtag.getTagId(), boardKind);
     
     if (boardIds.isEmpty()) {
       return Page.empty(pageable);
@@ -691,7 +691,7 @@ public class BoardService {
     }
     
     // 3. 해당 카테고리와 해시태그들을 가진 게시글 ID 목록 조회 (OR 조건)
-    List<Long> boardIds = boardHashtagRepository.findBoardIdsByTagIdsAndBoardKind(hashtagIds, boardKind.name());
+    List<Long> boardIds = boardHashtagRepository.findBoardIdsByTagIdsAndBoardKind(hashtagIds, boardKind);
     
     if (boardIds.isEmpty()) {
       return Page.empty(pageable);
