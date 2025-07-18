@@ -321,4 +321,16 @@ public class MemberService implements UserDetailsService {
       .map(memberHashtag -> HashtagDto.fromEntity(memberHashtag.getHashtag()))
       .collect(Collectors.toList());
   }
+
+  /**
+   * 회원 ID로 역할을 조회하는 메서드 (API용)
+   */
+  public String getMemberRole(Long memberId) {
+    Member member = getMemberById(memberId);
+    if (member == null) {
+      throw new IllegalStateException("존재하지 않는 회원입니다.");
+    }
+    
+    return member.getMember_Role().name();
+  }
 }

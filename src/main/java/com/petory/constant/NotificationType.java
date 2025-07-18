@@ -19,7 +19,13 @@ public enum NotificationType {
   AUCTION_END("경매 종료"),
   
   // 경매 낙찰 알림 (경매에서 낙찰된 경우)
-  AUCTION_WIN("경매 낙찰");
+  AUCTION_WIN("경매 낙찰"),
+  
+  // 크리에이터 신청 승인 알림 (크리에이터 신청이 승인된 경우)
+  CREATOR_APPROVED("크리에이터 신청 승인"),
+  
+  // 크리에이터 신청 거절 알림 (크리에이터 신청이 거절된 경우)
+  CREATOR_REJECTED("크리에이터 신청 거절");
 
   private final String description;
 }
