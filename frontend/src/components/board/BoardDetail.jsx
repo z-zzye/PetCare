@@ -55,18 +55,18 @@ const BoardDetail = () => {
 
   useEffect(() => {
     if (!post) return;
-    
+
     try {
       const token = localStorage.getItem('token'); // accessToken -> token으로 통일
       const payload = parseJwt(token);
-      
+
       // JWT의 sub(이메일)과 게시글 작성자 이메일 비교
       if (payload && post && post.authorEmail) {
         setIsWriter(payload.sub === post.authorEmail);
       } else {
         setIsWriter(false);
       }
-      
+
       // 토큰 만료 확인 (exp: 초 단위)
       if (payload && payload.exp) {
         const now = Math.floor(Date.now() / 1000);
@@ -200,6 +200,18 @@ const BoardDetail = () => {
               {new Date(post.createdAt).toLocaleString()}
             </span>
           </div>
+
+          {/* 해시태그 표시 */}
+          {post.hashtags && post.hashtags.length > 0 && (
+            <div className="board-hashtags">
+              {post.hashtags.map((hashtag, index) => (
+                <span key={index} className="board-hashtag">
+                  #{hashtag.tagName}
+                </span>
+              ))}
+            </div>
+          )}
+
           <div style={{ minHeight: '200px', whiteSpace: 'pre-wrap' }}>
             {post.content}
           </div>
