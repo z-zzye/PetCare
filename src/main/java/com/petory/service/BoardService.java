@@ -724,4 +724,16 @@ public class BoardService {
         boards.size()
     );
   }
+
+  /**
+   * 내가 쓴 글 조회
+   */
+  @Transactional(readOnly = true)
+  public Page<BoardListDto> getMyPosts(Long memberId, Pageable pageable) {
+    return boardRepository.findBoardsByMemberId(memberId, pageable)
+      .map(board -> {
+        List<BoardHashtag> boardHashtags = boardHashtagRepository.findByPostId(board.getId());
+        return BoardListDto.from(board, boardHashtags);
+      });
+  }
 }

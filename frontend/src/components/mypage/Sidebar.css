@@ -141,7 +141,11 @@
 }
 
 .sidebar-tabs button:hover {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); /* 호버 시 약간 회색 */
+  background: linear-gradient(
+    135deg,
+    #f8f9fa 0%,
+    #e9ecef 100%
+  ); /* 호버 시 약간 회색 */
   color: #1a252f; /* 호버 시 더 진한 네이비 텍스트 */
   transform: translateX(2px); /* 오른쪽으로 이동 */
   box-shadow: 3px 2px 6px rgba(0, 0, 0, 0.15);
@@ -149,7 +153,11 @@
 }
 
 .sidebar-tabs button.active {
-  background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%); /* 활성 상태는 짙은 네이비 */
+  background: linear-gradient(
+    135deg,
+    #2c3e50 0%,
+    #1a252f 100%
+  ); /* 활성 상태는 짙은 네이비 */
   color: white;
   box-shadow: 3px 2px 6px rgba(44, 62, 80, 0.25);
   transform: translateX(3px); /* 오른쪽으로 더 이동 */
@@ -157,38 +165,43 @@
 }
 
 /* 각 탭별 고유 색상 - 네이비 포인트 */
-.sidebar-tabs button:nth-child(1) { 
+.sidebar-tabs button:nth-child(1) {
   border-right: 3px solid #34495e; /* 짙은 네이비 포인트 */
   background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
 }
-.sidebar-tabs button:nth-child(2) { 
-  border-right: 3px solid #2c3e50; 
+.sidebar-tabs button:nth-child(2) {
+  border-right: 3px solid #2c3e50;
   background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
 }
-.sidebar-tabs button:nth-child(3) { 
-  border-right: 3px solid #1a252f; 
+.sidebar-tabs button:nth-child(3) {
+  border-right: 3px solid #1a252f;
   background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
 }
-.sidebar-tabs button:nth-child(4) { 
-  border-right: 3px solid #34495e; 
+.sidebar-tabs button:nth-child(4) {
+  border-right: 3px solid #34495e;
   background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
 }
-.sidebar-tabs button:nth-child(5) { 
-  border-right: 3px solid #2c3e50; 
-  background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
-}
-.sidebar-tabs button:nth-child(6) { 
-  border-right: 3px solid #1a252f; 
+.sidebar-tabs button:nth-child(5) {
+  border-right: 3px solid #2c3e50;
   background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
 }
 
 /* 활성 상태일 때 색상 변경 - 네이비 계열로 통일 */
-.sidebar-tabs button.active:nth-child(1) { background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%); }
-.sidebar-tabs button.active:nth-child(2) { background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%); }
-.sidebar-tabs button.active:nth-child(3) { background: linear-gradient(135deg, #1a252f 0%, #0f1419 100%); }
-.sidebar-tabs button.active:nth-child(4) { background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%); }
-.sidebar-tabs button.active:nth-child(5) { background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%); }
-.sidebar-tabs button.active:nth-child(6) { background: linear-gradient(135deg, #1a252f 0%, #0f1419 100%); }
+.sidebar-tabs button.active:nth-child(1) {
+  background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+}
+.sidebar-tabs button.active:nth-child(2) {
+  background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
+}
+.sidebar-tabs button.active:nth-child(3) {
+  background: linear-gradient(135deg, #1a252f 0%, #0f1419 100%);
+}
+.sidebar-tabs button.active:nth-child(4) {
+  background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+}
+.sidebar-tabs button.active:nth-child(5) {
+  background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
+}
 
 .user-interests {
   margin-top: 0.5rem;

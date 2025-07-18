@@ -1,11 +1,11 @@
+import { Stomp } from '@stomp/stompjs';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { FaBars, FaComments, FaTimes } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
+import SockJS from 'sockjs-client';
+import axios from '../api/axios';
 import { useAuth } from '../contexts/AuthContext';
 import ChatRoomListPopup from './ChatRoomListPopup';
-import axios from '../api/axios';
-import SockJS from 'sockjs-client';
-import { Stomp } from '@stomp/stompjs';
 import './Header.css';
 import NotificationPopup from './NotificationPopup';
 
@@ -17,7 +17,7 @@ const baseMenu = [
       { name: '정보게시판', link: '/board/info' },
       { name: '자유게시판', link: '/board/free' },
       { name: 'Q&A', link: '/board/qna' },
-      { name: '산책동행', link: '/board/walkwith' },
+      // { name: '산책동행', link: '/board/walkwith' },
     ],
   },
   {
@@ -86,29 +86,33 @@ const Header = () => {
   // 내 ID 가져오기
   useEffect(() => {
     if (!isLoggedIn) return;
-    
+
     const token = localStorage.getItem('token');
     if (!token) return;
 
     const decoded = require('jwt-decode').jwtDecode(token);
     const email = decoded.sub || decoded.email;
 
-    axios.get(`/members/id-by-email?email=${email}`)
-      .then(res => {
+    axios
+      .get(`/members/id-by-email?email=${email}`)
+      .then((res) => {
         setMyId(res.data);
       })
-      .catch(err => console.error('❌ 내 ID 조회 실패:', err));
+      .catch((err) => console.error('❌ 내 ID 조회 실패:', err));
   }, [isLoggedIn]);
 
   // 전체 안 읽은 메시지 개수 조회
   useEffect(() => {
     if (!isLoggedIn) return;
-    
-    axios.get('/chat/unread-count')
-      .then(res => {
+
+    axios
+      .get('/chat/unread-count')
+      .then((res) => {
         setTotalUnreadCount(res.data);
       })
-      .catch(err => console.error('❌ 전체 안 읽은 메시지 개수 조회 실패:', err));
+      .catch((err) =>
+        console.error('❌ 전체 안 읽은 메시지 개수 조회 실패:', err)
+      );
   }, [isLoggedIn]);
 
   // WebSocket 연결 및 실시간 업데이트
@@ -123,12 +127,12 @@ const Header = () => {
       { Authorization: `Bearer ${token}` },
       () => {
         console.log('✅ 헤더 WebSocket 연결 성공');
-        
+
         // 새 메시지 수신 시 전체 안 읽은 메시지 개수 증가
         client.subscribe(`/queue/chat/${myId}`, (message) => {
           const body = JSON.parse(message.body);
           console.log('📨 새 메시지 수신 (헤더 업데이트):', body);
-          setTotalUnreadCount(prev => prev + 1);
+          setTotalUnreadCount((prev) => prev + 1);
         });
 
         // 읽음 처리 시 전체 안 읽은 메시지 개수 감소
@@ -136,11 +140,14 @@ const Header = () => {
           const body = JSON.parse(message.body);
           console.log('👁️ 읽음 알림 수신 (헤더 업데이트):', body);
           // 읽음 처리 시 전체 안 읽은 메시지 개수를 다시 조회하여 정확한 개수로 업데이트
-          axios.get('/chat/unread-count')
-            .then(res => {
+          axios
+            .get('/chat/unread-count')
+            .then((res) => {
               setTotalUnreadCount(res.data);
             })
-            .catch(err => console.error('❌ 전체 안 읽은 메시지 개수 조회 실패:', err));
+            .catch((err) =>
+              console.error('❌ 전체 안 읽은 메시지 개수 조회 실패:', err)
+            );
         });
       },
       (error) => {
@@ -430,11 +437,11 @@ const Header = () => {
         </div>
       )}
       {isChatListOpen && (
-        <ChatRoomListPopup 
-          onClose={() => setIsChatListOpen(false)} 
+        <ChatRoomListPopup
+          onClose={() => setIsChatListOpen(false)}
           onUnreadCountUpdate={(decreasedCount) => {
             // 채팅방 입장 시 해당 채팅방의 안 읽은 개수만큼 전체 개수에서 차감
-            setTotalUnreadCount(prev => Math.max(0, prev - decreasedCount));
+            setTotalUnreadCount((prev) => Math.max(0, prev - decreasedCount));
           }}
         />
       )}
