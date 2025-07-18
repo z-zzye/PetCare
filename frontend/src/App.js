@@ -23,6 +23,7 @@ import PaymentFailPage from './pages/PaymentFailPage.jsx'; //토스페이먼츠 
 import PaymentMethodPage from './components/mypage/PaymentMethodPage';
 import ChatPage from './components/chat/ChatPage.jsx'; //채팅창
 import Chatbot from "./components/chatbot/Chatbot";
+import CreatorApply from './components/mypage/CreatorApply.jsx';
 
 //쇼핑/경매
 import ItemRegister from './components/shop/ItemRegister.jsx';
@@ -115,6 +116,7 @@ function App() {
         <Route path="/members/mypage" element={<MyPage />} />
         <Route path="/members/pet-register" element={<PetRegister />} />
         <Route path="/members/pet-edit/:petId" element={<PetUpdate />} />
+        <Route path="/members/creatorapply" element={<CreatorApply />} />
 
         <Route path="/place" element={<MapServicePage />} />
 

@@ -154,7 +154,7 @@ const Sidebar = ({ onTabChange }) => {
         {/* 크리에이터 섹션 */}
         <div className="creator-section">
           {!isCreator ? (
-            <button className="creator-btn" onClick={() => navigate('/creator-apply')}>
+            <button className="creator-btn" onClick={() => navigate('/members/creatorapply')}>
               크리에이터 신청
             </button>
           ) : (
