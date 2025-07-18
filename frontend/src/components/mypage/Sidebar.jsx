@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 import './Sidebar.css';
 import { jwtDecode } from 'jwt-decode';
@@ -87,6 +88,33 @@ const Sidebar = ({ onTabChange }) => {
     }
   };
 
+  // 크리에이터 신청 상태 확인
+  const checkCreatorApplyStatus = async () => {
+    try {
+      const response = await axios.get('/creator-apply/my-latest-apply');
+      
+      if (response.data && response.data.applyStatus === 'PENDING') {
+        Swal.fire({
+          title: '신청 처리 중',
+          text: '이미 크리에이터 신청이 접수되어 검토 중입니다. 검토 결과는 1-2주 내에 이메일로 안내드립니다.',
+          icon: 'info',
+          confirmButtonText: '확인',
+          confirmButtonColor: '#3085d6'
+        });
+        return false;
+      }
+      
+      return true; // 신청 가능
+    } catch (error) {
+      // 신청 내역이 없는 경우 (404 에러) 신청 가능
+      if (error.response && error.response.status === 404) {
+        return true;
+      }
+      console.error('크리에이터 신청 상태 확인 실패:', error);
+      return true; // 에러 시에도 신청 페이지로 이동
+    }
+  };
+
   return (
     <div className="sidebar-wrapper">
       {/* 사이드바 본체 */}
@@ -154,7 +182,15 @@ const Sidebar = ({ onTabChange }) => {
         {/* 크리에이터 섹션 */}
         <div className="creator-section">
           {!isCreator ? (
-            <button className="creator-btn" onClick={() => navigate('/members/creatorapply')}>
+            <button 
+              className="creator-btn" 
+              onClick={async () => {
+                const canApply = await checkCreatorApplyStatus();
+                if (canApply) {
+                  navigate('/members/creatorapply');
+                }
+              }}
+            >
               크리에이터 신청
             </button>
           ) : (

@@ -213,6 +213,13 @@
   cursor: not-allowed;
 }
 
+.creator-apply-error {
+  color: #e74c3c;
+  font-size: 0.875rem;
+  margin-top: 5px;
+  font-weight: 500;
+}
+
 .creator-apply-form-group textarea {
   resize: vertical;
   min-height: 120px;

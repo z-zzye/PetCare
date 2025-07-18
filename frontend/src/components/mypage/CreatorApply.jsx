@@ -20,6 +20,8 @@ const CreatorApply = () => {
     motivation: ''
   });
 
+  const [errors, setErrors] = useState({});
+
   // 유저 정보 조회
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -49,14 +51,68 @@ const CreatorApply = () => {
       ...prev,
       [name]: value
     }));
+    
+    // 입력 시 해당 필드의 에러 메시지 제거
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: API 호출로 크리에이터 신청 데이터 전송
-    console.log('크리에이터 신청 데이터:', formData);
-    alert('크리에이터 신청이 완료되었습니다. 검토 후 연락드리겠습니다.');
-    navigate('/mypage');
+    console.log('handleSubmit 함수 실행됨');
+    console.log('현재 formData:', formData);
+    
+    // 유효성 검사
+    const newErrors = {};
+    
+    if (!formData.name.trim()) {
+      newErrors.name = '이름을 입력해주세요.';
+      console.log('이름 필수 입력 에러');
+    }
+    
+    if (!formData.content.trim()) {
+      newErrors.content = '주요 콘텐츠를 입력해주세요.';
+      console.log('주요 콘텐츠 필수 입력 에러');
+    }
+    
+    if (!formData.experience.trim()) {
+      newErrors.experience = '콘텐츠 제작 경험을 입력해주세요.';
+      console.log('콘텐츠 제작 경험 필수 입력 에러');
+    }
+    
+    console.log('유효성 검사 결과 newErrors:', newErrors);
+    
+    // 에러가 있으면 제출 중단
+    if (Object.keys(newErrors).length > 0) {
+      console.log('에러가 있어서 제출 중단');
+      setErrors(newErrors);
+      return;
+    }
+    
+    try {
+      const response = await axios.post('/creator-apply/apply', {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        instagram: formData.instagram,
+        youtube: formData.youtube,
+        tiktok: formData.tiktok,
+        blog: formData.blog,
+        content: formData.content,
+        experience: formData.experience
+      });
+      
+      alert(response.data.message || '크리에이터 신청이 완료되었습니다. 검토 후 연락드리겠습니다.');
+      navigate('/members/mypage');
+      
+    } catch (error) {
+      console.error('크리에이터 신청 오류:', error);
+      alert(error.response?.data?.error || '크리에이터 신청 중 오류가 발생했습니다.');
+    }
   };
 
   return (
@@ -104,7 +160,13 @@ const CreatorApply = () => {
         {/* 신청 폼 섹션 */}
         <div className="creator-apply-form-section">
           <h2 className="creator-apply-section-title">크리에이터 신청</h2>
-          <form className="creator-apply-form" onSubmit={handleSubmit}>
+          <form 
+            className="creator-apply-form" 
+            onSubmit={(e) => {
+              console.log('폼 제출 이벤트 발생');
+              handleSubmit(e);
+            }}
+          >
             <div className="creator-apply-form-grid">
               <div className="creator-apply-form-group">
                 <label htmlFor="name">이름 *</label>
@@ -117,6 +179,7 @@ const CreatorApply = () => {
                   placeholder="실명을 입력해주세요"
                   required
                 />
+                {errors.name && <div className="creator-apply-error">{errors.name}</div>}
               </div>
               <div className="creator-apply-form-group">
                 <label htmlFor="email">이메일 *</label>
@@ -196,6 +259,7 @@ const CreatorApply = () => {
                   placeholder="어떤 종류의 콘텐츠를 제작하고 계신지 알려주세요. (예: 반려동물 일상, 훈련법, 건강 관리 등)"
                   required
                 />
+                {errors.content && <div className="creator-apply-error">{errors.content}</div>}
               </div>
               <div className="creator-apply-form-group full-width">
                 <label htmlFor="experience">콘텐츠 제작 경험 *</label>
@@ -207,10 +271,20 @@ const CreatorApply = () => {
                   placeholder="콘텐츠 제작 경험과 성과에 대해 자세히 설명해주세요."
                   required
                 />
+                {errors.experience && <div className="creator-apply-error">{errors.experience}</div>}
               </div>
             </div>
             <div className="creator-apply-form-submit">
-              <button type="submit" className="creator-apply-submit-btn">
+              <button 
+                type="submit" 
+                className="creator-apply-submit-btn"
+                onClick={(e) => {
+                  console.log('버튼 클릭됨');
+                  e.preventDefault();
+                  console.log('폼 제출 이벤트 발생');
+                  handleSubmit(e);
+                }}
+              >
                 크리에이터 신청하기
               </button>
             </div>
