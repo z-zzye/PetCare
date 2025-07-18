@@ -1,3 +1,4 @@
+package com.petory.service.shop;
 
 import com.petory.dto.shop.OrderItemDto;
 import com.petory.dto.shop.OrderListDto;
