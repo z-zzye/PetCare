@@ -6,7 +6,9 @@ import com.petory.entity.CreatorApply;
 import com.petory.entity.Member;
 import com.petory.repository.CreatorApplyRepository;
 import com.petory.repository.MemberRepository;
+import com.petory.service.NotificationService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,10 +20,12 @@ import org.springframework.data.domain.Pageable;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class CreatorApplyService {
     
     private final CreatorApplyRepository creatorApplyRepository;
     private final MemberRepository memberRepository;
+    private final NotificationService notificationService;
     
     /**
      * 크리에이터 신청
@@ -171,6 +175,27 @@ public class CreatorApplyService {
         if (applyStatus == com.petory.constant.ApplyStatus.APPROVED) {
             Member member = apply.getMember();
             member.updateRole(com.petory.constant.Role.CREATOR);
+            
+            // 크리에이터 승인 알림 생성
+            try {
+                notificationService.createCreatorApprovedNotification(member);
+                log.info("크리에이터 승인 알림 생성 완료: memberId={}", member.getMember_Id());
+            } catch (Exception e) {
+                log.error("크리에이터 승인 알림 생성 중 오류 발생: memberId={}", member.getMember_Id(), e);
+                // 알림 생성 실패가 승인 처리를 막지 않도록 예외를 던지지 않음
+            }
+        }
+        
+        // 거절된 경우 크리에이터 거절 알림 생성
+        if (applyStatus == com.petory.constant.ApplyStatus.REJECTED) {
+            Member member = apply.getMember();
+            try {
+                notificationService.createCreatorRejectedNotification(member, rejectReason);
+                log.info("크리에이터 거절 알림 생성 완료: memberId={}, rejectReason={}", member.getMember_Id(), rejectReason);
+            } catch (Exception e) {
+                log.error("크리에이터 거절 알림 생성 중 오류 발생: memberId={}", member.getMember_Id(), e);
+                // 알림 생성 실패가 거절 처리를 막지 않도록 예외를 던지지 않음
+            }
         }
     }
 } 
