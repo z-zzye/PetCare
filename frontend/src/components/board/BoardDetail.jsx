@@ -57,24 +57,56 @@ const BoardDetail = () => {
     if (!post) return;
 
     try {
-      const token = localStorage.getItem('token'); // accessToken -> token으로 통일
+      const token = localStorage.getItem('token');
       const payload = parseJwt(token);
+
+      console.log('JWT Payload:', payload); // 디버깅용
+      console.log('Post authorEmail:', post.authorEmail); // 디버깅용
+      console.log('Post data:', post); // 디버깅용
 
       // JWT의 sub(이메일)과 게시글 작성자 이메일 비교
       if (payload && post && post.authorEmail) {
-        setIsWriter(payload.sub === post.authorEmail);
+        const isAuthor = payload.sub === post.authorEmail;
+        console.log(
+          'Is writer check:',
+          payload.sub,
+          '===',
+          post.authorEmail,
+          '=',
+          isAuthor
+        ); // 디버깅용
+        setIsWriter(isAuthor);
       } else {
+        console.log(
+          'Missing data - payload:',
+          !!payload,
+          'post:',
+          !!post,
+          'authorEmail:',
+          post?.authorEmail
+        ); // 디버깅용
         setIsWriter(false);
       }
 
       // 토큰 만료 확인 (exp: 초 단위)
       if (payload && payload.exp) {
         const now = Math.floor(Date.now() / 1000);
-        setTokenExpiredOrInvalid(payload.exp < now);
+        const isExpired = payload.exp < now;
+        console.log(
+          'Token expiry check:',
+          now,
+          '>=',
+          payload.exp,
+          '=',
+          isExpired
+        ); // 디버깅용
+        setTokenExpiredOrInvalid(isExpired);
       } else {
+        console.log('No expiry info in token'); // 디버깅용
         setTokenExpiredOrInvalid(true);
       }
     } catch (e) {
+      console.error('Error parsing JWT:', e); // 디버깅용
       setTokenExpiredOrInvalid(true);
       setIsWriter(false);
     }
@@ -200,7 +232,6 @@ const BoardDetail = () => {
               {new Date(post.createdAt).toLocaleString()}
             </span>
           </div>
-
           {/* 해시태그 표시 */}
           {post.hashtags && post.hashtags.length > 0 && (
             <div className="board-hashtags">
@@ -211,7 +242,6 @@ const BoardDetail = () => {
               ))}
             </div>
           )}
-
           <div style={{ minHeight: '200px', whiteSpace: 'pre-wrap' }}>
             {post.content}
           </div>
@@ -223,8 +253,14 @@ const BoardDetail = () => {
               추천하기
             </button>
           </div>
-
           {/* 작성자만 수정/삭제 버튼 노출, 토큰 만료/변조 시 숨김 */}
+          {console.log(
+            'Button visibility check - isWriter:',
+            isWriter,
+            'tokenExpiredOrInvalid:',
+            tokenExpiredOrInvalid
+          )}{' '}
+          {/* 디버깅용 */}
           {isWriter && !tokenExpiredOrInvalid && (
             <div className="board-actions improved-actions">
               <Link

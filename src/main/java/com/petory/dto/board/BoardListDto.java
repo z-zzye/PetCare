@@ -30,7 +30,7 @@ public class BoardListDto {
   // 카테고리 정보 추가
   private String category;
   
-  // 해시태그 리스트 필드 (목록에서는 최대 3개만 표시)
+  // 해시태그 리스트 필드 (목록에서는 최대 5개만 표시)
   private List<HashtagDto> hashtags;
 
   public static BoardListDto from(Board board, List<BoardHashtag> boardHashtags) {
@@ -50,10 +50,10 @@ public class BoardListDto {
     // 카테고리 정보 설정
     dto.setCategory(board.getBoardKind().name().toLowerCase());
     
-    // 해시태그 리스트 설정 (목록에서는 최대 3개만)
+    // 해시태그 리스트 설정 (목록에서는 최대 5개만)
     if (boardHashtags != null) {
       dto.setHashtags(boardHashtags.stream()
-        .limit(3) // 최대 3개만 표시
+        .limit(5) // 최대 5개만 표시
         .map(boardHashtag -> HashtagDto.fromEntity(boardHashtag.getHashtag()))
         .collect(Collectors.toList()));
     }
