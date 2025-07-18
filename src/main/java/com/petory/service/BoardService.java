@@ -13,14 +13,19 @@ import com.petory.dto.board.BoardDetailDto;
 import com.petory.dto.board.BoardListDto;
 import com.petory.dto.board.BoardUpdateDto;
 import com.petory.entity.Board;
+import com.petory.entity.BoardHashtag;
+import com.petory.entity.BoardHashtagId;
 import com.petory.entity.BoardRecommend;
 import com.petory.entity.CleanBotLog;
 import com.petory.entity.Comment;
+import com.petory.entity.Hashtag;
 import com.petory.entity.Member;
+import com.petory.repository.BoardHashtagRepository;
 import com.petory.repository.BoardRecommendRepository;
 import com.petory.repository.BoardRepository;
 import com.petory.repository.CleanBotLogRepository;
 import com.petory.repository.CommentRepository;
+import com.petory.repository.HashtagRepository;
 import com.petory.repository.MemberRepository;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -42,6 +47,8 @@ public class BoardService {
   private final BoardRecommendRepository boardRecommendRepository;
   private final NotificationService notificationService;
   private final CleanBotLogRepository cleanBotLogRepository;
+  private final HashtagRepository hashtagRepository;
+  private final BoardHashtagRepository boardHashtagRepository;
 
   /**
    * 새 게시글 생성
@@ -59,7 +66,6 @@ public class BoardService {
     board.setTitle(filteredTitle);
     board.setContent(filteredContent);
     board.setBoardKind(requestDto.getBoardKind());
-    board.setHashTag(requestDto.getHashTag());
     board.setMember(member);
 
     // 클린봇이 부적절한 내용을 감지한 경우 블라인드 처리
@@ -79,6 +85,11 @@ public class BoardService {
     }
 
     Board savedBoard = boardRepository.save(board);
+    
+    // 해시태그 처리
+    if (requestDto.getHashtags() != null && !requestDto.getHashtags().isEmpty()) {
+      saveBoardHashtags(savedBoard, requestDto.getHashtags());
+    }
     
     // 클린봇이 부적절한 내용을 감지한 경우 로그 저장
     if (savedBoard.isBlinded()) {
@@ -104,7 +115,10 @@ public class BoardService {
   @Transactional(readOnly = true)
   public Page<BoardListDto> getBoardList(Pageable pageable) {
     // Board 엔티티 페이지를 BoardListResponseDto 페이지로 변환하여 반환
-    return boardRepository.findAll(pageable).map(BoardListDto::from);
+    return boardRepository.findAll(pageable).map(board -> {
+      List<BoardHashtag> boardHashtags = boardHashtagRepository.findByPostId(board.getId());
+      return BoardListDto.from(board, boardHashtags);
+    });
   }
 
   /**
@@ -118,7 +132,10 @@ public class BoardService {
 
     // 2. Repository에 미리 정의해둔 findByBoardKind 메서드를 사용
     return boardRepository.findByBoardKind(boardKind, pageable)
-      .map(BoardListDto::from);
+      .map(board -> {
+        List<BoardHashtag> boardHashtags = boardHashtagRepository.findByPostId(board.getId());
+        return BoardListDto.from(board, boardHashtags);
+      });
   }
 
   /**
@@ -141,7 +158,11 @@ public class BoardService {
 
     // 해당 게시글의 댓글 목록도 함께 조회
     List<Comment> comments = commentRepository.findByBoardIdOrderByRegDateAsc(boardId);
-    return BoardDetailDto.from(board, comments);
+    
+    // 해당 게시글의 해시태그 목록 조회
+    List<BoardHashtag> boardHashtags = boardHashtagRepository.findByPostId(boardId);
+    
+    return BoardDetailDto.from(board, comments, boardHashtags);
   }
 
   /**
@@ -180,7 +201,25 @@ public class BoardService {
     }
 
     if (requestDto.getBoardKind() != null) board.setBoardKind(requestDto.getBoardKind());
-    if (requestDto.getHashTag() != null) board.setHashTag(requestDto.getHashTag());
+    
+    // 해시태그 업데이트
+    if (requestDto.getHashtags() != null) {
+      // 기존 해시태그 사용 횟수 감소 및 삭제
+      List<BoardHashtag> existingBoardHashtags = boardHashtagRepository.findByPostId(boardId);
+      for (BoardHashtag boardHashtag : existingBoardHashtags) {
+        Hashtag hashtag = boardHashtag.getHashtag();
+        if (hashtag.getTagCount() > 0) {
+          hashtag.setTagCount(hashtag.getTagCount() - 1);
+          hashtagRepository.save(hashtag);
+        }
+      }
+      boardHashtagRepository.deleteByPostId(boardId);
+      
+      // 새로운 해시태그 저장
+      if (!requestDto.getHashtags().isEmpty()) {
+        saveBoardHashtags(board, requestDto.getHashtags());
+      }
+    }
 
     // @Transactional 어노테이션에 의해 메서드 종료 시 자동으로 DB에 반영됨
   }
@@ -195,6 +234,18 @@ public class BoardService {
     if (!board.getMember().getMember_Email().equals(email)) {
       throw new IllegalStateException("게시글을 삭제할 권한이 없습니다.");
     }
+    
+    // 해시태그 사용 횟수 감소 및 연결 삭제
+    List<BoardHashtag> boardHashtags = boardHashtagRepository.findByPostId(boardId);
+    for (BoardHashtag boardHashtag : boardHashtags) {
+      Hashtag hashtag = boardHashtag.getHashtag();
+      if (hashtag.getTagCount() > 0) {
+        hashtag.setTagCount(hashtag.getTagCount() - 1);
+        hashtagRepository.save(hashtag);
+      }
+    }
+    boardHashtagRepository.deleteByPostId(boardId);
+    
     boardRecommendRepository.deleteAllByBoard_Id(boardId); // 추천 기록 먼저 삭제
     commentRepository.deleteAllByBoard_Id(boardId);
     boardRepository.delete(board);
@@ -268,6 +319,18 @@ public class BoardService {
   public void deleteBoardByAdmin(Long boardId) {
     Board board = boardRepository.findById(boardId)
         .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다."));
+    
+    // 해시태그 사용 횟수 감소 및 연결 삭제
+    List<BoardHashtag> boardHashtags = boardHashtagRepository.findByPostId(boardId);
+    for (BoardHashtag boardHashtag : boardHashtags) {
+      Hashtag hashtag = boardHashtag.getHashtag();
+      if (hashtag.getTagCount() > 0) {
+        hashtag.setTagCount(hashtag.getTagCount() - 1);
+        hashtagRepository.save(hashtag);
+      }
+    }
+    boardHashtagRepository.deleteByPostId(boardId);
+    
     boardRecommendRepository.deleteAllByBoard_Id(boardId);
     commentRepository.deleteAllByBoard_Id(boardId);
     boardRepository.delete(board);
@@ -301,7 +364,25 @@ public class BoardService {
     }
 
     if (requestDto.getBoardKind() != null) board.setBoardKind(requestDto.getBoardKind());
-    if (requestDto.getHashTag() != null) board.setHashTag(requestDto.getHashTag());
+    
+    // 해시태그 업데이트
+    if (requestDto.getHashtags() != null) {
+      // 기존 해시태그 사용 횟수 감소 및 삭제
+      List<BoardHashtag> existingBoardHashtags = boardHashtagRepository.findByPostId(boardId);
+      for (BoardHashtag boardHashtag : existingBoardHashtags) {
+        Hashtag hashtag = boardHashtag.getHashtag();
+        if (hashtag.getTagCount() > 0) {
+          hashtag.setTagCount(hashtag.getTagCount() - 1);
+          hashtagRepository.save(hashtag);
+        }
+      }
+      boardHashtagRepository.deleteByPostId(boardId);
+      
+      // 새로운 해시태그 저장
+      if (!requestDto.getHashtags().isEmpty()) {
+        saveBoardHashtags(board, requestDto.getHashtags());
+      }
+    }
   }
 
   @Transactional(readOnly = true)
@@ -310,7 +391,10 @@ public class BoardService {
         .filter(b -> b.getBoardKind() == boardKind)
         .sorted((a, b) -> Long.compare(b.getId(), a.getId()))
         .toList();
-    return boards.stream().map(BoardListDto::from).toList();
+    return boards.stream().map(board -> {
+      List<BoardHashtag> boardHashtags = boardHashtagRepository.findByPostId(board.getId());
+      return BoardListDto.from(board, boardHashtags);
+    }).toList();
   }
 
   /**
@@ -360,5 +444,259 @@ public class BoardService {
   public Board getBoardById(Long id) {
     return boardRepository.findById(id)
         .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다."));
+  }
+
+  /**
+   * 해시태그로 게시글 검색
+   */
+  @Transactional(readOnly = true)
+  public Page<BoardListDto> searchBoardsByHashtag(String hashtagName, Pageable pageable) {
+    // 해시태그 이름으로 해시태그 찾기
+    Hashtag hashtag = hashtagRepository.findByTagName(hashtagName)
+        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 해시태그입니다: " + hashtagName));
+    
+    // 해당 해시태그를 가진 게시글 ID 목록 조회
+    List<Long> boardIds = boardHashtagRepository.findBoardIdsByTagId(hashtag.getTagId());
+    
+    if (boardIds.isEmpty()) {
+      // 해당 해시태그를 가진 게시글이 없는 경우 빈 페이지 반환
+      return Page.empty(pageable);
+    }
+    
+    // 게시글 ID 목록으로 게시글 조회
+    List<Board> boards = boardRepository.findAllById(boardIds);
+    
+    // 페이징 처리
+    int start = (int) pageable.getOffset();
+    int end = Math.min((start + pageable.getPageSize()), boards.size());
+    
+    if (start > boards.size()) {
+      return Page.empty(pageable);
+    }
+    
+    List<Board> pagedBoards = boards.subList(start, end);
+    
+    // BoardListDto로 변환
+    List<BoardListDto> boardListDtos = pagedBoards.stream()
+        .map(board -> {
+          List<BoardHashtag> boardHashtags = boardHashtagRepository.findByPostId(board.getId());
+          return BoardListDto.from(board, boardHashtags);
+        })
+        .toList();
+    
+    return new org.springframework.data.domain.PageImpl<>(
+        boardListDtos, 
+        pageable, 
+        boards.size()
+    );
+  }
+
+  /**
+   * 여러 해시태그로 게시글 검색 (OR 조건)
+   */
+  @Transactional(readOnly = true)
+  public Page<BoardListDto> searchBoardsByHashtags(List<String> hashtagNames, Pageable pageable) {
+    if (hashtagNames == null || hashtagNames.isEmpty()) {
+      return Page.empty(pageable);
+    }
+    
+    // 해시태그 이름으로 해시태그 ID 목록 조회
+    List<Long> hashtagIds = hashtagNames.stream()
+        .map(name -> hashtagRepository.findByTagName(name))
+        .filter(java.util.Optional::isPresent)
+        .map(java.util.Optional::get)
+        .map(Hashtag::getTagId)
+        .toList();
+    
+    if (hashtagIds.isEmpty()) {
+      return Page.empty(pageable);
+    }
+    
+    // 해당 해시태그들을 가진 게시글 ID 목록 조회 (OR 조건)
+    List<Long> boardIds = boardHashtagRepository.findBoardIdsByTagIds(hashtagIds);
+    
+    if (boardIds.isEmpty()) {
+      return Page.empty(pageable);
+    }
+    
+    // 게시글 ID 목록으로 게시글 조회
+    List<Board> boards = boardRepository.findAllById(boardIds);
+    
+    // 페이징 처리
+    int start = (int) pageable.getOffset();
+    int end = Math.min((start + pageable.getPageSize()), boards.size());
+    
+    if (start > boards.size()) {
+      return Page.empty(pageable);
+    }
+    
+    List<Board> pagedBoards = boards.subList(start, end);
+    
+    // BoardListDto로 변환
+    List<BoardListDto> boardListDtos = pagedBoards.stream()
+        .map(board -> {
+          List<BoardHashtag> boardHashtags = boardHashtagRepository.findByPostId(board.getId());
+          return BoardListDto.from(board, boardHashtags);
+        })
+        .toList();
+    
+    return new org.springframework.data.domain.PageImpl<>(
+        boardListDtos, 
+        pageable, 
+        boards.size()
+    );
+  }
+
+  /**
+   * 게시글에 해시태그 연결
+   */
+  private void saveBoardHashtags(Board board, List<String> hashtagNames) {
+    for (String hashtagName : hashtagNames) {
+      if (hashtagName != null && !hashtagName.trim().isEmpty()) {
+        // 해시태그가 존재하는지 확인하고, 없으면 생성
+        Hashtag hashtag = hashtagRepository.findByTagName(hashtagName.trim())
+          .orElseGet(() -> {
+            Hashtag newHashtag = Hashtag.builder()
+              .tagName(hashtagName.trim())
+              .tagCount(0)
+              .build();
+            return hashtagRepository.save(newHashtag);
+          });
+        
+        // BoardHashtag 생성
+        BoardHashtagId boardHashtagId = new BoardHashtagId();
+        boardHashtagId.setPostId(board.getId());
+        boardHashtagId.setTagId(hashtag.getTagId());
+        
+        BoardHashtag boardHashtag = BoardHashtag.builder()
+          .id(boardHashtagId)
+          .board(board)
+          .hashtag(hashtag)
+          .build();
+        
+        boardHashtagRepository.save(boardHashtag);
+        
+        // 해시태그 사용 횟수 증가
+        hashtag.setTagCount(hashtag.getTagCount() + 1);
+        hashtagRepository.save(hashtag);
+      }
+    }
+  }
+
+  /**
+   * 게시글 작성용 인기 해시태그 목록 조회
+   */
+  @Transactional(readOnly = true)
+  public List<String> getPopularHashtagsForWrite() {
+    return hashtagRepository.findAllByOrderByTagCountDesc().stream()
+        .limit(20) // 상위 20개만 반환
+        .map(Hashtag::getTagName)
+        .toList();
+  }
+
+  /**
+   * 카테고리별 해시태그로 게시글 검색 (효율적인 버전)
+   */
+  @Transactional(readOnly = true)
+  public Page<BoardListDto> searchBoardsByCategoryAndHashtag(String category, String hashtagName, Pageable pageable) {
+    // 1. 문자열로 받은 category를 BoardKind Enum으로 변환
+    BoardKind boardKind = BoardKind.valueOf(category.toUpperCase());
+    
+    // 2. 해시태그 이름으로 해시태그 찾기
+    Hashtag hashtag = hashtagRepository.findByTagName(hashtagName)
+        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 해시태그입니다: " + hashtagName));
+    
+    // 3. 해당 카테고리와 해시태그를 가진 게시글 ID 목록 조회
+    List<Long> boardIds = boardHashtagRepository.findBoardIdsByTagIdAndBoardKind(hashtag.getTagId(), boardKind.name());
+    
+    if (boardIds.isEmpty()) {
+      return Page.empty(pageable);
+    }
+    
+    // 4. 게시글 ID 목록으로 게시글 조회
+    List<Board> boards = boardRepository.findAllById(boardIds);
+    
+    // 5. 페이징 처리
+    int start = (int) pageable.getOffset();
+    int end = Math.min((start + pageable.getPageSize()), boards.size());
+    
+    if (start > boards.size()) {
+      return Page.empty(pageable);
+    }
+    
+    List<Board> pagedBoards = boards.subList(start, end);
+    
+    // 6. BoardListDto로 변환
+    List<BoardListDto> boardListDtos = pagedBoards.stream()
+        .map(board -> {
+          List<BoardHashtag> boardHashtags = boardHashtagRepository.findByPostId(board.getId());
+          return BoardListDto.from(board, boardHashtags);
+        })
+        .toList();
+    
+    return new org.springframework.data.domain.PageImpl<>(
+        boardListDtos, 
+        pageable, 
+        boards.size()
+    );
+  }
+
+  /**
+   * 카테고리별 여러 해시태그로 게시글 검색 (효율적인 버전)
+   */
+  @Transactional(readOnly = true)
+  public Page<BoardListDto> searchBoardsByCategoryAndHashtags(String category, List<String> hashtagNames, Pageable pageable) {
+    if (hashtagNames == null || hashtagNames.isEmpty()) {
+      return Page.empty(pageable);
+    }
+    
+    // 1. 문자열로 받은 category를 BoardKind Enum으로 변환
+    BoardKind boardKind = BoardKind.valueOf(category.toUpperCase());
+    
+    // 2. 해시태그 이름으로 해시태그 ID 목록 조회
+    List<Long> hashtagIds = hashtagNames.stream()
+        .map(name -> hashtagRepository.findByTagName(name))
+        .filter(java.util.Optional::isPresent)
+        .map(java.util.Optional::get)
+        .map(Hashtag::getTagId)
+        .toList();
+    
+    if (hashtagIds.isEmpty()) {
+      return Page.empty(pageable);
+    }
+    
+    // 3. 해당 카테고리와 해시태그들을 가진 게시글 ID 목록 조회 (OR 조건)
+    List<Long> boardIds = boardHashtagRepository.findBoardIdsByTagIdsAndBoardKind(hashtagIds, boardKind.name());
+    
+    if (boardIds.isEmpty()) {
+      return Page.empty(pageable);
+    }
+    
+    // 4. 게시글 ID 목록으로 게시글 조회
+    List<Board> boards = boardRepository.findAllById(boardIds);
+    
+    // 5. 페이징 처리
+    int start = (int) pageable.getOffset();
+    int end = Math.min((start + pageable.getPageSize()), boards.size());
+    
+    if (start > boards.size()) {
+      return Page.empty(pageable);
+    }
+    
+    List<Board> pagedBoards = boards.subList(start, end);
+    
+    // 6. BoardListDto로 변환
+    List<BoardListDto> boardListDtos = pagedBoards.stream()
+        .map(board -> {
+          List<BoardHashtag> boardHashtags = boardHashtagRepository.findByPostId(board.getId());
+          return BoardListDto.from(board, boardHashtags);
+        })
+        .toList();
+    
+    return new org.springframework.data.domain.PageImpl<>(
+        boardListDtos, 
+        pageable, 
+        boards.size()
+    );
   }
 }
