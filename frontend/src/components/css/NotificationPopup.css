@@ -206,6 +206,10 @@
   color: #ff6b35;
 }
 
+.notification-type-creator {
+  color: #ffd700;
+}
+
 /* 알림 삭제 버튼 */
 .notification-delete-btn {
   background: none;

@@ -57,6 +57,17 @@ const NotificationPopup = () => {
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-51.411.411014.17l7.59599z" />
           </svg>
         );
+      case 'CREATOR_APPROVED':
+      case 'CREATOR_REJECTED':
+        return (
+          <svg
+            className="notification-type-icon notification-type-creator"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+          >
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+          </svg>
+        );
       default:
         return (
           <svg
@@ -219,6 +230,11 @@ const NotificationPopup = () => {
       case 'AUCTION_WIN':
         // 경매 관련 알림인 경우 - 내 입찰 내역 페이지로 이동
         navigate('/shop/my-auction-history');
+        break;
+      case 'CREATOR_APPROVED':
+      case 'CREATOR_REJECTED':
+        // 크리에이터 관련 알림인 경우 - 마이페이지로 이동
+        navigate('/members/mypage');
         break;
       default:
         // 기본적으로 마이페이지로 이동

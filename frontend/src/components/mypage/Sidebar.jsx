@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 import './Sidebar.css';
 import { jwtDecode } from 'jwt-decode';
@@ -10,10 +11,11 @@ import './Sidebar.css'
 
 const Sidebar = ({ onTabChange }) => {
   const navigate = useNavigate();
-  const { profileImg, nickname, isCreator } = useAuth();
+  const { profileImg, nickname } = useAuth();
 
   const [isSocialUser, setIsSocialUser] = useState(false);
   const [memberId, setMemberId] = useState(null);
+  const [memberRole, setMemberRole] = useState(null);
   const [pets, setPets] = useState([]);
   const [showHashtagModal, setShowHashtagModal] = useState(false);
   const [userHashtags, setUserHashtags] = useState([]);
@@ -76,6 +78,19 @@ const Sidebar = ({ onTabChange }) => {
     fetchUserHashtags();
   }, [memberId]);
 
+  // ✅ 멤버ID 기반 역할 조회
+  useEffect(() => {
+    if (memberId === null) return;
+    
+    axios.get(`/members/${memberId}/role`)
+      .then(res => {
+        setMemberRole(res.data);
+      })
+      .catch(err => {
+        console.error('회원 역할 조회 실패:', err);
+      });
+  }, [memberId]);
+
   const fetchUserHashtags = async () => {
     if (memberId) {
       try {
@@ -84,6 +99,33 @@ const Sidebar = ({ onTabChange }) => {
       } catch (error) {
         console.error('관심사 조회 실패:', error);
       }
+    }
+  };
+
+  // 크리에이터 신청 상태 확인
+  const checkCreatorApplyStatus = async () => {
+    try {
+      const response = await axios.get('/creator-apply/my-latest-apply');
+      
+      if (response.data && response.data.applyStatus === 'PENDING') {
+        Swal.fire({
+          title: '신청 처리 중',
+          text: '이미 크리에이터 신청이 접수되어 검토 중입니다. 검토 결과는 1-2주 내에 이메일로 안내드립니다.',
+          icon: 'info',
+          confirmButtonText: '확인',
+          confirmButtonColor: '#3085d6'
+        });
+        return false;
+      }
+      
+      return true; // 신청 가능
+    } catch (error) {
+      // 신청 내역이 없는 경우 (404 에러) 신청 가능
+      if (error.response && error.response.status === 404) {
+        return true;
+      }
+      console.error('크리에이터 신청 상태 확인 실패:', error);
+      return true; // 에러 시에도 신청 페이지로 이동
     }
   };
 
@@ -153,12 +195,33 @@ const Sidebar = ({ onTabChange }) => {
 
         {/* 크리에이터 섹션 */}
         <div className="creator-section">
-          {!isCreator ? (
-            <button className="creator-btn" onClick={() => navigate('/creator-apply')}>
+          {memberRole !== 'CREATOR' ? (
+            <button 
+              className="creator-btn" 
+              onClick={async () => {
+                const canApply = await checkCreatorApplyStatus();
+                if (canApply) {
+                  navigate('/members/creatorapply');
+                }
+              }}
+            >
               크리에이터 신청
             </button>
           ) : (
-            <div className="creator-image-placeholder" />
+            <button 
+              className="creator-btn creator-already-btn" 
+              onClick={() => {
+                Swal.fire({
+                  title: '이미 크리에이터입니다',
+                  text: '축하합니다! 이미 크리에이터 권한을 가지고 있습니다.',
+                  icon: 'success',
+                  confirmButtonText: '확인',
+                  confirmButtonColor: '#27ae60'
+                });
+              }}
+            >
+              크리에이터 신청
+            </button>
           )}
 
           {/* ✅ [추가] 결제수단 관리 버튼 */}
