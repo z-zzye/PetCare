@@ -18,6 +18,9 @@ const BoardDetail = () => {
     fetch(`/api/boards/${category}/${id}`)
       .then((res) => res.json())
       .then((data) => {
+        console.log('게시글 상세 데이터:', data);
+        console.log('작성자:', data.memberNickname);
+        console.log('작성일:', data.regDate);
         setPost(data);
         setComments(data.comments || []);
       })
@@ -61,17 +64,17 @@ const BoardDetail = () => {
       const payload = parseJwt(token);
 
       console.log('JWT Payload:', payload); // 디버깅용
-      console.log('Post authorEmail:', post.authorEmail); // 디버깅용
+      console.log('Post memberEmail:', post.memberEmail); // 디버깅용
       console.log('Post data:', post); // 디버깅용
 
       // JWT의 sub(이메일)과 게시글 작성자 이메일 비교
-      if (payload && post && post.authorEmail) {
-        const isAuthor = payload.sub === post.authorEmail;
+      if (payload && post && post.memberEmail) {
+        const isAuthor = payload.sub === post.memberEmail;
         console.log(
           'Is writer check:',
           payload.sub,
           '===',
-          post.authorEmail,
+          post.memberEmail,
           '=',
           isAuthor
         ); // 디버깅용
@@ -82,8 +85,8 @@ const BoardDetail = () => {
           !!payload,
           'post:',
           !!post,
-          'authorEmail:',
-          post?.authorEmail
+          'memberEmail:',
+          post?.memberEmail
         ); // 디버깅용
         setIsWriter(false);
       }
@@ -227,9 +230,9 @@ const BoardDetail = () => {
         <div className="board-content">
           <h1 className="board-title">{post.title}</h1>
           <div className="board-meta improved-meta">
-            <span className="board-author">작성자: {post.authorNickName}</span>
+            <span className="board-author">작성자: {post.memberNickname}</span>
             <span className="board-date">
-              {new Date(post.createdAt).toLocaleString()}
+              {new Date(post.regDate).toLocaleString()}
             </span>
           </div>
           {/* 해시태그 표시 */}
@@ -242,8 +245,12 @@ const BoardDetail = () => {
               ))}
             </div>
           )}
-          <div 
-            style={{ minHeight: '200px', whiteSpace: 'pre-wrap' }}
+          <div
+            style={{
+              minHeight: '200px',
+              padding: '20px',
+              backgroundColor: 'white',
+            }}
             dangerouslySetInnerHTML={{ __html: post.content }}
           />
           <div className="board-recommend-section">

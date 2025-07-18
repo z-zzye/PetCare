@@ -635,265 +635,212 @@
   cursor: not-allowed;
 }
 
-/* 크롤링 게시글 작성 스타일 */
-.crawling-board-write {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+/* 해시태그 드롭다운 모바일 최적화 */
+@media (max-width: 768px) {
+  .hashtag-dropdown {
+    position: fixed !important;
+    top: auto !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    max-height: 50vh !important;
+    border-radius: 12px 12px 0 0 !important;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2) !important;
+  }
+
+  .hashtag-dropdown > div {
+    padding: 15px !important;
+    font-size: 1rem !important;
+    min-height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+  }
 }
 
-.crawling-board-write h2 {
-  color: #333;
-  margin-bottom: 20px;
-  text-align: center;
+/* Quill 에디터 스타일 */
+.ql-editor {
+  min-height: 200px !important;
+  height: auto !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  padding: 12px !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  overflow: visible !important;
+  background: white !important;
+  color: #333 !important;
 }
 
-.crawling-board-write .form-group {
-  margin-bottom: 15px;
+.ql-toolbar {
+  border-top: 1px solid #ccc !important;
+  border-left: 1px solid #ccc !important;
+  border-right: 1px solid #ccc !important;
+  border-bottom: none !important;
+  border-radius: 4px 4px 0 0 !important;
+  background: #f8f9fa !important;
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
-.crawling-board-write label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: 600;
-  color: #555;
+.ql-container {
+  border-bottom: 1px solid #ccc !important;
+  border-left: 1px solid #ccc !important;
+  border-right: 1px solid #ccc !important;
+  border-top: none !important;
+  border-radius: 0 0 4px 4px !important;
+  min-height: 200px !important;
+  height: auto !important;
+  background: white !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  overflow: visible !important;
 }
 
-.crawling-board-write input,
-.crawling-board-write select {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
+.ql-editor img {
+  max-width: 100%;
+  height: auto;
+  margin: 10px 0;
 }
 
-.crawling-board-write input:focus,
-.crawling-board-write select:focus {
-  outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+/* 이미지 업로드 중 로딩 스타일 */
+.ql-editor .ql-image {
+  position: relative;
 }
 
-.button-group {
-  display: flex;
-  gap: 10px;
-  margin-top: 20px;
-  flex-wrap: wrap;
-}
-
-.btn-primary {
-  background: #007bff;
+.ql-editor .ql-image::after {
+  content: '업로드 중...';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.7);
   color: white;
-  border: none;
-  padding: 10px 20px;
+  padding: 5px 10px;
   border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  flex: 1;
-  min-width: 120px;
+  font-size: 12px;
 }
 
-.btn-primary:hover {
-  background: #0056b3;
+/* Quill 툴바 중복 방지 */
+.ql-toolbar:not(:first-of-type) {
+  display: none !important;
 }
 
-.btn-primary:disabled {
-  background: #ccc;
-  cursor: not-allowed;
+/* Quill 컨테이너 중복 방지 - 에디터 영역은 보이도록 수정 */
+.ql-container:not(:first-of-type) {
+  display: none !important;
 }
 
-.btn-secondary {
-  background: #6c757d;
-  color: white;
-  border: none;
-  padding: 10px 20px;
+/* Quill 에디터 컨테이너가 보이도록 보장 */
+.ql-container {
+  display: block !important;
+  min-height: 200px !important;
+  height: auto !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
+  z-index: 1 !important;
+  background: white !important;
+  border: 1px solid #ccc !important;
+  border-radius: 4px !important;
+}
+
+/* Quill 에디터 내용 영역이 보이도록 보장 */
+.ql-editor {
+  display: block !important;
+  min-height: 200px !important;
+  height: 200px !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  overflow: visible !important;
+  position: relative !important;
+  z-index: 1 !important;
+  background: white !important;
+  color: #333 !important;
+  padding: 12px !important;
+  border: none !important;
+  outline: none !important;
+  box-sizing: border-box !important;
+}
+
+/* Quill 에디터 컨테이너 강제 스타일 */
+#quill-editor-container {
+  min-height: 300px !important;
+  height: auto !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  background: white !important;
+  border: 1px solid #ccc !important;
+  border-radius: 4px !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+#quill-editor-container .ql-editor {
+  min-height: 200px !important;
+  height: 200px !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  background: white !important;
+  color: #333 !important;
+  padding: 12px !important;
+  border: none !important;
+  outline: none !important;
+  box-sizing: border-box !important;
+}
+
+/* 게시글 상세보기에서 HTML 콘텐츠 스타일 */
+.board-content img {
+  max-width: 100%;
+  height: auto;
+  margin: 10px 0;
   border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  flex: 1;
-  min-width: 120px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.btn-secondary:hover {
-  background: #545b62;
+.board-content p {
+  margin: 10px 0;
+  line-height: 1.6;
 }
 
-.btn-secondary:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-}
-
-.error-message {
-  background: #f8d7da;
-  color: #721c24;
-  padding: 10px;
-  border-radius: 4px;
-  margin-top: 15px;
-  border: 1px solid #f5c6cb;
-}
-
-.preview-section {
-  margin-top: 20px;
-  padding: 15px;
-  background: #f8f9fa;
-  border-radius: 4px;
-  border: 1px solid #dee2e6;
-}
-
-.preview-section h3 {
-  color: #495057;
-  margin-bottom: 10px;
-}
-
-.preview-content h4 {
-  color: #333;
-  margin-bottom: 8px;
-}
-
-.preview-content p {
-  color: #666;
-  line-height: 1.5;
-}
-
-/* 고급 설정 스타일 */
-.advanced-settings {
-  margin: 20px 0;
-  border: 1px solid #dee2e6;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.advanced-settings summary {
-  background: #f8f9fa;
-  padding: 12px 15px;
-  cursor: pointer;
+.board-content h1,
+.board-content h2,
+.board-content h3,
+.board-content h4,
+.board-content h5,
+.board-content h6 {
+  margin: 20px 0 10px 0;
+  color: #223a5e;
   font-weight: 600;
-  color: #495057;
-  border-bottom: 1px solid #dee2e6;
 }
 
-.advanced-settings summary:hover {
-  background: #e9ecef;
+.board-content ul,
+.board-content ol {
+  margin: 10px 0;
+  padding-left: 20px;
 }
 
-.advanced-content {
-  padding: 15px;
-  background: #fff;
+.board-content li {
+  margin: 5px 0;
 }
 
-.advanced-content .form-group {
-  margin-bottom: 15px;
-}
-
-.advanced-content small {
-  display: block;
-  color: #6c757d;
-  font-size: 12px;
-  margin-top: 4px;
-}
-
-/* 이미지 옵션 스타일 */
-.image-options {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 8px;
-}
-
-.radio-option {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  border: 1px solid #dee2e6;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.radio-option:hover {
+.board-content blockquote {
+  border-left: 4px solid #223a5e;
+  margin: 15px 0;
+  padding: 10px 15px;
   background: #f8f9fa;
+  font-style: italic;
 }
 
-.radio-option input[type="radio"] {
-  margin: 0;
+.board-content a {
+  color: #007bff;
+  text-decoration: none;
 }
 
-.radio-option span {
-  font-size: 14px;
-  color: #495057;
-}
-
-/* 이미지 미리보기 스타일 */
-.preview-images {
-  margin-top: 15px;
-  padding-top: 15px;
-  border-top: 1px solid #dee2e6;
-}
-
-.preview-images h5 {
-  color: #495057;
-  margin-bottom: 10px;
-  font-size: 14px;
-}
-
-.image-list {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.preview-image {
-  width: 80px;
-  height: 80px;
-  border: 1px solid #dee2e6;
-  border-radius: 4px;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.preview-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.image-count {
-  margin-top: 10px;
-  font-size: 12px;
-  color: #6c757d;
-  text-align: center;
-}
-
-/* 게시글 썸네일 스타일 */
-.post-title-container {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.post-thumbnails {
-  display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
-}
-
-.post-thumbnail {
-  width: 40px;
-  height: 40px;
-  object-fit: cover;
-  border-radius: 4px;
-  border: 1px solid #dee2e6;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-
-.post-thumbnail:hover {
-  transform: scale(1.1);
+.board-content a:hover {
+  text-decoration: underline;
 }

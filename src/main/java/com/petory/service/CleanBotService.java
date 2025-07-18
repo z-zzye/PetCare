@@ -101,6 +101,22 @@ public class CleanBotService {
     }
 
     /**
+     * 텍스트에서 감지된 비속어들을 반환합니다.
+     */
+    public Set<String> getDetectedProfanity(String text) {
+        Set<String> detected = new HashSet<>();
+        if (!StringUtils.hasText(text)) return detected;
+        
+        String lowerCaseText = text.toLowerCase();
+        for (String badWord : badWords) {
+            if (lowerCaseText.contains(badWord)) {
+                detected.add(badWord);
+            }
+        }
+        return detected;
+    }
+
+    /**
      * 파일에서 금지어 목록을 읽어와 메모리의 Set을 갱신하는 내부 메서드
      */
     private void loadProfanityList() {
