@@ -35,6 +35,12 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Value("${board.image.resource.location}")
     String boardImageResourceLocation;
 
+    @Value("${crawling.image.resource.handler}")
+    String crawlingImageResourceHandler;
+
+    @Value("${crawling.image.resource.location}")
+    String crawlingImageResourceLocation;
+
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
@@ -68,6 +74,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
         // 게시글 이미지 전용 핸들러
         registry.addResourceHandler(boardImageResourceHandler)
                 .addResourceLocations(boardImageResourceLocation);
+
+        // 크롤링 이미지 전용 핸들러
+        registry.addResourceHandler(crawlingImageResourceHandler)
+                .addResourceLocations(crawlingImageResourceLocation);
     }
 
     @Override

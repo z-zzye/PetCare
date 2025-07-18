@@ -1,8 +1,15 @@
 package com.petory.service;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -19,11 +26,16 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CrawlingService {
     
+    private static final String CRAWLING_IMAGE_DIR = "C:/petory/crawling/";
+    
     /**
      * 웹 페이지를 크롤링하여 게시글 데이터를 추출합니다.
      */
     public BoardCreateDto crawlWebPage(CrawlingRequestDto requestDto) {
         try {
+            // 크롤링 이미지 디렉토리 생성
+            createCrawlingImageDirectory();
+            
             // 웹 페이지 크롤링
             Document doc = Jsoup.connect(requestDto.getUrl())
                     .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
@@ -36,8 +48,8 @@ public class CrawlingService {
             // 내용 추출
             String content = extractContent(doc, requestDto);
             
-            // 이미지 추출 및 내용에 추가
-            List<String> images = extractImages(doc, requestDto, requestDto.getUrl());
+            // 이미지 추출 및 다운로드
+            List<String> images = extractAndDownloadImages(doc, requestDto, requestDto.getUrl());
             
             // 내용에서 이미지 URL 추출 (추가)
             List<String> contentImages = extractImagesFromContent(content);
@@ -67,6 +79,21 @@ public class CrawlingService {
         } catch (IOException e) {
             log.error("크롤링 중 오류 발생: {}", e.getMessage());
             throw new RuntimeException("웹 페이지 크롤링에 실패했습니다: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 크롤링 이미지 디렉토리를 생성합니다.
+     */
+    private void createCrawlingImageDirectory() {
+        try {
+            Path directory = Paths.get(CRAWLING_IMAGE_DIR);
+            if (!Files.exists(directory)) {
+                Files.createDirectories(directory);
+                log.info("크롤링 이미지 디렉토리 생성: {}", CRAWLING_IMAGE_DIR);
+            }
+        } catch (IOException e) {
+            log.error("크롤링 이미지 디렉토리 생성 실패: {}", e.getMessage());
         }
     }
     
@@ -143,9 +170,9 @@ public class CrawlingService {
     }
     
     /**
-     * 이미지를 추출합니다.
+     * 이미지를 추출하고 다운로드합니다.
      */
-    private List<String> extractImages(Document doc, CrawlingRequestDto requestDto, String baseUrl) {
+    private List<String> extractAndDownloadImages(Document doc, CrawlingRequestDto requestDto, String baseUrl) {
         List<String> images = new ArrayList<>();
         
         // 이미지 가져오기를 하지 않는 경우
@@ -153,7 +180,7 @@ public class CrawlingService {
             return images;
         }
         
-        log.info("이미지 추출 시작 - URL: {}", baseUrl);
+        log.info("이미지 추출 및 다운로드 시작 - URL: {}", baseUrl);
         
         // 커스텀 이미지 선택자가 있는 경우
         if (requestDto.getImageSelector() != null && !requestDto.getImageSelector().isEmpty() && !"none".equals(requestDto.getImageSelector())) {
@@ -170,8 +197,11 @@ public class CrawlingService {
                     log.info("발견된 이미지 URL: {}", imageUrl);
                     String absoluteUrl = convertToAbsoluteUrl(imageUrl, baseUrl);
                     if (absoluteUrl != null && isValidImageUrl(absoluteUrl)) {
-                        images.add(absoluteUrl);
-                        log.info("추가된 이미지: {}", absoluteUrl);
+                        String downloadedUrl = downloadImage(absoluteUrl);
+                        if (downloadedUrl != null) {
+                            images.add(downloadedUrl);
+                            log.info("✅ 다운로드된 이미지: {}", downloadedUrl);
+                        }
                     }
                 }
             }
@@ -180,7 +210,6 @@ public class CrawlingService {
             Elements imageElements = doc.select("img");
             log.info("전체 이미지 개수: {}", imageElements.size());
             
-            // 모든 img 태그의 정보를 로그로 출력
             for (int i = 0; i < imageElements.size(); i++) {
                 Element element = imageElements.get(i);
                 String src = element.attr("src");
@@ -205,8 +234,11 @@ public class CrawlingService {
                         log.info("이미지 검증: isValid={}, isAd={}", isValid, isAd);
                         
                         if (isValid && !isAd) {
-                            images.add(absoluteUrl);
-                            log.info("✅ 추가된 이미지: {}", absoluteUrl);
+                            String downloadedUrl = downloadImage(absoluteUrl);
+                            if (downloadedUrl != null) {
+                                images.add(downloadedUrl);
+                                log.info("✅ 다운로드된 이미지: {}", downloadedUrl);
+                            }
                         } else {
                             log.info("❌ 필터링된 이미지: {} (isValid={}, isAd={})", absoluteUrl, isValid, isAd);
                         }
@@ -219,7 +251,7 @@ public class CrawlingService {
             }
         }
         
-        log.info("최종 추출된 이미지 개수: {}", images.size());
+        log.info("최종 다운로드된 이미지 개수: {}", images.size());
         return images;
     }
     
@@ -310,6 +342,56 @@ public class CrawlingService {
             log.warn("URL 변환 실패: {} -> {}", src, e.getMessage());
             return null;
         }
+    }
+    
+    /**
+     * 이미지를 다운로드하고 로컬 URL을 반환합니다.
+     */
+    private String downloadImage(String imageUrl) {
+        try {
+            // 파일 확장자 추출
+            String extension = getImageExtension(imageUrl);
+            if (extension == null) {
+                log.warn("이미지 확장자를 추출할 수 없습니다: {}", imageUrl);
+                return null;
+            }
+            
+            // 고유한 파일명 생성
+            String fileName = UUID.randomUUID().toString() + extension;
+            Path filePath = Paths.get(CRAWLING_IMAGE_DIR, fileName);
+            
+            // 이미지 다운로드
+            URL url = new URL(imageUrl);
+            try (InputStream in = url.openStream()) {
+                Files.copy(in, filePath, StandardCopyOption.REPLACE_EXISTING);
+                log.info("이미지 다운로드 완료: {} -> {}", imageUrl, filePath);
+                
+                // 웹에서 접근 가능한 URL 반환
+                return "/images/crawling/" + fileName;
+            }
+        } catch (Exception e) {
+            log.error("이미지 다운로드 실패: {} - {}", imageUrl, e.getMessage());
+            return null;
+        }
+    }
+    
+    /**
+     * 이미지 URL에서 확장자를 추출합니다.
+     */
+    private String getImageExtension(String imageUrl) {
+        String lowerUrl = imageUrl.toLowerCase();
+        if (lowerUrl.contains(".jpg") || lowerUrl.contains(".jpeg")) {
+            return ".jpg";
+        } else if (lowerUrl.contains(".png")) {
+            return ".png";
+        } else if (lowerUrl.contains(".gif")) {
+            return ".gif";
+        } else if (lowerUrl.contains(".webp")) {
+            return ".webp";
+        } else if (lowerUrl.contains(".svg")) {
+            return ".svg";
+        }
+        return ".jpg"; // 기본값
     }
     
     /**

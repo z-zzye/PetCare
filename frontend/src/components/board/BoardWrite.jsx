@@ -6,6 +6,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import axiosInstance from '../../api/axios';
 import { useAuth } from '../../contexts/AuthContext';
 import Header from '../Header';
+import CrawlingBoardWrite from './CrawlingBoardWrite';
 import './BoardCommon.css';
 import { boardConfig } from './boardConfig';
 
@@ -24,6 +25,7 @@ const BoardWrite = () => {
   const [showHashtagDropdown, setShowHashtagDropdown] = useState(false);
   const [loading, setLoading] = useState(false);
   const [pendingImages, setPendingImages] = useState([]); // 업로드 대기 중인 이미지들
+  const [showCrawlingModal, setShowCrawlingModal] = useState(false); // 크롤링 모달 상태
 
   // Quill 에디터 초기화
   useEffect(() => {
@@ -447,101 +449,91 @@ const BoardWrite = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!title.trim()) {
+      alert('제목을 입력해주세요.');
+      return;
+    }
+
+    if (!content.trim()) {
+      alert('내용을 입력해주세요.');
+      return;
+    }
+
     if (!category) {
-      alert('게시판 카테고리를 선택해주세요.');
+      alert('게시판을 선택해주세요.');
       return;
     }
 
     setLoading(true);
-    const token = localStorage.getItem('token');
-    if (!token) {
-      alert('로그인이 필요합니다.');
-      navigate('/members/login');
-      return;
-    }
 
     try {
-      // 1. 게시글 생성
-      const response = await axiosInstance.post('/boards', {
-        title,
-        content,
-        boardKind: category.toUpperCase(),
-        hashtags: selectedHashtags,
-      });
+      // 이미지 업로드 처리
+      const uploadedImageUrls = [];
+      for (const pendingImage of pendingImages) {
+        try {
+          const formData = new FormData();
+          formData.append('file', pendingImage.file);
+          formData.append('type', 'board');
 
-      const boardId = response.data;
+          const uploadResponse = await axiosInstance.post('/boards/upload-image', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          });
 
-      // 2. 이미지 업로드 (pendingImages가 있는 경우)
-      if (pendingImages.length > 0) {
-        console.log('업로드할 이미지 개수:', pendingImages.length);
-        console.log('게시글 ID:', boardId);
-        console.log('토큰:', token ? '존재' : '없음');
-
-        for (const pendingImage of pendingImages) {
-          try {
-            console.log('이미지 업로드 시작:', pendingImage.file.name);
-            console.log('파일 크기:', pendingImage.file.size, 'bytes');
-            console.log('파일 타입:', pendingImage.file.type);
-
-            const formData = new FormData();
-            formData.append('file', pendingImage.file);
-            formData.append('boardId', boardId);
-
-            // FormData 내용 확인
-            for (let [key, value] of formData.entries()) {
-              console.log('FormData:', key, value);
-            }
-
-            // axiosInstance로 이미지 업로드 (Content-Type 헤더 제거)
-            const imageResponse = await axiosInstance.post(
-              '/board-images/upload',
-              formData
-            );
-
-            console.log(
-              '이미지 업로드 성공:',
-              pendingImage.file.name,
-              '결과:',
-              imageResponse.data
-            );
-          } catch (imageError) {
-            console.error(
-              '이미지 업로드 중 오류:',
-              pendingImage.file.name,
-              imageError
-            );
-            if (imageError.response?.data?.errorMessage) {
-              alert(
-                `이미지 업로드 실패: ${imageError.response.data.errorMessage}`
-              );
-            } else {
-              alert(`이미지 업로드 실패: ${pendingImage.file.name}`);
-            }
+          if (uploadResponse.data && uploadResponse.data.imageUrl) {
+            uploadedImageUrls.push(uploadResponse.data.imageUrl);
           }
+        } catch (error) {
+          console.error('이미지 업로드 실패:', error);
+          alert('이미지 업로드에 실패했습니다.');
+          setLoading(false);
+          return;
         }
-      } else {
-        console.log('업로드할 이미지가 없습니다.');
       }
 
-      alert('게시글이 성공적으로 등록되었습니다.');
-      navigate(`/board/${category}`);
+      // 게시글 데이터 준비
+      const boardData = {
+        title: title,
+        content: content,
+        boardKind: category.toUpperCase(), // 소문자를 대문자로 변환
+        hashtags: selectedHashtags
+      };
+
+      console.log('게시글 데이터:', boardData);
+
+      const response = await axiosInstance.post('/boards', boardData);
+
+      if (response.status === 201) {
+        alert('게시글이 성공적으로 작성되었습니다.');
+        navigate(`/board/${category}/${response.data}`);
+      } else {
+        alert('게시글 작성에 실패했습니다.');
+      }
     } catch (error) {
-      console.error('게시글 등록 오류:', error);
-
-      // 비속어 감지 시 처리
-      if (error.response?.data?.error === 'profanity_detected') {
-        const detectedWords = error.response.data.detectedWords || '';
-        alert(
-          `비속어가 감지되어 게시글 등록이 취소되었습니다.\n\n감지된 부적절한 표현:\n${detectedWords}\n\n부적절한 표현을 수정해주세요.`
-        );
-      } else if (error.response?.data?.message) {
-        alert(`게시글 등록 실패: ${error.response.data.message}`);
-      } else {
-        alert('게시글 등록 중 오류가 발생했습니다.');
-      }
+      console.error('게시글 작성 오류:', error);
+      alert('게시글 작성 중 오류가 발생했습니다.');
     } finally {
       setLoading(false);
     }
+  };
+
+  // 크롤링 모달 열기
+  const handleOpenCrawlingModal = () => {
+    setShowCrawlingModal(true);
+  };
+
+  // 크롤링 모달 닫기
+  const handleCloseCrawlingModal = () => {
+    setShowCrawlingModal(false);
+  };
+
+  // 크롤링 성공 시 처리
+  const handleCrawlingSuccess = (boardId) => {
+    setShowCrawlingModal(false);
+    alert('크롤링으로 게시글이 성공적으로 작성되었습니다.');
+    navigate(`/board/${category}/${boardId}`);
   };
 
   return (
@@ -788,8 +780,71 @@ const BoardWrite = () => {
           <button type="submit" className="board-btn" disabled={loading}>
             {loading ? '저장 중...' : '저장'}
           </button>
+          
+          {/* 크롤링으로 작성하기 버튼 - 관리자만 표시 */}
+          {role === 'ADMIN' && (
+            <button 
+              type="button" 
+              className="board-btn crawling-btn" 
+              onClick={handleOpenCrawlingModal}
+              style={{
+                marginLeft: '10px',
+                backgroundColor: '#28a745',
+                borderColor: '#28a745'
+              }}
+            >
+              크롤링으로 작성하기
+            </button>
+          )}
         </form>
       </div>
+      
+      {/* 크롤링 모달 */}
+      {showCrawlingModal && (
+        <div className="modal-overlay" style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          zIndex: 1000,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}>
+          <div className="modal-content" style={{
+            backgroundColor: 'white',
+            borderRadius: '8px',
+            padding: '20px',
+            maxWidth: '90%',
+            maxHeight: '90%',
+            overflow: 'auto',
+            position: 'relative'
+          }}>
+            <button 
+              onClick={handleCloseCrawlingModal}
+              style={{
+                position: 'absolute',
+                top: '10px',
+                right: '15px',
+                background: 'none',
+                border: 'none',
+                fontSize: '24px',
+                cursor: 'pointer',
+                color: '#666'
+              }}
+            >
+              ×
+            </button>
+            <CrawlingBoardWrite 
+              boardKind={category}
+              onClose={handleCloseCrawlingModal}
+              onSuccess={handleCrawlingSuccess}
+            />
+          </div>
+        </div>
+      )}
     </>
   );
 };
