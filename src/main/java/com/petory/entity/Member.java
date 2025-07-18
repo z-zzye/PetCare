@@ -64,4 +64,11 @@ public class Member extends BaseEntity {
     public Long getMemberId() {
         return member_Id;
     }
+
+    /**
+     * 역할 업데이트
+     */
+    public void updateRole(Role role) {
+        this.member_Role = role;
+    }
 }

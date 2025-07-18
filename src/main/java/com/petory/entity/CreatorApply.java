@@ -54,6 +54,9 @@ public class CreatorApply extends BaseEntity {
     @Column(name = "reject_reason")
     private String rejectReason;
 
+    @Column(name = "reg_date", updatable = false)
+    private java.time.LocalDateTime regDate;
+
     public static CreatorApply createCreatorApply(Member member, String memberName, 
                                                 String maincontents, String producingex,
                                                 String insta, String youtube, String tiktok, String blog) {
@@ -67,6 +70,17 @@ public class CreatorApply extends BaseEntity {
                 .creatorTiktok(tiktok)
                 .creatorBlog(blog)
                 .applyStatus(ApplyStatus.PENDING)
+                .regDate(java.time.LocalDateTime.now())
                 .build();
+    }
+
+    /**
+     * 신청 상태 업데이트
+     */
+    public void updateStatus(ApplyStatus status) {
+        this.applyStatus = status;
+        if (status == ApplyStatus.APPROVED || status == ApplyStatus.REJECTED) {
+            this.applyProcessDate = java.time.LocalDateTime.now();
+        }
     }
 } 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from '../../api/axios';
 import { jwtDecode } from 'jwt-decode';
+import Swal from 'sweetalert2';
 import './CreatorApply.css';
 import Header from '../Header';
 
@@ -106,12 +107,25 @@ const CreatorApply = () => {
         experience: formData.experience
       });
       
-      alert(response.data.message || '크리에이터 신청이 완료되었습니다. 검토 후 연락드리겠습니다.');
-      navigate('/members/mypage');
+      Swal.fire({
+        icon: 'success',
+        title: '신청 완료!',
+        text: response.data.message || '크리에이터 신청이 완료되었습니다. 검토 후 연락드리겠습니다.',
+        confirmButtonText: '확인',
+        confirmButtonColor: '#3085d6'
+      }).then(() => {
+        navigate('/members/mypage');
+      });
       
     } catch (error) {
       console.error('크리에이터 신청 오류:', error);
-      alert(error.response?.data?.error || '크리에이터 신청 중 오류가 발생했습니다.');
+      Swal.fire({
+        icon: 'error',
+        title: '신청 실패',
+        text: error.response?.data?.error || '크리에이터 신청 중 오류가 발생했습니다.',
+        confirmButtonText: '확인',
+        confirmButtonColor: '#d33'
+      });
     }
   };
 

@@ -11,10 +11,11 @@ import './Sidebar.css'
 
 const Sidebar = ({ onTabChange }) => {
   const navigate = useNavigate();
-  const { profileImg, nickname, isCreator } = useAuth();
+  const { profileImg, nickname } = useAuth();
 
   const [isSocialUser, setIsSocialUser] = useState(false);
   const [memberId, setMemberId] = useState(null);
+  const [memberRole, setMemberRole] = useState(null);
   const [pets, setPets] = useState([]);
   const [showHashtagModal, setShowHashtagModal] = useState(false);
   const [userHashtags, setUserHashtags] = useState([]);
@@ -75,6 +76,19 @@ const Sidebar = ({ onTabChange }) => {
   useEffect(() => {
     if (memberId === null) return;
     fetchUserHashtags();
+  }, [memberId]);
+
+  // ✅ 멤버ID 기반 역할 조회
+  useEffect(() => {
+    if (memberId === null) return;
+    
+    axios.get(`/members/${memberId}/role`)
+      .then(res => {
+        setMemberRole(res.data);
+      })
+      .catch(err => {
+        console.error('회원 역할 조회 실패:', err);
+      });
   }, [memberId]);
 
   const fetchUserHashtags = async () => {
@@ -181,7 +195,7 @@ const Sidebar = ({ onTabChange }) => {
 
         {/* 크리에이터 섹션 */}
         <div className="creator-section">
-          {!isCreator ? (
+          {memberRole !== 'CREATOR' ? (
             <button 
               className="creator-btn" 
               onClick={async () => {
@@ -194,7 +208,20 @@ const Sidebar = ({ onTabChange }) => {
               크리에이터 신청
             </button>
           ) : (
-            <div className="creator-image-placeholder" />
+            <button 
+              className="creator-btn creator-already-btn" 
+              onClick={() => {
+                Swal.fire({
+                  title: '이미 크리에이터입니다',
+                  text: '축하합니다! 이미 크리에이터 권한을 가지고 있습니다.',
+                  icon: 'success',
+                  confirmButtonText: '확인',
+                  confirmButtonColor: '#27ae60'
+                });
+              }}
+            >
+              크리에이터 신청
+            </button>
           )}
 
           {/* ✅ [추가] 결제수단 관리 버튼 */}

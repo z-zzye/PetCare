@@ -24,4 +24,13 @@ public interface CreatorApplyRepository extends JpaRepository<CreatorApply, Long
     
     // 멤버 ID로 크리에이터 신청 존재 여부 확인
     boolean existsByMember(Member member);
+    
+    // 특정 멤버의 특정 상태 신청 존재 여부 확인
+    boolean existsByMemberAndApplyStatus(Member member, com.petory.constant.ApplyStatus status);
+    
+    // 특정 멤버의 특정 상태들 중 하나라도 존재하는지 확인
+    boolean existsByMemberAndApplyStatusIn(Member member, java.util.List<com.petory.constant.ApplyStatus> statuses);
+    
+    // 관리자용 페이징 조회
+    org.springframework.data.domain.Page<CreatorApply> findAllByOrderByRegDateDesc(org.springframework.data.domain.Pageable pageable);
 } 

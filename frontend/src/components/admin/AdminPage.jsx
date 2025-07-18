@@ -51,6 +51,11 @@ const AdminPage = () => {
             <h3>자동 예약 관리</h3>
             <p>자동 예약 현황을 확인하고 접종 완료/취소를 처리합니다</p>
           </Link>
+          <Link to="/admin/creator-apply" className="admin-menu-item">
+            <div className="admin-menu-icon">🌟</div>
+            <h3>크리에이터 신청 확인</h3>
+            <p>크리에이터 신청 현황을 확인하고 승인/거절을 처리합니다</p>
+          </Link>
         </div>
       </div>
     </div>

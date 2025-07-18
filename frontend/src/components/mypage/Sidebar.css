@@ -79,6 +79,30 @@
   border: 1px dashed #aaa;
 }
 
+.creator-already-btn {
+  background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%) !important;
+  color: white !important;
+  border: 2px solid #27ae60 !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.creator-already-btn::before {
+  content: '✓';
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.creator-already-btn:hover {
+  background: linear-gradient(135deg, #229954 0%, #27ae60 100%) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(39, 174, 96, 0.3);
+}
+
 /* 다이어리 인덱스 탭 스타일 */
 .sidebar-tabs {
   position: absolute;
