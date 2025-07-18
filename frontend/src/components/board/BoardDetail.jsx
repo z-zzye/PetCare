@@ -242,9 +242,10 @@ const BoardDetail = () => {
               ))}
             </div>
           )}
-          <div style={{ minHeight: '200px', whiteSpace: 'pre-wrap' }}>
-            {post.content}
-          </div>
+          <div 
+            style={{ minHeight: '200px', whiteSpace: 'pre-wrap' }}
+            dangerouslySetInnerHTML={{ __html: post.content }}
+          />
           <div className="board-recommend-section">
             <span className="recommend-count">
               👍 {post.likeCount !== undefined ? post.likeCount : 0}

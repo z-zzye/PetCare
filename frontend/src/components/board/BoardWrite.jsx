@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import Header from '../Header';
+import CrawlingBoardWrite from './CrawlingBoardWrite';
 import './BoardCommon.css';
 import { boardConfig } from './boardConfig';
 
@@ -16,6 +17,7 @@ const BoardWrite = () => {
   const [selectedHashtags, setSelectedHashtags] = useState([]);
   const [showHashtagModal, setShowHashtagModal] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showCrawlingForm, setShowCrawlingForm] = useState(false);
 
   // 권한별 선택 가능한 카테고리만 노출
   const availableCategories = Object.entries(boardConfig).filter(
@@ -104,7 +106,30 @@ const BoardWrite = () => {
       <Header />
       <div className="board-container">
         <h1 className="board-title">글 작성</h1>
-        <form onSubmit={handleSubmit} className="board-form">
+        
+        {/* 크롤링 버튼 */}
+        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+          <button
+            type="button"
+            onClick={() => setShowCrawlingForm(!showCrawlingForm)}
+            className="board-btn"
+            style={{ marginRight: '10px' }}
+          >
+            {showCrawlingForm ? '일반 작성으로' : '크롤링으로 작성'}
+          </button>
+        </div>
+
+        {showCrawlingForm ? (
+          <CrawlingBoardWrite
+            boardKind={category.toUpperCase()}
+            onClose={() => setShowCrawlingForm(false)}
+            onSuccess={(boardId) => {
+              alert('게시글이 성공적으로 작성되었습니다.');
+              navigate(`/board/${category}`);
+            }}
+          />
+        ) : (
+          <form onSubmit={handleSubmit} className="board-form">
           <div className="board-form-group">
             <label className="board-form-label">게시판 카테고리</label>
             <select
@@ -186,6 +211,7 @@ const BoardWrite = () => {
             {loading ? '저장 중...' : '저장'}
           </button>
         </form>
+        )}
       </div>
     </>
   );

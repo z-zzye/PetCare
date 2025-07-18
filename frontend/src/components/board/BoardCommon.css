@@ -634,3 +634,266 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* 크롤링 게시글 작성 스타일 */
+.crawling-board-write {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.crawling-board-write h2 {
+  color: #333;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.crawling-board-write .form-group {
+  margin-bottom: 15px;
+}
+
+.crawling-board-write label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 600;
+  color: #555;
+}
+
+.crawling-board-write input,
+.crawling-board-write select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.crawling-board-write input:focus,
+.crawling-board-write select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.btn-primary {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  flex: 1;
+  min-width: 120px;
+}
+
+.btn-primary:hover {
+  background: #0056b3;
+}
+
+.btn-primary:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  flex: 1;
+  min-width: 120px;
+}
+
+.btn-secondary:hover {
+  background: #545b62;
+}
+
+.btn-secondary:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.error-message {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 10px;
+  border-radius: 4px;
+  margin-top: 15px;
+  border: 1px solid #f5c6cb;
+}
+
+.preview-section {
+  margin-top: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
+}
+
+.preview-section h3 {
+  color: #495057;
+  margin-bottom: 10px;
+}
+
+.preview-content h4 {
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.preview-content p {
+  color: #666;
+  line-height: 1.5;
+}
+
+/* 고급 설정 스타일 */
+.advanced-settings {
+  margin: 20px 0;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.advanced-settings summary {
+  background: #f8f9fa;
+  padding: 12px 15px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #495057;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.advanced-settings summary:hover {
+  background: #e9ecef;
+}
+
+.advanced-content {
+  padding: 15px;
+  background: #fff;
+}
+
+.advanced-content .form-group {
+  margin-bottom: 15px;
+}
+
+.advanced-content small {
+  display: block;
+  color: #6c757d;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* 이미지 옵션 스타일 */
+.image-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.radio-option:hover {
+  background: #f8f9fa;
+}
+
+.radio-option input[type="radio"] {
+  margin: 0;
+}
+
+.radio-option span {
+  font-size: 14px;
+  color: #495057;
+}
+
+/* 이미지 미리보기 스타일 */
+.preview-images {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #dee2e6;
+}
+
+.preview-images h5 {
+  color: #495057;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.image-list {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.preview-image {
+  width: 80px;
+  height: 80px;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.preview-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-count {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #6c757d;
+  text-align: center;
+}
+
+/* 게시글 썸네일 스타일 */
+.post-title-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.post-thumbnails {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.post-thumbnail {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.post-thumbnail:hover {
+  transform: scale(1.1);
+}

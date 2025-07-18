@@ -179,12 +179,38 @@ const BoardList = () => {
                     <tr key={post.id}>
                       <td className="th-id">{post.id}</td>
                       <td className="th-title">
-                        <Link
-                          to={`/board/${category}/${post.id}`}
-                          className="board-link"
-                        >
-                          {post.title} [{post.commentCount}]
-                        </Link>
+                        <div className="post-title-container">
+                          <Link
+                            to={`/board/${category}/${post.id}`}
+                            className="board-link"
+                          >
+                            {post.title} [{post.commentCount}]
+                          </Link>
+                          {/* 이미지 썸네일 표시 */}
+                          {post.content && post.content.includes('[원본 이미지들]') && (
+                            <div className="post-thumbnails">
+                              {post.content.split('\n')
+                                .filter(line => line.includes('<img src='))
+                                .slice(0, 3)
+                                .map((imgLine, index) => {
+                                  const srcMatch = imgLine.match(/src="([^"]+)"/);
+                                  if (srcMatch) {
+                                    return (
+                                      <img 
+                                        key={index}
+                                        src={srcMatch[1]} 
+                                        alt={`썸네일 ${index + 1}`}
+                                        className="post-thumbnail"
+                                        onError={(e) => e.target.style.display = 'none'}
+                                        crossOrigin="anonymous"
+                                      />
+                                    );
+                                  }
+                                  return null;
+                                })}
+                            </div>
+                          )}
+                        </div>
                         {/* 해시태그 표시 */}
                         {post.hashtags && post.hashtags.length > 0 && (
                           <div className="post-hashtags">

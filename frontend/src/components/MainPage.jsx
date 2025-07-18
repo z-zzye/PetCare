@@ -168,18 +168,8 @@ const MainPage = () => {
         {/* 배너 섹션 */}
         <section className="banner-section">
           <div className="banner-content">
-            <div className="banner-text">
-              <h1>{bannerData.title}</h1>
-              <p>{bannerData.subtitle}</p>
-              <button
-                className="banner-btn"
-                onClick={() => navigate('/members/login')}
-              >
-                시작하기
-              </button>
-            </div>
             <div className="banner-image">
-              <img src={bannerData.image} alt="반려동물" />
+              <img src="/images/main-banner-image.png" alt="반려동물" />
             </div>
           </div>
         </section>
