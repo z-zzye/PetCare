@@ -209,7 +209,7 @@ public class MemberApiController {
 
       try {
         dto.setMember_ProfileImgFile(file);
-        
+
         memberService.updateMember(dto);
         return ResponseEntity.ok("회원 정보가 성공적으로 업데이트되었습니다.");
       } catch (IllegalStateException e) {
@@ -272,6 +272,18 @@ public class MemberApiController {
   @GetMapping("/public/{id}")
   public ResponseEntity<ChatMemberDto> getPublicMember(@PathVariable Long id) {
     return ResponseEntity.ok(memberService.getChatMemberById(id));
+  }
+
+  @GetMapping("/{memberId}/role")
+  public ResponseEntity<String> getMemberRole(@PathVariable Long memberId) {
+    try {
+      String role = memberService.getMemberRole(memberId);
+      return ResponseEntity.ok(role);
+    } catch (IllegalStateException e) {
+      return ResponseEntity.status(404).body(e.getMessage());
+    } catch (Exception e) {
+      return ResponseEntity.status(500).body("역할 조회 중 오류가 발생했습니다.");
+    }
   }
 
 }
