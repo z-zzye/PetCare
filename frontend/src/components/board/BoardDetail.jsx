@@ -13,12 +13,12 @@ const BoardDetail = () => {
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
-  
+
   // 사용자 액션 팝업 상태
   const [showUserActionPopup, setShowUserActionPopup] = useState(false);
   const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 });
   const [selectedUser, setSelectedUser] = useState(null);
-  
+
   // 채팅 모달 상태
   const [showChatModal, setShowChatModal] = useState(false);
   const [chatReceiverId, setChatReceiverId] = useState(null);
@@ -74,20 +74,20 @@ const BoardDetail = () => {
     try {
       const token = localStorage.getItem('token');
       const payload = parseJwt(token);
-      
+
       // 내 이메일 설정
       if (payload && payload.sub) {
         setMyEmail(payload.sub);
       }
-      
+
       // JWT의 sub(이메일)과 게시글 작성자 이메일 비교
-      if (payload && post && post.authorEmail) {
-        const isAuthor = payload.sub === post.authorEmail;
+      if (payload && post && post.memberEmail) {
+        const isAuthor = payload.sub === post.memberEmail;
         console.log(
           'Is writer check:',
           payload.sub,
           '===',
-          post.authorEmail,
+          post.memberEmail,
           '=',
           isAuthor
         ); // 디버깅용
@@ -98,8 +98,8 @@ const BoardDetail = () => {
           !!payload,
           'post:',
           !!post,
-          'authorEmail:',
-          post?.authorEmail
+          'memberEmail:',
+          post?.memberEmail
         ); // 디버깅용
         setIsWriter(false);
       }
@@ -228,9 +228,9 @@ const BoardDetail = () => {
   };
 
   // 사용자 닉네임 클릭 핸들러
-  const handleNicknameClick = (authorId, authorNickname, authorEmail, event) => {
+  const handleNicknameClick = (memberId, memberNickname, memberEmail, event) => {
     event.stopPropagation();
-    
+
     if (!isLoggedIn) {
       alert('채팅을 이용하려면 로그인이 필요합니다.');
       navigate('/members/login');
@@ -239,11 +239,11 @@ const BoardDetail = () => {
 
     // 팝업 위치 계산
     const rect = event.target.getBoundingClientRect();
-    setPopupPosition({ 
-      x: rect.left, 
-      y: rect.bottom + 5 
+    setPopupPosition({
+      x: rect.left,
+      y: rect.bottom + 5
     });
-    setSelectedUser({ id: authorId, nickname: authorNickname, email: authorEmail });
+    setSelectedUser({ id: memberId, nickname: memberNickname, email: memberEmail });
     setShowUserActionPopup(true);
   };
 
@@ -282,12 +282,12 @@ const BoardDetail = () => {
         <div className="board-content">
           <h1 className="board-title">{post.title}</h1>
           <div className="board-meta improved-meta">
-            <span 
+            <span
               className="board-author clickable-nickname"
-              onClick={(e) => handleNicknameClick(post.authorId, post.authorNickName, post.authorEmail, e)}
+              onClick={(e) => handleNicknameClick(post.memberId, post.memberNickname, post.memberEmail, e)}
               style={{ cursor: 'pointer', color: '#007bff' }}
             >
-              작성자: {post.authorNickName}
+              작성자: {post.memberNickname}
             </span>
             <span className="board-date">
               {new Date(post.regDate).toLocaleString()}
@@ -363,7 +363,7 @@ const BoardDetail = () => {
           <ul className="board-comment-list">
             {comments.map((comment) => (
               <li key={comment.id} className="board-comment-item">
-                <div 
+                <div
                   className="board-comment-author clickable-nickname"
                   onClick={(e) => handleNicknameClick(comment.authorId, comment.authorNickName, comment.authorEmail, e)}
                   style={{ cursor: 'pointer', color: '#007bff' }}
@@ -379,7 +379,7 @@ const BoardDetail = () => {
           </ul>
         </div>
       </div>
-      
+
       {/* 사용자 액션 팝업 */}
       {showUserActionPopup && (
         <UserActionPopup

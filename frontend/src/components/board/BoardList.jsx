@@ -12,20 +12,19 @@ const BoardList = () => {
   const { category } = useParams();
   const { isLoggedIn, email } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
-  
+
   // 소문자 카테고리를 대문자로 매핑
   const getBoardConfigKey = (category) => {
     const categoryMap = {
       'info': 'INFO',
-      'free': 'FREE', 
+      'free': 'FREE',
       'qna': 'QNA',
       'walkwith': 'WALKWITH'
     };
     return categoryMap[category] || category;
   };
-  
+
   const config = boardConfig[getBoardConfigKey(category)];
   const [posts, setPosts] = useState([]);
   const [myEmail, setMyEmail] = useState(null);
@@ -34,13 +33,13 @@ const BoardList = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [searchHashtag, setSearchHashtag] = useState('');
   const [popularHashtags, setPopularHashtags] = useState([]);
-  
-  
+
+
   // 사용자 액션 팝업 상태
   const [showUserActionPopup, setShowUserActionPopup] = useState(false);
   const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 });
   const [selectedUser, setSelectedUser] = useState(null);
-  
+
   // 채팅 모달 상태
   const [showChatModal, setShowChatModal] = useState(false);
   const [chatReceiverId, setChatReceiverId] = useState(null);
@@ -66,7 +65,7 @@ const BoardList = () => {
   // 내 이메일 가져오기
   useEffect(() => {
     if (!isLoggedIn) return;
-    
+
     const token = localStorage.getItem('token');
     if (!token) return;
 
@@ -176,7 +175,7 @@ const BoardList = () => {
   // 사용자 닉네임 클릭 핸들러
   const handleNicknameClick = (authorId, authorNickname, authorEmail, event) => {
     event.stopPropagation();
-    
+
     if (!isLoggedIn) {
       alert('채팅을 이용하려면 로그인이 필요합니다.');
       navigate('/members/login');
@@ -185,9 +184,9 @@ const BoardList = () => {
 
     // 팝업 위치 계산
     const rect = event.target.getBoundingClientRect();
-    setPopupPosition({ 
-      x: rect.left, 
-      y: rect.bottom + 5 
+    setPopupPosition({
+      x: rect.left,
+      y: rect.bottom + 5
     });
     setSelectedUser({ id: authorId, nickname: authorNickname, email: authorEmail });
     setShowUserActionPopup(true);
@@ -275,8 +274,8 @@ const BoardList = () => {
         >
           글 작성하기
         </Link>
-        
-       
+
+
 
         {/* 게시글 목록 */}
         {loading ? (
@@ -317,9 +316,9 @@ const BoardList = () => {
                                   const srcMatch = imgLine.match(/src="([^"]+)"/);
                                   if (srcMatch) {
                                     return (
-                                      <img 
+                                      <img
                                         key={index}
-                                        src={srcMatch[1]} 
+                                        src={srcMatch[1]}
                                         alt={`썸네일 ${index + 1}`}
                                         className="post-thumbnail"
                                         onError={(e) => e.target.style.display = 'none'}
@@ -350,7 +349,7 @@ const BoardList = () => {
                           </div>
                         )}
                       </td>
-                      <td 
+                      <td
                     className="th-author clickable-nickname"
                     onClick={(e) => handleNicknameClick(post.authorId, post.authorNickName, post.authorEmail, e)}
                     style={{ cursor: 'pointer', color: '#007bff' }}
@@ -415,7 +414,7 @@ const BoardList = () => {
           </>
         )}
       </div>
-      
+
       {/* 사용자 액션 팝업 */}
       {showUserActionPopup && (
         <UserActionPopup
