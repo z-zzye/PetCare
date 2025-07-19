@@ -216,6 +216,18 @@ const BoardList = () => {
 
   return (
     <>
+      <style>
+        {`
+          body {
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+          }
+          html {
+            background-color: #ffffff;
+          }
+        `}
+      </style>
       <Header />
       <div className="board-container">
         <h1 className="board-title">{config.name}</h1>
@@ -237,14 +249,14 @@ const BoardList = () => {
             />
             <button
               onClick={() => handleHashtagSearch(searchHashtag)}
-              className="board-btn"
+              className="board-search-btn"
             >
               검색
             </button>
             {searchHashtag && (
               <button
                 onClick={handleClearSearch}
-                className="board-btn board-btn-secondary"
+                className="board-search-btn board-btn-secondary"
               >
                 초기화
               </button>
@@ -253,7 +265,7 @@ const BoardList = () => {
 
           {/* 인기 해시태그 */}
           <div className="popular-hashtags">
-            <span className="popular-hashtags-label">인기 해시태그:</span>
+            <span className="popular-hashtags-label">인기 해시태그</span>
             {popularHashtags.map((hashtag, index) => (
               <button
                 key={index}
@@ -266,14 +278,23 @@ const BoardList = () => {
           </div>
         </div>
 
-        <Link
-          to="/board/write"
-          className="board-btn"
-          style={{ marginBottom: 24, display: 'inline-block' }}
-          onClick={handleWriteClick}
-        >
-          글 작성하기
-        </Link>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 24 }}>
+          <Link
+            to="/board/write"
+            className="board-btn"
+            onClick={handleWriteClick}
+            style={{
+              fontSize: '0.8rem',
+              padding: '6px 12px',
+              textDecoration: 'none',
+              backgroundColor: '#ffc107',
+              color: '#223a5e',
+              border: '2px solid #ffc107'
+            }}
+          >
+            글 작성하기
+          </Link>
+        </div>
 
 
 
@@ -282,62 +303,24 @@ const BoardList = () => {
           <div className="board-loading">로딩 중...</div>
         ) : (
           <>
-            <table className="board-table">
-              <thead>
-                <tr>
-                  <th className="th-id">번호</th>
-                  <th className="th-title">제목</th>
-                  <th className="th-author">작성자</th>
-                  <th className="th-date">작성일</th>
-                  <th className="th-views">조회수</th>
-                  <th className="th-likes">추천수</th>
-                </tr>
-              </thead>
-              <tbody>
-                {posts.length > 0 ? (
-                  posts.map((post) => (
-                    <tr key={post.id}>
-                      <td className="th-id">{post.id}</td>
-                      <td className="th-title">
-                        <div className="post-title-container">
-                          <Link
-                            to={`/board/${category}/${post.id}`}
-                            className="board-link"
-                          >
-                            {post.title} [{post.commentCount}]
-                          </Link>
-                          {/* 이미지 썸네일 표시 */}
-                          {post.content && post.content.includes('[원본 이미지들]') && (
-                            <div className="post-thumbnails">
-                              {post.content.split('\n')
-                                .filter(line => line.includes('<img src='))
-                                .slice(0, 3)
-                                .map((imgLine, index) => {
-                                  const srcMatch = imgLine.match(/src="([^"]+)"/);
-                                  if (srcMatch) {
-                                    return (
-                                      <img
-                                        key={index}
-                                        src={srcMatch[1]}
-                                        alt={`썸네일 ${index + 1}`}
-                                        className="post-thumbnail"
-                                        onError={(e) => e.target.style.display = 'none'}
-                                        crossOrigin="anonymous"
-                                      />
-                                    );
-                                  }
-                                  return null;
-                                })}
-                            </div>
-                          )}
+            <div className="board-posts">
+              {posts.length > 0 ? (
+                posts.map((post) => (
+                  <div key={post.id} className="board-post-item">
+                    <div className="board-post-content">
+                      {/* 카테고리 태그와 해시태그 */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                        <div className="board-post-category">
+                          🐾 {config.name}
                         </div>
-                        {/* 해시태그 표시 */}
+                        
+                        {/* 해시태그 */}
                         {post.hashtags && post.hashtags.length > 0 && (
-                          <div className="post-hashtags">
+                          <div className="board-post-hashtags">
                             {post.hashtags.slice(0, 5).map((hashtag, index) => (
                               <span
                                 key={index}
-                                className="post-hashtag"
+                                className="board-post-hashtag"
                                 onClick={(e) => {
                                   e.preventDefault();
                                   handleHashtagSearch(hashtag.tagName);
@@ -348,32 +331,60 @@ const BoardList = () => {
                             ))}
                           </div>
                         )}
-                      </td>
-                      <td
-                    className="th-author clickable-nickname"
-                    onClick={(e) => handleNicknameClick(post.authorId, post.authorNickName, post.authorEmail, e)}
-                    style={{ cursor: 'pointer', color: '#007bff' }}
-                  >
-                    {post.authorNickName}
-                  </td>
-                      <td className="th-date">
-                        {new Date(post.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="th-views">{post.viewCount}</td>
-                      <td className="th-likes">{post.likeCount}</td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={6} className="board-empty">
-                      {searchHashtag
-                        ? `"${searchHashtag}" 검색 결과가 없습니다.`
-                        : '게시글이 없습니다.'}
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                      </div>
+                      
+                      {/* 제목 */}
+                      <Link
+                        to={`/board/${category}/${post.id}`}
+                        className="board-post-title"
+                      >
+                        {post.title}
+                      </Link>
+                      
+                      {/* 메타 정보 */}
+                      <div className="board-post-meta">
+                        <div className="board-post-author">
+                          <span
+                            className="clickable-nickname"
+                            onClick={(e) => handleNicknameClick(post.authorId, post.authorNickName, post.authorEmail, e)}
+                            style={{ cursor: 'pointer', color: '#223a5e' }}
+                          >
+                            {post.authorNickName}
+                          </span>
+                          <div style={{ 
+                            width: '1px', 
+                            height: '12px', 
+                            backgroundColor: '#223a5e', 
+                            margin: '0 8px' 
+                          }}></div>
+                        </div>
+                        
+                        <div className="board-post-stats">
+                          <div className="board-post-stat">
+                            댓글: {post.commentCount}
+                          </div>
+                          <div className="board-post-stat">
+                            추천: {post.likeCount}
+                          </div>
+                          <div className="board-post-stat">
+                            조회: {post.viewCount}
+                          </div>
+                          <div className="board-post-stat">
+                            {new Date(post.createdAt).toLocaleDateString()}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="board-empty">
+                  {searchHashtag
+                    ? `"${searchHashtag}" 검색 결과가 없습니다.`
+                    : '게시글이 없습니다.'}
+                </div>
+              )}
+            </div>
 
             {/* 페이징 */}
             {totalPages > 1 && (

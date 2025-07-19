@@ -585,6 +585,18 @@ const BoardWrite = () => {
 
   return (
     <>
+      <style>
+        {`
+          body {
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+          }
+          html {
+            background-color: #ffffff;
+          }
+        `}
+      </style>
       <Header />
       <div className="board-container">
         <h1 className="board-title">글 작성</h1>
