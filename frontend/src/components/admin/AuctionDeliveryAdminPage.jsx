@@ -79,7 +79,12 @@ const AuctionDeliveryAdminPage = () => {
       maxWidth: '1200px',
       margin: '0 auto',
       padding: '20px',
-      fontFamily: 'Arial, sans-serif'
+      fontFamily: 'Arial, sans-serif',
+      backgroundColor: '#ffffff',
+      borderRadius: '15px',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+      marginTop: '20px',
+      marginBottom: '20px'
     },
     header: {
       display: 'flex',
@@ -90,7 +95,7 @@ const AuctionDeliveryAdminPage = () => {
     title: {
       color: '#333',
       margin: 0,
-      fontSize: '2rem',
+      fontSize: '1.5rem',
       fontWeight: 700
     },
     statsGrid: {
@@ -213,10 +218,35 @@ const AuctionDeliveryAdminPage = () => {
   return (
     <>
       <Header />
+      <style>
+        {`
+          body {
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+          }
+          @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+              transform: translateY(0);
+            }
+            40% {
+              transform: translateY(-15px);
+            }
+            60% {
+              transform: translateY(-7px);
+            }
+          }
+        `}
+      </style>
       <div style={styles.container}>
         <div style={styles.header}>
           <h1 style={styles.title}>
-            <i className="fas fa-truck" style={{ marginRight: '10px', color: '#667eea' }}></i>
+            <i className="fas fa-truck" style={{ 
+              marginRight: '10px', 
+              color: '#1a365d',
+              animation: 'bounce 2s ease-in-out infinite',
+              fontSize: '1.2rem'
+            }}></i>
             낙찰물품 배송관리
           </h1>
         </div>
@@ -260,10 +290,10 @@ const AuctionDeliveryAdminPage = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             style={styles.input}
           />
-          <button onClick={handleFilter} style={styles.button}>
+          <button onClick={handleFilter} style={{...styles.button, backgroundColor: '#1a365d'}}>
             검색
           </button>
-          <button onClick={fetchData} style={{...styles.button, backgroundColor: '#6c757d'}}>
+          <button onClick={fetchData} style={{...styles.button, backgroundColor: '#f6ad55'}}>
             새로고침
           </button>
         </div>

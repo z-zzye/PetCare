@@ -116,7 +116,12 @@ const ShopAdminPage = () => {
             maxWidth: '70rem',
             margin: '0 auto',
             padding: '1.25rem',
-            fontFamily: 'Arial, sans-serif'
+            fontFamily: 'Arial, sans-serif',
+            backgroundColor: '#ffffff',
+            borderRadius: '15px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+            marginTop: '20px',
+            marginBottom: '20px'
         },
         header: {
             display: 'flex',
@@ -342,6 +347,18 @@ const ShopAdminPage = () => {
 
     return (
         <>
+            <style>
+                {`
+                  body {
+                    background-color: #ffffff;
+                    margin: 0;
+                    padding: 0;
+                  }
+                  html {
+                    background-color: #ffffff;
+                  }
+                `}
+            </style>
             <Header />
             {toast && (
                 <div style={{
@@ -387,9 +404,9 @@ const ShopAdminPage = () => {
                             color: '#223A5E',
                             border: 'none',
                             borderRadius: '0.5rem',
-                            padding: '0.8rem 2.1rem',
+                            padding: '0.6rem 1.5rem',
                             fontWeight: 700,
-                            fontSize: '1.05rem',
+                            fontSize: '0.9rem',
                             cursor: 'pointer',
                             boxShadow: '0 2px 8px #0001',
                             transition: 'background 0.2s, color 0.2s',
