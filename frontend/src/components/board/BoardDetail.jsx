@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import Header from '../Header';
 import UserActionPopup from '../UserActionPopup';
 import ChatPage from '../chat/ChatPage';
+import { FaCommentDots } from 'react-icons/fa';
 import './BoardCommon.css';
 
 const BoardDetail = () => {
@@ -22,6 +23,19 @@ const BoardDetail = () => {
   // 채팅 모달 상태
   const [showChatModal, setShowChatModal] = useState(false);
   const [chatReceiverId, setChatReceiverId] = useState(null);
+
+  // 토스트 상태
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+
+  // 토스트 표시 함수
+  const showToastMessage = (message) => {
+    setToastMessage(message);
+    setShowToast(true);
+    setTimeout(() => {
+      setShowToast(false);
+    }, 3000);
+  };
 
   // ▼▼▼ 1. 누락되었던 fetchPostDetails 함수를 정의합니다. ▼▼▼
   // useCallback을 사용하여 category나 id가 변경될 때만 함수가 새로 생성되도록 최적화합니다.
@@ -132,7 +146,7 @@ const BoardDetail = () => {
   const handleRecommend = () => {
     const token = localStorage.getItem('token');
     if (!token) {
-      alert('추천하려면 로그인이 필요합니다.');
+      showToastMessage('추천하려면 로그인이 필요합니다.');
       navigate('/members/login');
       return;
     }
@@ -145,15 +159,18 @@ const BoardDetail = () => {
     })
       .then((res) => {
         if (res.ok) {
-          alert('게시글을 추천했습니다.');
+          showToastMessage('게시글을 추천했습니다.');
           fetchPostDetails(); // 추천수 갱신을 위해 데이터 다시 불러오기
         } else if (res.status === 409) {
-          alert('이미 추천한 게시글입니다.');
+          showToastMessage('이미 추천한 게시글입니다.');
         } else {
-          alert('추천 처리 중 오류가 발생했습니다.');
+          showToastMessage('추천 처리 중 오류가 발생했습니다.');
         }
       })
-      .catch((error) => console.error('추천 요청 오류:', error));
+      .catch((error) => {
+        console.error('추천 요청 오류:', error);
+        showToastMessage('추천 처리 중 오류가 발생했습니다.');
+      });
   };
 
   // 댓글 작성 핸들러
@@ -280,29 +297,31 @@ const BoardDetail = () => {
       <Header />
       <div className="board-container">
         <div className="board-content">
-          <h1 className="board-title">{post.title}</h1>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+            <h1 className="board-title">{post.title}</h1>
+            {/* 해시태그를 타이틀 오른쪽으로 이동 */}
+            {post.hashtags && post.hashtags.length > 0 && (
+              <div className="board-hashtags">
+                {post.hashtags.map((hashtag, index) => (
+                  <span key={index} className="board-hashtag">
+                    #{hashtag.tagName}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
           <div className="board-meta improved-meta">
             <span
               className="board-author clickable-nickname"
               onClick={(e) => handleNicknameClick(post.memberId, post.memberNickname, post.memberEmail, e)}
-              style={{ cursor: 'pointer', color: '#007bff' }}
+              style={{ cursor: 'pointer', color: '#1a365d !important', backgroundColor: '#ffc107', padding: '2px 6px', borderRadius: '4px' }}
             >
-              작성자: {post.memberNickname}
+              {post.memberNickname}
             </span>
             <span className="board-date">
               {new Date(post.regDate).toLocaleString()}
             </span>
           </div>
-          {/* 해시태그 표시 */}
-          {post.hashtags && post.hashtags.length > 0 && (
-            <div className="board-hashtags">
-              {post.hashtags.map((hashtag, index) => (
-                <span key={index} className="board-hashtag">
-                  #{hashtag.tagName}
-                </span>
-              ))}
-            </div>
-          )}
           <div
             style={{
               minHeight: '200px',
@@ -313,10 +332,10 @@ const BoardDetail = () => {
           />
           <div className="board-recommend-section">
             <span className="recommend-count">
-              👍 {post.likeCount !== undefined ? post.likeCount : 0}
+              {post.likeCount !== undefined ? post.likeCount : 0}
             </span>
-            <button onClick={handleRecommend} className="board-btn">
-              추천하기
+            <button onClick={handleRecommend} className="board-btn" style={{ padding: '8px 12px', minWidth: 'auto' }}>
+              👍
             </button>
           </div>
           {/* 작성자만 수정/삭제 버튼 노출, 토큰 만료/변조 시 숨김 */}
@@ -332,12 +351,14 @@ const BoardDetail = () => {
               <Link
                 to={`/board/edit/${category}/${id}`}
                 className="board-btn board-btn-secondary"
+                style={{ padding: '8px 16px', fontSize: '13px', backgroundColor: '#1a365d', color: 'white', border: 'none', textAlign: 'center' }}
               >
                 수정하기
               </Link>
               <button
                 onClick={handleDeletePost}
                 className="board-btn board-btn-danger"
+                style={{ padding: '8px 16px', fontSize: '13px' }}
               >
                 삭제
               </button>
@@ -347,16 +368,16 @@ const BoardDetail = () => {
 
         {/* 댓글 목록 */}
         <div className="board-comments">
-          <h3>댓글 ({comments.length})</h3>
-          <form onSubmit={handleCommentSubmit} className="board-comment-form">
+          <h3 style={{ fontSize: '1rem' }}><FaCommentDots style={{ marginRight: '6px', verticalAlign: 'middle', fontSize: '16px' }} /> 댓글 ({comments.length})</h3>
+          <form onSubmit={handleCommentSubmit} className="board-comment-form" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
             <textarea
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
               placeholder="댓글을 입력하세요"
               className="board-form-textarea"
-              style={{ minHeight: '60px' }}
+              style={{ minHeight: '60px', flex: 1 }}
             />
-            <button type="submit" className="board-btn">
+            <button type="submit" className="board-btn" style={{ padding: '8px 16px', fontSize: '14px', minWidth: 'auto' }}>
               등록
             </button>
           </form>
@@ -366,7 +387,7 @@ const BoardDetail = () => {
                 <div
                   className="board-comment-author clickable-nickname"
                   onClick={(e) => handleNicknameClick(comment.authorId, comment.authorNickName, comment.authorEmail, e)}
-                  style={{ cursor: 'pointer', color: '#007bff' }}
+                  style={{ cursor: 'pointer', color: '#1a365d !important', backgroundColor: '#ffc107', padding: '2px 6px', borderRadius: '4px' }}
                 >
                   {comment.authorNickName}
                 </div>
@@ -400,6 +421,27 @@ const BoardDetail = () => {
             <button className="user-action-chatroom-popup-close" onClick={handleCloseChatModal}>×</button>
             <ChatPage receiverId={chatReceiverId} />
           </div>
+        </div>
+      )}
+
+      {/* 토스트 팝업 */}
+      {showToast && (
+        <div style={{
+          position: 'fixed',
+          top: '20px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          backgroundColor: '#1a365d',
+          color: 'white',
+          padding: '12px 20px',
+          borderRadius: '8px',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+          zIndex: 9999,
+          fontSize: '14px',
+          fontWeight: '500',
+          animation: 'slideIn 0.3s ease-out'
+        }}>
+          {toastMessage}
         </div>
       )}
     </>
