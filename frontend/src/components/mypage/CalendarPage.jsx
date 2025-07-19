@@ -78,7 +78,7 @@ const CalendarPage = () => {
 
     const payload = {
       calendar_content: newTitle,
-      calendar_event_date: newDate.toISOString().split('T')[0],
+      calendar_event_date: newDate.toLocaleDateString('en-CA'),
     };
 
     axios
@@ -126,16 +126,21 @@ const CalendarPage = () => {
 
   return (
     <div className="calendar-wrapper">
-      <FullCalendar
-        plugins={[dayGridPlugin, interactionPlugin]}
-        initialView="dayGridMonth"
-        events={events}
-        eventClick={handleEventClick}
-        height="auto"
-        eventBackgroundColor="#ffc107"
-        eventBorderColor="#ffc107"
-        eventDisplay="block"
-      />
+      <div className="calendar-container">
+        <FullCalendar
+          plugins={[dayGridPlugin, interactionPlugin]}
+          initialView="dayGridMonth"
+          events={events}
+          eventClick={handleEventClick}
+          height="auto"
+          eventBackgroundColor="#ffc107"
+          eventBorderColor="#ffc107"
+          eventDisplay="block"
+        />
+        <div className="calendar-dog-image">
+          <img src="/images/dog-zz.png" alt="잠자는 강아지" />
+        </div>
+      </div>
       <div className="calendar-form">
         <input
           type="text"
@@ -148,7 +153,7 @@ const CalendarPage = () => {
           onChange={(date) => setNewDate(date)}
           dateFormat="yyyy-MM-dd"
         />
-        <button onClick={handleAddEvent}>일정 추가</button>
+        <button onClick={handleAddEvent}>일정추가</button>
       </div>
     </div>
   );

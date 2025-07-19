@@ -191,25 +191,25 @@
 .price-label {
   font-weight: bold;
   color: #223A5E;
-  font-size: 0.9rem;
+  font-size: 1.1rem;
 }
 
 .price-label.current-price-label {
   color: #223A5E;
-  font-size: 1.1rem;
+  font-size: 1.3rem;
   font-weight: bold;
 }
 
 .price-value {
   color: #666;
-  font-size: 0.9rem;
+  font-size: 1.1rem;
   text-align: right;
   font-weight: bold;
 }
 
 .price-value.current-price-value {
   color: #223A5E;
-  font-size: 1.1rem;
+  font-size: 1.3rem;
   font-weight: bold;
 }
 
@@ -240,12 +240,12 @@
 .time-label {
   font-weight: bold;
   color: #223A5E;
-  font-size: 0.9rem;
+  font-size: 1rem;
 }
 
 .time-value {
   color: #666;
-  font-size: 0.9rem;
+  font-size: 1rem;
   text-align: right;
 }
 

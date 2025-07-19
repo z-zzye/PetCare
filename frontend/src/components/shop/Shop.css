@@ -1,9 +1,10 @@
 .shop-container {
-  min-height: 100vh;
+  height: 80vh;
   background-color: #ffffff;
 }
 
 .shop-content {
+  height: 80vh;
 }
 
 .shop-content h1 {

@@ -3,21 +3,70 @@
   flex-direction: column;
   gap: 2rem;
   padding: 2rem;
-  background: linear-gradient(135deg, #fff9e6 0%, #f0f8ff 100%);
-  border-radius: 20px;
-  box-shadow: 0 8px 32px rgba(11, 49, 93, 0.1);
+  background: #fefefe;
+  border-radius: 0px;
+  box-shadow: 0 8px 32px rgba(128, 128, 128, 0.2);
   margin: 1rem;
+  background-image: linear-gradient(#fefefe 0%, #fefefe 39px, #e5e5e5 40px);
+  background-size: 100% 40px;
+  transform: rotate(-3deg);
+  position: relative;
+}
+
+.calendar-wrapper > * {
+  transform: rotate(3deg);
+  background-image: linear-gradient(#fefefe 0%, #fefefe 39px, #e5e5e5 40px);
+  background-size: 100% 40px;
+}
+
+.calendar-wrapper::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  right: -5px;
+  bottom: -5px;
+  background: #f5f5f5;
+  background-image: linear-gradient(#f5f5f5 0%, #f5f5f5 39px, #e0e0e0 40px);
+  background-size: 100% 40px;
+  z-index: -1;
+  transform: rotate(3deg);
+}
+
+.calendar-container {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.calendar-dog-image {
+  position: absolute;
+  top: 12px;
+  left: 250px;
+  z-index: 10;
+  transform: rotate(3deg);
+}
+
+.calendar-dog-image img {
+  width: 130px;
+  height: auto;
+  opacity: 0.8;
+  transition: all 0.3s ease;
+}
+
+.calendar-dog-image img:hover {
+  /* 호버 효과 제거 */
 }
 
 .calendar-form {
   display: flex;
   align-items: center;
   gap: 1.5rem;
-  background: white;
+  background: transparent;
   padding: 1.5rem;
   border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(254, 182, 56, 0.2);
-  border: 2px solid #fff3cd;
+  border: none;
 }
 
 .calendar-form input {
@@ -27,7 +76,7 @@
   font-size: 1rem;
   font-family: 'Noto Sans KR', sans-serif;
   transition: all 0.3s ease;
-  background: #fafafa;
+  background: white;
 }
 
 .calendar-form input:focus {
@@ -38,16 +87,18 @@
 }
 
 .calendar-form button {
-  background: linear-gradient(135deg, #FEB638 0%, #ffcc00 100%);
+  background: #0B315D;
   border: none;
-  padding: 0.8rem 1.5rem;
+  padding: 0.6rem 1rem;
   border-radius: 12px;
   cursor: pointer;
   font-weight: bold;
-  font-size: 1rem;
-  color: #0B315D;
+  font-size: 0.85rem;
+  color: white;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(254, 182, 56, 0.3);
+  box-shadow: 0 4px 12px rgba(11, 49, 93, 0.3);
+  height: 48px;
+  box-sizing: border-box;
 }
 
 .calendar-form button:hover {
@@ -58,15 +109,15 @@
 /* FullCalendar 커스텀 스타일 */
 .fc {
   background: white;
-  border-radius: 16px;
+  border-radius: 8px;
   box-shadow: 0 4px 16px rgba(11, 49, 93, 0.1);
   overflow: hidden;
-  border: 2px solid #fff3cd;
+  border: 2px solid #e3e6ef;
 }
 
 .fc-header-toolbar {
-  background: linear-gradient(135deg, #0B315D 0%, #1976d2 100%);
-  color: white;
+  background: white;
+  color: #0B315D;
   padding: 1rem;
   border-radius: 16px 16px 0 0;
 }
@@ -74,20 +125,31 @@
 .fc-toolbar-title {
   font-size: 1.5rem !important;
   font-weight: bold !important;
-  color: white !important;
+  color: #0B315D !important;
+  background: #ffc107 !important;
+  padding: 10px 16px !important;
+  border-radius: 0px !important;
+  border: none !important;
+  display: inline-block !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  filter: blur(0.5px) !important;
 }
 
 .fc-button {
-  background: rgba(255, 255, 255, 0.2) !important;
-  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  background: white !important;
+  border: none !important;
   border-radius: 12px !important;
-  color: white !important;
+  color: #0B315D !important;
   font-weight: bold !important;
   transition: all 0.3s ease !important;
+  padding: 6px 12px !important;
+  font-size: 0.85rem !important;
 }
 
 .fc-button:hover {
-  background: rgba(255, 255, 255, 0.3) !important;
+  background: rgba(26, 54, 93, 0.08) !important;
+  border: none !important;
   transform: translateY(-1px) !important;
 }
 
@@ -111,7 +173,7 @@
 }
 
 .fc-event {
-  border-radius: 8px !important;
+  border-radius: 0px !important;
   border: none !important;
   font-weight: bold !important;
   font-size: 0.9rem !important;
@@ -130,7 +192,7 @@
 }
 
 .fc-col-header-cell {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+  background: white !important;
   border: 1px solid #e3e6ef !important;
   font-weight: bold !important;
   color: #0B315D !important;

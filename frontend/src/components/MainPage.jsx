@@ -22,38 +22,26 @@ const MainPage = () => {
   const bannerSlides = [
     {
       id: 1,
-      title: '🐾 반려동물과 함께하는 행복한 일상',
-      subtitle: 'Petory에서 더 나은 반려생활을 시작하세요',
-      image: '/images/main-banner-image.png',
-      buttonText: '시작하기',
-      buttonLink: '/members/signup',
+      title: '메인 배너 1',
+      image: '/images/main-banner-image-1.png',
       backgroundColor: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     },
     {
       id: 2,
-      title: '🏥 반려동물 건강관리',
-      subtitle: '예방접종부터 건강검진까지 체계적인 관리',
-      image: '/images/pet-cat.png',
-      buttonText: '건강관리',
-      buttonLink: '/mypage/autovax',
+      title: '메인 배너 2',
+      image: '/images/main-banner-image-2.png',
       backgroundColor: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
     },
     {
       id: 3,
-      title: '🛒 반려동물 용품 쇼핑',
-      subtitle: '다양한 반려동물 용품을 경매로 구매하세요',
-      image: '/images/pet-dog.png',
-      buttonText: '쇼핑하기',
-      buttonLink: '/shop',
+      title: '메인 배너 3',
+      image: '/images/main-banner-image-3.png',
       backgroundColor: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
     },
     {
       id: 4,
-      title: '🚶‍♂️ 산책로 추천',
-      subtitle: '반려동물과 함께할 수 있는 최고의 산책로',
-      image: '/images/pet-etc.png',
-      buttonText: '산책로 보기',
-      buttonLink: '/map',
+      title: '메인 배너 4',
+      image: '/images/main-banner-image-4.png',
       backgroundColor: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
     },
   ];
@@ -420,16 +408,6 @@ const MainPage = () => {
                   style={{ background: slide.backgroundColor }}
                 >
                   <div className="banner-content">
-                    <div className="banner-text">
-                      <h1>{slide.title}</h1>
-                      <p>{slide.subtitle}</p>
-                      <button 
-                        className="banner-btn"
-                        onClick={() => navigate(slide.buttonLink)}
-                      >
-                        {slide.buttonText}
-                      </button>
-                    </div>
                     <div className="banner-image">
                       <img src={slide.image} alt={slide.title} />
                     </div>
