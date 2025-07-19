@@ -2,12 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
-import './Sidebar.css';
 import { jwtDecode } from 'jwt-decode';
 import axios from '../../api/axios'; // ✅ axios 인스턴스 사용
 import { useAuth } from '../../contexts/AuthContext';
 import HashtagSelectionModal from '../HashtagSelectionModal';
-import './Sidebar.css'
+import './Sidebar.css';
 
 const Sidebar = ({ onTabChange }) => {
   const navigate = useNavigate();
@@ -21,17 +20,19 @@ const Sidebar = ({ onTabChange }) => {
   const [userHashtags, setUserHashtags] = useState([]);
 
   const handleRunSchedulerTest = async () => {
-      const confirmed = window.confirm("정말로 스케줄러를 수동 실행하시겠습니까?");
-      if (confirmed) {
-          try {
-              alert('스케줄러를 수동으로 실행합니다. 백엔드 로그를 확인해주세요.');
-              // 컨트롤러에 만들어둔 임시 API 호출
-              await axios.post('/auto-reservations/test/run-scheduler');
-          } catch (error) {
-              alert('스케줄러 실행 요청에 실패했습니다.');
-              console.error(error);
-          }
+    const confirmed = window.confirm(
+      '정말로 스케줄러를 수동 실행하시겠습니까?'
+    );
+    if (confirmed) {
+      try {
+        alert('스케줄러를 수동으로 실행합니다. 백엔드 로그를 확인해주세요.');
+        // 컨트롤러에 만들어둔 임시 API 호출
+        await axios.post('/auto-reservations/test/run-scheduler');
+      } catch (error) {
+        alert('스케줄러 실행 요청에 실패했습니다.');
+        console.error(error);
       }
+    }
   };
 
   // ✅ 토큰 디코딩 → 이메일 → 소셜회원 여부 + 멤버ID 조회
@@ -43,17 +44,19 @@ const Sidebar = ({ onTabChange }) => {
       const decoded = jwtDecode(token);
       const email = decoded.sub || decoded.email;
 
-      axios.get(`/members/check-social/${email}`)
-        .then(res => {
+      axios
+        .get(`/members/check-social/${email}`)
+        .then((res) => {
           if (res.data.social) setIsSocialUser(true);
         })
-        .catch(err => console.error('소셜 여부 조회 실패:', err));
+        .catch((err) => console.error('소셜 여부 조회 실패:', err));
 
-      axios.get(`/members/id-by-email?email=${email}`)
-        .then(res => {
+      axios
+        .get(`/members/id-by-email?email=${email}`)
+        .then((res) => {
           setMemberId(res.data);
         })
-        .catch(err => console.error('멤버 ID 조회 실패:', err));
+        .catch((err) => console.error('멤버 ID 조회 실패:', err));
     } catch (err) {
       console.error('JWT 디코딩 실패:', err);
     }
@@ -63,11 +66,12 @@ const Sidebar = ({ onTabChange }) => {
   useEffect(() => {
     if (memberId === null) return;
 
-    axios.get(`/pets/member/${memberId}`)
-      .then(res => {
+    axios
+      .get(`/pets/member/${memberId}`)
+      .then((res) => {
         setPets(res.data);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error('펫 리스트 조회 실패:', err);
       });
   }, [memberId]);
@@ -81,12 +85,13 @@ const Sidebar = ({ onTabChange }) => {
   // ✅ 멤버ID 기반 역할 조회
   useEffect(() => {
     if (memberId === null) return;
-    
-    axios.get(`/members/${memberId}/role`)
-      .then(res => {
+
+    axios
+      .get(`/members/${memberId}/role`)
+      .then((res) => {
         setMemberRole(res.data);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error('회원 역할 조회 실패:', err);
       });
   }, [memberId]);
@@ -106,18 +111,18 @@ const Sidebar = ({ onTabChange }) => {
   const checkCreatorApplyStatus = async () => {
     try {
       const response = await axios.get('/creator-apply/my-latest-apply');
-      
+
       if (response.data && response.data.applyStatus === 'PENDING') {
         Swal.fire({
           title: '신청 처리 중',
           text: '이미 크리에이터 신청이 접수되어 검토 중입니다. 검토 결과는 1-2주 내에 이메일로 안내드립니다.',
           icon: 'info',
           confirmButtonText: '확인',
-          confirmButtonColor: '#3085d6'
+          confirmButtonColor: '#3085d6',
         });
         return false;
       }
-      
+
       return true; // 신청 가능
     } catch (error) {
       // 신청 내역이 없는 경우 (404 에러) 신청 가능
@@ -145,7 +150,9 @@ const Sidebar = ({ onTabChange }) => {
           {userHashtags.length > 0 && (
             <div className="user-interests">
               {userHashtags.map((hashtag, idx) => (
-                <span key={idx} className="interest-tag">#{hashtag.tagName}</span>
+                <span key={idx} className="interest-tag">
+                  #{hashtag.tagName}
+                </span>
               ))}
             </div>
           )}
@@ -176,7 +183,10 @@ const Sidebar = ({ onTabChange }) => {
         </div>
 
         {/* 버튼 영역 */}
-        <button className="info-btn" onClick={() => navigate('/members/pet-register')}>
+        <button
+          className="info-btn"
+          onClick={() => navigate('/members/pet-register')}
+        >
           펫 등록
         </button>
 
@@ -196,8 +206,8 @@ const Sidebar = ({ onTabChange }) => {
         {/* 크리에이터 섹션 */}
         <div className="creator-section">
           {memberRole !== 'CREATOR' ? (
-            <button 
-              className="creator-btn" 
+            <button
+              className="creator-btn"
               onClick={async () => {
                 const canApply = await checkCreatorApplyStatus();
                 if (canApply) {
@@ -208,15 +218,15 @@ const Sidebar = ({ onTabChange }) => {
               크리에이터 신청
             </button>
           ) : (
-            <button 
-              className="creator-btn creator-already-btn" 
+            <button
+              className="creator-btn creator-already-btn"
               onClick={() => {
                 Swal.fire({
                   title: '이미 크리에이터입니다',
                   text: '축하합니다! 이미 크리에이터 권한을 가지고 있습니다.',
                   icon: 'success',
                   confirmButtonText: '확인',
-                  confirmButtonColor: '#27ae60'
+                  confirmButtonColor: '#27ae60',
                 });
               }}
             >
@@ -225,28 +235,47 @@ const Sidebar = ({ onTabChange }) => {
           )}
 
           {/* ✅ [추가] 결제수단 관리 버튼 */}
-          <button className="info-btn" onClick={() => navigate('/payment-management')}>
+          <button
+            className="info-btn"
+            onClick={() => navigate('/payment-management')}
+          >
             결제수단 관리
           </button>
         </div>
 
-        <div className="developer-menu" style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid #555' }}>
-            <p style={{fontSize: '10px', color: '#ccc', textAlign: 'center', margin: '0 0 5px 0' }}>- Developer Menu -</p>
-            <button
-                onClick={handleRunSchedulerTest}
-                style={{
-                    width: '100%',
-                    padding: '8px',
-                    fontSize: '12px',
-                    backgroundColor: '#c9302c',
-                    color: 'white',
-                    border: '1px solid #ac2925',
-                    borderRadius: '4px',
-                    cursor: 'pointer'
-                }}
-            >
-                스케줄러 강제 실행
-            </button>
+        <div
+          className="developer-menu"
+          style={{
+            marginTop: 'auto',
+            paddingTop: '1rem',
+            borderTop: '1px solid #555',
+          }}
+        >
+          <p
+            style={{
+              fontSize: '10px',
+              color: '#ccc',
+              textAlign: 'center',
+              margin: '0 0 5px 0',
+            }}
+          >
+            - Developer Menu -
+          </p>
+          <button
+            onClick={handleRunSchedulerTest}
+            style={{
+              width: '100%',
+              padding: '8px',
+              fontSize: '12px',
+              backgroundColor: '#c9302c',
+              color: 'white',
+              border: '1px solid #ac2925',
+              borderRadius: '4px',
+              cursor: 'pointer',
+            }}
+          >
+            스케줄러 강제 실행
+          </button>
         </div>
       </div>
 
@@ -255,7 +284,6 @@ const Sidebar = ({ onTabChange }) => {
         <button onClick={() => onTabChange('calendar')}>📅캘린더</button>
         <button onClick={() => onTabChange('health')}>🩺건강수첩</button>
         <button onClick={() => onTabChange('posts')}>📝내가쓴글</button>
-        <button onClick={() => onTabChange('reservations')}>🎟️예약현황</button>
         <button onClick={() => onTabChange('orders')}>🛒구매내역</button>
         <button onClick={() => onTabChange('auctions')}>🏷️입찰내역</button>
       </div>

@@ -175,27 +175,43 @@ public class CreatorApplyService {
         if (applyStatus == com.petory.constant.ApplyStatus.APPROVED) {
             Member member = apply.getMember();
             member.updateRole(com.petory.constant.Role.CREATOR);
+            // Member 엔티티 변경 후 저장
+            memberRepository.save(member);
             
-            // 크리에이터 승인 알림 생성
-            try {
-                notificationService.createCreatorApprovedNotification(member);
-                log.info("크리에이터 승인 알림 생성 완료: memberId={}", member.getMember_Id());
-            } catch (Exception e) {
-                log.error("크리에이터 승인 알림 생성 중 오류 발생: memberId={}", member.getMember_Id(), e);
-                // 알림 생성 실패가 승인 처리를 막지 않도록 예외를 던지지 않음
-            }
+            // 크리에이터 승인 알림 생성 (별도 트랜잭션으로 처리)
+            createApprovalNotification(member);
         }
         
-        // 거절된 경우 크리에이터 거절 알림 생성
+        // 거절된 경우 크리에이터 거절 알림 생성 (별도 트랜잭션으로 처리)
         if (applyStatus == com.petory.constant.ApplyStatus.REJECTED) {
             Member member = apply.getMember();
-            try {
-                notificationService.createCreatorRejectedNotification(member, rejectReason);
-                log.info("크리에이터 거절 알림 생성 완료: memberId={}, rejectReason={}", member.getMember_Id(), rejectReason);
-            } catch (Exception e) {
-                log.error("크리에이터 거절 알림 생성 중 오류 발생: memberId={}", member.getMember_Id(), e);
-                // 알림 생성 실패가 거절 처리를 막지 않도록 예외를 던지지 않음
-            }
+            createRejectionNotification(member, rejectReason);
+        }
+    }
+    
+    /**
+     * 크리에이터 승인 알림 생성 (별도 메서드로 분리)
+     */
+    private void createApprovalNotification(Member member) {
+        try {
+            notificationService.createCreatorApprovedNotification(member);
+            log.info("크리에이터 승인 알림 생성 완료: memberId={}", member.getMember_Id());
+        } catch (Exception e) {
+            log.error("크리에이터 승인 알림 생성 중 오류 발생: memberId={}", member.getMember_Id(), e);
+            // 알림 생성 실패가 승인 처리를 막지 않도록 예외를 던지지 않음
+        }
+    }
+    
+    /**
+     * 크리에이터 거절 알림 생성 (별도 메서드로 분리)
+     */
+    private void createRejectionNotification(Member member, String rejectReason) {
+        try {
+            notificationService.createCreatorRejectedNotification(member, rejectReason);
+            log.info("크리에이터 거절 알림 생성 완료: memberId={}, rejectReason={}", member.getMember_Id(), rejectReason);
+        } catch (Exception e) {
+            log.error("크리에이터 거절 알림 생성 중 오류 발생: memberId={}", member.getMember_Id(), e);
+            // 알림 생성 실패가 거절 처리를 막지 않도록 예외를 던지지 않음
         }
     }
 } 

@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.petory.constant.BoardKind;
 import com.petory.entity.BoardHashtag;
 import com.petory.entity.BoardHashtagId;
 
@@ -51,9 +52,9 @@ public interface BoardHashtagRepository extends JpaRepository<BoardHashtag, Boar
     
     // 카테고리별 특정 해시태그를 가진 게시글 ID 목록 조회
     @Query("SELECT bh.board.id FROM BoardHashtag bh WHERE bh.hashtag.tagId = :tagId AND bh.board.boardKind = :boardKind")
-    List<Long> findBoardIdsByTagIdAndBoardKind(@Param("tagId") Long tagId, @Param("boardKind") String boardKind);
+    List<Long> findBoardIdsByTagIdAndBoardKind(@Param("tagId") Long tagId, @Param("boardKind") BoardKind boardKind);
     
     // 카테고리별 여러 해시태그를 가진 게시글 ID 목록 조회 (OR 조건)
     @Query("SELECT DISTINCT bh.board.id FROM BoardHashtag bh WHERE bh.hashtag.tagId IN :tagIds AND bh.board.boardKind = :boardKind")
-    List<Long> findBoardIdsByTagIdsAndBoardKind(@Param("tagIds") List<Long> tagIds, @Param("boardKind") String boardKind);
+    List<Long> findBoardIdsByTagIdsAndBoardKind(@Param("tagIds") List<Long> tagIds, @Param("boardKind") BoardKind boardKind);
 } 

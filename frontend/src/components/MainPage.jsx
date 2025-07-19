@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from '../api/axios';
+import { useAuth } from '../contexts/AuthContext';
 import Header from './Header';
 import './MainPage.css';
 
 const MainPage = () => {
   const navigate = useNavigate();
+  const { isLoggedIn } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [popularPosts, setPopularPosts] = useState([]);
+  const [recommendedPosts, setRecommendedPosts] = useState([]);
+  const [recommendationInfo, setRecommendationInfo] = useState(null);
   const [error, setError] = useState(null);
 
   // 카테고리 영어 -> 한글 매핑 함수
@@ -17,6 +21,10 @@ const MainPage = () => {
       FREE: '자유',
       QNA: 'Q&A',
       WALKWITH: '산책모임',
+      info: '정보',
+      free: '자유',
+      qna: 'Q&A',
+      walkwith: '산책모임',
     };
     return categoryMap[category] || category;
   };
@@ -34,7 +42,7 @@ const MainPage = () => {
 
   // 게시물 클릭 핸들러
   const handlePostClick = (post) => {
-    const category = getCategoryRoute(post.category);
+    const category = getCategoryRoute(post.boardKind || post.category);
     navigate(`/board/${category}/${post.id}`);
   };
 
@@ -45,48 +53,79 @@ const MainPage = () => {
     image: '/images/pet-default.png',
   };
 
-  const recommendedPosts = [
-    {
-      id: 5,
-      title: '고양이 스트레스 해소 방법',
-      author: '고양이전문가',
-      views: 432,
-      likes: 28,
-      category: '정보',
-    },
-    {
-      id: 6,
-      title: '강아지 훈련 성공 사례',
-      author: '훈련사',
-      views: 321,
-      likes: 15,
-      category: '정보',
-    },
-    {
-      id: 7,
-      title: '반려동물 건강검진 꼭 받아야 할까요?',
-      author: '수의사',
-      views: 298,
-      likes: 42,
-      category: 'Q&A',
-    },
-    {
-      id: 8,
-      title: '우리 고양이 사진 공유합니다',
-      author: '고양이맘',
-      views: 187,
-      likes: 33,
-      category: '자유',
-    },
-    {
-      id: 12,
-      title: '살려주세요',
-      author: 'NO_YAE',
-      views: 3000,
-      likes: 11,
-      category: '자유',
-    },
-  ];
+  // 로그인하지 않은 유저를 위한 추천 게시물 (카테고리별 베스트 + 계절별 콘텐츠)
+  const getRecommendedPostsForGuest = () => {
+    const currentMonth = new Date().getMonth() + 1;
+    const isSpring = currentMonth >= 3 && currentMonth <= 5;
+    const isSummer = currentMonth >= 6 && currentMonth <= 8;
+    const isAutumn = currentMonth >= 9 && currentMonth <= 11;
+    const isWinter = currentMonth === 12 || currentMonth <= 2;
+
+    return [
+      {
+        id: 101,
+        title: '반려동물 입양 전 꼭 알아야 할 10가지',
+        author: 'Petory팀',
+        views: 2156,
+        likes: 89,
+        category: 'INFO',
+        isSeasonal: false,
+        description: '입양 전 체크리스트와 준비사항',
+      },
+      {
+        id: 102,
+        title: '초보 집사를 위한 반려동물 기본 관리법',
+        author: '수의사김선생',
+        views: 1892,
+        likes: 67,
+        category: 'INFO',
+        isSeasonal: false,
+        description: '기본적인 케어 방법과 주의사항',
+      },
+      {
+        id: 103,
+        title: isSpring
+          ? '봄철 반려동물 알레르기 대처법'
+          : isSummer
+          ? '여름철 반려동물 더위 대비법'
+          : isAutumn
+          ? '가을철 반려동물 건강관리'
+          : '겨울철 반려동물 보온 관리법',
+        author: '건강관리전문가',
+        views: 1456,
+        likes: 52,
+        category: 'INFO',
+        isSeasonal: true,
+        description: isSpring
+          ? '봄철 알레르기 예방과 관리'
+          : isSummer
+          ? '더위 대비와 안전한 여름 보내기'
+          : isAutumn
+          ? '가을철 건강관리 포인트'
+          : '겨울철 보온과 건강관리',
+      },
+      {
+        id: 104,
+        title: '우리 강아지/고양이 사진 자랑해요',
+        author: '반려동물맘',
+        views: 892,
+        likes: 45,
+        category: 'FREE',
+        isSeasonal: false,
+        description: '귀여운 반려동물 사진 공유',
+      },
+      {
+        id: 105,
+        title: '반려동물 응급상황 대처법',
+        author: '응급수의사',
+        views: 1234,
+        likes: 78,
+        category: 'QNA',
+        isSeasonal: false,
+        description: '응급상황 시 침착하게 대응하는 방법',
+      },
+    ];
+  };
 
   const infoPosts = [
     {
@@ -128,6 +167,132 @@ const MainPage = () => {
     fetchPopularPosts();
   }, []);
 
+  // 추천 게시글 API 호출 (모든 사용자)
+  useEffect(() => {
+    const fetchRecommendedPosts = async () => {
+      try {
+        const response = await axios.get('/main/recommended?limit=5');
+        setRecommendedPosts(response.data.posts);
+        setRecommendationInfo({
+          type: response.data.recommendationType,
+          hashtags: response.data.selectedHashtags,
+          message: response.data.message,
+        });
+
+        console.log('추천 게시글 조회 성공:', response.data);
+      } catch (err) {
+        console.error('추천 게시글 조회 실패:', err);
+        // 추천 실패 시 기존 더미 데이터 사용
+        setRecommendedPosts([]);
+      }
+    };
+
+    fetchRecommendedPosts();
+  }, []);
+
+  // 추천 타입에 따른 제목과 설명 생성
+  const getRecommendationTitle = () => {
+    if (!recommendationInfo) return '💡 추천 게시물';
+
+    switch (recommendationInfo.type) {
+      case 'personalized':
+        return '💡 맞춤 추천 게시물';
+      case 'popular_hashtags':
+        return '🔥 인기 해시태그 게시물 추천';
+      case 'fallback':
+        return '🔥 인기 게시글 추천';
+      default:
+        return '💡 추천 게시물';
+    }
+  };
+
+  const getRecommendationDescription = () => {
+    if (!recommendationInfo) return null;
+
+    // 인기 해시태그 기반 추천인 경우 특별한 스타일 적용 (로그인 여부 관계없이)
+    if (
+      recommendationInfo.type === 'popular_hashtags' &&
+      recommendationInfo.hashtags &&
+      recommendationInfo.hashtags.length > 0
+    ) {
+      return (
+        <div className="recommendation-info popular-hashtags-info">
+          <p className="recommendation-message">
+            💡 <strong>최근 인기 해시태그</strong>가 달린 게시물을 추천해드려요!
+          </p>
+          <div className="popular-hashtags-display">
+            <span className="popular-hashtags-label">🔥 인기 해시태그:</span>
+            <div className="popular-hashtags-list">
+              {recommendationInfo.hashtags.map((tag, index) => (
+                <span key={index} className="popular-hashtag-tag">
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          </div>
+          {/* 비로그인 사용자에게 로그인 유도 메시지 추가 */}
+          {!isLoggedIn && (
+            <div className="login-encouragement-mini">
+              <p>
+                더 정확한 맞춤 추천을 받으려면{' '}
+                <button
+                  className="login-link-btn-mini"
+                  onClick={() => navigate('/members/login')}
+                >
+                  로그인
+                </button>
+                하세요!
+              </p>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // 비로그인 사용자이고 인기 해시태그 추천이 아닌 경우
+    if (!isLoggedIn) {
+      return (
+        <p className="login-encouragement">
+          더 많은 맞춤 추천을 받으려면{' '}
+          <button
+            className="login-link-btn"
+            onClick={() => navigate('/members/login')}
+          >
+            로그인
+          </button>
+          하세요!
+        </p>
+      );
+    }
+
+    return (
+      <div className="recommendation-info">
+        <p className="recommendation-message">{recommendationInfo.message}</p>
+        {recommendationInfo.hashtags &&
+          recommendationInfo.hashtags.length > 0 && (
+            <div className="selected-hashtags">
+              <span>선택된 해시태그: </span>
+              {recommendationInfo.hashtags.map((tag, index) => (
+                <span key={index} className="hashtag-tag">
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          )}
+      </div>
+    );
+  };
+
+  // 현재 표시할 추천 게시물 결정
+  const getCurrentRecommendedPosts = () => {
+    if (recommendedPosts.length > 0) {
+      return recommendedPosts;
+    }
+
+    // 추천 데이터가 없으면 더미 데이터 사용
+    return getRecommendedPostsForGuest();
+  };
+
   // 스켈레톤 컴포넌트들
   const BannerSkeleton = () => (
     <section className="banner-section">
@@ -168,18 +333,8 @@ const MainPage = () => {
         {/* 배너 섹션 */}
         <section className="banner-section">
           <div className="banner-content">
-            <div className="banner-text">
-              <h1>{bannerData.title}</h1>
-              <p>{bannerData.subtitle}</p>
-              <button
-                className="banner-btn"
-                onClick={() => navigate('/members/login')}
-              >
-                시작하기
-              </button>
-            </div>
             <div className="banner-image">
-              <img src={bannerData.image} alt="반려동물" />
+              <img src="/images/main-banner-image.png" alt="반려동물" />
             </div>
           </div>
         </section>
@@ -216,6 +371,21 @@ const MainPage = () => {
                       {getCategoryInKorean(post.category)}
                     </div>
                     <h3 className="post-title">{post.title}</h3>
+                    {/* 해시태그 표시 */}
+                    {post.hashtags && post.hashtags.length > 0 && (
+                      <div className="post-hashtags">
+                        {post.hashtags.slice(0, 3).map((hashtag, index) => (
+                          <span key={index} className="post-hashtag">
+                            #{hashtag.tagName || hashtag}
+                          </span>
+                        ))}
+                        {post.hashtags.length > 3 && (
+                          <span className="post-hashtag-more">
+                            +{post.hashtags.length - 3}
+                          </span>
+                        )}
+                      </div>
+                    )}
                     <div className="post-meta">
                       <span className="post-author">{post.author}</span>
                       <span className="post-views">
@@ -232,28 +402,58 @@ const MainPage = () => {
           </div>
 
           <div className="recommended-posts">
-            <h2>💡 관심사 추천 게시물</h2>
+            <h2>{getRecommendationTitle()}</h2>
+            {getRecommendationDescription()}
             <div className="posts-list">
-              {recommendedPosts.map((post) => (
-                <div
-                  key={post.id}
-                  className="post-item"
-                  onClick={() => handlePostClick(post)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <div className="post-category">
-                    {getCategoryInKorean(post.category)}
-                  </div>
-                  <h3 className="post-title">{post.title}</h3>
-                  <div className="post-meta">
-                    <span className="post-author">{post.author}</span>
-                    <span className="post-views">조회수 : {post.views}</span>
-                    <span className="post-likes">
-                      추천수 : {post.likes || 0}
-                    </span>
-                  </div>
-                </div>
-              ))}
+              {recommendedPosts.length === 0
+                ? // 추천 로딩 중
+                  [...Array(4)].map((_, index) => <PostSkeleton key={index} />)
+                : // 실제 데이터 표시
+                  getCurrentRecommendedPosts().map((post) => (
+                    <div
+                      key={post.id}
+                      className="post-item"
+                      onClick={() => handlePostClick(post)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <div className="post-category">
+                        {getCategoryInKorean(post.category)}
+                        {post.isSeasonal && (
+                          <span className="seasonal-badge">계절</span>
+                        )}
+                      </div>
+                      <h3 className="post-title">{post.title}</h3>
+                      {/* 해시태그 표시 */}
+                      {post.hashtags && post.hashtags.length > 0 && (
+                        <div className="post-hashtags">
+                          {post.hashtags.slice(0, 3).map((hashtag, index) => (
+                            <span key={index} className="post-hashtag">
+                              #{hashtag.tagName || hashtag}
+                            </span>
+                          ))}
+                          {post.hashtags.length > 3 && (
+                            <span className="post-hashtag-more">
+                              +{post.hashtags.length - 3}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      {post.description && (
+                        <p className="post-description">{post.description}</p>
+                      )}
+                      <div className="post-meta">
+                        <span className="post-author">
+                          {post.authorNickName || post.author}
+                        </span>
+                        <span className="post-views">
+                          조회수 : {post.viewCount}
+                        </span>
+                        <span className="post-likes">
+                          추천수 : {post.likeCount}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
             </div>
           </div>
         </section>

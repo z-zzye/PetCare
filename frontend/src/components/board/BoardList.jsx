@@ -12,8 +12,21 @@ const BoardList = () => {
   const { category } = useParams();
   const { isLoggedIn, email } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
-  const config = boardConfig[category];
+  
+  // 소문자 카테고리를 대문자로 매핑
+  const getBoardConfigKey = (category) => {
+    const categoryMap = {
+      'info': 'INFO',
+      'free': 'FREE', 
+      'qna': 'QNA',
+      'walkwith': 'WALKWITH'
+    };
+    return categoryMap[category] || category;
+  };
+  
+  const config = boardConfig[getBoardConfigKey(category)];
   const [posts, setPosts] = useState([]);
   const [myEmail, setMyEmail] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -118,21 +131,18 @@ const BoardList = () => {
     }
   };
 
-  // 해시태그 검색
   const handleHashtagSearch = (hashtag) => {
     setSearchHashtag(hashtag);
     setCurrentPage(0);
     setSearchParams({ hashtag, page: '0' });
   };
 
-  // 검색어 초기화
   const handleClearSearch = () => {
     setSearchHashtag('');
     setCurrentPage(0);
     setSearchParams({ page: '0' });
   };
 
-  // 페이지 변경
   const handlePageChange = (page) => {
     setCurrentPage(page);
     const params = { page: page.toString() };
@@ -142,6 +152,27 @@ const BoardList = () => {
     setSearchParams(params);
   };
 
+  // 글쓰기 버튼 클릭 핸들러
+  const handleWriteClick = (e) => {
+    if (!isLoggedIn) {
+      e.preventDefault();
+      alert('글을 작성하려면 로그인이 필요합니다.');
+      navigate('/members/login');
+      return;
+    }
+    // 로그인된 경우 기존 링크 동작 유지
+  };
+
+  if (!config) {
+    return (
+      <>
+        <Header />
+        <div className="board-container">
+          <h1 className="board-title">존재하지 않는 게시판입니다.</h1>
+        </div>
+      </>
+    );
+  }
   // 사용자 닉네임 클릭 핸들러
   const handleNicknameClick = (authorId, authorNickname, authorEmail, event) => {
     event.stopPropagation();
@@ -240,12 +271,14 @@ const BoardList = () => {
           to="/board/write"
           className="board-btn"
           style={{ marginBottom: 24, display: 'inline-block' }}
+          onClick={handleWriteClick}
         >
           글 작성하기
         </Link>
         
        
 
+        {/* 게시글 목록 */}
         {loading ? (
           <div className="board-loading">로딩 중...</div>
         ) : (
@@ -267,12 +300,38 @@ const BoardList = () => {
                     <tr key={post.id}>
                       <td className="th-id">{post.id}</td>
                       <td className="th-title">
-                        <Link
-                          to={`/board/${category}/${post.id}`}
-                          className="board-link"
-                        >
-                          {post.title} [{post.commentCount}]
-                        </Link>
+                        <div className="post-title-container">
+                          <Link
+                            to={`/board/${category}/${post.id}`}
+                            className="board-link"
+                          >
+                            {post.title} [{post.commentCount}]
+                          </Link>
+                          {/* 이미지 썸네일 표시 */}
+                          {post.content && post.content.includes('[원본 이미지들]') && (
+                            <div className="post-thumbnails">
+                              {post.content.split('\n')
+                                .filter(line => line.includes('<img src='))
+                                .slice(0, 3)
+                                .map((imgLine, index) => {
+                                  const srcMatch = imgLine.match(/src="([^"]+)"/);
+                                  if (srcMatch) {
+                                    return (
+                                      <img 
+                                        key={index}
+                                        src={srcMatch[1]} 
+                                        alt={`썸네일 ${index + 1}`}
+                                        className="post-thumbnail"
+                                        onError={(e) => e.target.style.display = 'none'}
+                                        crossOrigin="anonymous"
+                                      />
+                                    );
+                                  }
+                                  return null;
+                                })}
+                            </div>
+                          )}
+                        </div>
                         {/* 해시태그 표시 */}
                         {post.hashtags && post.hashtags.length > 0 && (
                           <div className="post-hashtags">

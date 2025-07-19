@@ -5,6 +5,179 @@ import { jwtDecode } from 'jwt-decode';
 import axios from '../../api/axios';
 import { useAuth } from '../../contexts/AuthContext';
 
+// 커스텀 날짜 선택기 컴포넌트
+const CustomDatePicker = ({ value, onChange, label, required, placeholder, hasError, onBlur }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(value ? new Date(value) : new Date());
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+
+  const daysInMonth = (date) => {
+    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  };
+
+  const getFirstDayOfMonth = (date) => {
+    return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+  };
+
+  const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const handleDateSelect = (day) => {
+    const newDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+    setSelectedDate(newDate);
+  };
+
+  const handleYearChange = (increment) => {
+    setCurrentMonth(prev => new Date(prev.getFullYear() + increment, prev.getMonth(), 1));
+  };
+
+  const handleConfirm = () => {
+    onChange(formatDate(selectedDate));
+    setIsOpen(false);
+    if (onBlur) onBlur();
+  };
+
+  const handleToday = () => {
+    const today = new Date();
+    setSelectedDate(today);
+  };
+
+  const handleClear = () => {
+    onChange('');
+    setIsOpen(false);
+    if (onBlur) onBlur();
+  };
+
+  const renderCalendar = () => {
+    const days = [];
+    const firstDay = getFirstDayOfMonth(currentMonth);
+    const totalDays = daysInMonth(currentMonth);
+    
+    // 이전 달의 마지막 날들
+    const prevMonthDays = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 0).getDate();
+    for (let i = firstDay - 1; i >= 0; i--) {
+      days.push(
+        <div key={`prev-${i}`} className="calendar-day prev-month">
+          {prevMonthDays - i}
+        </div>
+      );
+    }
+    
+    // 현재 달의 날들
+    for (let day = 1; day <= totalDays; day++) {
+      const isSelected = selectedDate.getDate() === day && 
+                       selectedDate.getMonth() === currentMonth.getMonth() &&
+                       selectedDate.getFullYear() === currentMonth.getFullYear();
+      
+      days.push(
+        <div 
+          key={day} 
+          className={`calendar-day ${isSelected ? 'selected' : ''}`}
+          onClick={() => handleDateSelect(day)}
+        >
+          {day}
+        </div>
+      );
+    }
+    
+    // 다음 달의 첫 날들
+    const remainingDays = 42 - days.length; // 6주 표시를 위해
+    for (let day = 1; day <= remainingDays; day++) {
+      days.push(
+        <div key={`next-${day}`} className="calendar-day next-month">
+          {day}
+        </div>
+      );
+    }
+    
+    return days;
+  };
+
+  return (
+    <div className="custom-date-picker">
+      <div className={`date-input-wrapper ${hasError ? 'error-shake' : ''}`} onClick={() => setIsOpen(!isOpen)}>
+        <input
+          type="text"
+          value={value ? new Date(value).toLocaleDateString('ko-KR') : ''}
+          placeholder={placeholder || "날짜를 선택하세요"}
+          readOnly
+          className={`date-input ${hasError ? 'error-border' : ''}`}
+        />
+        <span className="calendar-icon"></span>
+      </div>
+      
+      {isOpen && (
+        <div className="date-picker-dropdown">
+          <div className="picker-header">
+            <button 
+              className="nav-btn" 
+              onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))}
+            >
+              ‹
+            </button>
+            <div className="month-year-display">
+              <span className="current-month">
+                {currentMonth.toLocaleDateString('en-US', { month: 'long' })}
+              </span>
+              <div className="year-controls">
+                <button 
+                  className="year-btn" 
+                  onClick={() => handleYearChange(-1)}
+                  title="이전 연도"
+                >
+                  ‹
+                </button>
+                <span className="current-year">
+                  {currentMonth.getFullYear()}
+                </span>
+                <button 
+                  className="year-btn" 
+                  onClick={() => handleYearChange(1)}
+                  title="다음 연도"
+                >
+                  ›
+                </button>
+              </div>
+            </div>
+            <button 
+              className="nav-btn" 
+              onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))}
+            >
+              ›
+            </button>
+          </div>
+          
+          <div className="picker-content">
+            <div className="calendar-section">
+              <div className="weekdays">
+                <div>일</div>
+                <div>월</div>
+                <div>화</div>
+                <div>수</div>
+                <div>목</div>
+                <div>금</div>
+                <div>토</div>
+              </div>
+              <div className="calendar-grid">
+                {renderCalendar()}
+              </div>
+            </div>
+          </div>
+          
+          <div className="picker-footer">
+            <button className="confirm-btn" onClick={handleConfirm}>확인</button>
+            <button className="cancel-btn" onClick={() => setIsOpen(false)}>취소</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const PetRegister = () => {
   const [memberId, setMemberId] = useState(null);
   const [profileImgPreview, setProfileImgPreview] = useState(null);
@@ -184,12 +357,10 @@ const PetRegister = () => {
 
         <div className="form-group">
           <label htmlFor="pet_Birth">생일</label>
-          <input
-            type="date"
-            name="pet_Birth"
+          <CustomDatePicker
             value={form.pet_Birth}
-            onChange={handleChange}
-            required
+            onChange={(value) => setForm(prev => ({ ...prev, pet_Birth: value }))}
+            placeholder="펫의 생일을 선택하세요"
           />
         </div>
 

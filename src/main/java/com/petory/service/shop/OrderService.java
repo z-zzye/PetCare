@@ -134,7 +134,7 @@ public class OrderService {
       .orderMemo(dto.getOrderMemo() != null ? dto.getOrderMemo() : "")
       .member(member)
       .build();
-    // TODO: member, orderItems 등 추가 세팅 필요
+
 
     // 3. OrderItem 엔티티 생성 및 저장 (주문 상품 개수만큼 반복)
     for (OrderItemDto itemDto : dto.getOrderItems()) {

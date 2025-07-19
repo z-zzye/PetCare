@@ -1,0 +1,148 @@
+.shop-container {
+  min-height: 100vh;
+  background-color: #ffffff;
+}
+
+.shop-content {
+}
+
+.shop-content h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 30px;
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+.banner-container {
+  display: flex;
+  width: 100%;
+  height: 80vh;
+  overflow: hidden;
+  flex-wrap: wrap;
+  gap: 0;
+}
+
+.banner-section {
+  flex: 1;
+  min-width: 300px;
+  background-color: transparent;
+  border-radius: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-shadow: none;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.banner-section.left-banner {
+  padding: 0;
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+  border: none;
+}
+
+.banner-section.right-banner {
+  padding: 0;
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+  border: none;
+}
+
+.banner-section:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.banner-section {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.banner-section h2 {
+  color: #333;
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.left-banner {
+  background: #ffffff;
+  color: #333;
+}
+
+.right-banner {
+  background: #ffffff;
+  color: #333;
+}
+
+.left-banner h2,
+.right-banner h2 {
+  color: #333;
+}
+
+.banner-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0;
+  margin: 0;
+  border: none;
+  transition: all 0.3s ease;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* 반응형 미디어 쿼리 */
+@media (max-width: 768px) {
+  .banner-container {
+    height: auto;
+    flex-direction: column;
+  }
+  
+  .banner-section {
+    min-width: 100%;
+    flex: none;
+    height: 40vh;
+  }
+  
+  .banner-image {
+    object-position: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .banner-container {
+    height: auto;
+  }
+  
+  .banner-section {
+    height: 35vh;
+  }
+  
+  .banner-section h2 {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+  }
+}
+
+@media (max-width: 320px) {
+  .banner-section {
+    height: 30vh;
+  }
+}
+
+.left-banner .banner-image {
+  object-position: 80% center;
+}
+
+.right-banner .banner-image {
+  object-position: 30% center;
+} 

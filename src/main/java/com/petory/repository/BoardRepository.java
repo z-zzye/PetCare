@@ -39,4 +39,38 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
       Pageable pageable
   );
 
+  // 6. 해시태그 기반 게시글 조회 (추천 시스템용) - 복합키 구조에 맞게 수정
+  @Query("SELECT DISTINCT b FROM Board b " +
+         "JOIN BoardHashtag bh ON b.id = bh.id.postId " +
+         "JOIN Hashtag h ON bh.id.tagId = h.tagId " +
+         "WHERE h.tagName IN :hashtags " +
+         "AND b.blinded = false " +
+         "ORDER BY b.regDate DESC")
+  List<Board> findBoardsByHashtags(@Param("hashtags") List<String> hashtags);
+
+  // 7. 해시태그 기반 게시글 조회 (개수 제한) - 복합키 구조에 맞게 수정
+  @Query("SELECT DISTINCT b FROM Board b " +
+         "JOIN BoardHashtag bh ON b.id = bh.id.postId " +
+         "JOIN Hashtag h ON bh.id.tagId = h.tagId " +
+         "WHERE h.tagName IN :hashtags " +
+         "AND b.blinded = false " +
+         "ORDER BY b.regDate DESC")
+  List<Board> findBoardsByHashtags(@Param("hashtags") List<String> hashtags, Pageable pageable);
+
+  // 8. 인기 해시태그 조회 (최근 30일 내 사용 빈도 기준) - 복합키 구조에 맞게 수정
+  @Query("SELECT h.tagName FROM Hashtag h " +
+         "JOIN BoardHashtag bh ON h.tagId = bh.id.tagId " +
+         "JOIN Board b ON bh.id.postId = b.id " +
+         "WHERE b.regDate >= :monthAgo " +
+         "AND b.blinded = false " +
+         "GROUP BY h.tagName " +
+         "ORDER BY COUNT(bh) DESC")
+  List<String> findPopularHashtags(@Param("monthAgo") LocalDateTime monthAgo, Pageable pageable);
+
+  // 9. 인기 해시태그 조회 (개수 제한)
+  default List<String> findPopularHashtags(int limit) {
+    LocalDateTime monthAgo = LocalDateTime.now().minusDays(30);
+    Pageable pageable = Pageable.ofSize(limit);
+    return findPopularHashtags(monthAgo, pageable);
+  }
 }

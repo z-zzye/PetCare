@@ -21,6 +21,20 @@ const Auction = () => {
   }
 
   useEffect(() => {
+    // body에 흰색 배경 적용
+    document.body.style.backgroundColor = '#ffffff';
+    document.body.style.margin = '0';
+    document.body.style.padding = '0';
+    
+    // 컴포넌트 언마운트 시 원래 상태로 복원
+    return () => {
+      document.body.style.backgroundColor = '';
+      document.body.style.margin = '';
+      document.body.style.padding = '';
+    };
+  }, []);
+
+  useEffect(() => {
     // 이미 요청했다면 중복 방지 (로컬 + 전역 체크)
     if (hasFetchedScheduled.current || window.__auctionFetched.scheduled) {
       console.log('⚠️ 이미 경매 목록을 요청했습니다. 중복 방지.');
@@ -96,11 +110,16 @@ const Auction = () => {
   return (
     <>
       <Header />
-      <div style={{ marginTop: 32 }}>
+      <div style={{ 
+        backgroundColor: '#ffffff', 
+        minHeight: 'calc(100vh - 80px)', // 헤더 높이만큼 제외
+        margin: 0,
+        padding: 0
+      }}>
         {loading ? (
-          <div style={{ textAlign: 'center', margin: '60px 0', fontSize: '1.2rem' }}>로딩 중...</div>
+          <div style={{ textAlign: 'center', margin: '60px 0', fontSize: '1.2rem', backgroundColor: '#ffffff' }}>로딩 중...</div>
         ) : scheduledItems.length === 0 ? (
-          <div style={{ textAlign: 'center', margin: '60px 0' }}>
+          <div style={{ textAlign: 'center', margin: '60px 0', backgroundColor: '#ffffff' }}>
             <img
               src={process.env.PUBLIC_URL + '/images/empty-auction.png'}
               alt="경매 없음"

@@ -29,6 +29,9 @@ const BoardDetail = () => {
     fetch(`/api/boards/${category}/${id}`)
       .then((res) => res.json())
       .then((data) => {
+        console.log('게시글 상세 데이터:', data);
+        console.log('작성자:', data.memberNickname);
+        console.log('작성일:', data.regDate);
         setPost(data);
         setComments(data.comments || []);
       })
@@ -287,7 +290,7 @@ const BoardDetail = () => {
               작성자: {post.authorNickName}
             </span>
             <span className="board-date">
-              {new Date(post.createdAt).toLocaleString()}
+              {new Date(post.regDate).toLocaleString()}
             </span>
           </div>
           {/* 해시태그 표시 */}
@@ -300,9 +303,14 @@ const BoardDetail = () => {
               ))}
             </div>
           )}
-          <div style={{ minHeight: '200px', whiteSpace: 'pre-wrap' }}>
-            {post.content}
-          </div>
+          <div
+            style={{
+              minHeight: '200px',
+              padding: '20px',
+              backgroundColor: 'white',
+            }}
+            dangerouslySetInnerHTML={{ __html: post.content }}
+          />
           <div className="board-recommend-section">
             <span className="recommend-count">
               👍 {post.likeCount !== undefined ? post.likeCount : 0}

@@ -8,23 +8,23 @@
  *   (권한 예시: USER, VET, ADMIN)
  */
 export const boardConfig = {
-    info: {
+    INFO: {
       name: "정보게시판",
       apiPath: "/api/boards/info",
       allowedRoles: ["VET", "ADMIN"], // 정보게시판은 수의사, 관리자만 작성 가능
     },
-    free: {
+    FREE: {
       name: "자유게시판",
       apiPath: "/api/boards/free",
       allowedRoles: ["USER", "VET", "ADMIN"], // 모두 작성 가능
     },
-    qna: {
+    QNA: {
       name: "Q&A",
       apiPath: "/api/boards/qna",
       allowedRoles: ["USER", "VET", "ADMIN"], // 모두 작성 가능
     },
     // 추후 산책동행 등 추가 가능
-    // walk: {
+    // WALKWITH: {
     //   name: "산책 동행",
     //   apiPath: "/api/boards/walk",
     //   allowedRoles: ["USER", "VET", "ADMIN"],

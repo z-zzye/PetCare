@@ -29,6 +29,18 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Value("${item.resource.location}")
     String itemResourceLocation;
 
+    @Value("${board.image.resource.handler}")
+    String boardImageResourceHandler;
+
+    @Value("${board.image.resource.location}")
+    String boardImageResourceLocation;
+
+    @Value("${crawling.image.resource.handler}")
+    String crawlingImageResourceHandler;
+
+    @Value("${crawling.image.resource.location}")
+    String crawlingImageResourceLocation;
+
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
@@ -58,6 +70,14 @@ public class WebMvcConfig implements WebMvcConfigurer {
         // 상품 이미지 전용 핸들러
         registry.addResourceHandler(itemResourceHandler)
                 .addResourceLocations(itemResourceLocation);
+
+        // 게시글 이미지 전용 핸들러
+        registry.addResourceHandler(boardImageResourceHandler)
+                .addResourceLocations(boardImageResourceLocation);
+
+        // 크롤링 이미지 전용 핸들러
+        registry.addResourceHandler(crawlingImageResourceHandler)
+                .addResourceLocations(crawlingImageResourceLocation);
     }
 
     @Override

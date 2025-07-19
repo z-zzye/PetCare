@@ -1,6 +1,9 @@
 package com.petory.dto.board;
 
 import java.time.LocalDateTime;
+import java.util.List;
+
+import com.petory.dto.HashtagDto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,7 +25,6 @@ public class PopularBoardDto {
     private int likeCount;              // 추천수 (인기 순위 기준)
     private String category;            // 게시판 종류 (BoardKind)
     private LocalDateTime createdAt;    // 작성일
+    private List<HashtagDto> hashtags;  // 해시태그 목록
     
-    // 나중에 해시태그 기능 추가 시 확장 가능
-    // private List<String> hashtags;
 } 
