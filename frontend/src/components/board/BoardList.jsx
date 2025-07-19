@@ -1,6 +1,12 @@
 // frontend/src/components/board/BoardList.jsx
 import React, { useEffect, useState } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import {
+  Link,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import Header from '../Header';
 import './BoardCommon.css';
 import { boardConfig } from './boardConfig';
@@ -8,6 +14,8 @@ import { boardConfig } from './boardConfig';
 const BoardList = () => {
   const { category } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { isLoggedIn } = useAuth();
+  const navigate = useNavigate();
   
   // 소문자 카테고리를 대문자로 매핑
   const getBoardConfigKey = (category) => {
@@ -83,21 +91,18 @@ const BoardList = () => {
     }
   };
 
-  // 해시태그 검색
   const handleHashtagSearch = (hashtag) => {
     setSearchHashtag(hashtag);
     setCurrentPage(0);
     setSearchParams({ hashtag, page: '0' });
   };
 
-  // 검색어 초기화
   const handleClearSearch = () => {
     setSearchHashtag('');
     setCurrentPage(0);
     setSearchParams({ page: '0' });
   };
 
-  // 페이지 변경
   const handlePageChange = (page) => {
     setCurrentPage(page);
     const params = { page: page.toString() };
@@ -107,8 +112,27 @@ const BoardList = () => {
     setSearchParams(params);
   };
 
-  if (!config)
-    return <div className="board-container">존재하지 않는 게시판입니다.</div>;
+  // 글쓰기 버튼 클릭 핸들러
+  const handleWriteClick = (e) => {
+    if (!isLoggedIn) {
+      e.preventDefault();
+      alert('글을 작성하려면 로그인이 필요합니다.');
+      navigate('/members/login');
+      return;
+    }
+    // 로그인된 경우 기존 링크 동작 유지
+  };
+
+  if (!config) {
+    return (
+      <>
+        <Header />
+        <div className="board-container">
+          <h1 className="board-title">존재하지 않는 게시판입니다.</h1>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
@@ -166,10 +190,12 @@ const BoardList = () => {
           to="/board/write"
           className="board-btn"
           style={{ marginBottom: 24, display: 'inline-block' }}
+          onClick={handleWriteClick}
         >
           글 작성하기
         </Link>
 
+        {/* 게시글 목록 */}
         {loading ? (
           <div className="board-loading">로딩 중...</div>
         ) : (
