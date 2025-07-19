@@ -584,6 +584,15 @@
   text-align: center;
 }
 
+/* 클릭 가능한 닉네임 스타일 */
+.clickable-nickname {
+  transition: color 0.2s ease;
+}
+
+.clickable-nickname:hover {
+  color: #0056b3 !important;
+  text-decoration: underline;
+}
 /* --- 해시태그 관련 스타일 --- */
 
 /* 해시태그 선택 섹션 */

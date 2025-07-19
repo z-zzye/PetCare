@@ -25,6 +25,7 @@ public class BoardDetailDto {
   private String title;
   private String content;
   private BoardKind boardKind;
+  private Long memberId;
   private String memberEmail;
   private String memberNickname;
   private LocalDateTime regDate;
@@ -43,6 +44,7 @@ public class BoardDetailDto {
     dto.setTitle(board.getTitle());
     dto.setContent(board.getContent());
     dto.setBoardKind(board.getBoardKind());
+    dto.setMemberId(board.getMember().getMember_Id());
     dto.setMemberEmail(board.getMember().getMember_Email());
     dto.setMemberNickname(board.getMember().getMember_NickName());
     dto.setRegDate(board.getRegDate());

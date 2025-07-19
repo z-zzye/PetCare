@@ -274,17 +274,4 @@ public class MemberApiController {
     return ResponseEntity.ok(memberService.getChatMemberById(id));
   }
 
-  // 회원 역할 조회
-  @GetMapping("/{memberId}/role")
-  public ResponseEntity<String> getMemberRole(@PathVariable Long memberId) {
-    try {
-      String role = memberService.getMemberRole(memberId);
-      return ResponseEntity.ok(role);
-    } catch (IllegalStateException e) {
-      return ResponseEntity.status(404).body(e.getMessage());
-    } catch (Exception e) {
-      return ResponseEntity.status(500).body("역할 조회 중 오류가 발생했습니다.");
-    }
-  }
-
 }

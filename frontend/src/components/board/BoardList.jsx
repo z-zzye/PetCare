@@ -1,40 +1,79 @@
 // frontend/src/components/board/BoardList.jsx
 import React, { useEffect, useState } from 'react';
-import {
-  Link,
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from 'react-router-dom';
+import { Link, useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import Header from '../Header';
+import UserActionPopup from '../UserActionPopup';
+import ChatPage from '../chat/ChatPage';
 import './BoardCommon.css';
 import { boardConfig } from './boardConfig';
 
 const BoardList = () => {
   const { category } = useParams();
+  const { isLoggedIn, email } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
-  
+
   // 소문자 카테고리를 대문자로 매핑
   const getBoardConfigKey = (category) => {
     const categoryMap = {
       'info': 'INFO',
-      'free': 'FREE', 
+      'free': 'FREE',
       'qna': 'QNA',
       'walkwith': 'WALKWITH'
     };
     return categoryMap[category] || category;
   };
-  
+
   const config = boardConfig[getBoardConfigKey(category)];
   const [posts, setPosts] = useState([]);
+  const [myEmail, setMyEmail] = useState(null);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [searchHashtag, setSearchHashtag] = useState('');
   const [popularHashtags, setPopularHashtags] = useState([]);
+
+
+  // 사용자 액션 팝업 상태
+  const [showUserActionPopup, setShowUserActionPopup] = useState(false);
+  const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 });
+  const [selectedUser, setSelectedUser] = useState(null);
+
+  // 채팅 모달 상태
+  const [showChatModal, setShowChatModal] = useState(false);
+  const [chatReceiverId, setChatReceiverId] = useState(null);
+
+  // JWT 파싱 함수 추가
+  function parseJwt(token) {
+    if (!token) return null;
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
+      );
+      return JSON.parse(jsonPayload);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // 내 이메일 가져오기
+  useEffect(() => {
+    if (!isLoggedIn) return;
+
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    const payload = parseJwt(token);
+    if (payload && payload.sub) {
+      setMyEmail(payload.sub);
+    }
+  }, [isLoggedIn]);
 
   // URL 파라미터에서 검색어와 페이지 정보 가져오기
   useEffect(() => {
@@ -133,6 +172,47 @@ const BoardList = () => {
       </>
     );
   }
+  // 사용자 닉네임 클릭 핸들러
+  const handleNicknameClick = (authorId, authorNickname, authorEmail, event) => {
+    event.stopPropagation();
+
+    if (!isLoggedIn) {
+      alert('채팅을 이용하려면 로그인이 필요합니다.');
+      navigate('/members/login');
+      return;
+    }
+
+    // 팝업 위치 계산
+    const rect = event.target.getBoundingClientRect();
+    setPopupPosition({
+      x: rect.left,
+      y: rect.bottom + 5
+    });
+    setSelectedUser({ id: authorId, nickname: authorNickname, email: authorEmail });
+    setShowUserActionPopup(true);
+  };
+
+  // 팝업 닫기 핸들러
+  const handleClosePopup = () => {
+    setShowUserActionPopup(false);
+    setSelectedUser(null);
+  };
+
+  // 채팅 모달 열기 핸들러
+  const handleOpenChatModal = (receiverId) => {
+    setChatReceiverId(receiverId);
+    setShowChatModal(true);
+    setShowUserActionPopup(false);
+  };
+
+  // 채팅 모달 닫기 핸들러
+  const handleCloseChatModal = () => {
+    setShowChatModal(false);
+    setChatReceiverId(null);
+  };
+
+  if (!config)
+    return <div className="board-container">존재하지 않는 게시판입니다.</div>;
 
   return (
     <>
@@ -195,6 +275,8 @@ const BoardList = () => {
           글 작성하기
         </Link>
 
+
+
         {/* 게시글 목록 */}
         {loading ? (
           <div className="board-loading">로딩 중...</div>
@@ -234,9 +316,9 @@ const BoardList = () => {
                                   const srcMatch = imgLine.match(/src="([^"]+)"/);
                                   if (srcMatch) {
                                     return (
-                                      <img 
+                                      <img
                                         key={index}
-                                        src={srcMatch[1]} 
+                                        src={srcMatch[1]}
                                         alt={`썸네일 ${index + 1}`}
                                         className="post-thumbnail"
                                         onError={(e) => e.target.style.display = 'none'}
@@ -267,7 +349,13 @@ const BoardList = () => {
                           </div>
                         )}
                       </td>
-                      <td className="th-author">{post.authorNickName}</td>
+                      <td
+                    className="th-author clickable-nickname"
+                    onClick={(e) => handleNicknameClick(post.authorId, post.authorNickName, post.authorEmail, e)}
+                    style={{ cursor: 'pointer', color: '#007bff' }}
+                  >
+                    {post.authorNickName}
+                  </td>
                       <td className="th-date">
                         {new Date(post.createdAt).toLocaleDateString()}
                       </td>
@@ -326,6 +414,29 @@ const BoardList = () => {
           </>
         )}
       </div>
+
+      {/* 사용자 액션 팝업 */}
+      {showUserActionPopup && (
+        <UserActionPopup
+          key={`${selectedUser?.id}`}
+          isVisible={showUserActionPopup}
+          position={popupPosition}
+          user={selectedUser}
+          onClose={handleClosePopup}
+          onOpenChat={handleOpenChatModal}
+          isMyPost={myEmail && selectedUser && selectedUser.email === myEmail}
+        />
+      )}
+
+      {/* 채팅 모달 */}
+      {showChatModal && chatReceiverId && (
+        <div className="user-action-chatroom-popup-overlay" onClick={handleCloseChatModal}>
+          <div className="user-action-chatroom-popup" onClick={e => e.stopPropagation()}>
+            <button className="user-action-chatroom-popup-close" onClick={handleCloseChatModal}>×</button>
+            <ChatPage receiverId={chatReceiverId} />
+          </div>
+        </div>
+      )}
     </>
   );
 };

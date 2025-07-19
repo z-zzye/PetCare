@@ -56,6 +56,12 @@ const ChatPage = (props) => {
       .catch(err => {
         console.error('❌ 채팅방 or 메시지 로딩 실패:', err);
         console.error('❌ 에러 상세:', err.response?.data);
+        // 백엔드 서버가 실행되지 않은 경우 임시 처리
+        if (err.code === 'ERR_NETWORK' || err.message?.includes('Failed to fetch')) {
+          console.log('⚠️ 백엔드 서버가 실행되지 않았습니다. 채팅 기능을 사용할 수 없습니다.');
+          setMessages([]);
+          setChatRoomId(null);
+        }
       });
   }, [receiverId]);
 
