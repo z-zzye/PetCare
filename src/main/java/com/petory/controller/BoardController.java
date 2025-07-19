@@ -2,13 +2,8 @@
 
 package com.petory.controller;
 
-import com.petory.dto.board.BoardCreateDto;
-import com.petory.dto.board.BoardDetailDto;
-import com.petory.dto.board.BoardListDto;
-import com.petory.dto.board.BoardUpdateDto;
-import com.petory.service.BoardService;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -17,7 +12,24 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.petory.dto.board.BoardCreateDto;
+import com.petory.dto.board.BoardDetailDto;
+import com.petory.dto.board.BoardListDto;
+import com.petory.dto.board.BoardUpdateDto;
+import com.petory.service.BoardService;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/boards")
@@ -87,5 +99,63 @@ public class BoardController {
       // 이미 추천한 경우 409 Conflict 상태 코드 반환
       return ResponseEntity.status(HttpStatus.CONFLICT).build();
     }
+  }
+
+  // ▼▼▼ 해시태그 검색 API들 추가 ▼▼▼
+
+  // 단일 해시태그로 게시글 검색 API
+  @GetMapping("/search/hashtag")
+  public ResponseEntity<Page<BoardListDto>> searchBoardsByHashtag(
+    @RequestParam String hashtag,
+    @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+    try {
+      Page<BoardListDto> boardList = boardService.searchBoardsByHashtag(hashtag, pageable);
+      return ResponseEntity.ok(boardList);
+    } catch (IllegalArgumentException e) {
+      // 존재하지 않는 해시태그인 경우 빈 페이지 반환
+      return ResponseEntity.ok(Page.empty(pageable));
+    }
+  }
+
+  // 여러 해시태그로 게시글 검색 API (OR 조건)
+  @GetMapping("/search/hashtags")
+  public ResponseEntity<Page<BoardListDto>> searchBoardsByHashtags(
+    @RequestParam List<String> hashtags,
+    @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+    Page<BoardListDto> boardList = boardService.searchBoardsByHashtags(hashtags, pageable);
+    return ResponseEntity.ok(boardList);
+  }
+
+  // 카테고리별 해시태그 검색 API (효율적인 버전)
+  @GetMapping("/{category}/search/hashtag")
+  public ResponseEntity<Page<BoardListDto>> searchBoardsByCategoryAndHashtag(
+    @PathVariable String category,
+    @RequestParam String hashtag,
+    @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+    try {
+      Page<BoardListDto> boardList = boardService.searchBoardsByCategoryAndHashtag(category, hashtag, pageable);
+      return ResponseEntity.ok(boardList);
+    } catch (IllegalArgumentException e) {
+      // 존재하지 않는 해시태그인 경우 빈 페이지 반환
+      return ResponseEntity.ok(Page.empty(pageable));
+    }
+  }
+
+  // 카테고리별 여러 해시태그 검색 API (효율적인 버전)
+  @GetMapping("/{category}/search/hashtags")
+  public ResponseEntity<Page<BoardListDto>> searchBoardsByCategoryAndHashtags(
+    @PathVariable String category,
+    @RequestParam List<String> hashtags,
+    @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+    Page<BoardListDto> boardList = boardService.searchBoardsByCategoryAndHashtags(category, hashtags, pageable);
+    return ResponseEntity.ok(boardList);
+  }
+
+  // 게시글 작성용 해시태그 목록 조회 API
+  @GetMapping("/hashtags/for-write")
+  public ResponseEntity<List<String>> getHashtagsForWrite() {
+    // 인기 해시태그 상위 20개 반환 (게시글 작성 시 선택용)
+    List<String> popularHashtags = boardService.getPopularHashtagsForWrite();
+    return ResponseEntity.ok(popularHashtags);
   }
 }

@@ -1,6 +1,9 @@
 package com.petory.dto.board;
 
+import java.util.List;
+
 import com.petory.constant.BoardKind;
+
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,5 +20,7 @@ public class BoardCreateDto {
   private String content;
 
   private BoardKind boardKind;
-  private String hashTag;
+  
+  // 해시태그 리스트 필드
+  private List<String> hashtags;
 }
