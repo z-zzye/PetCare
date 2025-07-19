@@ -23,6 +23,9 @@ public class VetApplyAdminDto {
     private String specialization;
     private Integer experienceYears;
     private String certifications;
+    private String licenseImageUrl;
+    private String birthDate;
+    private String firstIssueDate;
     private ApplyStatus applyStatus;
     private LocalDateTime regDate;
     private LocalDateTime applyProcessDate;

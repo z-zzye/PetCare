@@ -18,8 +18,14 @@ const VetApply = () => {
     hospitalPhone: '',
     specialization: '',
     experienceYears: '',
-    certifications: ''
+    certifications: '',
+    birthDate: '',
+    firstIssueDate: ''
   });
+
+  const [licenseImage, setLicenseImage] = useState(null);
+  const [licenseImagePreview, setLicenseImagePreview] = useState(null);
+  const [licenseImageUrl, setLicenseImageUrl] = useState('');
 
   const [errors, setErrors] = useState({});
 
@@ -62,6 +68,171 @@ const VetApply = () => {
     }
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // 파일 크기 검증 (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        Swal.fire({
+          icon: 'error',
+          title: '파일 크기 오류',
+          text: '파일 크기는 5MB 이하여야 합니다.',
+          confirmButtonText: '확인'
+        });
+        return;
+      }
+
+      // 파일 형식 검증
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+      if (!validTypes.includes(file.type)) {
+        Swal.fire({
+          icon: 'error',
+          title: '파일 형식 오류',
+          text: '이미지 파일만 업로드 가능합니다. (jpg, jpeg, png, gif)',
+          confirmButtonText: '확인'
+        });
+        return;
+      }
+
+      console.log('setLicenseImage 호출 전, file:', file);
+      setLicenseImage(file);
+      console.log('setLicenseImage 호출 완료');
+      
+      // 이미지 업로드 시 해당 필드의 에러 메시지 제거
+      if (errors.licenseImage) {
+        setErrors(prev => ({
+          ...prev,
+          licenseImage: ''
+        }));
+      }
+      
+      // 미리보기 생성
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setLicenseImagePreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+      
+      // 파일 선택 시 즉시 Google Vision AI 분석 실행
+      console.log('파일 선택됨, Google Vision AI 분석 시작');
+      uploadLicenseImageWithFile(file);
+    }
+  };
+
+  const uploadLicenseImageWithFile = async (file) => {
+    console.log('uploadLicenseImageWithFile 함수 시작');
+    console.log('전달받은 file:', file);
+    
+    if (!file) {
+      console.log('file이 없음');
+      return null;
+    }
+
+    console.log('FormData 생성 시작');
+    const formData = new FormData();
+    formData.append('file', file);
+    console.log('FormData 생성 완료');
+
+    try {
+      console.log('axios 요청 시작');
+      const response = await axios.post('/vet-license-image/upload?analyze=true', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      console.log('axios 요청 성공:', response.data);
+      
+      // Google Vision AI 분석 결과가 있으면 폼에 자동 입력
+      if (response.data.extractedName || response.data.extractedBirthDate || response.data.extractedIssueDate) {
+        const licenseInfo = response.data.licenseInfo;
+        if (licenseInfo) {
+          setFormData(prev => ({
+            ...prev,
+            name: licenseInfo.name || prev.name,
+            birthDate: licenseInfo.birthDate || prev.birthDate,
+            firstIssueDate: licenseInfo.issueDate || prev.firstIssueDate
+          }));
+          
+          // 분석 결과 알림
+          Swal.fire({
+            icon: 'info',
+            title: '자격증 정보 자동 인식',
+            text: `이름: ${licenseInfo.name || '인식 실패'}\n생년월일: ${licenseInfo.birthDate || '인식 실패'}\n최초발급일: ${licenseInfo.issueDate || '인식 실패'}`,
+            confirmButtonText: '확인'
+          });
+        }
+      }
+      
+      return response.data.filename;
+    } catch (error) {
+      console.error('이미지 업로드 오류:', error);
+      Swal.fire({
+        icon: 'error',
+        title: '이미지 업로드 실패',
+        text: error.response?.data?.error || '이미지 업로드 중 오류가 발생했습니다.',
+        confirmButtonText: '확인'
+      });
+      return null;
+    }
+  };
+
+  const uploadLicenseImage = async () => {
+    console.log('uploadLicenseImage 함수 시작');
+    console.log('licenseImage 상태:', licenseImage);
+    
+    if (!licenseImage) {
+      console.log('licenseImage가 없음');
+      return null;
+    }
+
+    console.log('FormData 생성 시작');
+    const formData = new FormData();
+    formData.append('file', licenseImage);
+    console.log('FormData 생성 완료');
+
+    try {
+      console.log('axios 요청 시작');
+      const response = await axios.post('/vet-license-image/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      console.log('axios 요청 성공:', response.data);
+      
+      // Google Vision AI 분석 결과가 있으면 폼에 자동 입력
+      if (response.data.extractedName || response.data.extractedBirthDate || response.data.extractedIssueDate) {
+        const licenseInfo = response.data.licenseInfo;
+        if (licenseInfo) {
+          setFormData(prev => ({
+            ...prev,
+            name: licenseInfo.name || prev.name,
+            birthDate: licenseInfo.birthDate || prev.birthDate,
+            firstIssueDate: licenseInfo.issueDate || prev.firstIssueDate
+          }));
+          
+          // 분석 결과 알림
+          Swal.fire({
+            icon: 'info',
+            title: '자격증 정보 자동 인식',
+            text: `이름: ${licenseInfo.name || '인식 실패'}\n생년월일: ${licenseInfo.birthDate || '인식 실패'}\n최초발급일: ${licenseInfo.issueDate || '인식 실패'}`,
+            confirmButtonText: '확인'
+          });
+        }
+      }
+      
+      return response.data.filename;
+    } catch (error) {
+      console.error('이미지 업로드 오류:', error);
+      Swal.fire({
+        icon: 'error',
+        title: '이미지 업로드 실패',
+        text: error.response?.data?.error || '이미지 업로드 중 오류가 발생했습니다.',
+        confirmButtonText: '확인'
+      });
+      return null;
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log('handleSubmit 함수 실행됨');
@@ -70,24 +241,31 @@ const VetApply = () => {
     // 유효성 검사
     const newErrors = {};
     
-    if (!formData.name.trim()) {
-      newErrors.name = '이름을 입력해주세요.';
-    }
+    // 이름은 자동 입력되므로 검사하지 않음
     
     if (!formData.licenseNumber.trim()) {
       newErrors.licenseNumber = '수의사 면허번호를 입력해주세요.';
+      console.log('수의사 면허번호 필수 입력 에러');
     }
     
     if (!formData.hospitalName.trim()) {
       newErrors.hospitalName = '소속 병원명을 입력해주세요.';
+      console.log('소속 병원명 필수 입력 에러');
     }
     
     if (!formData.specialization.trim()) {
       newErrors.specialization = '전문 분야를 입력해주세요.';
+      console.log('전문 분야 필수 입력 에러');
     }
     
     if (!formData.experienceYears || formData.experienceYears < 0) {
       newErrors.experienceYears = '경력 연차를 입력해주세요.';
+      console.log('경력 연차 필수 입력 에러');
+    }
+    
+    if (!licenseImage) {
+      newErrors.licenseImage = '수의사 자격증 이미지를 업로드해주세요.';
+      console.log('수의사 자격증 이미지 필수 입력 에러');
     }
     
     console.log('유효성 검사 결과 newErrors:', newErrors);
@@ -100,6 +278,31 @@ const VetApply = () => {
     }
     
     try {
+      // 이미지 업로드 처리 (Google Vision API 호출 없이)
+      let uploadedImageUrl = null;
+      if (licenseImage) {
+        const formData = new FormData();
+        formData.append('file', licenseImage);
+        
+        try {
+          const response = await axios.post('/vet-license-image/upload?analyze=false', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
+          });
+          uploadedImageUrl = response.data.filename;
+        } catch (error) {
+          console.error('이미지 업로드 오류:', error);
+          Swal.fire({
+            icon: 'error',
+            title: '이미지 업로드 실패',
+            text: '이미지 업로드 중 오류가 발생했습니다.',
+            confirmButtonText: '확인'
+          });
+          return;
+        }
+      }
+
       const response = await axios.post('/vet-apply/apply', {
         name: formData.name,
         email: formData.email,
@@ -110,7 +313,10 @@ const VetApply = () => {
         hospitalPhone: formData.hospitalPhone,
         specialization: formData.specialization,
         experienceYears: parseInt(formData.experienceYears),
-        certifications: formData.certifications
+        certifications: formData.certifications,
+        licenseImageUrl: uploadedImageUrl,
+        birthDate: formData.birthDate,
+        firstIssueDate: formData.firstIssueDate
       });
       
       Swal.fire({
@@ -182,7 +388,10 @@ const VetApply = () => {
           <h2 className="vet-apply-section-title">수의사 신청</h2>
           <form 
             className="vet-apply-form" 
-            onSubmit={handleSubmit}
+            onSubmit={(e) => {
+              console.log('폼 제출 이벤트 발생');
+              handleSubmit(e);
+            }}
           >
             <div className="vet-apply-form-grid">
               <div className="vet-apply-form-group">
@@ -192,11 +401,11 @@ const VetApply = () => {
                   id="name"
                   name="name"
                   value={formData.name}
-                  onChange={handleInputChange}
-                  placeholder="실명을 입력해주세요"
+                  readOnly
+                  placeholder="자격증 이미지를 업로드하면 자동으로 입력됩니다"
                   required
                 />
-                {errors.name && <div className="vet-apply-error">{errors.name}</div>}
+                <small className="vet-apply-help-text">자격증 이미지에서 자동으로 추출됩니다</small>
               </div>
               <div className="vet-apply-form-group">
                 <label htmlFor="email">이메일 *</label>
@@ -236,6 +445,27 @@ const VetApply = () => {
                 {errors.licenseNumber && <div className="vet-apply-error">{errors.licenseNumber}</div>}
               </div>
               <div className="vet-apply-form-group">
+                <label htmlFor="licenseImage">수의사 자격증 이미지 *</label>
+                <input
+                  type="file"
+                  id="licenseImage"
+                  name="licenseImage"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="vet-apply-file-input"
+                  required
+                />
+                <div className="vet-apply-file-info">
+                  <small>이미지 파일만 업로드 가능합니다. (jpg, jpeg, png, gif, 최대 5MB)</small>
+                </div>
+                {licenseImagePreview && (
+                  <div className="vet-apply-image-preview">
+                    <img src={licenseImagePreview} alt="자격증 미리보기" />
+                  </div>
+                )}
+                {errors.licenseImage && <div className="vet-apply-error">{errors.licenseImage}</div>}
+              </div>
+              <div className="vet-apply-form-group">
                 <label htmlFor="hospitalName">소속 병원명 *</label>
                 <input
                   type="text"
@@ -269,6 +499,30 @@ const VetApply = () => {
                   onChange={handleInputChange}
                   placeholder="병원 전화번호를 입력해주세요"
                 />
+              </div>
+              <div className="vet-apply-form-group">
+                <label htmlFor="birthDate">생년월일</label>
+                <input
+                  type="text"
+                  id="birthDate"
+                  name="birthDate"
+                  value={formData.birthDate}
+                  readOnly
+                  placeholder="자격증 이미지를 업로드하면 자동으로 입력됩니다"
+                />
+                <small className="vet-apply-help-text">자격증 이미지에서 자동으로 추출됩니다</small>
+              </div>
+              <div className="vet-apply-form-group">
+                <label htmlFor="firstIssueDate">최초 발급일</label>
+                <input
+                  type="text"
+                  id="firstIssueDate"
+                  name="firstIssueDate"
+                  value={formData.firstIssueDate}
+                  readOnly
+                  placeholder="자격증 이미지를 업로드하면 자동으로 입력됩니다"
+                />
+                <small className="vet-apply-help-text">자격증 이미지에서 자동으로 추출됩니다</small>
               </div>
               <div className="vet-apply-form-group">
                 <label htmlFor="experienceYears">경력 연차 *</label>
@@ -311,6 +565,12 @@ const VetApply = () => {
               <button 
                 type="submit" 
                 className="vet-apply-submit-btn"
+                onClick={(e) => {
+                  console.log('버튼 클릭됨');
+                  e.preventDefault();
+                  console.log('폼 제출 이벤트 발생');
+                  handleSubmit(e);
+                }}
               >
                 수의사 신청하기
               </button>

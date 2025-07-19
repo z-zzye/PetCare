@@ -121,42 +121,50 @@ const AdminVetApply = () => {
               <>
                 <div className="auction-list">
                   <h2 className="vet-apply-list-title">신청 현황 (총 {totalElements}건)</h2>
-                  <table className="admin-table">
-                    <thead>
-                      <tr>
-                        <th>번호</th>
+                                  <table className="admin-table">
+                  <thead>
+                    <tr>
+                                              <th>번호</th>
                         <th>신청자</th>
                         <th>이메일</th>
                         <th>면허번호</th>
                         <th>병원명</th>
+                        <th>자격증</th>
                         <th>신청일</th>
                         <th>상태</th>
                         <th>처리일</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {applies.map((apply, index) => (
+                      <tr 
+                        key={apply.applyId}
+                        onClick={() => navigate(`/admin/vet-applies/${apply.applyId}`)}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <td>{totalElements - (currentPage * ITEMS_PER_PAGE + index)}</td>
+                        <td>{apply.memberName}</td>
+                        <td title={apply.memberEmail}>{apply.memberEmail}</td>
+                        <td title={apply.licenseNumber}>{apply.licenseNumber}</td>
+                        <td title={apply.hospitalName}>{apply.hospitalName}</td>
+                        <td>
+                          {apply.licenseImageUrl ? (
+                            <span className="license-badge">있음</span>
+                          ) : (
+                            <span className="no-license-badge">없음</span>
+                          )}
+                        </td>
+                        <td title={formatDate(apply.regDate)}>{formatDate(apply.regDate)}</td>
+                        <td>
+                          <span className={`status-badge ${getStatusBadgeClass(apply.applyStatus)}`}>
+                            {getStatusText(apply.applyStatus)}
+                          </span>
+                        </td>
+                        <td title={formatDate(apply.applyProcessDate)}>{formatDate(apply.applyProcessDate)}</td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {applies.map((apply, index) => (
-                        <tr 
-                          key={apply.applyId}
-                          onClick={() => navigate(`/admin/vet-applies/${apply.applyId}`)}
-                          style={{ cursor: 'pointer' }}
-                        >
-                          <td>{totalElements - (currentPage * ITEMS_PER_PAGE + index)}</td>
-                          <td>{apply.memberName}</td>
-                          <td>{apply.memberEmail}</td>
-                          <td>{apply.licenseNumber}</td>
-                          <td>{apply.hospitalName}</td>
-                          <td>{formatDate(apply.regDate)}</td>
-                          <td>
-                            <span className={`status-badge ${getStatusBadgeClass(apply.applyStatus)}`}>
-                              {getStatusText(apply.applyStatus)}
-                            </span>
-                          </td>
-                          <td>{formatDate(apply.applyProcessDate)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                    ))}
+                  </tbody>
+                </table>
                 </div>
 
                 {/* 페이징 */}

@@ -60,6 +60,15 @@ public class VetApply extends BaseEntity {
     @Column(name = "reg_date", updatable = false)
     private java.time.LocalDateTime regDate;
 
+    @Column(name = "license_image_url")
+    private String licenseImageUrl;
+
+    @Column(name = "birth_date")
+    private java.time.LocalDate birthDate;
+
+    @Column(name = "first_issue_date")
+    private java.time.LocalDate firstIssueDate;
+
     public static VetApply createVetApply(Member member, String memberName, 
                                          String licenseNumber, String hospitalName,
                                          String hospitalAddress, String hospitalPhone,
@@ -75,6 +84,51 @@ public class VetApply extends BaseEntity {
                 .specialization(specialization)
                 .experienceYears(experienceYears)
                 .certifications(certifications)
+                .applyStatus(ApplyStatus.PENDING)
+                .regDate(java.time.LocalDateTime.now())
+                .build();
+    }
+
+    public static VetApply createVetApplyWithImage(Member member, String memberName, 
+                                                  String licenseNumber, String hospitalName,
+                                                  String hospitalAddress, String hospitalPhone,
+                                                  String specialization, Integer experienceYears,
+                                                  String certifications, String licenseImageUrl) {
+        return VetApply.builder()
+                .member(member)
+                .memberName(memberName)
+                .licenseNumber(licenseNumber)
+                .hospitalName(hospitalName)
+                .hospitalAddress(hospitalAddress)
+                .hospitalPhone(hospitalPhone)
+                .specialization(specialization)
+                .experienceYears(experienceYears)
+                .certifications(certifications)
+                .licenseImageUrl(licenseImageUrl)
+                .applyStatus(ApplyStatus.PENDING)
+                .regDate(java.time.LocalDateTime.now())
+                .build();
+    }
+
+    public static VetApply createVetApplyWithImageAndDates(Member member, String memberName, 
+                                                          String licenseNumber, String hospitalName,
+                                                          String hospitalAddress, String hospitalPhone,
+                                                          String specialization, Integer experienceYears,
+                                                          String certifications, String licenseImageUrl,
+                                                          String birthDate, String firstIssueDate) {
+        return VetApply.builder()
+                .member(member)
+                .memberName(memberName)
+                .licenseNumber(licenseNumber)
+                .hospitalName(hospitalName)
+                .hospitalAddress(hospitalAddress)
+                .hospitalPhone(hospitalPhone)
+                .specialization(specialization)
+                .experienceYears(experienceYears)
+                .certifications(certifications)
+                .licenseImageUrl(licenseImageUrl)
+                .birthDate(birthDate != null ? java.time.LocalDate.parse(birthDate) : null)
+                .firstIssueDate(firstIssueDate != null ? java.time.LocalDate.parse(firstIssueDate) : null)
                 .applyStatus(ApplyStatus.PENDING)
                 .regDate(java.time.LocalDateTime.now())
                 .build();
