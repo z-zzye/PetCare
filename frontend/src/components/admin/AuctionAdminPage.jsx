@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../Header.jsx';
-import './AdminPage.css';
 import axios from '../../api/axios';
 import { FaTrash } from 'react-icons/fa';
 
@@ -216,192 +215,353 @@ const AuctionAdminPage = () => {
     setSelectedAuction(null); // 상세 모달 닫기
   }
 
+  const styles = {
+    container: {
+      maxWidth: '1200px',
+      margin: '0 auto',
+      padding: '20px',
+      fontFamily: 'Arial, sans-serif',
+      backgroundColor: '#ffffff',
+      borderRadius: '15px',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+      marginTop: '20px',
+      marginBottom: '20px'
+    },
+    header: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: '30px'
+    },
+    title: {
+      color: '#333',
+      margin: 0,
+      fontSize: '1.5rem',
+      fontWeight: 700
+    },
+    statsGrid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+      gap: '20px',
+      marginBottom: '30px'
+    },
+    statCard: {
+      background: '#fff',
+      padding: '20px',
+      borderRadius: '10px',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+      textAlign: 'center'
+    },
+    statValue: {
+      fontSize: '2rem',
+      fontWeight: 700,
+      color: '#223A5E',
+      marginBottom: '5px'
+    },
+    statLabel: {
+      color: '#666',
+      fontSize: '0.9rem'
+    },
+    button: {
+      padding: '8px 16px',
+      borderRadius: '6px',
+      border: 'none',
+      backgroundColor: '#667eea',
+      color: 'white',
+      cursor: 'pointer',
+      fontSize: '0.9rem',
+      fontWeight: 600,
+      textDecoration: 'none',
+      display: 'inline-block'
+    },
+    auctionGrid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+      gap: '20px',
+      marginTop: '20px'
+    },
+    auctionCard: {
+      background: '#fff',
+      border: '1px solid #e0e0e0',
+      borderRadius: '10px',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+      padding: '18px',
+      cursor: 'pointer',
+      transition: 'transform 0.2s ease'
+    },
+    statusBadge: {
+      fontSize: '0.9rem',
+      fontWeight: 'bold',
+      padding: '4px 12px',
+      borderRadius: '8px',
+      color: '#fff',
+      display: 'inline-block',
+      marginBottom: '10px'
+    },
+    actionButtons: {
+      display: 'flex',
+      gap: '8px',
+      justifyContent: 'center',
+      marginTop: '12px'
+    },
+    actionButton: {
+      padding: '4px 10px',
+      borderRadius: '6px',
+      border: 'none',
+      color: '#fff',
+      fontWeight: 600,
+      fontSize: '0.85rem',
+      height: '28px',
+      cursor: 'pointer'
+    },
+    deleteButton: {
+      width: '28px',
+      height: '28px',
+      borderRadius: '6px',
+      border: 'none',
+      background: '#e53935',
+      color: '#fff',
+      fontWeight: 600,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: 0,
+      cursor: 'pointer'
+    }
+  };
+
   return (
     <>
-      <style>{`
-      .auction-items {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 20px;
-      }
-      .auction-item-card {
-        background: #fff;
-        border: 1px solid #e0e0e0;
-        border-radius: 10px;
-        box-shadow: 0 2px 8px #0001;
-        padding: 18px 22px;
-        min-width: 220px;
-        max-width: 260px;
-        flex: 1 1 220px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-      }
-      .auction-item-header {
-        display: flex;
-        justify-content: flex-end;
-        margin-bottom: 8px;
-      }
-      .auction-status {
-        font-size: 0.95rem;
-        font-weight: bold;
-        padding: 2px 10px;
-        border-radius: 8px;
-        color: #fff;
-        background: #888;
-      }
-      .auction-status-예정 { background: #6c63ff; }
-      .auction-status-진행 { background: #00b894; }
-      .auction-status-완료 { background: #636e72; }
-      `}</style>
+      <style>
+        {`
+          body {
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+          }
+          @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+              transform: translateY(0);
+            }
+            40% {
+              transform: translateY(-15px);
+            }
+            60% {
+              transform: translateY(-7px);
+            }
+          }
+          .delivery-button {
+            background-color: #ffffff !important;
+            color: #f6ad55 !important;
+            border: 2px solid #f6ad55 !important;
+            transition: all 0.3s ease !important;
+          }
+          .delivery-button:hover {
+            background-color: #f6ad55 !important;
+            color: #ffffff !important;
+          }
+          .register-button {
+            background-color: #1a365d !important;
+            transition: all 0.3s ease !important;
+          }
+          .register-button:hover {
+            background-color: #2d5a8b !important;
+          }
+        `}
+      </style>
       <Header />
-      <div className="admin-page">
-        <div className="admin-container">
-          <div className="admin-header">
-            <div className="admin-title" style={{ fontSize: '1.375rem', fontWeight: '500', lineheight: '1.2', color: '#333', margin: 0, padding
-              : 0 }}>경매 관리</div>
-            <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-              <Link to="/admin/auction-delivery" className="admin-button" style={{ backgroundColor: '#28a745' }}>
-                🚚 배송관리
-              </Link>
-              <Link to="/admin/auction/register" className="admin-button">
-                🏷️ 경매상품등록
-              </Link>
-            </div>
+      <div style={styles.container}>
+        <div style={styles.header}>
+          <h1 style={styles.title}>
+            <i className="fas fa-gavel" style={{ 
+              marginRight: '10px', 
+              color: '#1a365d',
+              animation: 'bounce 2s ease-in-out infinite',
+              fontSize: '1.2rem'
+            }}></i>
+            경매 관리
+          </h1>
+          <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+            <Link to="/admin/auction-delivery" className="delivery-button" style={styles.button}>
+              🚚 배송관리
+            </Link>
+            <Link to="/admin/auction/register" className="register-button" style={styles.button}>
+              🏷️ 경매상품등록
+            </Link>
           </div>
+        </div>
 
-        <div className="admin-content">
+        {/* 통계 카드 */}
+        <div style={styles.statsGrid}>
+          <div style={styles.statCard}>
+            <div style={styles.statValue}>{auctionItems.length}</div>
+            <div style={styles.statLabel}>전체 경매</div>
+          </div>
+          <div style={styles.statCard}>
+            <div style={styles.statValue}>{auctionItems.filter(item => item.auction_status === 'SCHEDULED').length}</div>
+            <div style={styles.statLabel}>예정된 경매</div>
+          </div>
+          <div style={styles.statCard}>
+            <div style={styles.statValue}>{auctionItems.filter(item => item.auction_status === 'ACTIVE').length}</div>
+            <div style={styles.statLabel}>진행 중</div>
+          </div>
+          <div style={styles.statCard}>
+            <div style={styles.statValue}>{auctionItems.filter(item => item.auction_status === 'ENDED').length}</div>
+            <div style={styles.statLabel}>완료된 경매</div>
+          </div>
+        </div>
+
+        {/* 경매 목록 */}
+        <div>
+          <h2 style={{ marginBottom: '0px', paddingTop: '20px', paddingBottom: '10px', color: '#333', fontSize: '1.3rem' }}>
+            <i className="fas fa-gift" style={{ 
+              marginRight: '10px', 
+              marginLeft: '5px',
+              color: '#1a365d',
+              fontSize: '1.1rem'
+            }}></i>
+            경매 상품 목록
+          </h2>
+          <hr style={{ 
+            border: 'none', 
+            height: '2px', 
+            background: '#1a365d', 
+            marginTop: '0px',
+            marginBottom: '20px',
+            borderRadius: '1px'
+          }} />
           {loading ? (
-            <div className="loading">로딩 중...</div>
+            <div style={{ textAlign: 'center', padding: '50px', color: '#666' }}>로딩 중...</div>
+          ) : auctionItems.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '50px', color: '#666' }}>
+              등록된 경매 상품이 없습니다.
+            </div>
           ) : (
-            <div className="auction-admin-content">
-              <div className="auction-stats">
-                <div className="stat-card">
-                  <h3>전체 경매</h3>
-                  <p className="stat-number">{auctionItems.length}</p>
-                </div>
-                <div className="stat-card">
-                  <h3>예정된 경매</h3>
-                  <p className="stat-number">{auctionItems.filter(item => item.auction_status === 'SCHEDULED').length}</p>
-                </div>
-                <div className="stat-card">
-                  <h3>진행 중</h3>
-                  <p className="stat-number">{auctionItems.filter(item => item.auction_status === 'ACTIVE').length}</p>
-                </div>
-                <div className="stat-card">
-                  <h3>완료된 경매</h3>
-                  <p className="stat-number">{auctionItems.filter(item => item.auction_status === 'ENDED').length}</p>
-                </div>
-              </div>
-
-              <div className="auction-list">
-                <h2>경매 상품 목록</h2>
-                {auctionItems.length === 0 ? (
-                  <div className="empty-state">
-                    <p>등록된 경매 상품이 없습니다.</p>
-                  </div>
-                ) : (
-                  <div className="auction-items">
-                    {auctionItems.map(item => {
-                      let status = '예정';
-                      if (item.auction_status === 'ACTIVE') status = '진행';
-                      else if (item.auction_status === 'ENDED') status = '완료';
-                      return (
-                        <div className="auction-item-card" key={item.auction_item_id} onClick={() => handleCardClick(item)} style={{ cursor: 'pointer' }}>
-                          <div className="auction-item-header">
-                            <span className={`auction-status auction-status-${status}`}>{status}</span>
-                          </div>
-                          {item.thumbnailUrl && (
-                            <div className="auction-item-thumbnail" style={{textAlign: 'center', marginBottom: 8}}>
-                              <img src={item.thumbnailUrl} alt="썸네일" style={{maxWidth: '100%', maxHeight: 220, borderRadius: 3, objectFit: 'cover'}} />
-                            </div>
-                          )}
-                          <div className="auction-item-body">
-                            <div><b>상품명: </b> {item.itemName}</div>
-                            <div><b>시작가: </b> {item.start_price}P</div>
-                            <div><b>경매 기간: </b> {item.start_time?.slice(0,16).replace('T',' ')} ~ {item.end_time?.slice(0,16).replace('T',' ')}</div>
-                            {item.currentWinnerName && (
-                              <div><b>입찰자:</b> {item.currentWinnerName}</div>
-                            )}
-                          </div>
-                          <div className="auction-item-actions" style={{marginTop: 12, display: 'flex', gap: 8, justifyContent: 'center'}}>
-                            <button
-                              onClick={e => {
-                                e.stopPropagation();
-                                setConfirmToast({ open: true, auction: item });
-                              }}
-                              disabled={item.auction_status !== 'SCHEDULED'}
-                              style={{
-                                padding: '4px 10px',
-                                borderRadius: 6,
-                                border: 'none',
-                                background: '#6c63ff',
-                                color: '#fff',
-                                fontWeight: 600,
-                                fontSize: '0.92rem',
-                                height: 28,
-                                minWidth: 0,
-                                cursor: item.auction_status !== 'SCHEDULED' ? 'not-allowed' : 'pointer',
-                                opacity: item.auction_status !== 'SCHEDULED' ? 0.5 : 1
-                              }}
-                            >경매 시작</button>
-                            <button
-                              onClick={e => {
-                                e.stopPropagation();
-                                setConfirmEndToast({ open: true, auction: item });
-                              }}
-                              disabled={item.auction_status !== 'ACTIVE'}
-                              style={{
-                                padding: '4px 10px',
-                                borderRadius: 6,
-                                border: 'none',
-                                background: '#636e72',
-                                color: '#fff',
-                                fontWeight: 600,
-                                fontSize: '0.92rem',
-                                height: 28,
-                                minWidth: 0,
-                                cursor: item.auction_status !== 'ACTIVE' ? 'not-allowed' : 'pointer',
-                                opacity: item.auction_status !== 'ACTIVE' ? 0.5 : 1
-                              }}
-                            >경매 종료</button>
-                            {item.auction_status === 'SCHEDULED' && (
-                              <button
-                                onClick={e => {
-                                  e.stopPropagation();
-                                  setConfirmDeleteToast({ open: true, auction: item });
-                                }}
-                                style={{
-                                  width: 28,
-                                  height: 28,
-                                  borderRadius: 6,
-                                  border: 'none',
-                                  background: '#e53935',
-                                  color: '#fff',
-                                  fontWeight: 600,
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  padding: 0,
-                                  cursor: 'pointer'
-                                }}
-                                title="경매 상품 삭제"
-                              >
-                                <FaTrash style={{ margin: 0, fontSize: '1.1rem' }} />
-                              </button>
-                            )}
-                          </div>
+            <div style={styles.auctionGrid}>
+              {auctionItems.map(item => {
+                let status = '예정';
+                let statusColor = '#1a365d';
+                if (item.auction_status === 'ACTIVE') {
+                  status = '진행';
+                  statusColor = '#f6ad55';
+                } else if (item.auction_status === 'ENDED') {
+                  status = '완료';
+                  statusColor = '#636e72';
+                }
+                
+                return (
+                  <div key={item.auction_item_id} style={{
+                    ...styles.auctionCard,
+                    boxShadow: item.auction_status === 'ACTIVE' 
+                      ? '0 4px 12px rgba(246, 173, 85, 0.6)' 
+                      : '0 2px 8px rgba(0,0,0,0.1)'
+                  }} onClick={() => handleCardClick(item)}>
+                    <div style={{...styles.statusBadge, backgroundColor: statusColor}}>{status}</div>
+                    {item.thumbnailUrl && (
+                      <div style={{textAlign: 'center', marginBottom: '18px'}}>
+                        <img src={item.thumbnailUrl} alt="썸네일" style={{maxWidth: '100%', maxHeight: '180px', borderRadius: '6px', objectFit: 'cover'}} />
+                      </div>
+                    )}
+                    <div style={{ marginBottom: '12px' }}>
+                      <div style={{ marginBottom: '6px', display: 'flex', alignItems: 'center' }}>
+                        <span style={{ 
+                          display: 'inline-block', 
+                          width: '3px', 
+                          height: '14px', 
+                          backgroundColor: '#1a365d', 
+                          marginRight: '8px'
+                        }}></span>
+                        <span style={{ width: '60px', flexShrink: 0 }}><strong>상품명</strong></span>
+                        <span>{item.itemName}</span>
+                      </div>
+                      <div style={{ marginBottom: '6px', display: 'flex', alignItems: 'center' }}>
+                        <span style={{ 
+                          display: 'inline-block', 
+                          width: '3px', 
+                          height: '14px', 
+                          backgroundColor: '#1a365d', 
+                          marginRight: '8px'
+                        }}></span>
+                        <span style={{ width: '60px', flexShrink: 0 }}><strong>시작가</strong></span>
+                        <span>{item.start_price}P</span>
+                      </div>
+                      <div style={{ marginBottom: '6px', display: 'flex', alignItems: 'flex-start' }}>
+                        <span style={{ 
+                          display: 'inline-block', 
+                          width: '3px', 
+                          height: '28px', 
+                          backgroundColor: '#1a365d', 
+                          marginRight: '8px',
+                          marginTop: '2px'
+                        }}></span>
+                        <span style={{ width: '60px', flexShrink: 0, lineHeight: '1.2' }}><strong>경매<br/>기간</strong></span>
+                        <span>
+                          {item.start_time?.slice(0,16).replace('T',' ')}<br/>
+                          ~ {item.end_time?.slice(0,16).replace('T',' ')}
+                        </span>
+                      </div>
+                      {item.currentWinnerName && (
+                        <div style={{ marginBottom: '6px', display: 'flex', alignItems: 'center' }}>
+                          <span style={{ 
+                            display: 'inline-block', 
+                            width: '3px', 
+                            height: '14px', 
+                            backgroundColor: '#1a365d', 
+                            marginRight: '8px'
+                          }}></span>
+                          <span style={{ width: '60px', flexShrink: 0 }}><strong>입찰자</strong></span>
+                          <span>{item.currentWinnerName}</span>
                         </div>
-                      );
-                    })}
+                      )}
+                    </div>
+                    <div style={styles.actionButtons}>
+                      <button
+                        onClick={e => {
+                          e.stopPropagation();
+                          setConfirmToast({ open: true, auction: item });
+                        }}
+                        disabled={item.auction_status !== 'SCHEDULED'}
+                        style={{
+                          ...styles.actionButton,
+                          background: item.auction_status === 'SCHEDULED' ? '#f6ad55' : '#cccccc',
+                          color: item.auction_status === 'SCHEDULED' ? '#ffffff' : '#666666',
+                          cursor: item.auction_status !== 'SCHEDULED' ? 'not-allowed' : 'pointer'
+                        }}
+                      >경매 시작</button>
+                      <button
+                        onClick={e => {
+                          e.stopPropagation();
+                          setConfirmEndToast({ open: true, auction: item });
+                        }}
+                        disabled={item.auction_status !== 'ACTIVE'}
+                        style={{
+                          ...styles.actionButton,
+                          background: item.auction_status === 'ACTIVE' ? '#ffffff' : '#cccccc',
+                          color: item.auction_status === 'ACTIVE' ? '#1a365d' : '#666666',
+                          border: item.auction_status === 'ACTIVE' ? '2px solid #1a365d' : '2px solid #cccccc',
+                          cursor: item.auction_status !== 'ACTIVE' ? 'not-allowed' : 'pointer'
+                        }}
+                      >경매 종료</button>
+                      {item.auction_status === 'SCHEDULED' && (
+                        <button
+                          onClick={e => {
+                            e.stopPropagation();
+                            setConfirmDeleteToast({ open: true, auction: item });
+                          }}
+                          style={styles.deleteButton}
+                          title="경매 상품 삭제"
+                        >
+                          <FaTrash style={{ fontSize: '1.1rem' }} />
+                        </button>
+                      )}
+                    </div>
                   </div>
-                )}
-              </div>
+                );
+              })}
             </div>
           )}
         </div>
       </div>
-    </div>
     {selectedAuction && (
       <AuctionDetailModal auction={selectedAuction} onClose={closeModal} onEdit={() => handleEditAuction(selectedAuction)} />
     )}

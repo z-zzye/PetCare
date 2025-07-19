@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import Header from '../Header';
 import './BoardCommon.css';
 import { boardConfig } from './boardConfig';
+import { FaBook, FaDog, FaLightbulb } from 'react-icons/fa';
 
 const BoardMain = () => {
   const navigate = useNavigate();
@@ -130,21 +131,54 @@ const BoardMain = () => {
 
   return (
     <>
+      <style>
+        {`
+          body {
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+          }
+          html {
+            background-color: #ffffff;
+          }
+        `}
+      </style>
       <Header />
       <div className="board-container">
         <h1 className="board-title">커뮤니티</h1>
 
         {/* 통합 검색 */}
         <div className="board-search-section">
-          <form onSubmit={handleSearch} className="board-search-form">
+          <form onSubmit={handleSearch} className="board-search-form" style={{ position: 'relative' }}>
             <input
               type="text"
               placeholder="제목, 작성자, 해시태그로 검색..."
               value={searchKeyword}
               onChange={(e) => setSearchKeyword(e.target.value)}
               className="board-search-input"
+              style={{ 
+                borderRadius: '20px',
+                paddingRight: '80px'
+              }}
             />
-            <button type="submit" className="board-btn" disabled={isSearching}>
+            <button 
+              type="submit" 
+              className="board-btn" 
+              disabled={isSearching}
+              style={{ 
+                borderRadius: '20px',
+                fontSize: '0.8rem',
+                padding: '6px 12px',
+                minWidth: '60px',
+                position: 'absolute',
+                right: '8px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                backgroundColor: '#223a5e',
+                border: '2px solid #223a5e',
+                color: 'white'
+              }}
+            >
               {isSearching ? '검색 중...' : '검색'}
             </button>
           </form>
@@ -186,87 +220,165 @@ const BoardMain = () => {
           {loading ? (
             <div className="board-loading">최신글을 불러오는 중...</div>
           ) : (
-            <div style={{ display: 'grid', gap: '20px' }}>
-              {Object.entries(boardConfig).map(([category, config]) => (
-                <div
-                  key={category}
-                  className="board-form"
-                  style={{ marginBottom: 0 }}
-                >
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: '1fr 1fr',
+              gap: '20px',
+              gridTemplateAreas: `
+                "info info"
+                "free qna"
+              `
+            }}>
+              {Object.entries(boardConfig).map(([category, config]) => {
+                // 카테고리별 grid-area 설정
+                const gridArea = category === 'INFO' ? 'info' : 
+                               category === 'FREE' ? 'free' : 
+                               category === 'QNA' ? 'qna' : 'auto';
+                
+                return (
                   <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: '15px',
+                    key={category}
+                    className="board-form"
+                    style={{ 
+                      marginBottom: 0,
+                      gridArea: gridArea
                     }}
                   >
-                    <h3 style={{ margin: 0, color: '#223a5e' }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: '15px',
+                      }}
+                    >
+                                          <h3 style={{ 
+                      margin: 0, 
+                      color: '#223a5e',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}>
+                      {category === 'INFO' && <FaBook size={20} color="#223a5e" />}
+                      {category === 'FREE' && <FaDog size={20} color="#223a5e" />}
+                      {category === 'QNA' && <FaLightbulb size={20} color="#223a5e" />}
                       {config.name}
                     </h3>
-                    <div style={{ display: 'flex', gap: '10px' }}>
-                      <button
-                        onClick={() => handleQuickWrite(category)}
-                        className="board-btn"
-                        style={{ fontSize: '0.9rem', padding: '8px 16px' }}
-                      >
-                        글쓰기
-                      </button>
-                      <Link
-                        to={`/board/${category}`}
-                        className="board-btn board-btn-secondary"
-                        style={{ fontSize: '0.9rem', padding: '8px 16px' }}
-                      >
-                        더보기
-                      </Link>
-                    </div>
-                  </div>
-
-                  {latestPosts[category] && latestPosts[category].length > 0 ? (
-                    <div className="board-posts">
-                      {latestPosts[category].map((post) => (
-                        <Link
-                          key={post.id}
-                          to={`/board/${category}/${post.id}`}
-                          className="board-post-item"
+                      <div style={{ display: 'flex', gap: '6px' }}>
+                                                <button
+                          onClick={() => handleQuickWrite(category)}
+                          className="board-btn"
+                          style={{ 
+                            fontSize: '0.8rem', 
+                            padding: '6px 10px',
+                            minWidth: '50px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            border: '2px solid #FFA500',
+                            transition: 'all 0.3s ease'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.backgroundColor = '#FFA500';
+                            e.target.style.color = 'white';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.backgroundColor = '';
+                            e.target.style.color = '';
+                          }}
                         >
-                          <div className="board-post-header">
-                            <h4 className="board-post-title">{post.title}</h4>
-                            <div className="board-post-meta">
-                              <span className="board-post-author">
-                                {post.authorNickName}
-                              </span>
-                              <span className="board-post-date">
-                                {new Date(post.createdAt).toLocaleDateString()}
-                              </span>
-                              <span className="board-post-views">
-                                조회 {post.viewCount}
-                              </span>
-                              <span className="board-post-likes">
-                                추천 {post.likeCount}
-                              </span>
-                            </div>
-                          </div>
-                          {post.hashtags && post.hashtags.length > 0 && (
-                            <div className="board-post-hashtags">
-                              {post.hashtags.map((hashtag, index) => (
-                                <span
-                                  key={index}
-                                  className="board-post-hashtag"
-                                >
-                                  #{hashtag.tagName}
-                                </span>
-                              ))}
-                            </div>
-                          )}
+                          <svg 
+                            width="12" 
+                            height="12" 
+                            viewBox="0 0 24 24" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            strokeWidth="2" 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round"
+                          >
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                          </svg>
+                          글쓰기
+                        </button>
+                        <Link
+                          to={`/board/${category}`}
+                          className="board-btn board-btn-secondary"
+                          style={{ 
+                            fontSize: '0.8rem', 
+                            padding: '6px 10px',
+                            textDecoration: 'none',
+                            backgroundColor: '#223a5e',
+                            color: 'white',
+                            textAlign: 'center',
+                            minWidth: '50px'
+                          }}
+                        >
+                          이동
                         </Link>
-                      ))}
+                      </div>
                     </div>
-                  ) : (
-                    <div className="board-empty">최신글이 없습니다.</div>
-                  )}
-                </div>
-              ))}
+
+                    {latestPosts[category] && latestPosts[category].length > 0 ? (
+                      <div 
+                        className="board-posts"
+                        style={{
+                          display: category === 'INFO' ? 'grid' : 'flex',
+                          gridTemplateColumns: category === 'INFO' ? 'repeat(auto-fit, minmax(300px, 1fr))' : 'none',
+                          flexDirection: category === 'INFO' ? 'unset' : 'column',
+                          gap: '16px'
+                        }}
+                      >
+                        {latestPosts[category].map((post) => (
+                          <Link
+                            key={post.id}
+                            to={`/board/${category}/${post.id}`}
+                            className="board-post-item"
+                            style={{
+                              display: category === 'INFO' ? 'flex' : 'flex',
+                              flexDirection: category === 'INFO' ? 'column' : 'row',
+                              minHeight: category === 'INFO' ? '200px' : 'auto'
+                            }}
+                          >
+                            <div className="board-post-header" style={{ flex: 1 }}>
+                              <h4 className="board-post-title">{post.title}</h4>
+                              <div className="board-post-meta">
+                                <span className="board-post-author">
+                                  {post.authorNickName}
+                                </span>
+                                <span className="board-post-date">
+                                  {new Date(post.createdAt).toLocaleDateString()}
+                                </span>
+                                <span className="board-post-views">
+                                  조회 {post.viewCount}
+                                </span>
+                                <span className="board-post-likes">
+                                  추천 {post.likeCount}
+                                </span>
+                              </div>
+                            </div>
+                            {post.hashtags && post.hashtags.length > 0 && (
+                              <div className="board-post-hashtags">
+                                {post.hashtags.map((hashtag, index) => (
+                                  <span
+                                    key={index}
+                                    className="board-post-hashtag"
+                                  >
+                                    #{hashtag.tagName}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </Link>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="board-empty">최신글이 없습니다.</div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

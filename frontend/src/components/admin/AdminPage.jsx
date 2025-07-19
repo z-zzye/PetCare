@@ -4,12 +4,12 @@ import {
   FaShieldAlt, 
   FaClipboardList, 
   FaUsers, 
-  FaMapMarkedAlt, 
   FaShoppingCart, 
   FaGavel, 
   FaTags, 
   FaSyringe,
-  FaPaw
+  FaPaw,
+  FaStar
 } from 'react-icons/fa';
 import './AdminPage.css';
 import Header from '../Header.jsx';
@@ -46,13 +46,6 @@ const AdminPage = () => {
             <h3>사용자 관리</h3>
             <p>회원 정보를 관리합니다</p>
           </Link>
-          <Link to="/admin/trails" className="admin-menu-item">
-            <div className="admin-menu-icon">
-              <FaMapMarkedAlt />
-            </div>
-            <h3>산책로 관리</h3>
-            <p>산책로 정보를 관리합니다</p>
-          </Link>
           <Link to="/admin/shop" className="admin-menu-item">
             <div className="admin-menu-icon">
               <FaShoppingCart />
@@ -82,7 +75,9 @@ const AdminPage = () => {
             <p>자동 예약 현황을 확인하고 접종 완료/취소를 처리합니다</p>
           </Link>
           <Link to="/admin/creator-apply" className="admin-menu-item">
-            <div className="admin-menu-icon">🌟</div>
+            <div className="admin-menu-icon">
+              <FaStar />
+            </div>
             <h3>크리에이터 신청 확인</h3>
             <p>크리에이터 신청 현황을 확인하고 승인/거절을 처리합니다</p>
           </Link>
