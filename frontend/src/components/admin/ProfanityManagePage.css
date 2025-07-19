@@ -1,6 +1,6 @@
 .profanity-manage-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 50%, #f39c12 100%);
+  background: #ffffff;
   padding: 20px;
   font-family: 'Pretendard', sans-serif;
 }
@@ -8,12 +8,10 @@
 .profanity-container {
   max-width: 1000px;
   margin: 0 auto;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 25px;
+  background: #fff;
+  border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  border: 2px solid #fdcb6e;
-  padding: 40px;
-  backdrop-filter: blur(10px);
+  padding: 28px;
 }
 
 .profanity-header {
@@ -24,34 +22,36 @@
   display: inline-block;
   color: #223a5e;
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 600;
   margin-bottom: 20px;
   transition: all 0.3s ease;
-  padding: 8px 16px;
-  border-radius: 20px;
-  background: linear-gradient(135deg, #fffbf0 0%, #fff8e1 100%);
-  border: 2px solid #fdcb6e;
+  padding: 8px 18px;
+  border-radius: 8px;
+  background: #667eea;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
 }
 
 .back-button:hover {
-  color: #fdcb6e;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(253, 203, 110, 0.4);
+  background: #5a6fd8;
+  transform: translateY(-1px);
 }
 
 .profanity-title {
   color: #223a5e;
-  font-size: 2.5rem;
-  margin: 0;
+  font-size: 1.8rem;
+  margin: 0 0 20px 0;
   font-weight: 700;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.profanity-title::before {
-  content: '🛡️';
-  display: block;
-  font-size: 3rem;
-  margin-bottom: 15px;
+.shield-icon {
+  font-size: 2rem;
+  color: #0d1b2a;
   animation: bounce 2s infinite;
 }
 
@@ -60,21 +60,18 @@
     transform: translateY(0);
   }
   40% {
-    transform: translateY(-10px);
+    transform: translateY(-8px);
   }
   60% {
-    transform: translateY(-5px);
+    transform: translateY(-4px);
   }
 }
 
 .profanity-description {
-  background: linear-gradient(135deg, #fffbf0 0%, #fff8e1 100%);
-  padding: 25px;
-  border-radius: 20px;
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
   margin-bottom: 30px;
-  border-left: 4px solid #223a5e;
-  border: 2px solid #fdcb6e;
-  box-shadow: 0 4px 15px rgba(253, 203, 110, 0.3);
 }
 
 .profanity-description p {
@@ -96,19 +93,27 @@
 }
 
 .textarea-label {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-weight: 600;
   color: #223a5e;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
+  margin-top: 20px;
   font-size: 1.1rem;
+}
+
+.skull-icon {
+  font-size: 1.2rem;
+  color: #e53935;
 }
 
 .profanity-textarea {
   width: 100%;
   min-height: 400px;
-  padding: 20px;
-  border: 2px solid #fdcb6e;
-  border-radius: 20px;
+  padding: 16px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
   font-size: 1rem;
   font-family: 'Courier New', monospace;
   line-height: 1.5;
@@ -116,67 +121,76 @@
   transition: all 0.3s ease;
   box-sizing: border-box;
   background: white;
-  box-shadow: 0 4px 15px rgba(253, 203, 110, 0.2);
 }
 
 .profanity-textarea:focus {
   outline: none;
-  border-color: #f39c12;
-  box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.2);
-  transform: translateY(-2px);
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .button-group {
   display: flex;
-  gap: 15px;
+  gap: 8px;
   flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .save-button,
 .reset-button,
 .test-button {
-  padding: 15px 30px;
+  padding: 8px 14px;
   border: none;
-  border-radius: 25px;
-  font-size: 1rem;
-  font-weight: 600;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 400;
   cursor: pointer;
   transition: all 0.3s ease;
-  min-width: 120px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  min-width: 85px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .save-button {
-  background: linear-gradient(135deg, #f39c12 0%, #fdcb6e 100%);
-  color: white;
+  background-color: white !important;
+  color: #1a365d !important;
+  font-weight: 400 !important;
+  font-size: 0.9rem !important;
+  border: 2px solid #1a365d !important;
 }
 
 .save-button:hover:not(:disabled) {
-  background: linear-gradient(135deg, #e67e22 0%, #fdcb6e 100%);
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(243, 156, 18, 0.4);
+  background-color: #1a365d !important;
+  color: white !important;
+  transform: translateY(-1px);
 }
 
 .reset-button {
-  background: linear-gradient(135deg, #ff8a80 0%, #ff5252 100%);
-  color: white;
+  background-color: #dc3545 !important;
+  color: white !important;
+  font-weight: 400 !important;
+  font-size: 0.9rem !important;
+  border: 2px solid #dc3545 !important;
 }
 
 .reset-button:hover:not(:disabled) {
-  background: linear-gradient(135deg, #ff5252 0%, #d32f2f 100%);
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(255, 82, 82, 0.4);
+  background-color: #dc3545 !important;
+  transform: translateY(-1px);
 }
 
 .test-button {
-  background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
-  color: white;
+  background-color: #0d1b2a !important;
+  color: white !important;
+  font-weight: 400 !important;
+  font-size: 0.9rem !important;
+  border: 2px solid #0d1b2a !important;
 }
 
 .test-button:hover:not(:disabled) {
-  background: linear-gradient(135deg, #0984e3 0%, #6c5ce7 100%);
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(116, 185, 255, 0.4);
+  background-color: #0d1b2a !important;
+  transform: translateY(-1px);
 }
 
 .save-button:disabled,
@@ -188,44 +202,38 @@
 }
 
 .message {
-  padding: 20px 25px;
-  border-radius: 20px;
-  margin-bottom: 25px;
+  padding: 16px 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
   font-weight: 500;
-  border: 2px solid;
+  border: 1px solid;
 }
 
 .message.success {
-  background: linear-gradient(135deg, #a8e6cf 0%, #88d8c0 100%);
-  color: #2d3436;
-  border-color: #00b894;
+  background: #d4edda;
+  color: #155724;
+  border-color: #c3e6cb;
 }
 
 .message.error {
-  background: linear-gradient(135deg, #ff8a80 0%, #ff5252 100%);
-  color: white;
-  border-color: #d63031;
+  background: #f8d7da;
+  color: #721c24;
+  border-color: #f5c6cb;
 }
 
 .profanity-info {
-  background: linear-gradient(135deg, #fffbf0 0%, #fff8e1 100%);
-  padding: 30px;
-  border-radius: 20px;
-  border-left: 4px solid #223a5e;
-  border: 2px solid #fdcb6e;
-  box-shadow: 0 4px 15px rgba(253, 203, 110, 0.3);
+  background: #f8f9fa;
+  padding: 20px;
+  padding-bottom: 30px;
+  border-radius: 0 8px 8px 0;
+  border-left: 4px solid #0d1b2a;
 }
 
 .profanity-info h3 {
   color: #223a5e;
   margin: 0 0 15px 0;
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   font-weight: 600;
-}
-
-.profanity-info h3::before {
-  content: '💡';
-  margin-right: 10px;
 }
 
 .profanity-info ul {
@@ -235,7 +243,7 @@
 
 .profanity-info li {
   color: #6c757d;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   line-height: 1.5;
 }
 
@@ -243,31 +251,27 @@
   margin-bottom: 0;
 }
 
-.profanity-info li::before {
-  content: '🐾';
-  margin-right: 8px;
-}
-
+/* 반응형 디자인 */
 @media (max-width: 768px) {
   .profanity-container {
     padding: 20px;
     margin: 10px;
   }
-
+  
   .profanity-title {
-    font-size: 2rem;
+    font-size: 1.5rem;
   }
-
+  
   .button-group {
     flex-direction: column;
   }
-
+  
   .save-button,
   .reset-button,
   .test-button {
     width: 100%;
   }
-
+  
   .profanity-textarea {
     min-height: 300px;
   }

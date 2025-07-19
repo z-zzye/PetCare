@@ -1,5 +1,6 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
+import { FaUsers } from 'react-icons/fa';
 import './boards/BoardAdmin.css'; // 기존 어드민 스타일 재사용
 import Header from '../Header.jsx';
 
@@ -43,7 +44,10 @@ const UserAdminPage = () => {
     <Header />
     <div className="board-admin-page">
       <div className="board-admin-container">
-        <h1 className="admin-title">사용자 관리</h1>
+        <h1 className="admin-title">
+          <FaUsers className="users-icon" />
+          사용자 관리
+        </h1>
         <div className="board-admin-controls">
           <div className="category-tabs">
             {roles.map((role) => (

@@ -1,7 +1,7 @@
 .autovax-admin-page {
-  padding: 20px;
   min-height: 100vh;
-  background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 50%, #f39c12 100%);
+  background: white;
+  padding: 20px;
   font-family: 'Pretendard', sans-serif;
 }
 
@@ -11,26 +11,31 @@
   background: rgba(255, 255, 255, 0.95);
   border-radius: 25px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  border: 2px solid #fdcb6e;
-  padding: 30px;
+  border: none;
+  overflow: hidden;
   backdrop-filter: blur(10px);
 }
 
 .autovax-admin-title {
-  text-align: center;
-  color: #223a5e;
-  margin-bottom: 30px;
-  font-size: 2.5rem;
+  background: white;
+  color: #1a365d;
+  margin: 0;
+  padding: 30px;
+  text-align: left;
+  font-size: 1.5rem;
   font-weight: 700;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+  text-shadow: none;
+  display: flex;
+  align-items: center;
+  gap: 15px;
 }
 
-.autovax-admin-title::before {
-  content: '💉';
-  display: block;
-  font-size: 3rem;
-  margin-bottom: 15px;
+.autovax-icon {
+  font-size: 1.6rem;
   animation: bounce 2s infinite;
+  color: #1a365d;
 }
 
 @keyframes bounce {
@@ -49,12 +54,11 @@
   display: flex;
   align-items: center;
   gap: 15px;
-  margin-bottom: 20px;
-  padding: 25px;
-  background: linear-gradient(135deg, #fffbf0 0%, #fff8e1 100%);
-  border-radius: 20px;
-  border: 2px solid #fdcb6e;
-  box-shadow: 0 4px 15px rgba(253, 203, 110, 0.3);
+  margin-bottom: 0px;
+  padding: 40px 30px 0px 30px;
+  background: white;
+  border-bottom: none;
+  position: relative;
 }
 
 .filter-section label {
@@ -63,54 +67,51 @@
 }
 
 .filter-section select {
-  padding: 12px 20px;
-  border: 2px solid #fdcb6e;
-  border-radius: 25px;
+  padding: 8px 16px;
+  border: 2px solid #1a365d;
+  border-radius: 20px;
   background: white;
-  font-size: 1rem;
+  font-size: 0.9rem;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(253, 203, 110, 0.2);
+  box-shadow: 0 4px 15px rgba(26, 54, 93, 0.2);
 }
 
 .filter-section select:focus {
   outline: none;
-  border-color: #f39c12;
-  box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.2);
-  transform: translateY(-2px);
 }
 
 .refresh-btn {
-  padding: 12px 24px;
-  background: linear-gradient(135deg, #f39c12 0%, #fdcb6e 100%);
+  padding: 8px 20px;
+  background: #1a365d;
   color: white;
   border: none;
-  border-radius: 25px;
+  border-radius: 20px;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3);
+  box-shadow: 0 4px 15px rgba(26, 54, 93, 0.3);
 }
 
 .refresh-btn:hover {
-  background: linear-gradient(135deg, #e67e22 0%, #fdcb6e 100%);
+  background: #2d3748;
   transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(243, 156, 18, 0.4);
 }
 
 .reservations-table {
   overflow-x: auto;
   background: white;
-  border-radius: 20px;
-  border: 2px solid #fdcb6e;
+  border-radius: 8px;
+  border: none;
   box-shadow: 0 8px 25px rgba(253, 203, 110, 0.3);
+  padding: 30px;
 }
 
 .reservations-table table {
   width: 100%;
   border-collapse: collapse;
   background: white;
-  border-radius: 20px;
+  border-radius: 8px;
   overflow: hidden;
 }
 
@@ -118,14 +119,14 @@
 .reservations-table td {
   padding: 15px;
   text-align: left;
-  border-bottom: 1px solid #fdcb6e;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .reservations-table th {
-  background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
-  color: #223a5e;
+  background: #1a365d;
+  color: white;
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 0.9rem;
 }
 
 .reservations-table td {
@@ -146,22 +147,22 @@
 }
 
 .status-pending {
-  background: linear-gradient(135deg, #fdcb6e 0%, #ffeaa7 100%);
+  background: #fdcb6e;
   color: #2d3436;
 }
 
 .status-confirmed {
-  background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+  background: #74b9ff;
   color: white;
 }
 
 .status-completed {
-  background: linear-gradient(135deg, #a8e6cf 0%, #88d8c0 100%);
+  background: #a8e6cf;
   color: #2d3436;
 }
 
 .status-cancelled {
-  background: linear-gradient(135deg, #ff8a80 0%, #ff5252 100%);
+  background: #ff8a80;
   color: white;
 }
 
@@ -183,23 +184,23 @@
 }
 
 .btn-complete {
-  background: linear-gradient(135deg, #a8e6cf 0%, #88d8c0 100%);
+  background: #a8e6cf;
   color: #2d3436;
 }
 
 .btn-complete:hover {
-  background: linear-gradient(135deg, #88d8c0 0%, #00b894 100%);
+  background: #88d8c0;
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(168, 230, 207, 0.4);
 }
 
 .btn-cancel {
-  background: linear-gradient(135deg, #ff8a80 0%, #ff5252 100%);
+  background: #ff8a80;
   color: white;
 }
 
 .btn-cancel:hover {
-  background: linear-gradient(135deg, #ff5252 0%, #d32f2f 100%);
+  background: #ff5252;
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(255, 138, 128, 0.4);
 }
@@ -231,7 +232,7 @@
 }
 
 .no-data::before {
-  content: '💉';
+  content: '';
   display: block;
   font-size: 3rem;
   margin-bottom: 15px;

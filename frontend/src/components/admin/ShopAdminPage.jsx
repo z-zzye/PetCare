@@ -357,6 +357,17 @@ const ShopAdminPage = () => {
                   html {
                     background-color: #ffffff;
                   }
+                  @keyframes bounce {
+                    0%, 20%, 50%, 80%, 100% {
+                      transform: translateY(0);
+                    }
+                    40% {
+                      transform: translateY(-8px);
+                    }
+                    60% {
+                      transform: translateY(-4px);
+                    }
+                  }
                 `}
             </style>
             <Header />
@@ -372,7 +383,13 @@ const ShopAdminPage = () => {
             <div style={styles.container}>
                 <div style={styles.header}>
                     <h1 style={styles.title}>
-                        <i className="fas fa-shopping-bag" style={{ marginRight: 8, color: '#223A5E', fontSize: 22, verticalAlign: 'middle' }}></i>
+                        <i className="fas fa-shopping-bag" style={{ 
+                            marginRight: 8, 
+                            color: '#223A5E', 
+                            fontSize: 22, 
+                            verticalAlign: 'middle',
+                            animation: 'bounce 2s infinite'
+                        }}></i>
                         쇼핑몰 관리
                     </h1>
                 </div>

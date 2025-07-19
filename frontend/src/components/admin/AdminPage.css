@@ -24,7 +24,7 @@
   font-weight: 700;
   margin: 0;
   padding: 0;
-  text-align: center;
+  text-align: center !important;
   margin-bottom: 60px;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
   border-bottom: 3px solid #223a5e;

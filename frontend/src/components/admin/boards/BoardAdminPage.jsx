@@ -1,6 +1,7 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { FaClipboardList } from 'react-icons/fa';
 import '../../board/BoardCommon.css';
 import './BoardAdmin.css';
 import Header from '../../Header.jsx';
@@ -115,7 +116,10 @@ const BoardAdminPage = () => {
     <Header/>
     <div className="board-admin-page">
       <div className="board-admin-container">
-        <h1 className="admin-title">게시판 관리</h1>
+        <h1 className="admin-title">
+          <FaClipboardList className="clipboard-icon" />
+          게시판 관리
+        </h1>
         <div className="board-admin-controls">
           <div className="category-tabs">
             {categories.map((cat) => (
@@ -186,18 +190,20 @@ const BoardAdminPage = () => {
                     {post.blinded ? '블라인드' : '정상'}
                   </td>
                   <td className="th-manage">
-                    <button
-                      className="blind-btn"
-                      onClick={() => handleBlindToggle(post.id)}
-                    >
-                      {post.blinded ? '해제' : '블라인드'}
-                    </button>
-                    <button
-                      className="delete-btn"
-                      onClick={() => handleDelete(post.id)}
-                    >
-                      삭제
-                    </button>
+                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                      <button
+                        className="blind-btn"
+                        onClick={() => handleBlindToggle(post.id)}
+                      >
+                        {post.blinded ? '해제' : '블라인드'}
+                      </button>
+                      <button
+                        className="delete-btn"
+                        onClick={() => handleDelete(post.id)}
+                      >
+                        삭제
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))

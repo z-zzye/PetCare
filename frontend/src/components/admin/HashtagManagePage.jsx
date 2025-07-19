@@ -3,6 +3,7 @@ import axios from '../../api/axios';
 import './HashtagManagePage.css';
 import Swal from 'sweetalert2';
 import Header from '../Header.jsx';
+import { FaTags } from 'react-icons/fa';
 
 const HashtagManagePage = () => {
   const [hashtags, setHashtags] = useState([]);
@@ -174,7 +175,10 @@ const HashtagManagePage = () => {
     <Header />
     <div className="hashtag-manage-page">
       <div className="hashtag-manage-container">
-        <h1 className="hashtag-manage-title">관심 태그 관리</h1>
+        <h1 className="hashtag-manage-title">
+          <FaTags className="hashtag-icon" />
+          관심 태그 관리
+        </h1>
 
         {/* 검색 및 추가 섹션 */}
         <div className="hashtag-control-section">
@@ -221,7 +225,7 @@ const HashtagManagePage = () => {
               >
                 <div className="hashtag-content">
                   <span className="hashtag-name">#{hashtag.tagName}</span>
-                  <span className="hashtag-count">({hashtag.tagCount})</span>
+                  <span className="hashtag-count">{hashtag.tagCount}</span>
                 </div>
                 <div className="hashtag-delete-hint">클릭하여 삭제</div>
               </div>

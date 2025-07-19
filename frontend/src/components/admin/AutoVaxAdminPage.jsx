@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from '../../api/axios';
 import './AutoVaxAdminPage.css';
 import Header from '../Header.jsx';
+import { FaSyringe } from 'react-icons/fa';
 
 const AutoVaxAdminPage = () => {
   const [reservations, setReservations] = useState([]);
@@ -99,10 +100,12 @@ const AutoVaxAdminPage = () => {
     <Header />
     <div className="autovax-admin-page">
       <div className="autovax-admin-container">
-        <h1 className="autovax-admin-title">자동 예약 관리</h1>
+        <h1 className="autovax-admin-title">
+          <FaSyringe className="autovax-icon" />
+          자동 예약 관리
+        </h1>
 
         <div className="filter-section">
-          <label>상태 필터: </label>
           <select value={filter} onChange={(e) => setFilter(e.target.value)}>
             <option value="all">전체</option>
             <option value="PENDING">대기중</option>

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { FaShieldAlt, FaSkull } from 'react-icons/fa';
 import axios from '../../api/axios';
 import './ProfanityManagePage.css';
 import Header from '../Header.jsx';
@@ -86,20 +87,26 @@ const ProfanityManagePage = () => {
     <div className="profanity-manage-page">
       <div className="profanity-container">
         <div className="profanity-header">
-          <h1 className="profanity-title">비속어 관리</h1>
+          <h1 className="profanity-title">
+            <FaShieldAlt className="shield-icon" />
+            비속어 관리
+          </h1>
         </div>
 
-        <div className="profanity-description">
-          <p>클린봇 시스템에서 사용되는 비속어 목록을 관리합니다.</p>
-          <p>
-            한 줄에 한 단어씩 입력해 주세요. 저장 버튼을 누르면 즉시 필터링에
-            적용됩니다.
-          </p>
+        <div className="profanity-info">
+          <h3>사용법</h3>
+          <ul>
+            <li>한 줄에 하나의 비속어를 입력하세요</li>
+            <li>대소문자는 구분하지 않습니다</li>
+            <li>저장 후 즉시 클린봇 시스템에 적용됩니다</li>
+            <li>테스트 버튼으로 필터링 기능을 확인할 수 있습니다</li>
+          </ul>
         </div>
 
         <form onSubmit={handleSubmit} className="profanity-form">
           <div className="textarea-container">
             <label htmlFor="profanityText" className="textarea-label">
+              <FaSkull className="skull-icon" />
               비속어 목록
             </label>
             <textarea
@@ -136,16 +143,6 @@ const ProfanityManagePage = () => {
         </form>
 
         {message && <div className={`message ${messageType}`}>{message}</div>}
-
-        <div className="profanity-info">
-          <h3>사용법</h3>
-          <ul>
-            <li>한 줄에 하나의 비속어를 입력하세요</li>
-            <li>대소문자는 구분하지 않습니다</li>
-            <li>저장 후 즉시 클린봇 시스템에 적용됩니다</li>
-            <li>테스트 버튼으로 필터링 기능을 확인할 수 있습니다</li>
-          </ul>
-        </div>
       </div>
     </div>
     </>

@@ -1,7 +1,7 @@
 /* 관심 태그 관리 페이지 스타일 */
 .hashtag-manage-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 50%, #f39c12 100%);
+  background: white;
   padding: 20px;
   font-family: 'Pretendard', sans-serif;
 }
@@ -12,33 +12,31 @@
   background: rgba(255, 255, 255, 0.95);
   border-radius: 25px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  border: 2px solid #fdcb6e;
+  border: none;
   overflow: hidden;
   backdrop-filter: blur(10px);
 }
 
 .hashtag-manage-title {
-  background: linear-gradient(135deg, #f39c12 0%, #fdcb6e 100%);
-  color: white;
+  background: white;
+  color: #1a365d;
   margin: 0;
   padding: 30px;
-  text-align: center;
-  font-size: 2.5rem;
+  text-align: left;
+  font-size: 1.5rem;
   font-weight: 700;
   position: relative;
   overflow: hidden;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  text-shadow: none;
+  display: flex;
+  align-items: center;
+  gap: 15px;
 }
 
-.hashtag-manage-title::before {
-  content: '🏷️';
-  position: absolute;
-  left: 30px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 2.5rem;
+.hashtag-icon {
+  font-size: 1.6rem;
   animation: bounce 2s infinite;
-  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.2));
+  color: #1a365d;
 }
 
 @keyframes bounce {
@@ -54,9 +52,20 @@
 }
 
 .hashtag-control-section {
-  padding: 30px;
-  background: linear-gradient(135deg, #fffbf0 0%, #fff8e1 100%);
-  border-bottom: 2px solid #fdcb6e;
+  padding: 40px 30px;
+  background: white;
+  border-bottom: none;
+  position: relative;
+}
+
+.hashtag-control-section::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 30px;
+  right: 30px;
+  height: 1px;
+  background: #e0e0e0;
 }
 
 .hashtag-search-add {
@@ -73,7 +82,7 @@
 
 .hashtag-search-input {
   width: 100%;
-  padding: 15px 20px;
+  padding: 12px 20px;
   border: 2px solid #fdcb6e;
   border-radius: 25px;
   font-size: 1rem;
@@ -98,7 +107,7 @@
 
 .hashtag-add-input {
   flex: 1;
-  padding: 15px 20px;
+  padding: 12px 20px;
   border: 2px solid #fdcb6e;
   border-radius: 25px;
   font-size: 1rem;
@@ -115,8 +124,8 @@
 }
 
 .hashtag-add-button {
-  padding: 15px 30px;
-  background: linear-gradient(135deg, #f39c12 0%, #fdcb6e 100%);
+  padding: 12px 30px;
+  background: #f39c12;
   color: white;
   border: none;
   border-radius: 25px;
@@ -145,13 +154,13 @@
 }
 
 .hashtag-add-button:hover {
-  background: linear-gradient(135deg, #e67e22 0%, #fdcb6e 100%);
+  background: #e67e22;
   transform: translateY(-3px);
   box-shadow: 0 8px 25px rgba(243, 156, 18, 0.4);
 }
 
 .hashtag-add-button:disabled {
-  background: linear-gradient(135deg, #b2bec3 0%, #74b9ff 100%);
+  background: #b2bec3;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
@@ -159,7 +168,7 @@
 
 .hashtag-list-section {
   padding: 30px;
-  background: linear-gradient(135deg, #fffbf0 0%, #fff8e1 100%);
+  background: white;
 }
 
 .hashtag-grid {
@@ -197,6 +206,7 @@
   transform: translateY(-8px) scale(1.02);
   box-shadow: 0 15px 35px rgba(253, 203, 110, 0.5);
   border-color: #f39c12;
+  background: white;
 }
 
 .hashtag-item:hover::before {
@@ -211,20 +221,19 @@
 }
 
 .hashtag-name {
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   font-weight: 600;
   color: #223a5e;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .hashtag-count {
-  background: linear-gradient(135deg, #fdcb6e 0%, #ffeaa7 100%);
-  color: #2d3436;
-  padding: 8px 16px;
-  border-radius: 25px;
-  font-size: 0.9rem;
+  background: #1a365d;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
   font-weight: 600;
-  box-shadow: 0 4px 15px rgba(253, 203, 110, 0.3);
 }
 
 .hashtag-delete-hint {

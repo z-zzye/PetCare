@@ -1,6 +1,6 @@
 .board-admin-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 50%, #f39c12 100%);
+  background: #ffffff;
   padding: 20px;
   font-family: 'Pretendard', sans-serif;
 }
@@ -8,21 +8,34 @@
 .board-admin-container {
   max-width: 1200px;
   margin: 0 auto;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 25px;
+  background: #ffffff;
+  border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  border: 2px solid #fdcb6e;
-  padding: 40px;
-  backdrop-filter: blur(10px);
+  padding: 28px;
 }
 
 .admin-title {
-  font-size: 2.5rem;
+  font-size: 1.8rem;
   font-weight: 700;
   color: #223a5e;
   margin-bottom: 30px;
-  text-align: center;
+  text-align: left;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.clipboard-icon {
+  font-size: 1.5rem;
+  color: #0d1b2a;
+  animation: bounce 2s infinite;
+}
+
+.users-icon {
+  font-size: 1.5rem;
+  color: #0d1b2a;
+  animation: bounce 2s infinite;
 }
 
 .admin-title::before {
@@ -50,6 +63,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 25px;
+  margin-top: 20px;
   flex-wrap: wrap;
   gap: 20px;
 }
@@ -57,7 +71,7 @@
 .admin-actions {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 10px;
 }
 
 .category-tabs {
@@ -66,47 +80,43 @@
 }
 
 .category-tab {
-  background: linear-gradient(135deg, #fffbf0 0%, #fff8e1 100%);
-  border: 2px solid #fdcb6e;
-  border-radius: 25px;
-  padding: 12px 24px;
-  font-size: 1rem;
+  background: #fffbf0;
+  border: 2px solid #ffc107;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 0.9rem;
   color: #223a5e;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(253, 203, 110, 0.2);
 }
 
 .category-tab.active {
-  background: linear-gradient(135deg, #f39c12 0%, #fdcb6e 100%);
-  color: white;
+  background: #ffc107;
+  color: #223a5e;
   font-weight: 600;
-  border-color: #f39c12;
-  box-shadow: 0 8px 25px rgba(243, 156, 18, 0.3);
+  border-color: #ffc107;
 }
 
 .category-tab:hover:not(.active) {
-  background: linear-gradient(135deg, #fff8e1 0%, #fdcb6e 100%);
-  border-color: #f39c12;
-  transform: translateY(-2px);
+  background: #fff8e1;
+  border-color: #ffc107;
 }
 
 .search-input {
-  padding: 12px 20px;
-  border: 2px solid #fdcb6e;
-  border-radius: 25px;
-  font-size: 1rem;
-  min-width: 220px;
+  padding: 8px 16px;
+  border: 2px solid #ffc107;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  min-width: 180px;
   outline: none;
   transition: all 0.3s ease;
   background: white;
-  box-shadow: 0 4px 15px rgba(253, 203, 110, 0.2);
 }
 
 .search-input:focus {
-  border-color: #f39c12;
-  box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.2);
+  border-color: #ffc107;
+  box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.2);
   transform: translateY(-2px);
 }
 
@@ -115,21 +125,21 @@
   border-collapse: collapse;
   margin-top: 20px;
   background: white;
-  border-radius: 20px;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 8px 25px rgba(253, 203, 110, 0.3);
-  border: 2px solid #fdcb6e;
+  border: 2px solid #ffc107;
 }
 
 .board-admin-table th,
 .board-admin-table td {
   padding: 15px;
   text-align: center;
-  border-bottom: 1px solid #fdcb6e;
+  border-bottom: 1px solid #ffc107;
+  vertical-align: middle;
 }
 
 .board-admin-table th {
-  background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+  background: #ffc107;
   color: #223a5e;
   font-weight: 600;
   font-size: 1rem;
@@ -138,6 +148,11 @@
 .board-admin-table td {
   color: #6c757d;
   font-size: 1rem;
+  vertical-align: middle;
+}
+
+.board-admin-table td.th-title {
+  vertical-align: middle;
 }
 
 .board-admin-table tr:last-child td {
@@ -157,14 +172,22 @@
 .blind-btn,
 .delete-btn {
   margin: 0 4px;
-  padding: 10px 20px;
+  padding: 6px 8px;
   border: none;
-  border-radius: 25px;
-  font-size: 0.9rem;
+  border-radius: 15px;
+  font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  width: 60px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .detail-btn {
@@ -179,38 +202,35 @@
 }
 
 .blind-btn {
-  background: linear-gradient(135deg, #fdcb6e 0%, #ffeaa7 100%);
+  background: #ffc107;
   color: #2d3436;
 }
 
 .blind-btn:hover {
-  background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+  background: #ffb300;
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(253, 203, 110, 0.4);
 }
 
 .delete-btn {
-  background: linear-gradient(135deg, #ff8a80 0%, #ff5252 100%);
+  background: #dc3545;
   color: white;
 }
 
 .delete-btn:hover {
-  background: linear-gradient(135deg, #ff5252 0%, #d32f2f 100%);
+  background: #c82333;
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(255, 138, 128, 0.4);
 }
 
 .update-blinded-btn {
-  background: linear-gradient(135deg, #a8e6cf 0%, #88d8c0 100%);
-  color: #2d3436;
+  background: #1a365d;
+  color: white;
   border: none;
-  border-radius: 25px;
-  padding: 12px 24px;
-  font-size: 1rem;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(168, 230, 207, 0.3);
 }
 
 .update-blinded-btn:hover {
