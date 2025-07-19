@@ -97,15 +97,13 @@ const AdminVetApply = () => {
       <div className="admin-page">
         <div className="admin-container">
           <div className="admin-header">
-            <h1 className="admin-title">수의사 신청 관리</h1>
-            <div className="admin-header-buttons">
-              <button
-                className="admin-button"
-                onClick={() => navigate('/admin')}
-              >
-                관리자 홈
-              </button>
-            </div>
+            <h1 className="admin-title">수의사 신청 확인</h1>
+            <button 
+              className="admin-button"
+              onClick={() => fetchVetApplies(currentPage)}
+            >
+              새로고침
+            </button>
           </div>
 
           <div className="admin-content">
@@ -138,7 +136,11 @@ const AdminVetApply = () => {
                     </thead>
                     <tbody>
                       {applies.map((apply, index) => (
-                        <tr key={apply.applyId} className="admin-table-row">
+                        <tr 
+                          key={apply.applyId}
+                          onClick={() => navigate(`/admin/vet-applies/${apply.applyId}`)}
+                          style={{ cursor: 'pointer' }}
+                        >
                           <td>{totalElements - (currentPage * ITEMS_PER_PAGE + index)}</td>
                           <td>{apply.memberName}</td>
                           <td>{apply.memberEmail}</td>
@@ -151,39 +153,31 @@ const AdminVetApply = () => {
                             </span>
                           </td>
                           <td>{formatDate(apply.applyProcessDate)}</td>
-                          <td>
-                            <button
-                              className="admin-button small"
-                              onClick={() => navigate(`/admin/vet-applies/${apply.applyId}`)}
-                            >
-                              상세보기
-                            </button>
-                          </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
 
-                {/* 페이지네이션 */}
+                {/* 페이징 */}
                 {totalPages > 1 && (
                   <div className="pagination">
                     <button
-                      className="pagination-button"
+                      className="admin-button"
                       onClick={() => handlePageChange(currentPage - 1)}
                       disabled={currentPage === 0}
+                      style={{ marginRight: '10px' }}
                     >
                       이전
                     </button>
-                    
-                    <span className="pagination-info">
+                    <span className="page-info">
                       {currentPage + 1} / {totalPages}
                     </span>
-                    
                     <button
-                      className="pagination-button"
+                      className="admin-button"
                       onClick={() => handlePageChange(currentPage + 1)}
                       disabled={currentPage === totalPages - 1}
+                      style={{ marginLeft: '10px' }}
                     >
                       다음
                     </button>
