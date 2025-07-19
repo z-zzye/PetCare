@@ -1,0 +1,359 @@
+.vet-apply-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 50%, #90caf9 100%);
+  padding: 20px;
+  font-family: 'Pretendard', sans-serif;
+}
+
+.vet-apply-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 25px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 2px solid #90caf9;
+  padding: 40px;
+  backdrop-filter: blur(10px);
+}
+
+/* 헤더 섹션 */
+.vet-apply-header {
+  text-align: center;
+  margin-bottom: 50px;
+  padding: 40px 0;
+  background: linear-gradient(135deg, #f3f9ff 0%, #e8f4fd 100%);
+  border-radius: 20px;
+  border: 2px solid #90caf9;
+  box-shadow: 0 8px 25px rgba(144, 202, 249, 0.3);
+}
+
+.vet-apply-header-icon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.vet-apply-header-title {
+  color: #1565c0;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.vet-apply-header-subtitle {
+  color: #6c757d;
+  font-size: 1.2rem;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* 혜택 섹션 */
+.vet-apply-benefits-section {
+  margin-bottom: 50px;
+}
+
+.vet-apply-section-title {
+  color: #1565c0;
+  font-size: 2rem;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 30px;
+  position: relative;
+}
+
+.vet-apply-section-title::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(135deg, #90caf9 0%, #64b5f6 100%);
+  border-radius: 2px;
+}
+
+.vet-apply-benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-top: 40px;
+}
+
+.vet-apply-benefit-item {
+  background: linear-gradient(135deg, #f8fbff 0%, #f0f8ff 100%);
+  border: 2px solid #e3f2fd;
+  border-radius: 20px;
+  padding: 20px;
+  text-align: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(144, 202, 249, 0.2);
+  min-width: 0;
+}
+
+.vet-apply-benefit-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(144, 202, 249, 0.3);
+  border-color: #90caf9;
+}
+
+.vet-apply-benefit-icon {
+  font-size: 2.5rem;
+  margin-bottom: 15px;
+  display: block;
+}
+
+.vet-apply-benefit-item h3 {
+  color: #1565c0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.vet-apply-benefit-item p {
+  color: #6c757d;
+  line-height: 1.5;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* 폼 섹션 */
+.vet-apply-form-section {
+  margin-bottom: 50px;
+}
+
+.vet-apply-form {
+  background: linear-gradient(135deg, #f8fbff 0%, #f0f8ff 100%);
+  border: 2px solid #e3f2fd;
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 4px 15px rgba(144, 202, 249, 0.2);
+}
+
+.vet-apply-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 25px;
+  margin-bottom: 30px;
+}
+
+.vet-apply-form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.vet-apply-form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.vet-apply-form-group label {
+  color: #1565c0;
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+}
+
+.vet-apply-form-group input,
+.vet-apply-form-group textarea {
+  padding: 12px 16px;
+  border: 2px solid #e3f2fd;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.vet-apply-form-group input:focus,
+.vet-apply-form-group textarea:focus {
+  outline: none;
+  border-color: #90caf9;
+  box-shadow: 0 0 0 3px rgba(144, 202, 249, 0.1);
+}
+
+.vet-apply-form-group input:read-only {
+  background-color: #f8f9fa;
+  color: #6c757d;
+}
+
+.vet-apply-form-group textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.vet-apply-error {
+  color: #e74c3c;
+  font-size: 0.85rem;
+  margin-top: 5px;
+  font-weight: 500;
+}
+
+.vet-apply-form-submit {
+  text-align: center;
+  margin-top: 30px;
+}
+
+.vet-apply-submit-btn {
+  background: linear-gradient(135deg, #1565c0 0%, #1976d2 100%);
+  color: white;
+  border: none;
+  padding: 15px 40px;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(21, 101, 192, 0.3);
+}
+
+.vet-apply-submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(21, 101, 192, 0.4);
+  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+}
+
+.vet-apply-submit-btn:active {
+  transform: translateY(0);
+}
+
+/* 안내사항 섹션 */
+.vet-apply-notice-section {
+  background: linear-gradient(135deg, #f8fbff 0%, #f0f8ff 100%);
+  border: 2px solid #e3f2fd;
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 4px 15px rgba(144, 202, 249, 0.2);
+}
+
+.vet-apply-notice-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  margin-top: 30px;
+}
+
+.vet-apply-notice-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  padding: 20px;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 2px 10px rgba(144, 202, 249, 0.1);
+  transition: all 0.3s ease;
+}
+
+.vet-apply-notice-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(144, 202, 249, 0.2);
+}
+
+.vet-apply-notice-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.vet-apply-notice-text h4 {
+  color: #1565c0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.vet-apply-notice-text p {
+  color: #6c757d;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1200px) {
+  .vet-apply-benefits-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .vet-apply-container {
+    padding: 20px;
+  }
+  
+  .vet-apply-header {
+    padding: 30px 20px;
+  }
+  
+  .vet-apply-header-title {
+    font-size: 2rem;
+  }
+  
+  .vet-apply-header-subtitle {
+    font-size: 1rem;
+  }
+  
+  .vet-apply-form-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .vet-apply-benefits-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .vet-apply-notice-content {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .vet-apply-form {
+    padding: 25px;
+  }
+  
+  .vet-apply-notice-section {
+    padding: 25px;
+  }
+}
+
+@media (max-width: 480px) {
+  .vet-apply-page {
+    padding: 10px;
+  }
+  
+  .vet-apply-container {
+    padding: 15px;
+  }
+  
+  .vet-apply-header {
+    padding: 20px 15px;
+  }
+  
+  .vet-apply-header-title {
+    font-size: 1.8rem;
+  }
+  
+  .vet-apply-section-title {
+    font-size: 1.6rem;
+  }
+  
+  .vet-apply-benefit-item {
+    padding: 20px;
+  }
+  
+  .vet-apply-form {
+    padding: 20px;
+  }
+  
+  .vet-apply-notice-section {
+    padding: 20px;
+  }
+} 

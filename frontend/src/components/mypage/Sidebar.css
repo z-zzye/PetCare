@@ -60,7 +60,8 @@
 }
 
 .info-btn,
-.creator-btn {
+.creator-btn,
+.vet-btn {
   width: 100%;
   padding: 10px;
   background-color: #fff;
@@ -101,6 +102,30 @@
   background: linear-gradient(135deg, #229954 0%, #27ae60 100%) !important;
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(39, 174, 96, 0.3);
+}
+
+.vet-already-btn {
+  background: linear-gradient(135deg, #1565c0 0%, #1976d2 100%) !important;
+  color: white !important;
+  border: 2px solid #1565c0 !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.vet-already-btn::before {
+  content: '✓';
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.vet-already-btn:hover {
+  background: linear-gradient(135deg, #0d47a1 0%, #1565c0 100%) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(21, 101, 192, 0.3);
 }
 
 /* 다이어리 인덱스 탭 스타일 */

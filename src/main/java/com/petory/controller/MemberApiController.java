@@ -274,6 +274,7 @@ public class MemberApiController {
     return ResponseEntity.ok(memberService.getChatMemberById(id));
   }
 
+  // 회원 역할 조회
   @GetMapping("/{memberId}/role")
   public ResponseEntity<String> getMemberRole(@PathVariable Long memberId) {
     try {

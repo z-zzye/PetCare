@@ -258,4 +258,44 @@ public class NotificationService {
     notificationRepository.save(notification);
     log.info("크리에이터 거절 알림 생성: memberId={}, rejectReason={}", member.getMember_Id(), rejectReason);
   }
+
+  /**
+   * 수의사 신청 승인 알림 생성
+   */
+  @Transactional
+  public void createVetApprovedNotification(Member member) {
+    String title = "🎉 수의사 자격신청이 승인되었습니다!";
+    String message = "축하합니다! 수의사 파트너십 신청이 승인되었습니다. 이제 수의사 전용 기능을 이용하실 수 있습니다.";
+
+    Notification notification = Notification.builder()
+      .member(member)
+      .notificationType(NotificationType.VET_APPROVED)
+      .title(title)
+      .message(message)
+      .isRead(false)
+      .build();
+
+    notificationRepository.save(notification);
+    log.info("수의사 승인 알림 생성: memberId={}", member.getMember_Id());
+  }
+
+  /**
+   * 수의사 신청 거절 알림 생성
+   */
+  @Transactional
+  public void createVetRejectedNotification(Member member, String rejectReason) {
+    String title = "수의사 자격신청이 거절되었습니다";
+    String message = String.format("수의사 파트너십 신청이 거절되었습니다.\n\n사유: %s\n\n재신청을 원하시면 다시 신청해주세요.", rejectReason);
+
+    Notification notification = Notification.builder()
+      .member(member)
+      .notificationType(NotificationType.VET_REJECTED)
+      .title(title)
+      .message(message)
+      .isRead(false)
+      .build();
+
+    notificationRepository.save(notification);
+    log.info("수의사 거절 알림 생성: memberId={}, rejectReason={}", member.getMember_Id(), rejectReason);
+  }
 }

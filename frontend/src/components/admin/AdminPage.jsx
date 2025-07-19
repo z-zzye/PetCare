@@ -81,6 +81,11 @@ const AdminPage = () => {
             <h3>크리에이터 신청 확인</h3>
             <p>크리에이터 신청 현황을 확인하고 승인/거절을 처리합니다</p>
           </Link>
+          <Link to="/admin/vet-apply" className="admin-menu-item">
+            <div className="admin-menu-icon">🏥</div>
+            <h3>수의사 신청 확인</h3>
+            <p>수의사 신청 현황을 확인하고 승인/거절을 처리합니다</p>
+          </Link>
         </div>
       </div>
     </div>
