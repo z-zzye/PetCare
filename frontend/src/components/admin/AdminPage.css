@@ -313,13 +313,17 @@
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 4px 15px rgba(253, 203, 110, 0.3);
+  table-layout: fixed;
 }
 
 .admin-table th,
 .admin-table td {
-  padding: 15px;
+  padding: 12px 8px;
   text-align: left;
   border-bottom: 1px solid #fdcb6e;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .admin-table th {
@@ -328,16 +332,61 @@
   font-weight: 600;
 }
 
+/* 테이블 컬럼 너비 조정 */
+.admin-table th:nth-child(1), /* 번호 */
+.admin-table td:nth-child(1) {
+  width: 8%;
+}
+
+.admin-table th:nth-child(2), /* 신청자 */
+.admin-table td:nth-child(2) {
+  width: 12%;
+}
+
+.admin-table th:nth-child(3), /* 이메일 */
+.admin-table td:nth-child(3) {
+  width: 20%;
+}
+
+.admin-table th:nth-child(4), /* 면허번호/주요 콘텐츠 */
+.admin-table td:nth-child(4) {
+  width: 15%;
+}
+
+.admin-table th:nth-child(5), /* 병원명 */
+.admin-table td:nth-child(5) {
+  width: 15%;
+}
+
+.admin-table th:nth-child(6), /* 신청일 */
+.admin-table td:nth-child(6) {
+  width: 15%;
+}
+
+.admin-table th:nth-child(7), /* 상태 */
+.admin-table td:nth-child(7) {
+  width: 10%;
+}
+
+.admin-table th:nth-child(8), /* 처리일 */
+.admin-table td:nth-child(8) {
+  width: 15%;
+}
+
 .admin-table tr:hover {
   background: #fffbf0;
 }
 
 /* 상태 배지 스타일 */
 .status-badge {
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 0.8rem;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
   font-weight: 600;
+  white-space: nowrap;
+  display: inline-block;
+  min-width: 60px;
+  text-align: center;
 }
 
 .status-active {
@@ -353,6 +402,24 @@
 .status-cancelled {
   background: linear-gradient(135deg, #ff8a80 0%, #ff5252 100%);
   color: white;
+}
+
+.license-badge {
+  background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.no-license-badge {
+  background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
 }
 
 /* 검색 및 필터 스타일 */
@@ -722,6 +789,34 @@
 
 .reject-button:hover {
   background: linear-gradient(135deg, #c0392b 0%, #a93226 100%) !important;
+}
+
+/* 자격증 이미지 스타일 */
+.license-image-container {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.license-image {
+  max-width: 100%;
+  max-height: 400px;
+  border-radius: 10px;
+  border: 2px solid #e3f2fd;
+  box-shadow: 0 4px 15px rgba(144, 202, 249, 0.2);
+  transition: transform 0.3s ease;
+}
+
+.license-image:hover {
+  transform: scale(1.02);
+}
+
+.license-image-error {
+  color: #e74c3c;
+  font-size: 0.9rem;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
 }
 
 .admin-header-buttons {

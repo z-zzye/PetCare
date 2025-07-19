@@ -292,7 +292,40 @@ const VetApplyDetail = () => {
                     <label>경력 연차</label>
                     <span>{applyDetail.experienceYears}년</span>
                   </div>
+                  {applyDetail.birthDate && (
+                    <div className="detail-item">
+                      <label>생년월일</label>
+                      <span>{applyDetail.birthDate}</span>
+                    </div>
+                  )}
+                  {applyDetail.firstIssueDate && (
+                    <div className="detail-item">
+                      <label>최초 발급일</label>
+                      <span>{applyDetail.firstIssueDate}</span>
+                    </div>
+                  )}
                 </div>
+                
+                {/* 자격증 이미지 섹션 */}
+                {applyDetail.licenseImageUrl && (
+                  <div className="detail-item full-width">
+                    <label>자격증 이미지</label>
+                    <div className="license-image-container">
+                      <img 
+                        src={`/images/vetlicense/${applyDetail.licenseImageUrl}`}
+                        alt="수의사 자격증"
+                        className="license-image"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'block';
+                        }}
+                      />
+                      <div className="license-image-error" style={{ display: 'none' }}>
+                        이미지를 불러올 수 없습니다.
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* 병원 정보 섹션 */}

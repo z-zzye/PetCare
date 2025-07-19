@@ -47,18 +47,47 @@ public class VetApplyService {
         
         // 3. REJECTED 상태는 재신청 가능하므로 통과
         
-        // VetApply 엔티티 생성
-        VetApply vetApply = VetApply.createVetApply(
-                member,
-                vetApplyDto.getName(),
-                vetApplyDto.getLicenseNumber(),
-                vetApplyDto.getHospitalName(),
-                vetApplyDto.getHospitalAddress(),
-                vetApplyDto.getHospitalPhone(),
-                vetApplyDto.getSpecialization(),
-                vetApplyDto.getExperienceYears(),
-                vetApplyDto.getCertifications()
-        );
+        // VetApply 엔티티 생성 (이미지 경로 및 날짜 포함)
+        VetApply vetApply;
+        if (vetApplyDto.getLicenseImageUrl() != null && !vetApplyDto.getLicenseImageUrl().trim().isEmpty()) {
+            // 날짜 파싱 (문자열 형태로 저장)
+            String birthDate = null;
+            String firstIssueDate = null;
+            
+            if (vetApplyDto.getBirthDate() != null && !vetApplyDto.getBirthDate().trim().isEmpty()) {
+                birthDate = vetApplyDto.getBirthDate().trim();
+            }
+            if (vetApplyDto.getFirstIssueDate() != null && !vetApplyDto.getFirstIssueDate().trim().isEmpty()) {
+                firstIssueDate = vetApplyDto.getFirstIssueDate().trim();
+            }
+            
+            vetApply = VetApply.createVetApplyWithImageAndDates(
+                    member,
+                    vetApplyDto.getName(),
+                    vetApplyDto.getLicenseNumber(),
+                    vetApplyDto.getHospitalName(),
+                    vetApplyDto.getHospitalAddress(),
+                    vetApplyDto.getHospitalPhone(),
+                    vetApplyDto.getSpecialization(),
+                    vetApplyDto.getExperienceYears(),
+                    vetApplyDto.getCertifications(),
+                    vetApplyDto.getLicenseImageUrl(),
+                    birthDate,
+                    firstIssueDate
+            );
+        } else {
+            vetApply = VetApply.createVetApply(
+                    member,
+                    vetApplyDto.getName(),
+                    vetApplyDto.getLicenseNumber(),
+                    vetApplyDto.getHospitalName(),
+                    vetApplyDto.getHospitalAddress(),
+                    vetApplyDto.getHospitalPhone(),
+                    vetApplyDto.getSpecialization(),
+                    vetApplyDto.getExperienceYears(),
+                    vetApplyDto.getCertifications()
+            );
+        }
         
         return vetApplyRepository.save(vetApply);
     }
@@ -119,6 +148,9 @@ public class VetApplyService {
                 .specialization(apply.getSpecialization())
                 .experienceYears(apply.getExperienceYears())
                 .certifications(apply.getCertifications())
+                .licenseImageUrl(apply.getLicenseImageUrl())
+                .birthDate(apply.getBirthDate() != null ? apply.getBirthDate().toString() : null)
+                .firstIssueDate(apply.getFirstIssueDate() != null ? apply.getFirstIssueDate().toString() : null)
                 .applyStatus(apply.getApplyStatus())
                 .regDate(apply.getRegDate())
                 .applyProcessDate(apply.getApplyProcessDate())
@@ -145,6 +177,9 @@ public class VetApplyService {
                 .specialization(apply.getSpecialization())
                 .experienceYears(apply.getExperienceYears())
                 .certifications(apply.getCertifications())
+                .licenseImageUrl(apply.getLicenseImageUrl())
+                .birthDate(apply.getBirthDate() != null ? apply.getBirthDate().toString() : null)
+                .firstIssueDate(apply.getFirstIssueDate() != null ? apply.getFirstIssueDate().toString() : null)
                 .applyStatus(apply.getApplyStatus())
                 .regDate(apply.getRegDate())
                 .applyProcessDate(apply.getApplyProcessDate())

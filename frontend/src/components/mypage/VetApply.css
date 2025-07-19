@@ -190,11 +190,50 @@
   resize: vertical;
 }
 
+/* 파일 업로드 스타일 */
+.vet-apply-file-input {
+  padding: 8px 12px !important;
+  border: 2px dashed #90caf9 !important;
+  background: #f8fbff !important;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.vet-apply-file-input:hover {
+  border-color: #64b5f6 !important;
+  background: #e3f2fd !important;
+}
+
+.vet-apply-file-info {
+  margin-top: 8px;
+  color: #6c757d;
+  font-size: 0.85rem;
+}
+
+.vet-apply-image-preview {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.vet-apply-image-preview img {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 10px;
+  border: 2px solid #e3f2fd;
+  box-shadow: 0 4px 15px rgba(144, 202, 249, 0.2);
+}
+
 .vet-apply-error {
   color: #e74c3c;
   font-size: 0.85rem;
   margin-top: 5px;
   font-weight: 500;
+  background-color: #fdf2f2;
+  padding: 5px 10px;
+  border-radius: 5px;
+  border-left: 3px solid #e74c3c;
+  display: block;
+  margin-bottom: 10px;
 }
 
 .vet-apply-form-submit {
