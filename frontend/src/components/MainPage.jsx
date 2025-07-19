@@ -21,6 +21,10 @@ const MainPage = () => {
       FREE: '자유',
       QNA: 'Q&A',
       WALKWITH: '산책모임',
+      info: '정보',
+      free: '자유',
+      qna: 'Q&A',
+      walkwith: '산책모임',
     };
     return categoryMap[category] || category;
   };
@@ -413,24 +417,39 @@ const MainPage = () => {
                       style={{ cursor: 'pointer' }}
                     >
                       <div className="post-category">
-                        {getCategoryInKorean(post.boardKind || post.category)}
+                        {getCategoryInKorean(post.category)}
                         {post.isSeasonal && (
                           <span className="seasonal-badge">계절</span>
                         )}
                       </div>
                       <h3 className="post-title">{post.title}</h3>
+                      {/* 해시태그 표시 */}
+                      {post.hashtags && post.hashtags.length > 0 && (
+                        <div className="post-hashtags">
+                          {post.hashtags.slice(0, 3).map((hashtag, index) => (
+                            <span key={index} className="post-hashtag">
+                              #{hashtag.tagName || hashtag}
+                            </span>
+                          ))}
+                          {post.hashtags.length > 3 && (
+                            <span className="post-hashtag-more">
+                              +{post.hashtags.length - 3}
+                            </span>
+                          )}
+                        </div>
+                      )}
                       {post.description && (
                         <p className="post-description">{post.description}</p>
                       )}
                       <div className="post-meta">
                         <span className="post-author">
-                          {post.memberNickname || post.author}
+                          {post.authorNickName || post.author}
                         </span>
                         <span className="post-views">
-                          조회수 : {post.viewCount || post.views}
+                          조회수 : {post.viewCount}
                         </span>
                         <span className="post-likes">
-                          추천수 : {post.likeCount || post.likes || 0}
+                          추천수 : {post.likeCount}
                         </span>
                       </div>
                     </div>

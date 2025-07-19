@@ -6,9 +6,9 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import axiosInstance from '../../api/axios';
 import { useAuth } from '../../contexts/AuthContext';
 import Header from '../Header';
-import CrawlingBoardWrite from './CrawlingBoardWrite';
 import './BoardCommon.css';
 import { boardConfig } from './boardConfig';
+import CrawlingBoardWrite from './CrawlingBoardWrite';
 
 const BoardWrite = () => {
   const { role, isLoggedIn } = useAuth();
@@ -459,7 +459,7 @@ const BoardWrite = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!title.trim()) {
       alert('제목을 입력해주세요.');
       return;
@@ -492,11 +492,15 @@ const BoardWrite = () => {
           formData.append('file', pendingImage.file);
           formData.append('type', 'board');
 
-          const uploadResponse = await axiosInstance.post('/boards/upload-image', formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-          });
+          const uploadResponse = await axiosInstance.post(
+            '/boards/upload-image',
+            formData,
+            {
+              headers: {
+                'Content-Type': 'multipart/form-data',
+              },
+            }
+          );
 
           if (uploadResponse.data && uploadResponse.data.imageUrl) {
             uploadedImageUrls.push(uploadResponse.data.imageUrl);
@@ -514,7 +518,7 @@ const BoardWrite = () => {
         title: title,
         content: content,
         boardKind: category.toUpperCase(),
-        hashtags: selectedHashtags
+        hashtags: selectedHashtags,
       };
 
       console.log('게시글 데이터:', boardData);
@@ -560,12 +564,17 @@ const BoardWrite = () => {
   const handleCrawlingSuccess = (boardId, selectedBoardKind) => {
     setShowCrawlingModal(false);
     alert('크롤링으로 게시글이 성공적으로 작성되었습니다.');
-    
+
     // 크롤링에서 선택된 게시판 정보를 사용하거나, 기본값 사용
     const boardKind = selectedBoardKind || category || 'FREE';
     const categoryPath = boardKind.toLowerCase();
-    
-    console.log('크롤링 성공 - boardId:', boardId, 'categoryPath:', categoryPath);
+
+    console.log(
+      '크롤링 성공 - boardId:',
+      boardId,
+      'categoryPath:',
+      categoryPath
+    );
     navigate(`/board/${categoryPath}/${boardId}`);
   };
 
@@ -818,17 +827,17 @@ const BoardWrite = () => {
           <button type="submit" className="board-btn" disabled={loading}>
             {loading ? '저장 중...' : '저장'}
           </button>
-          
+
           {/* 크롤링으로 작성하기 버튼 - 관리자만 표시 */}
           {role === 'ADMIN' && (
-            <button 
-              type="button" 
-              className="board-btn crawling-btn" 
+            <button
+              type="button"
+              className="board-btn crawling-btn"
               onClick={handleOpenCrawlingModal}
               style={{
                 marginLeft: '10px',
                 backgroundColor: '#28a745',
-                borderColor: '#28a745'
+                borderColor: '#28a745',
               }}
             >
               크롤링으로 작성하기
@@ -836,31 +845,37 @@ const BoardWrite = () => {
           )}
         </form>
       </div>
-      
+
       {/* 크롤링 모달 */}
       {showCrawlingModal && (
-        <div className="modal-overlay" style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          zIndex: 1000,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center'
-        }}>
-          <div className="modal-content" style={{
-            backgroundColor: 'white',
-            borderRadius: '8px',
-            padding: '20px',
-            maxWidth: '90%',
-            maxHeight: '90%',
-            overflow: 'auto',
-            position: 'relative'
-          }}>
-            <button 
+        <div
+          className="modal-overlay"
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            zIndex: 1000,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <div
+            className="modal-content"
+            style={{
+              backgroundColor: 'white',
+              borderRadius: '8px',
+              padding: '20px',
+              maxWidth: '90%',
+              maxHeight: '90%',
+              overflow: 'auto',
+              position: 'relative',
+            }}
+          >
+            <button
               onClick={handleCloseCrawlingModal}
               style={{
                 position: 'absolute',
@@ -870,12 +885,12 @@ const BoardWrite = () => {
                 border: 'none',
                 fontSize: '24px',
                 cursor: 'pointer',
-                color: '#666'
+                color: '#666',
               }}
             >
               ×
             </button>
-            <CrawlingBoardWrite 
+            <CrawlingBoardWrite
               boardKind={category || 'FREE'} // 기본값으로 FREE 설정
               onClose={handleCloseCrawlingModal}
               onSuccess={handleCrawlingSuccess}
