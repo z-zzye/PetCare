@@ -347,18 +347,31 @@ const BoardDetail = () => {
           )}{' '}
           {/* 디버깅용 */}
           {isWriter && !tokenExpiredOrInvalid && (
-            <div className="board-actions improved-actions">
+            <div className="board-actions improved-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
               <Link
                 to={`/board/edit/${category}/${id}`}
                 className="board-btn board-btn-secondary"
-                style={{ padding: '8px 16px', fontSize: '13px', backgroundColor: '#1a365d', color: 'white', border: 'none', textAlign: 'center' }}
+                style={{ 
+                  padding: '8px 16px', 
+                  fontSize: '13px', 
+                  backgroundColor: '#ffc107', 
+                  color: 'black', 
+                  border: 'none', 
+                  textAlign: 'center' 
+                }}
               >
                 수정하기
               </Link>
               <button
                 onClick={handleDeletePost}
                 className="board-btn board-btn-danger"
-                style={{ padding: '8px 16px', fontSize: '13px' }}
+                style={{ 
+                  padding: '8px 16px', 
+                  fontSize: '13px',
+                  backgroundColor: 'white',
+                  color: '#dc3545',
+                  border: '1px solid #dc3545'
+                }}
               >
                 삭제
               </button>

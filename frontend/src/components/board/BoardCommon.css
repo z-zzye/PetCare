@@ -760,8 +760,8 @@ body {
 }
 
 .selected-hashtag {
-  background: #007bff;
-  color: white;
+  background: #e8f0f8;
+  color: #223a5e;
   padding: 4px 8px;
   border-radius: 12px;
   font-size: 0.8rem;

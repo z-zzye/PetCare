@@ -1,6 +1,10 @@
 package com.petory.service;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -210,20 +214,40 @@ public class BoardService {
     
     // 해시태그 업데이트
     if (requestDto.getHashtags() != null) {
-      // 기존 해시태그 사용 횟수 감소 및 삭제
+      // 기존 해시태그 조회
       List<BoardHashtag> existingBoardHashtags = boardHashtagRepository.findByPostId(boardId);
+      Set<String> existingHashtagNames = existingBoardHashtags.stream()
+          .map(bh -> bh.getHashtag().getTagName())
+          .collect(Collectors.toSet());
+      
+      // 새로운 해시태그
+      Set<String> newHashtagNames = new HashSet<>(requestDto.getHashtags());
+      
+      // 삭제할 해시태그 (기존에 있지만 새로운 목록에 없는 것)
+      Set<String> toDelete = existingHashtagNames.stream()
+          .filter(existing -> !newHashtagNames.contains(existing))
+          .collect(Collectors.toSet());
+      
+      // 추가할 해시태그 (새로운 목록에 있지만 기존에 없는 것)
+      Set<String> toAdd = newHashtagNames.stream()
+          .filter(newTag -> !existingHashtagNames.contains(newTag))
+          .collect(Collectors.toSet());
+      
+      // 삭제 처리
       for (BoardHashtag boardHashtag : existingBoardHashtags) {
-        Hashtag hashtag = boardHashtag.getHashtag();
-        if (hashtag.getTagCount() > 0) {
-          hashtag.setTagCount(hashtag.getTagCount() - 1);
-          hashtagRepository.save(hashtag);
+        if (toDelete.contains(boardHashtag.getHashtag().getTagName())) {
+          Hashtag hashtag = boardHashtag.getHashtag();
+          if (hashtag.getTagCount() > 0) {
+            hashtag.setTagCount(hashtag.getTagCount() - 1);
+            hashtagRepository.save(hashtag);
+          }
+          boardHashtagRepository.delete(boardHashtag);
         }
       }
-      boardHashtagRepository.deleteByPostId(boardId);
       
-      // 새로운 해시태그 저장
-      if (!requestDto.getHashtags().isEmpty()) {
-        saveBoardHashtags(board, requestDto.getHashtags());
+      // 추가 처리
+      if (!toAdd.isEmpty()) {
+        saveBoardHashtags(board, new ArrayList<>(toAdd));
       }
     }
 
@@ -373,20 +397,40 @@ public class BoardService {
     
     // 해시태그 업데이트
     if (requestDto.getHashtags() != null) {
-      // 기존 해시태그 사용 횟수 감소 및 삭제
+      // 기존 해시태그 조회
       List<BoardHashtag> existingBoardHashtags = boardHashtagRepository.findByPostId(boardId);
+      Set<String> existingHashtagNames = existingBoardHashtags.stream()
+          .map(bh -> bh.getHashtag().getTagName())
+          .collect(Collectors.toSet());
+      
+      // 새로운 해시태그
+      Set<String> newHashtagNames = new HashSet<>(requestDto.getHashtags());
+      
+      // 삭제할 해시태그 (기존에 있지만 새로운 목록에 없는 것)
+      Set<String> toDelete = existingHashtagNames.stream()
+          .filter(existing -> !newHashtagNames.contains(existing))
+          .collect(Collectors.toSet());
+      
+      // 추가할 해시태그 (새로운 목록에 있지만 기존에 없는 것)
+      Set<String> toAdd = newHashtagNames.stream()
+          .filter(newTag -> !existingHashtagNames.contains(newTag))
+          .collect(Collectors.toSet());
+      
+      // 삭제 처리
       for (BoardHashtag boardHashtag : existingBoardHashtags) {
-        Hashtag hashtag = boardHashtag.getHashtag();
-        if (hashtag.getTagCount() > 0) {
-          hashtag.setTagCount(hashtag.getTagCount() - 1);
-          hashtagRepository.save(hashtag);
+        if (toDelete.contains(boardHashtag.getHashtag().getTagName())) {
+          Hashtag hashtag = boardHashtag.getHashtag();
+          if (hashtag.getTagCount() > 0) {
+            hashtag.setTagCount(hashtag.getTagCount() - 1);
+            hashtagRepository.save(hashtag);
+          }
+          boardHashtagRepository.delete(boardHashtag);
         }
       }
-      boardHashtagRepository.deleteByPostId(boardId);
       
-      // 새로운 해시태그 저장
-      if (!requestDto.getHashtags().isEmpty()) {
-        saveBoardHashtags(board, requestDto.getHashtags());
+      // 추가 처리
+      if (!toAdd.isEmpty()) {
+        saveBoardHashtags(board, new ArrayList<>(toAdd));
       }
     }
   }

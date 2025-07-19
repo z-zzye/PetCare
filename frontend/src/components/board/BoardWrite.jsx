@@ -666,7 +666,7 @@ const BoardWrite = () => {
           <div className="board-form-group">
             <label className="board-form-label">해시태그 선택 (선택사항)</label>
             <div className="hashtag-selection-info">
-              선택된 해시태그: {selectedHashtags.length}/5
+              선택된 해시태그 {selectedHashtags.length}/5
             </div>
 
             {/* 해시태그 검색 및 드롭다운 */}
