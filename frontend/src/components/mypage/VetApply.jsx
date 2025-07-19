@@ -241,10 +241,7 @@ const VetApply = () => {
     // 유효성 검사
     const newErrors = {};
     
-    if (!formData.name.trim()) {
-      newErrors.name = '이름을 입력해주세요.';
-      console.log('이름 필수 입력 에러');
-    }
+    // 이름은 자동 입력되므로 검사하지 않음
     
     if (!formData.licenseNumber.trim()) {
       newErrors.licenseNumber = '수의사 면허번호를 입력해주세요.';
@@ -404,11 +401,11 @@ const VetApply = () => {
                   id="name"
                   name="name"
                   value={formData.name}
-                  onChange={handleInputChange}
-                  placeholder="실명을 입력해주세요"
+                  readOnly
+                  placeholder="자격증 이미지를 업로드하면 자동으로 입력됩니다"
                   required
                 />
-                {errors.name && <div className="vet-apply-error">{errors.name}</div>}
+                <small className="vet-apply-help-text">자격증 이미지에서 자동으로 추출됩니다</small>
               </div>
               <div className="vet-apply-form-group">
                 <label htmlFor="email">이메일 *</label>
@@ -510,9 +507,10 @@ const VetApply = () => {
                   id="birthDate"
                   name="birthDate"
                   value={formData.birthDate}
-                  onChange={handleInputChange}
-                  placeholder="생년월일을 입력해주세요 (예: 1990-01-01)"
+                  readOnly
+                  placeholder="자격증 이미지를 업로드하면 자동으로 입력됩니다"
                 />
+                <small className="vet-apply-help-text">자격증 이미지에서 자동으로 추출됩니다</small>
               </div>
               <div className="vet-apply-form-group">
                 <label htmlFor="firstIssueDate">최초 발급일</label>
@@ -521,9 +519,10 @@ const VetApply = () => {
                   id="firstIssueDate"
                   name="firstIssueDate"
                   value={formData.firstIssueDate}
-                  onChange={handleInputChange}
-                  placeholder="면허 최초 발급일을 입력해주세요 (예: 2020-01-01)"
+                  readOnly
+                  placeholder="자격증 이미지를 업로드하면 자동으로 입력됩니다"
                 />
+                <small className="vet-apply-help-text">자격증 이미지에서 자동으로 추출됩니다</small>
               </div>
               <div className="vet-apply-form-group">
                 <label htmlFor="experienceYears">경력 연차 *</label>
