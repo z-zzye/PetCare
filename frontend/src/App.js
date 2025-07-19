@@ -24,6 +24,7 @@ import PaymentMethodPage from './components/mypage/PaymentMethodPage';
 import ChatPage from './components/chat/ChatPage.jsx'; //채팅창
 import Chatbot from "./components/chatbot/Chatbot";
 import CreatorApply from './components/mypage/CreatorApply.jsx';
+import VetApply from './components/mypage/VetApply.jsx';
 
 //쇼핑/경매
 import ItemRegister from './components/shop/ItemRegister.jsx';
@@ -63,6 +64,8 @@ import HashtagManagePage from './components/admin/HashtagManagePage.jsx';
 import AutoVaxAdminPage from './components/admin/AutoVaxAdminPage.jsx';
 import AdminCreatorApply from './components/admin/AdminCreatorApply.jsx';
 import CreatorApplyDetail from './components/admin/CreatorApplyDetail.jsx';
+import AdminVetApply from './components/admin/AdminVetApply.jsx';
+import VetApplyDetail from './components/admin/VetApplyDetail.jsx';
 
 // 챗봇 버튼 컴포넌트
 const ChatbotButton = () => {
@@ -120,6 +123,7 @@ function App() {
         <Route path="/members/pet-register" element={<PetRegister />} />
         <Route path="/members/pet-edit/:petId" element={<PetUpdate />} />
         <Route path="/members/creatorapply" element={<CreatorApply />} />
+        <Route path="/members/vetapply" element={<VetApply />} />
 
         <Route path="/place" element={<MapServicePage />} />
 
@@ -207,6 +211,8 @@ function App() {
             <Route path="/admin/autovax" element={<AdminRoute><AutoVaxAdminPage /></AdminRoute>} />
             <Route path="/admin/creator-apply" element={<AdminRoute><AdminCreatorApply /></AdminRoute>} />
             <Route path="/admin/creator-applies/:applyId" element={<AdminRoute><CreatorApplyDetail /></AdminRoute>} />
+            <Route path="/admin/vet-apply" element={<AdminRoute><AdminVetApply /></AdminRoute>} />
+            <Route path="/admin/vet-applies/:applyId" element={<AdminRoute><VetApplyDetail /></AdminRoute>} />
           </Routes>
         </BrowserRouter>
         {/* 로그인한 사용자만 챗봇 버튼 표시 */}

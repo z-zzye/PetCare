@@ -22,11 +22,13 @@ import com.petory.dto.board.BoardListDto;
 import com.petory.dto.board.BoardUpdateDto;
 import com.petory.dto.member.MemberSearchDto;
 import com.petory.dto.CreatorApplyAdminDto;
+import com.petory.dto.VetApplyAdminDto;
 import com.petory.entity.Board;
 import com.petory.service.BoardService;
 import com.petory.service.CleanBotService;
 import com.petory.service.MemberService;
 import com.petory.service.CreatorApplyService;
+import com.petory.service.VetApplyService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -39,6 +41,7 @@ public class AdminController {
     private final BoardService boardService;
     private final MemberService memberService;
     private final CreatorApplyService creatorApplyService;
+    private final VetApplyService vetApplyService;
 
     /**
      * 금지어 목록을 조회하는 API
@@ -184,6 +187,62 @@ public class AdminController {
             
             creatorApplyService.updateApplyStatus(applyId, status, rejectReason);
             return ResponseEntity.ok("크리에이터 신청 상태가 성공적으로 변경되었습니다.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("처리 중 오류 발생: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 관리자용 수의사 신청 목록 조회 (페이징)
+     */
+    @GetMapping("/vet-applies")
+    public ResponseEntity<Page<VetApplyAdminDto>> getVetApplies(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        try {
+            Pageable pageable = PageRequest.of(page, size);
+            Page<VetApplyAdminDto> applies = vetApplyService.getAllVetAppliesForAdmin(pageable);
+            return ResponseEntity.ok(applies);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("수의사 신청 목록 조회 오류: " + e.getMessage());
+            System.err.println("오류 타입: " + e.getClass().getName());
+            System.err.println("오류 스택 트레이스:");
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    /**
+     * 수의사 신청 상세 조회
+     */
+    @GetMapping("/vet-applies/{applyId}")
+    public ResponseEntity<VetApplyAdminDto> getVetApplyDetail(@PathVariable Long applyId) {
+        try {
+            VetApplyAdminDto applyDetail = vetApplyService.getVetApplyDetail(applyId);
+            return ResponseEntity.ok(applyDetail);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+
+    /**
+     * 수의사 신청 승인/거절 처리
+     */
+    @PatchMapping("/vet-applies/{applyId}/status")
+    public ResponseEntity<String> updateVetApplyStatus(
+            @PathVariable Long applyId,
+            @RequestBody Map<String, String> request) {
+        try {
+            String status = request.get("status");
+            String rejectReason = request.get("rejectReason");
+            
+            if (status == null || (!status.equals("APPROVED") && !status.equals("REJECTED"))) {
+                return ResponseEntity.badRequest().body("유효하지 않은 상태값입니다.");
+            }
+            
+            vetApplyService.updateApplyStatus(applyId, status, rejectReason);
+            return ResponseEntity.ok("수의사 신청 상태가 성공적으로 변경되었습니다.");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("처리 중 오류 발생: " + e.getMessage());
         }

@@ -25,7 +25,13 @@ public enum NotificationType {
   CREATOR_APPROVED("크리에이터 신청 승인"),
   
   // 크리에이터 신청 거절 알림 (크리에이터 신청이 거절된 경우)
-  CREATOR_REJECTED("크리에이터 신청 거절");
+  CREATOR_REJECTED("크리에이터 신청 거절"),
+  
+  // 수의사 신청 승인 알림 (수의사 신청이 승인된 경우)
+  VET_APPROVED("수의사 신청 승인"),
+  
+  // 수의사 신청 거절 알림 (수의사 신청이 거절된 경우)
+  VET_REJECTED("수의사 신청 거절");
 
   private final String description;
 }
