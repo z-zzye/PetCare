@@ -78,7 +78,7 @@ const CalendarPage = () => {
 
     const payload = {
       calendar_content: newTitle,
-      calendar_event_date: newDate.toISOString().split('T')[0],
+      calendar_event_date: newDate.toLocaleDateString('en-CA'),
     };
 
     axios
