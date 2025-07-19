@@ -11,63 +11,209 @@ body {
   padding: 20px;
 }
 
-/* --- 배너 섹션 (디자인 통일성 적용) --- */
+/* --- 슬라이드 배너 섹션 --- */
 .banner-section {
-  /* 보라색 그라데이션 제거 -> 흰색 배경과 테두리로 변경 */
-  background: white;
-  border: 1px solid #e9ecef;
-  border-radius: 15px;
-  padding: 40px;
+  position: relative;
   margin-bottom: 30px;
+  border-radius: 15px;
+  overflow: hidden;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  min-height: 300px;
+  min-height: 400px;
+}
+
+.banner-carousel {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  overflow: hidden;
+}
+
+.banner-slides {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.banner-slide {
+  min-width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  position: relative;
 }
 
 .banner-content {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1200px;
+  color: white;
+  padding: 0 80px; /* 좌우 화살표 공간 확보 */
 }
 
-/* 배너 텍스트 색상 변경 (white -> navy) */
+.banner-text {
+  flex: 1;
+  max-width: 350px; /* 텍스트 영역을 좀 더 줄여서 이미지 공간 확대 */
+  z-index: 2;
+}
+
 .banner-text h1 {
   font-size: 2.5rem;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
   font-weight: 700;
-  color: #223a5e;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .banner-text p {
   font-size: 1.2rem;
-  margin-bottom: 20px;
-  opacity: 0.9;
-  color: #495057;
+  margin-bottom: 25px;
+  opacity: 0.95;
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-/* 버튼 스타일 통일 */
 .banner-btn {
-  background: #223a5e; /* 메인 네이비 색상으로 변경 */
-  color: white; /* 텍스트 흰색으로 변경 */
-  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
   padding: 12px 30px;
-  border-radius: 8px; /* 다른 버튼들과 통일감 */
+  border-radius: 25px;
   font-size: 1.1em;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
 }
 
 .banner-btn:hover {
-  background: #1a2c47; /* 살짝 어둡게 */
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
   transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.banner-image {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
+  min-height: 300px; /* 최소 높이 설정 */
 }
 
 .banner-image img {
-  width: 100%;
-  max-width: 600px;
+  max-width: 500px; /* 더 크게 증가 */
+  max-height: 400px; /* 높이도 비례적으로 증가 */
+  width: 60%; /* 배너 너비의 60%로 증가 */
   height: auto;
   object-fit: contain;
-  border-radius: 15px;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+}
+
+/* 화살표 버튼 */
+.banner-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 24px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  z-index: 3;
+}
+
+.banner-arrow:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.banner-arrow-left {
+  left: 30px;
+}
+
+.banner-arrow-right {
+  right: 30px;
+}
+
+/* 하단 인디케이터 */
+.banner-indicators {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  z-index: 3;
+}
+
+.banner-indicator {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.banner-indicator:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.banner-indicator.active {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.banner-dots {
+  display: flex;
+  gap: 8px;
+}
+
+.banner-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.banner-dot:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.banner-dot.active {
+  background: white;
+  transform: scale(1.2);
+}
+
+.banner-counter {
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 /* --- 인기글 & 추천 게시물 섹션 --- */
@@ -532,11 +678,30 @@ body {
   }
 
   .banner-section {
-    padding: 25px;
+    min-height: 350px;
+  }
+
+  .banner-carousel {
+    height: 350px;
+  }
+
+  .banner-slide {
+    padding: 20px;
+  }
+
+  .banner-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+    padding: 0 60px; /* 태블릿에서는 좀 더 작게 */
+  }
+
+  .banner-text {
+    max-width: 100%;
   }
 
   .banner-text h1 {
-    font-size: 2rem;
+    font-size: 1.8rem;
   }
 
   .banner-text p {
@@ -544,8 +709,39 @@ body {
   }
 
   .banner-image img {
-    width: 150px;
-    height: 150px;
+    max-width: 300px; /* 태블릿에서도 더 크게 */
+    max-height: 250px;
+    width: 70%; /* 태블릿에서는 70% */
+  }
+
+  .banner-arrow {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+
+  .banner-arrow-left {
+    left: 15px;
+  }
+
+  .banner-arrow-right {
+    right: 15px;
+  }
+
+  .banner-indicators {
+    bottom: 15px;
+    gap: 10px;
+  }
+
+  .banner-indicator {
+    width: 35px;
+    height: 35px;
+    font-size: 14px;
+  }
+
+  .banner-dot {
+    width: 10px;
+    height: 10px;
   }
 
   .posts-section {
@@ -564,18 +760,70 @@ body {
 }
 
 @media (max-width: 480px) {
+  .banner-section {
+    min-height: 300px;
+  }
+
+  .banner-carousel {
+    height: 300px;
+  }
+
+  .banner-slide {
+    padding: 15px;
+  }
+
   .banner-content {
     flex-direction: column;
     text-align: center;
-    gap: 20px;
+    gap: 15px;
+    padding: 0 40px; /* 모바일에서는 더 작게 */
   }
 
   .banner-text h1 {
-    font-size: 1.8rem;
+    font-size: 1.5rem;
+  }
+
+  .banner-text p {
+    font-size: 0.9rem;
   }
 
   .banner-image img {
-    width: 120px;
-    height: 120px;
+    max-width: 220px; /* 모바일에서도 더 크게 */
+    max-height: 180px;
+    width: 80%; /* 모바일에서는 80% */
+  }
+
+  .banner-arrow {
+    width: 35px;
+    height: 35px;
+    font-size: 18px;
+  }
+
+  .banner-arrow-left {
+    left: 8px;
+  }
+
+  .banner-arrow-right {
+    right: 8px;
+  }
+
+  .banner-indicators {
+    bottom: 10px;
+    gap: 8px;
+  }
+
+  .banner-indicator {
+    width: 30px;
+    height: 30px;
+    font-size: 12px;
+  }
+
+  .banner-dot {
+    width: 8px;
+    height: 8px;
+  }
+
+  .banner-counter {
+    font-size: 12px;
   }
 }
