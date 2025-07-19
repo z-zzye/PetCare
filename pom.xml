@@ -187,6 +187,13 @@
       <artifactId>httpclient5</artifactId>
     </dependency>
 
+    <!-- Google Cloud Vision API -->
+    <dependency>
+      <groupId>com.google.cloud</groupId>
+      <artifactId>google-cloud-vision</artifactId>
+      <version>3.31.0</version>
+    </dependency>
+
 	</dependencies>
 
 	<build>
@@ -219,6 +226,13 @@
 	</build>
 
   <repositories>
+
+    <repository>
+      <id>central</id>
+      <name>Maven Central Repository</name>
+      <url>https://repo.maven.apache.org/maven2</url>
+    </repository>
+
     <repository>
       <id>jitpack.io</id>
       <url>https://jitpack.io</url>

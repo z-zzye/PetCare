@@ -1,5 +1,6 @@
 package com.petory.controller;
 
+import com.petory.service.GoogleVisionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -24,15 +25,24 @@ public class VetLicenseImageController {
 
     @Value("${vetlicense.location:C:/petory/vetlicense/}")
     private String uploadPath;
+    
+    private final GoogleVisionService googleVisionService;
 
     /**
      * 수의사 자격증 이미지 업로드
      */
     @PostMapping("/upload")
-    public ResponseEntity<?> uploadLicenseImage(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<?> uploadLicenseImage(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "analyze", defaultValue = "false") boolean analyze) {
+        System.out.println("=== 이미지 업로드 컨트롤러 호출됨 ===");
+        System.out.println("파일명: " + file.getOriginalFilename());
+        System.out.println("파일 크기: " + file.getSize());
+        
         try {
             // 파일 검증
             if (file.isEmpty()) {
+                System.out.println("파일이 비어있음");
                 return ResponseEntity.badRequest().body(Map.of("error", "파일이 선택되지 않았습니다."));
             }
 
@@ -63,12 +73,46 @@ public class VetLicenseImageController {
             Path filePath = Paths.get(uploadPath, newFilename);
             Files.copy(file.getInputStream(), filePath);
 
+            // Google Vision AI로 자격증 정보 분석 (analyze 파라미터가 true일 때만)
+            GoogleVisionService.VetLicenseInfo licenseInfo = null;
+            if (analyze) {
+                try {
+                    System.out.println("=== Google Vision AI 분석 시작 ===");
+                    System.out.println("파일명: " + file.getOriginalFilename());
+                    System.out.println("파일 크기: " + file.getSize() + " bytes");
+                    
+                    licenseInfo = googleVisionService.analyzeVetLicense(file);
+                    
+                    System.out.println("=== Google Vision AI 분석 완료 ===");
+                    if (licenseInfo != null) {
+                        System.out.println("추출된 이름: " + licenseInfo.getName());
+                        System.out.println("추출된 생년월일: " + licenseInfo.getBirthDate());
+                        System.out.println("추출된 발급일: " + licenseInfo.getIssueDate());
+                    }
+                } catch (Exception e) {
+                    // Vision AI 분석 실패 시에도 업로드는 성공으로 처리
+                    System.err.println("=== Google Vision AI 분석 실패 ===");
+                    System.err.println("오류 메시지: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            } else {
+                System.out.println("=== Google Vision AI 분석 건너뜀 (analyze=false) ===");
+            }
+
             // 응답 데이터
             Map<String, Object> response = new HashMap<>();
             response.put("message", "이미지 업로드가 완료되었습니다.");
             response.put("filename", newFilename);
             response.put("originalFilename", originalFilename);
             response.put("fileSize", file.getSize());
+            
+            // Vision AI 분석 결과 추가
+            if (licenseInfo != null) {
+                response.put("licenseInfo", licenseInfo);
+                response.put("extractedName", licenseInfo.getName());
+                response.put("extractedBirthDate", licenseInfo.getBirthDate());
+                response.put("extractedIssueDate", licenseInfo.getIssueDate());
+            }
 
             return ResponseEntity.ok(response);
 

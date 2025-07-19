@@ -94,7 +94,9 @@ const VetApply = () => {
         return;
       }
 
+      console.log('setLicenseImage 호출 전, file:', file);
       setLicenseImage(file);
+      console.log('setLicenseImage 호출 완료');
       
       // 이미지 업로드 시 해당 필드의 에러 메시지 제거
       if (errors.licenseImage) {
@@ -110,21 +112,113 @@ const VetApply = () => {
         setLicenseImagePreview(e.target.result);
       };
       reader.readAsDataURL(file);
+      
+      // 파일 선택 시 즉시 Google Vision AI 분석 실행
+      console.log('파일 선택됨, Google Vision AI 분석 시작');
+      uploadLicenseImageWithFile(file);
+    }
+  };
+
+  const uploadLicenseImageWithFile = async (file) => {
+    console.log('uploadLicenseImageWithFile 함수 시작');
+    console.log('전달받은 file:', file);
+    
+    if (!file) {
+      console.log('file이 없음');
+      return null;
+    }
+
+    console.log('FormData 생성 시작');
+    const formData = new FormData();
+    formData.append('file', file);
+    console.log('FormData 생성 완료');
+
+    try {
+      console.log('axios 요청 시작');
+      const response = await axios.post('/vet-license-image/upload?analyze=true', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      console.log('axios 요청 성공:', response.data);
+      
+      // Google Vision AI 분석 결과가 있으면 폼에 자동 입력
+      if (response.data.extractedName || response.data.extractedBirthDate || response.data.extractedIssueDate) {
+        const licenseInfo = response.data.licenseInfo;
+        if (licenseInfo) {
+          setFormData(prev => ({
+            ...prev,
+            name: licenseInfo.name || prev.name,
+            birthDate: licenseInfo.birthDate || prev.birthDate,
+            firstIssueDate: licenseInfo.issueDate || prev.firstIssueDate
+          }));
+          
+          // 분석 결과 알림
+          Swal.fire({
+            icon: 'info',
+            title: '자격증 정보 자동 인식',
+            text: `이름: ${licenseInfo.name || '인식 실패'}\n생년월일: ${licenseInfo.birthDate || '인식 실패'}\n최초발급일: ${licenseInfo.issueDate || '인식 실패'}`,
+            confirmButtonText: '확인'
+          });
+        }
+      }
+      
+      return response.data.filename;
+    } catch (error) {
+      console.error('이미지 업로드 오류:', error);
+      Swal.fire({
+        icon: 'error',
+        title: '이미지 업로드 실패',
+        text: error.response?.data?.error || '이미지 업로드 중 오류가 발생했습니다.',
+        confirmButtonText: '확인'
+      });
+      return null;
     }
   };
 
   const uploadLicenseImage = async () => {
-    if (!licenseImage) return null;
+    console.log('uploadLicenseImage 함수 시작');
+    console.log('licenseImage 상태:', licenseImage);
+    
+    if (!licenseImage) {
+      console.log('licenseImage가 없음');
+      return null;
+    }
 
+    console.log('FormData 생성 시작');
     const formData = new FormData();
     formData.append('file', licenseImage);
+    console.log('FormData 생성 완료');
 
     try {
+      console.log('axios 요청 시작');
       const response = await axios.post('/vet-license-image/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
+      console.log('axios 요청 성공:', response.data);
+      
+      // Google Vision AI 분석 결과가 있으면 폼에 자동 입력
+      if (response.data.extractedName || response.data.extractedBirthDate || response.data.extractedIssueDate) {
+        const licenseInfo = response.data.licenseInfo;
+        if (licenseInfo) {
+          setFormData(prev => ({
+            ...prev,
+            name: licenseInfo.name || prev.name,
+            birthDate: licenseInfo.birthDate || prev.birthDate,
+            firstIssueDate: licenseInfo.issueDate || prev.firstIssueDate
+          }));
+          
+          // 분석 결과 알림
+          Swal.fire({
+            icon: 'info',
+            title: '자격증 정보 자동 인식',
+            text: `이름: ${licenseInfo.name || '인식 실패'}\n생년월일: ${licenseInfo.birthDate || '인식 실패'}\n최초발급일: ${licenseInfo.issueDate || '인식 실패'}`,
+            confirmButtonText: '확인'
+          });
+        }
+      }
       
       return response.data.filename;
     } catch (error) {
@@ -187,12 +281,28 @@ const VetApply = () => {
     }
     
     try {
-      // 이미지 업로드 먼저 처리
+      // 이미지 업로드 처리 (Google Vision API 호출 없이)
       let uploadedImageUrl = null;
       if (licenseImage) {
-        uploadedImageUrl = await uploadLicenseImage();
-        if (!uploadedImageUrl) {
-          return; // 이미지 업로드 실패 시 제출 중단
+        const formData = new FormData();
+        formData.append('file', licenseImage);
+        
+        try {
+          const response = await axios.post('/vet-license-image/upload?analyze=false', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
+          });
+          uploadedImageUrl = response.data.filename;
+        } catch (error) {
+          console.error('이미지 업로드 오류:', error);
+          Swal.fire({
+            icon: 'error',
+            title: '이미지 업로드 실패',
+            text: '이미지 업로드 중 오류가 발생했습니다.',
+            confirmButtonText: '확인'
+          });
+          return;
         }
       }
 
