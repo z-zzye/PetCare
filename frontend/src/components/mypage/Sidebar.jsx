@@ -10,10 +10,11 @@ import './Sidebar.css';
 
 const Sidebar = ({ onTabChange }) => {
   const navigate = useNavigate();
-  const { profileImg, nickname, role } = useAuth();
+  const { profileImg, nickname } = useAuth();
 
   const [isSocialUser, setIsSocialUser] = useState(false);
   const [memberId, setMemberId] = useState(null);
+  const [memberRole, setMemberRole] = useState(null);
   const [pets, setPets] = useState([]);
   const [showHashtagModal, setShowHashtagModal] = useState(false);
   const [userHashtags, setUserHashtags] = useState([]);
@@ -79,6 +80,20 @@ const Sidebar = ({ onTabChange }) => {
   useEffect(() => {
     if (memberId === null) return;
     fetchUserHashtags();
+  }, [memberId]);
+
+  // ✅ 멤버ID 기반 역할 조회
+  useEffect(() => {
+    if (memberId === null) return;
+
+    axios
+      .get(`/members/${memberId}/role`)
+      .then((res) => {
+        setMemberRole(res.data);
+      })
+      .catch((err) => {
+        console.error('회원 역할 조회 실패:', err);
+      });
   }, [memberId]);
 
 
@@ -219,7 +234,7 @@ const Sidebar = ({ onTabChange }) => {
 
         {/* 크리에이터 섹션 */}
         <div className="creator-section">
-          {role !== 'CREATOR' ? (
+          {memberRole !== 'CREATOR' ? (
             <button
               className="creator-btn"
               onClick={async () => {
@@ -249,7 +264,7 @@ const Sidebar = ({ onTabChange }) => {
           )}
 
           {/* 수의사 섹션 */}
-          {role !== 'VET' ? (
+          {memberRole !== 'VET' ? (
             <button
               className="vet-btn"
               onClick={async () => {
