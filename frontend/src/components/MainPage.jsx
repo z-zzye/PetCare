@@ -13,6 +13,79 @@ const MainPage = () => {
   const [recommendedPosts, setRecommendedPosts] = useState([]);
   const [recommendationInfo, setRecommendationInfo] = useState(null);
   const [error, setError] = useState(null);
+  
+  // 슬라이드 배너 상태 추가
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isAutoPlay, setIsAutoPlay] = useState(true);
+
+  // 슬라이드 배너 데이터
+  const bannerSlides = [
+    {
+      id: 1,
+      title: '🐾 반려동물과 함께하는 행복한 일상',
+      subtitle: 'Petory에서 더 나은 반려생활을 시작하세요',
+      image: '/images/main-banner-image.png',
+      buttonText: '시작하기',
+      buttonLink: '/members/signup',
+      backgroundColor: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    },
+    {
+      id: 2,
+      title: '🏥 반려동물 건강관리',
+      subtitle: '예방접종부터 건강검진까지 체계적인 관리',
+      image: '/images/pet-cat.png',
+      buttonText: '건강관리',
+      buttonLink: '/mypage/autovax',
+      backgroundColor: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+    },
+    {
+      id: 3,
+      title: '🛒 반려동물 용품 쇼핑',
+      subtitle: '다양한 반려동물 용품을 경매로 구매하세요',
+      image: '/images/pet-dog.png',
+      buttonText: '쇼핑하기',
+      buttonLink: '/shop',
+      backgroundColor: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+    },
+    {
+      id: 4,
+      title: '🚶‍♂️ 산책로 추천',
+      subtitle: '반려동물과 함께할 수 있는 최고의 산책로',
+      image: '/images/pet-etc.png',
+      buttonText: '산책로 보기',
+      buttonLink: '/map',
+      backgroundColor: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+    },
+  ];
+
+  // 슬라이드 자동 재생
+  useEffect(() => {
+    if (!isAutoPlay) return;
+
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % bannerSlides.length);
+    }, 5000); // 5초마다 슬라이드 변경
+
+    return () => clearInterval(interval);
+  }, [isAutoPlay, bannerSlides.length]);
+
+  // 슬라이드 변경 함수
+  const goToSlide = (index) => {
+    setCurrentSlide(index);
+  };
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % bannerSlides.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + bannerSlides.length) % bannerSlides.length);
+  };
+
+  // 자동재생 토글
+  const toggleAutoPlay = () => {
+    setIsAutoPlay(!isAutoPlay);
+  };
 
   // 카테고리 영어 -> 한글 매핑 함수
   const getCategoryInKorean = (category) => {
@@ -330,11 +403,69 @@ const MainPage = () => {
     <>
       <Header />
       <main className="main-container">
-        {/* 배너 섹션 */}
+        {/* 슬라이드 배너 섹션 */}
         <section className="banner-section">
-          <div className="banner-content">
-            <div className="banner-image">
-              <img src="/images/main-banner-image.png" alt="반려동물" />
+          <div className="banner-carousel">
+            <div 
+              className="banner-slides" 
+              style={{ 
+                transform: `translateX(-${currentSlide * 100}%)`,
+                transition: 'transform 0.5s ease-in-out'
+              }}
+            >
+              {bannerSlides.map((slide, index) => (
+                <div 
+                  key={slide.id} 
+                  className="banner-slide"
+                  style={{ background: slide.backgroundColor }}
+                >
+                  <div className="banner-content">
+                    <div className="banner-text">
+                      <h1>{slide.title}</h1>
+                      <p>{slide.subtitle}</p>
+                      <button 
+                        className="banner-btn"
+                        onClick={() => navigate(slide.buttonLink)}
+                      >
+                        {slide.buttonText}
+                      </button>
+                    </div>
+                    <div className="banner-image">
+                      <img src={slide.image} alt={slide.title} />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            {/* 좌우 화살표 버튼 */}
+            <button className="banner-arrow banner-arrow-left" onClick={prevSlide}>
+              <span>‹</span>
+            </button>
+            <button className="banner-arrow banner-arrow-right" onClick={nextSlide}>
+              <span>›</span>
+            </button>
+            
+            {/* 하단 인디케이터 */}
+            <div className="banner-indicators">
+              <button 
+                className={`banner-indicator ${isAutoPlay ? 'active' : ''}`}
+                onClick={toggleAutoPlay}
+              >
+                {isAutoPlay ? '⏸' : '▶'}
+              </button>
+              <div className="banner-dots">
+                {bannerSlides.map((_, index) => (
+                  <button
+                    key={index}
+                    className={`banner-dot ${index === currentSlide ? 'active' : ''}`}
+                    onClick={() => goToSlide(index)}
+                  />
+                ))}
+              </div>
+              <span className="banner-counter">
+                {currentSlide + 1} / {bannerSlides.length}
+              </span>
             </div>
           </div>
         </section>
