@@ -223,7 +223,7 @@ const CrawlingBoardWrite = ({ boardKind, onClose, onSuccess }) => {
       
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label>크롤링할 URL:</label>
+          <label>크롤링할 URL</label>
           <input
             type="url"
             name="url"
@@ -235,7 +235,7 @@ const CrawlingBoardWrite = ({ boardKind, onClose, onSuccess }) => {
         </div>
 
         <div className="form-group">
-          <label>게시글 제목:</label>
+          <label>게시글 제목</label>
           <input
             type="text"
             name="title"
@@ -247,7 +247,7 @@ const CrawlingBoardWrite = ({ boardKind, onClose, onSuccess }) => {
         </div>
 
         <div className="form-group">
-          <label>게시판 종류:</label>
+          <label>게시판 종류</label>
           <select
             name="boardKind"
             value={formData.boardKind}
@@ -261,7 +261,7 @@ const CrawlingBoardWrite = ({ boardKind, onClose, onSuccess }) => {
         </div>
 
         <div className="form-group">
-          <label>해시태그 선택 (최대 3개):</label>
+          <label>해시태그 선택 (최대 3개)</label>
           <div className="hashtag-selection-info">
             선택된 해시태그: {selectedHashtags.length}/3
           </div>
@@ -439,7 +439,7 @@ const CrawlingBoardWrite = ({ boardKind, onClose, onSuccess }) => {
 
         {/* 이미지 설정 */}
         <div className="form-group">
-          <label>이미지 가져오기:</label>
+          <label>이미지 가져오기</label>
           <div className="image-options">
             <label className="radio-option">
               <input
@@ -477,7 +477,7 @@ const CrawlingBoardWrite = ({ boardKind, onClose, onSuccess }) => {
           <summary>고급 설정 (CSS 선택자)</summary>
           <div className="advanced-content">
             <div className="form-group">
-              <label>제목 CSS 선택자 (선택사항):</label>
+              <label>제목 CSS 선택자 (선택사항)</label>
               <input
                 type="text"
                 name="titleSelector"
@@ -489,7 +489,7 @@ const CrawlingBoardWrite = ({ boardKind, onClose, onSuccess }) => {
             </div>
 
             <div className="form-group">
-              <label>내용 CSS 선택자 (선택사항):</label>
+              <label>내용 CSS 선택자 (선택사항)</label>
               <input
                 type="text"
                 name="contentSelector"
@@ -501,7 +501,7 @@ const CrawlingBoardWrite = ({ boardKind, onClose, onSuccess }) => {
             </div>
 
             <div className="form-group">
-              <label>이미지 CSS 선택자 (선택사항):</label>
+              <label>이미지 CSS 선택자 (선택사항)</label>
               <input
                 type="text"
                 name="imageSelector"
