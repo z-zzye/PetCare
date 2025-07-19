@@ -6,12 +6,12 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import axiosInstance from '../../api/axios';
 import { useAuth } from '../../contexts/AuthContext';
 import Header from '../Header';
-import CrawlingBoardWrite from './CrawlingBoardWrite';
 import './BoardCommon.css';
 import { boardConfig } from './boardConfig';
+import CrawlingBoardWrite from './CrawlingBoardWrite';
 
 const BoardWrite = () => {
-  const { role } = useAuth();
+  const { role, isLoggedIn } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const quillRef = useRef();
@@ -27,8 +27,28 @@ const BoardWrite = () => {
   const [pendingImages, setPendingImages] = useState([]); // 업로드 대기 중인 이미지들
   const [showCrawlingModal, setShowCrawlingModal] = useState(false); // 크롤링 모달 상태
 
+  // 권한별 선택 가능한 카테고리만 노출 (useMemo로 최적화)
+  const availableCategories = useMemo(
+    () =>
+      Object.entries(boardConfig).filter(([key, config]) =>
+        config.allowedRoles.includes(role)
+      ),
+    [role]
+  );
+
+  // 로그인 체크 - 비로그인 사용자는 로그인 페이지로 리다이렉트
+  useEffect(() => {
+    if (!isLoggedIn) {
+      alert('글을 작성하려면 로그인이 필요합니다.');
+      navigate('/members/login');
+      return;
+    }
+  }, [isLoggedIn, navigate]);
+
   // Quill 에디터 초기화
   useEffect(() => {
+    if (!isLoggedIn) return; // 로그인하지 않은 경우 에디터 초기화하지 않음
+
     const initializeQuill = () => {
       if (quillRef.current && !quillInstance.current) {
         console.log('Quill 초기화 시작');
@@ -233,23 +253,12 @@ const BoardWrite = () => {
                     );
                     quillInstance.current.setSelection(range.index + 1);
 
-                    console.log(
-                      '드래그 앤 드롭 이미지 삽입 완료:',
-                      file.name,
-                      '크기:',
-                      file.size
-                    );
-                  };
-
-                  reader.onerror = () => {
-                    console.error('파일 읽기 오류');
-                    alert('이미지 파일을 읽는 중 오류가 발생했습니다.');
+                    console.log('드래그 앤 드롭 이미지 삽입 완료:', file.name);
                   };
 
                   reader.readAsDataURL(file);
                 } catch (error) {
                   console.error('드래그 앤 드롭 이미지 처리 중 오류:', error);
-                  alert('이미지 처리 중 오류가 발생했습니다.');
                 }
               });
             }
@@ -326,29 +335,24 @@ const BoardWrite = () => {
         quillRef.current.innerHTML = '';
       }
     };
-  }, []); // 의존성 배열을 빈 배열로 유지
+  }, [isLoggedIn]); // isLoggedIn을 의존성에 추가
 
   // content가 외부에서 변경될 때 에디터 내용 업데이트
   useEffect(() => {
+    if (!isLoggedIn) return; // 로그인하지 않은 경우 처리하지 않음
+
     if (
       quillInstance.current &&
       content !== quillInstance.current.root.innerHTML
     ) {
       quillInstance.current.root.innerHTML = content;
     }
-  }, [content]);
-
-  // 권한별 선택 가능한 카테고리만 노출 (useMemo로 최적화)
-  const availableCategories = useMemo(
-    () =>
-      Object.entries(boardConfig).filter(([key, config]) =>
-        config.allowedRoles.includes(role)
-      ),
-    [role]
-  );
+  }, [content, isLoggedIn]);
 
   // URL 파라미터에서 카테고리 가져오기 (초기 로딩 시에만)
   useEffect(() => {
+    if (!isLoggedIn) return; // 로그인하지 않은 경우 처리하지 않음
+
     const categoryParam = searchParams.get('category');
     console.log('URL 파라미터 카테고리:', categoryParam);
     console.log('현재 사용자 권한:', role);
@@ -365,19 +369,42 @@ const BoardWrite = () => {
         console.log('권한 부족으로 카테고리 설정 실패:', categoryParam);
       }
     }
-  }, [searchParams, role, availableCategories, category]);
+  }, [searchParams, role, availableCategories, category, isLoggedIn]);
 
   // 인기 해시태그 목록 가져오기
   useEffect(() => {
+    if (!isLoggedIn) return; // 로그인하지 않은 경우 처리하지 않음
+
     fetchPopularHashtags();
-  }, []);
+  }, [isLoggedIn]);
 
   // 검색어가 변경될 때마다 해시태그 검색
   useEffect(() => {
+    if (!isLoggedIn) return; // 로그인하지 않은 경우 처리하지 않음
+
     if (showHashtagDropdown) {
       searchHashtags();
     }
-  }, [hashtagSearchTerm, showHashtagDropdown]);
+  }, [hashtagSearchTerm, showHashtagDropdown, isLoggedIn]);
+
+  // 드롭다운 외부 클릭 시 닫기
+  useEffect(() => {
+    if (!isLoggedIn) return; // 로그인하지 않은 경우 처리하지 않음
+
+    const handleClickOutside = (event) => {
+      if (
+        showHashtagDropdown &&
+        !event.target.closest('.hashtag-dropdown-container')
+      ) {
+        setShowHashtagDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showHashtagDropdown, isLoggedIn]);
 
   const fetchPopularHashtags = async () => {
     try {
@@ -430,26 +457,9 @@ const BoardWrite = () => {
   // API에서 이미 필터링된 결과를 받으므로 그대로 사용
   const filteredHashtags = hashtags;
 
-  // 드롭다운 외부 클릭 시 닫기
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        showHashtagDropdown &&
-        !event.target.closest('.hashtag-dropdown-container')
-      ) {
-        setShowHashtagDropdown(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showHashtagDropdown]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!title.trim()) {
       alert('제목을 입력해주세요.');
       return;
@@ -466,6 +476,12 @@ const BoardWrite = () => {
     }
 
     setLoading(true);
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('로그인이 필요합니다.');
+      navigate('/members/login');
+      return;
+    }
 
     try {
       // 이미지 업로드 처리
@@ -476,11 +492,15 @@ const BoardWrite = () => {
           formData.append('file', pendingImage.file);
           formData.append('type', 'board');
 
-          const uploadResponse = await axiosInstance.post('/boards/upload-image', formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-          });
+          const uploadResponse = await axiosInstance.post(
+            '/boards/upload-image',
+            formData,
+            {
+              headers: {
+                'Content-Type': 'multipart/form-data',
+              },
+            }
+          );
 
           if (uploadResponse.data && uploadResponse.data.imageUrl) {
             uploadedImageUrls.push(uploadResponse.data.imageUrl);
@@ -497,8 +517,8 @@ const BoardWrite = () => {
       const boardData = {
         title: title,
         content: content,
-        boardKind: category, // 이미 대문자이므로 변환 불필요
-        hashtags: selectedHashtags
+        boardKind: category.toUpperCase(),
+        hashtags: selectedHashtags,
       };
 
       console.log('게시글 데이터:', boardData);
@@ -513,7 +533,18 @@ const BoardWrite = () => {
       }
     } catch (error) {
       console.error('게시글 작성 오류:', error);
-      alert('게시글 작성 중 오류가 발생했습니다.');
+
+      // 비속어 감지 시 처리
+      if (error.response?.data?.error === 'profanity_detected') {
+        const detectedWords = error.response.data.detectedWords || '';
+        alert(
+          `비속어가 감지되어 게시글 등록이 취소되었습니다.\n\n감지된 부적절한 표현:\n${detectedWords}\n\n부적절한 표현을 수정해주세요.`
+        );
+      } else if (error.response?.data?.message) {
+        alert(`게시글 등록 실패: ${error.response.data.message}`);
+      } else {
+        alert('게시글 작성 중 오류가 발생했습니다.');
+      }
     } finally {
       setLoading(false);
     }
@@ -533,14 +564,24 @@ const BoardWrite = () => {
   const handleCrawlingSuccess = (boardId, selectedBoardKind) => {
     setShowCrawlingModal(false);
     alert('크롤링으로 게시글이 성공적으로 작성되었습니다.');
-    
+
     // 크롤링에서 선택된 게시판 정보를 사용하거나, 기본값 사용
     const boardKind = selectedBoardKind || category || 'FREE';
     const categoryPath = boardKind.toLowerCase();
-    
-    console.log('크롤링 성공 - boardId:', boardId, 'categoryPath:', categoryPath);
+
+    console.log(
+      '크롤링 성공 - boardId:',
+      boardId,
+      'categoryPath:',
+      categoryPath
+    );
     navigate(`/board/${categoryPath}/${boardId}`);
   };
+
+  // 로그인하지 않은 경우 렌더링하지 않음
+  if (!isLoggedIn) {
+    return null;
+  }
 
   return (
     <>
@@ -786,17 +827,17 @@ const BoardWrite = () => {
           <button type="submit" className="board-btn" disabled={loading}>
             {loading ? '저장 중...' : '저장'}
           </button>
-          
+
           {/* 크롤링으로 작성하기 버튼 - 관리자만 표시 */}
           {role === 'ADMIN' && (
-            <button 
-              type="button" 
-              className="board-btn crawling-btn" 
+            <button
+              type="button"
+              className="board-btn crawling-btn"
               onClick={handleOpenCrawlingModal}
               style={{
                 marginLeft: '10px',
                 backgroundColor: '#28a745',
-                borderColor: '#28a745'
+                borderColor: '#28a745',
               }}
             >
               크롤링으로 작성하기
@@ -804,31 +845,37 @@ const BoardWrite = () => {
           )}
         </form>
       </div>
-      
+
       {/* 크롤링 모달 */}
       {showCrawlingModal && (
-        <div className="modal-overlay" style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          zIndex: 1000,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center'
-        }}>
-          <div className="modal-content" style={{
-            backgroundColor: 'white',
-            borderRadius: '8px',
-            padding: '20px',
-            maxWidth: '90%',
-            maxHeight: '90%',
-            overflow: 'auto',
-            position: 'relative'
-          }}>
-            <button 
+        <div
+          className="modal-overlay"
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            zIndex: 1000,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <div
+            className="modal-content"
+            style={{
+              backgroundColor: 'white',
+              borderRadius: '8px',
+              padding: '20px',
+              maxWidth: '90%',
+              maxHeight: '90%',
+              overflow: 'auto',
+              position: 'relative',
+            }}
+          >
+            <button
               onClick={handleCloseCrawlingModal}
               style={{
                 position: 'absolute',
@@ -838,12 +885,12 @@ const BoardWrite = () => {
                 border: 'none',
                 fontSize: '24px',
                 cursor: 'pointer',
-                color: '#666'
+                color: '#666',
               }}
             >
               ×
             </button>
-            <CrawlingBoardWrite 
+            <CrawlingBoardWrite
               boardKind={category || 'FREE'} // 기본값으로 FREE 설정
               onClose={handleCloseCrawlingModal}
               onSuccess={handleCrawlingSuccess}

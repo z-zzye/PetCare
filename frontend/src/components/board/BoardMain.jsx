@@ -1,12 +1,14 @@
 // frontend/src/components/board/BoardMain.jsx
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import Header from '../Header';
 import './BoardCommon.css';
 import { boardConfig } from './boardConfig';
 
 const BoardMain = () => {
   const navigate = useNavigate();
+  const { isLoggedIn } = useAuth();
   const [searchKeyword, setSearchKeyword] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -116,8 +118,13 @@ const BoardMain = () => {
     }
   };
 
-  // 빠른 글쓰기
+  // 빠른 글쓰기 (로그인 체크 추가)
   const handleQuickWrite = (category) => {
+    if (!isLoggedIn) {
+      alert('글을 작성하려면 로그인이 필요합니다.');
+      navigate('/members/login');
+      return;
+    }
     navigate(`/board/write?category=${category}`);
   };
 
@@ -128,15 +135,14 @@ const BoardMain = () => {
         <h1 className="board-title">커뮤니티</h1>
 
         {/* 통합 검색 */}
-        <div className="board-search-section" style={{ marginBottom: '30px' }}>
-          <form onSubmit={handleSearch} className="hashtag-search-container">
+        <div className="board-search-section">
+          <form onSubmit={handleSearch} className="board-search-form">
             <input
               type="text"
-              placeholder="전체 게시판에서 검색..."
+              placeholder="제목, 작성자, 해시태그로 검색..."
               value={searchKeyword}
               onChange={(e) => setSearchKeyword(e.target.value)}
-              className="hashtag-search-input"
-              style={{ flex: 1 }}
+              className="board-search-input"
             />
             <button type="submit" className="board-btn" disabled={isSearching}>
               {isSearching ? '검색 중...' : '검색'}
@@ -146,49 +152,37 @@ const BoardMain = () => {
 
         {/* 검색 결과 */}
         {searchResults.length > 0 && (
-          <div
-            className="board-search-section"
-            style={{ marginBottom: '30px' }}
-          >
+          <div className="board-search-results">
             <h3>검색 결과 ({searchResults.length}개)</h3>
-            <div className="board-table">
-              <thead>
-                <tr>
-                  <th>게시판</th>
-                  <th>제목</th>
-                  <th>작성자</th>
-                  <th>작성일</th>
-                  <th>조회수</th>
-                </tr>
-              </thead>
-              <tbody>
-                {searchResults.map((post) => (
-                  <tr key={`${post.category}-${post.id}`}>
-                    <td>{post.categoryName}</td>
-                    <td>
-                      <Link
-                        to={`/board/${post.category}/${post.id}`}
-                        className="board-link"
-                      >
-                        {post.title}
-                      </Link>
-                    </td>
-                    <td>{post.authorNickName}</td>
-                    <td>{new Date(post.createdAt).toLocaleDateString()}</td>
-                    <td>{post.viewCount}</td>
-                  </tr>
-                ))}
-              </tbody>
+            <div className="board-posts">
+              {searchResults.map((post) => (
+                <Link
+                  key={`${post.category}-${post.id}`}
+                  to={`/board/${post.category}/${post.id}`}
+                  className="board-post-item"
+                >
+                  <div className="board-post-header">
+                    <h4 className="board-post-title">
+                      [{post.categoryName}] {post.title}
+                    </h4>
+                    <div className="board-post-meta">
+                      <span className="board-post-author">
+                        {post.authorNickName}
+                      </span>
+                      <span className="board-post-date">
+                        {new Date(post.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
             </div>
           </div>
         )}
 
         {/* 카테고리별 최신글 */}
-        <div style={{ marginBottom: '30px' }}>
-          <h2 style={{ marginBottom: '20px', color: '#223a5e' }}>
-            카테고리별 최신글
-          </h2>
-
+        <div className="board-categories">
+          <h2>게시판별 최신글</h2>
           {loading ? (
             <div className="board-loading">최신글을 불러오는 중...</div>
           ) : (
@@ -229,74 +223,47 @@ const BoardMain = () => {
                   </div>
 
                   {latestPosts[category] && latestPosts[category].length > 0 ? (
-                    <div style={{ display: 'grid', gap: '10px' }}>
+                    <div className="board-posts">
                       {latestPosts[category].map((post) => (
-                        <div
+                        <Link
                           key={post.id}
-                          style={{
-                            padding: '12px',
-                            border: '1px solid #e9ecef',
-                            borderRadius: '8px',
-                            backgroundColor: '#f8f9fa',
-                          }}
+                          to={`/board/${category}/${post.id}`}
+                          className="board-post-item"
                         >
-                          <div
-                            style={{
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              alignItems: 'flex-start',
-                            }}
-                          >
-                            <Link
-                              to={`/board/${category}/${post.id}`}
-                              className="board-link"
-                              style={{
-                                flex: 1,
-                                fontSize: '0.95rem',
-                                fontWeight: '500',
-                                textDecoration: 'none',
-                              }}
-                            >
-                              {post.title}
-                            </Link>
-                            <span
-                              style={{
-                                fontSize: '0.8rem',
-                                color: '#6c757d',
-                                marginLeft: '10px',
-                              }}
-                            >
-                              {new Date(post.createdAt).toLocaleDateString()}
-                            </span>
+                          <div className="board-post-header">
+                            <h4 className="board-post-title">{post.title}</h4>
+                            <div className="board-post-meta">
+                              <span className="board-post-author">
+                                {post.authorNickName}
+                              </span>
+                              <span className="board-post-date">
+                                {new Date(post.createdAt).toLocaleDateString()}
+                              </span>
+                              <span className="board-post-views">
+                                조회 {post.viewCount}
+                              </span>
+                              <span className="board-post-likes">
+                                추천 {post.likeCount}
+                              </span>
+                            </div>
                           </div>
-                          <div
-                            style={{
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              alignItems: 'center',
-                              marginTop: '8px',
-                              fontSize: '0.85rem',
-                              color: '#6c757d',
-                            }}
-                          >
-                            <span>{post.authorNickName}</span>
-                            <span>
-                              조회 {post.viewCount} • 댓글 {post.commentCount}
-                            </span>
-                          </div>
-                        </div>
+                          {post.hashtags && post.hashtags.length > 0 && (
+                            <div className="board-post-hashtags">
+                              {post.hashtags.map((hashtag, index) => (
+                                <span
+                                  key={index}
+                                  className="board-post-hashtag"
+                                >
+                                  #{hashtag.tagName}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </Link>
                       ))}
                     </div>
                   ) : (
-                    <div
-                      style={{
-                        textAlign: 'center',
-                        color: '#6c757d',
-                        padding: '20px',
-                      }}
-                    >
-                      아직 게시글이 없습니다.
-                    </div>
+                    <div className="board-empty">최신글이 없습니다.</div>
                   )}
                 </div>
               ))}
