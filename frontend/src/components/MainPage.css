@@ -114,6 +114,11 @@ body {
   height: 100%;
   object-fit: cover;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+  transition: transform 0.3s ease;
+}
+
+.banner-slide:hover .banner-image img {
+  transform: scale(1.01);
 }
 
 /* 화살표 버튼 */
@@ -284,29 +289,28 @@ body {
 
 /* 인기 해시태그 기반 추천을 위한 특별한 스타일 */
 .popular-hashtags-info {
-  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
-  border-left: 4px solid #ff9800;
-  border: 1px solid #ffcc80;
+  background: #223A5E;
+  border-left: 4px solid #ffc107;
+  border: 1px solid #223A5E;
 }
 
 .popular-hashtags-info .recommendation-message {
-  color: #e65100;
-  font-weight: 600;
+  color: #ffffff;
+  font-weight: 400;
 }
 
 .popular-hashtags-display {
   margin-top: 12px;
   padding: 12px;
-  background: rgba(255, 255, 255, 0.7);
+  background: #ffffff;
   border-radius: 8px;
-  border: 1px solid #ffcc80;
 }
 
 .popular-hashtags-label {
   display: block;
-  color: #e65100;
+  color: #ffffff;
   font-size: 0.9em;
-  font-weight: 600;
+  font-weight: 400;
   margin-bottom: 8px;
 }
 
@@ -317,42 +321,53 @@ body {
 }
 
 .popular-hashtag-tag {
-  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
-  color: white;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 0.9em;
+  background: #ffc107;
+  color: #223a5e;
+  padding: 4px 8px;
+  border-radius: 16px;
+  font-size: 0.8em;
   font-weight: 600;
-  border: 1px solid #e65100;
-  box-shadow: 0 2px 4px rgba(255, 152, 0, 0.3);
+  border: 1px solid #ffc107;
   transition: all 0.3s ease;
+  animation: hashtagFloat 3s ease-in-out infinite;
 }
 
+.popular-hashtag-tag:nth-child(1) { animation-delay: 0s; }
+.popular-hashtag-tag:nth-child(2) { animation-delay: 0.5s; }
+.popular-hashtag-tag:nth-child(3) { animation-delay: 1s; }
+.popular-hashtag-tag:nth-child(4) { animation-delay: 1.5s; }
+.popular-hashtag-tag:nth-child(5) { animation-delay: 2s; }
+.popular-hashtag-tag:nth-child(6) { animation-delay: 2.5s; }
+.popular-hashtag-tag:nth-child(7) { animation-delay: 3s; }
+.popular-hashtag-tag:nth-child(8) { animation-delay: 3.5s; }
+.popular-hashtag-tag:nth-child(9) { animation-delay: 4s; }
+.popular-hashtag-tag:nth-child(10) { animation-delay: 4.5s; }
+
 .popular-hashtag-tag:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(255, 152, 0, 0.4);
-  background: linear-gradient(135deg, #f57c00 0%, #ef6c00 100%);
+  transform: translateY(-2px) scale(1.05);
+  background: #e6ac00;
+  animation: none;
 }
 
 /* 인기 해시태그 추천 섹션 내의 작은 로그인 유도 메시지 */
 .login-encouragement-mini {
   margin-top: 12px;
   padding: 10px;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.95);
   border-radius: 6px;
-  border: 1px solid #ffcc80;
+  border: 1px solid #ffc107;
   text-align: center;
 }
 
 .login-encouragement-mini p {
   margin: 0;
-  color: #e65100;
+  color: #223A5E;
   font-size: 0.85em;
   font-weight: 500;
 }
 
 .login-link-btn-mini {
-  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+  background: #223a5e;
   color: white;
   border: none;
   padding: 4px 8px;
@@ -365,9 +380,9 @@ body {
 }
 
 .login-link-btn-mini:hover {
-  background: linear-gradient(135deg, #f57c00 0%, #ef6c00 100%);
+  background: #1a2c47;
   transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(255, 152, 0, 0.3);
+  box-shadow: 0 2px 4px rgba(34, 58, 94, 0.3);
 }
 
 /* 로그인 유도 메시지 */
@@ -671,6 +686,54 @@ body {
 .retry-button:hover {
   background: #c82333;
   transform: translateY(-1px);
+}
+
+/* --- 아이콘 애니메이션 --- */
+@keyframes iconFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes iconGlow {
+  0%, 100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.2);
+  }
+}
+
+@keyframes iconPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes hashtagFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+/* 아이콘 호버 효과 */
+.icon-animation {
+  transition: all 0.3s ease;
+  animation: iconFloat 3s ease-in-out infinite;
+}
+
+.icon-animation:hover {
+  animation: iconPulse 0.6s ease-in-out;
+  filter: brightness(1.3);
 }
 
 /* --- 반응형 디자인 --- */

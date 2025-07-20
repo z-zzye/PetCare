@@ -14,8 +14,8 @@
 .character-illustrations {
   position: absolute;
   bottom: -80px;
-  left: 0;
-  right: 0;
+  left: -70px;
+  right: -70px;
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
@@ -24,9 +24,9 @@
 }
 
 .character-illustration {
-  width: 180px;
+  width: 230px;
   height: auto;
-  opacity: 0.8;
+  opacity: 0.95;
   transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
@@ -52,27 +52,29 @@
 }
 
 .carousel-arrow {
-  background: #fff;
+  background: transparent;
   border: none;
   font-size: 2.5rem;
-  color: #6c63ff;
+  color: #223A5E;
   cursor: pointer;
   z-index: 2;
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  box-shadow: 0 2px 8px #0002;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s;
+  transition: all 0.3s ease;
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
 }
 .carousel-arrow.left { left: -40px; }
 .carousel-arrow.right { right: -40px; }
-.carousel-arrow:hover { background: #f3f3ff; }
+.carousel-arrow:hover { 
+  background: rgba(255, 193, 7, 0.1); 
+  color: #ffc107;
+}
 
 /* 페이드 캐러셀 스타일 */
 .carousel-fade-wrapper {
@@ -329,4 +331,4 @@
   .carousel-cards-flex { height: 320px; }
   .carousel-arrow.left { left: -10px; }
   .carousel-arrow.right { right: -10px; }
-} 
+}

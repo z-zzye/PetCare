@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from '../api/axios';
 import { useAuth } from '../contexts/AuthContext';
 import Header from './Header';
+import { FaTrophy, FaStar, FaBook } from 'react-icons/fa';
 import './MainPage.css';
 
 const MainPage = () => {
@@ -253,17 +254,17 @@ const MainPage = () => {
 
   // 추천 타입에 따른 제목과 설명 생성
   const getRecommendationTitle = () => {
-    if (!recommendationInfo) return '💡 추천 게시물';
+    if (!recommendationInfo) return '해시태그 추천 게시글';
 
     switch (recommendationInfo.type) {
       case 'personalized':
-        return '💡 맞춤 추천 게시물';
+        return '해시태그 추천 게시글';
       case 'popular_hashtags':
-        return '🔥 인기 해시태그 게시물 추천';
+        return '해시태그 추천 게시글';
       case 'fallback':
-        return '🔥 인기 게시글 추천';
+        return '해시태그 추천 게시글';
       default:
-        return '💡 추천 게시물';
+        return '해시태그 추천 게시글';
     }
   };
 
@@ -279,10 +280,10 @@ const MainPage = () => {
       return (
         <div className="recommendation-info popular-hashtags-info">
           <p className="recommendation-message">
-            💡 <strong>최근 인기 해시태그</strong>가 달린 게시물을 추천해드려요!
+            💡 <strong>최근 인기 해시태그가 달린 게시물을 추천해드려요!</strong>
           </p>
           <div className="popular-hashtags-display">
-            <span className="popular-hashtags-label">🔥 인기 해시태그:</span>
+            <span className="popular-hashtags-label">🔥 인기 해시태그</span>
             <div className="popular-hashtags-list">
               {recommendationInfo.hashtags.map((tag, index) => (
                 <span key={index} className="popular-hashtag-tag">
@@ -451,7 +452,7 @@ const MainPage = () => {
         {/* 인기글 & 추천 게시물 섹션 */}
         <section className="posts-section">
           <div className="popular-posts">
-            <h2>🔥 인기글</h2>
+            <h2><FaTrophy className="icon-animation" style={{ color: '#ffc107', marginRight: '8px' }} />커뮤니티 베스트</h2>
             <div className="posts-list">
               {isLoading ? (
                 // 로딩 중일 때 스켈레톤 UI
@@ -511,7 +512,7 @@ const MainPage = () => {
           </div>
 
           <div className="recommended-posts">
-            <h2>{getRecommendationTitle()}</h2>
+            <h2><FaStar className="icon-animation" style={{ color: '#ffc107', marginRight: '8px' }} />{getRecommendationTitle()}</h2>
             {getRecommendationDescription()}
             <div className="posts-list">
               {recommendedPosts.length === 0
@@ -569,7 +570,7 @@ const MainPage = () => {
 
         {/* 정보글 섹션 */}
         <section className="info-posts-section">
-          <h2>📰 정보글</h2>
+          <h2><FaBook className="icon-animation" style={{ color: '#ffc107', marginRight: '8px' }} />정보글</h2>
           <div className="info-posts-grid">
             {infoPosts.map((post) => (
               <div key={post.id} className="info-post-item">
