@@ -683,8 +683,22 @@ function ItemDetail() {
                 바로구매
               </button>
             </div>
-            <div style={{ color: '#555', fontSize: '1.1rem' }}>{item.itemDescription}</div>
           </div>
+        </div>
+        {/* 구분선 추가 */}
+        <div style={{ 
+          borderBottom: '2px solid #ffc107', 
+          margin: '40px 0 20px 0',
+          width: '100%'
+        }}></div>
+        {/* 상품 상세 설명 */}
+        <div style={{ 
+          color: '#555', 
+          fontSize: '1.1rem',
+          lineHeight: '1.6',
+          padding: '20px 0'
+        }}>
+          {item.itemDescription}
         </div>
       </div>
     </>
