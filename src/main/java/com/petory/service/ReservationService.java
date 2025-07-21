@@ -118,8 +118,16 @@ public class ReservationService {
     } else {
       searchDto.setPreferredTime("MORNING");
     }
-    // TODO: 회원의 주소를 좌표로 변환(지오코딩)하여 설정하는 로직 추가 필요
-    searchDto.setLocation(new LocationDto(37.4905, 126.7260));
+
+    String address = pet.getMember().getMember_Address();
+    if (address != null && address.contains(",")) {
+        String[] parts = address.split(",");
+        double lat = Double.parseDouble(parts[0]);
+        double lng = Double.parseDouble(parts[1]);
+        searchDto.setLocation(new LocationDto(lat, lng));
+    } else {
+        searchDto.setLocation(new LocationDto(37.4905, 126.7260));
+    }
 
     // 3-2. 병원/슬롯을 탐색합니다.
     DetailedSlotSearchResponseDto searchResponse = autoReservationService.findAvailableSlots(searchDto);
@@ -376,8 +384,16 @@ public class ReservationService {
     } else {
       searchDto.setPreferredTime("MORNING");
     }
-    // TODO: 회원의 주소를 좌표로 변환(지오코딩)하여 설정하는 로직 추가 필요
-    searchDto.setLocation(new LocationDto(37.4905, 126.7260));
+
+    String address = pet.getMember().getMember_Address();
+    if (address != null && address.contains(",")) {
+        String[] parts = address.split(",");
+        double lat = Double.parseDouble(parts[0]);
+        double lng = Double.parseDouble(parts[1]);
+        searchDto.setLocation(new LocationDto(lat, lng));
+    } else {
+        searchDto.setLocation(new LocationDto(37.4905, 126.7260));
+    }
 
     // 3-2. 병원/슬롯을 탐색합니다.
     DetailedSlotSearchResponseDto searchResponse = autoReservationService.findAvailableSlots(searchDto);

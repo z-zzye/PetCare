@@ -1,13 +1,8 @@
 package com.petory.service;
 
-import com.petory.dto.member.MemberSearchDto;
-import com.petory.dto.member.MemberUpdateDto;
-import com.petory.dto.ChatMemberDto;
-import com.petory.entity.Member;
-import com.petory.repository.MemberRepository;
-import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,21 +10,25 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.petory.constant.Role;
-import com.petory.dto.member.MemberFormDto;
+import com.petory.dto.ChatMemberDto;
+import com.petory.dto.HashtagDto;
 import com.petory.dto.PhoneUpdateDto;
-
-import lombok.RequiredArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
-import com.petory.repository.HashtagRepository;
-import com.petory.repository.MemberHashtagRepository;
+import com.petory.dto.member.MemberFormDto;
+import com.petory.dto.member.MemberSearchDto;
+import com.petory.dto.member.MemberUpdateDto;
 import com.petory.entity.Hashtag;
+import com.petory.entity.Member;
 import com.petory.entity.MemberHashtag;
 import com.petory.entity.MemberHashtagId;
-import java.util.Arrays;
-import java.util.List;
-import com.petory.dto.HashtagDto;
+import com.petory.repository.HashtagRepository;
+import com.petory.repository.MemberHashtagRepository;
+import com.petory.repository.MemberRepository;
+
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @Transactional
@@ -333,4 +332,13 @@ public class MemberService implements UserDetailsService {
     
     return member.getMember_Role().name();
   }
+
+  public void updateAddress(Member member, double lat, double lng) {
+    if (member == null) {
+        throw new IllegalStateException("로그인 정보가 올바르지 않습니다. 다시 로그인 해주세요.");
+    }
+    String addressString = lat + "," + lng;
+    member.setMember_Address(addressString);
+    memberRepository.save(member);
+}
 }

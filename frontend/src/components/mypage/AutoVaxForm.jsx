@@ -296,6 +296,14 @@ const AutoVaxForm = ({
     setLastSearchRadius(radius);
 
     try {
+      // 위치 정보 서버에 저장 (최초 자동예약 시)
+      if (location) {
+        await axios.post('/members/update-address', {
+          lat: location.lat,
+          lng: location.lng,
+        });
+      }
+
       const requestData = {
         petId,
         location,

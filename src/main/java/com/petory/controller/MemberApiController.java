@@ -1,26 +1,46 @@
 package com.petory.controller;
 
-import com.petory.dto.*;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.petory.config.CustomUserDetails;
+import com.petory.config.JwtTokenProvider;
+import com.petory.dto.AddressUpdateDto;
+import com.petory.dto.ChatMemberDto;
+import com.petory.dto.HashtagDto;
+import com.petory.dto.LoginDto;
+import com.petory.dto.PhoneUpdateDto;
+import com.petory.dto.ResetPasswordDto;
+import com.petory.dto.SocialCheckDto;
 import com.petory.dto.member.MemberDto;
 import com.petory.dto.member.MemberFormDto;
 import com.petory.dto.member.MemberUpdateDto;
 import com.petory.entity.Member;
 import com.petory.service.MemberService;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.beans.factory.annotation.Autowired;
-import com.petory.config.JwtTokenProvider;
-import java.util.Map;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 @RestController
 @RequestMapping("/api/members")
@@ -285,6 +305,20 @@ public class MemberApiController {
     } catch (Exception e) {
       return ResponseEntity.status(500).body("역할 조회 중 오류가 발생했습니다.");
     }
+  }
+
+  // 자동 예약 신청 시 지정한 지도 좌표 멤버 엔티티에 저장
+  @PostMapping("/update-address")
+  public ResponseEntity<Void> updateAddress(
+          @RequestBody AddressUpdateDto dto,
+          @AuthenticationPrincipal CustomUserDetails userDetails
+  ) {
+      if (userDetails == null) {
+          return ResponseEntity.status(401).build(); // 인증 실패
+      }
+      Member member = userDetails.getMember();
+      memberService.updateAddress(member, dto.getLat(), dto.getLng());
+      return ResponseEntity.ok().build();
   }
 
 }

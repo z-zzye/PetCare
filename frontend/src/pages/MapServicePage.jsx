@@ -25,7 +25,6 @@ const MapServicePage = () => {
 
         ps.keywordSearch(keyword, (locationData, locationStatus) => {
             if (locationStatus === kakao.maps.services.Status.OK) {
-                // ▼▼▼ 오타 수정: locationData[-1] -> locationData[0] ▼▼▼
                 const firstPlace = locationData && locationData.length > 0 ? locationData[0] : null;
 
                 if (firstPlace) {
@@ -72,7 +71,6 @@ const MapServicePage = () => {
     useEffect(() => {
         if (!isLoaded || initialLoading) return;
         searchNearby(category, mapCenter);
-        // eslint-disable-next-line
     }, [category]);
 
     useEffect(() => {
@@ -91,7 +89,6 @@ const MapServicePage = () => {
                 alert("위치 정보 접근이 거부되었습니다. 기본 위치(서울시청) 주변을 검색합니다.");
             }
         );
-        // eslint-disable-next-line
     }, [isLoaded]);
 
     if (!isLoaded || initialLoading) {

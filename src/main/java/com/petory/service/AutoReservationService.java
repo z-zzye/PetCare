@@ -60,7 +60,7 @@ public class AutoReservationService {
   private final MemberRepository memberRepository;
 
   /**
-   * [수정] 백신별 예약 가능일과, 여러 날짜 옵션의 병원 목록을 함께 반환합니다.
+   * 백신별 예약 가능일과, 여러 날짜 옵션의 병원 목록을 함께 반환합니다.
    */
   @Transactional(readOnly = true)
   public DetailedSlotSearchResponseDto findAvailableSlots(SlotSearchRequestDto requestDto) {
@@ -114,7 +114,8 @@ public class AutoReservationService {
    */
   private List<VaccineDateInfo> calculateNextDates(Pet pet, List<String> targetVaccineNames) {
     Map<VaccineType, Long> completedCounts = getCompletedCounts(pet);
-    Optional<Reservation> lastCompleted = reservationRepository.findTopByPetAndReservationStatusOrderByReservationDateTimeDesc(pet, ReservationStatus.COMPLETED);
+    Optional<Reservation> lastCompleted = reservationRepository
+        .findTopByPetAndReservationStatusOrderByReservationDateTimeDesc(pet, ReservationStatus.COMPLETED);
 
     log.info("펫 ID {}의 다음 예약 계산 시작. 대상 백신: {}", pet.getPet_Num(), targetVaccineNames);
 
@@ -131,8 +132,11 @@ public class AutoReservationService {
         long alreadyDone = completedCounts.getOrDefault(vaccine, 0L);
         LocalDate idealDate = pet.getPet_Birth().plusWeeks(vaccine.getStartWeeks()).plusWeeks(alreadyDone * vaccine.getIntervalWeeks());
         LocalDate today = LocalDate.now();
-        LocalDate minGracePeriodDate = today.plusWeeks(1); // 규칙A: 최소 1주일의 준비 기간
-        LocalDate minIntervalDate = lastCompleted.map(r -> r.getReservationDateTime().toLocalDate().plusWeeks(3)).orElse(today); // 규칙B: 마지막 접종일로부터 최소 3주 간격
+        // 규칙A: 최소 1주일의 준비 기간
+        LocalDate minGracePeriodDate = today.plusWeeks(1);
+        // 규칙B: 마지막 접종일로부터 최소 3주 간격
+        LocalDate minIntervalDate = lastCompleted.map(
+          r -> r.getReservationDateTime().toLocalDate().plusWeeks(3)).orElse(today);
         LocalDate earliestPossibleDate = minGracePeriodDate.isAfter(minIntervalDate) ? minGracePeriodDate : minIntervalDate; // 두 규칙 중 더 나중 날짜 선택
         LocalDate finalDate = idealDate.isBefore(earliestPossibleDate) ? earliestPossibleDate : idealDate; // 최종 예약 가능일 조정
 
@@ -340,7 +344,7 @@ public class AutoReservationService {
     // 1. 펫 정보 조회 (결제 수단 체크를 위해 예약 소유자 정보가 필요)
     Pet pet = petRepository.findById(requestDto.getPetId())
       .orElseThrow(() -> new IllegalArgumentException("해당 펫을 찾을 수 없습니다."));
-    
+
     // 2. 예약 소유자(펫 주인)의 결제 수단 등록 여부 확인
     Member reservationOwner = pet.getMember();
     if (paymentMethodRepository.findByMember(reservationOwner).isEmpty()) {

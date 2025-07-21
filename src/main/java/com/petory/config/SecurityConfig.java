@@ -54,6 +54,7 @@ public class SecurityConfig {
               "/api/members/reset-password", //비밀번호찾기
               "/api/members/public/**", // 채팅에서 유저 닉네임 불러오기
               "/api/hashtags/signup", //회원가입용 해시태그 목록
+              "/api/members/update-address",
               "/api/members/*/hashtags", //회원가입 후 해시태그 저장
               "/ws/**", "/sockjs-node/**", "/static/**", "/**/*.html"//SockJS fallback, 정적리소스 fallback 요청 permit
             ).permitAll()

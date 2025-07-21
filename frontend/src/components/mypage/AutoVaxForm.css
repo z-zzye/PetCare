@@ -11,9 +11,11 @@
   color: #333;
 }
 
-.button-group {
+.autovax-form-container .button-group {
   display: flex;
   gap: 0.3rem;
+  justify-content: center !important;
+  flex-wrap: wrap;
 }
 
 .button-group button,
