@@ -493,7 +493,7 @@ const BoardWrite = () => {
           formData.append('type', 'board');
 
           const uploadResponse = await axiosInstance.post(
-            '/boards/upload-image',
+            '/board-images/upload',
             formData,
             {
               headers: {

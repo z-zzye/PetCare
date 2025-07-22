@@ -1,28 +1,33 @@
 package com.petory.service;
 
-import com.petory.dto.*;
-import com.petory.dto.walkingTrail.AmenityDto;
-import com.petory.dto.walkingTrail.WalkingTrailCreateDto;
-import com.petory.dto.walkingTrail.WalkingTrailDetailResponseDto;
-import com.petory.dto.walkingTrail.WalkingTrailListResponseDto;
-import com.petory.entity.*;
-import com.petory.repository.CleanBotLogRepository;
-import com.petory.repository.MemberRepository;
-import com.petory.repository.WalkingTrailCommentRepository;
-import com.petory.repository.WalkingTrailRepository;
-import com.petory.repository.WalkingTrailRecommendRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.petory.dto.CommentCreateDto;
+import com.petory.dto.walkingTrail.AmenityDto;
+import com.petory.dto.walkingTrail.WalkingTrailCreateDto;
+import com.petory.dto.walkingTrail.WalkingTrailDetailResponseDto;
+import com.petory.dto.walkingTrail.WalkingTrailListResponseDto;
+import com.petory.entity.CleanBotLog;
+import com.petory.entity.Member;
+import com.petory.entity.WalkingTrail;
+import com.petory.entity.WalkingTrailComment;
+import com.petory.entity.WalkingTrailRecommend;
+import com.petory.repository.CleanBotLogRepository;
+import com.petory.repository.MemberRepository;
+import com.petory.repository.WalkingTrailCommentRepository;
+import com.petory.repository.WalkingTrailRecommendRepository;
+import com.petory.repository.WalkingTrailRepository;
+
+import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor // final 필드에 대한 생성자를 자동으로 생성 (의존성 주입)
@@ -160,19 +165,26 @@ public class WalkingTrailServiceImpl implements WalkingTrailService {
     walkingTrailCommentRepository.delete(comment);
   }
 
+  /**
+   * 산책로 경로를 기준으로 주변 편의시설(카테고리별) 목록을 반환합니다.
+   * 1. 경로의 바운딩 박스를 계산해 1차 후보를 넓게 탐색
+   * 2. 여러 페이지(최대 3페이지) 반복 호출로 후보를 모두 수집
+   * 3. 중복 제거 후, 경로에서 200m 이내만 최종 필터링
+   */
   @Override
   public List<AmenityDto> searchAmenitiesNearTrail(Long trailId, String category) {
+    // 1. 산책로 경로(pathData) JSON을 파싱하여 경로 지점 리스트 생성
     WalkingTrail trail = walkingTrailRepository.findById(trailId)
         .orElseThrow(() -> new EntityNotFoundException("해당 산책로 없음"));
     String pathData = trail.getPathData();
     ObjectMapper objectMapper = new ObjectMapper();
-    // 1. 경로 파싱 및 바운딩 박스 계산
     List<Map<String, Object>> coordinates;
     try {
         coordinates = objectMapper.readValue(pathData, new TypeReference<List<Map<String, Object>>>() {});
     } catch (Exception e) {
         return List.of();
     }
+    // 2. 각 지점의 위도/경도에서 바운딩 박스(최소/최대 위경도) 계산
     List<Point> pathPoints = coordinates.stream()
         .map(coord -> new Point((double)coord.get("lat"), (double)coord.get("lng")))
         .collect(Collectors.toList());
@@ -181,16 +193,46 @@ public class WalkingTrailServiceImpl implements WalkingTrailService {
     double minLng = pathPoints.stream().mapToDouble(p -> p.lng).min().orElse(0);
     double maxLng = pathPoints.stream().mapToDouble(p -> p.lng).max().orElse(0);
 
-    // 2. 바운딩 박스 내 편의시설 1차 검색 (kakaoMapService.searchInBounds 등으로 위임)
-    List<AmenityDto> allAmenities = kakaoMapService.searchInBounds(category, minLat, maxLat, minLng, maxLng);
+    // 3. 바운딩 박스에 threshold(200m)만큼 여유(버퍼)를 더해 탐색 범위 확장
+    double threshold = 200.0;
+    double latBuffer = threshold / 111000.0; // 위도 1도 ≈ 111km
+    double avgLat = (minLat + maxLat) / 2.0;
+    double lngBuffer = threshold / (111000.0 * Math.cos(Math.toRadians(avgLat))); // 경도 1도 환산
 
-    // 3. 경로 근접 필터링
-    double threshold = 500.0;
-    List<AmenityDto> filtered = allAmenities.stream()
+    double searchMinLat = minLat - latBuffer;
+    double searchMaxLat = maxLat + latBuffer;
+    double searchMinLng = minLng - lngBuffer;
+    double searchMaxLng = maxLng + lngBuffer;
+
+    // 4. 카카오맵 API를 최대 3페이지(15개씩) 반복 호출하여 후보 편의시설 모두 수집
+    List<AmenityDto> allAmenities = new java.util.ArrayList<>();
+    int maxPage = 3;
+    for (int page = 1; page <= maxPage; page++) {
+        // 각 페이지별로 API 호출
+        List<AmenityDto> pageAmenities = kakaoMapService.searchInBounds
+              (category, searchMinLat, searchMaxLat, searchMinLng, searchMaxLng, page);
+        if (pageAmenities == null || pageAmenities.isEmpty()) break;
+        allAmenities.addAll(pageAmenities);
+        if (pageAmenities.size() < 15) break; // 마지막 페이지 도달 시 중단
+    }
+    // 5. 장소명+주소 기준으로 중복 편의시설 제거
+    java.util.Set<String> seen = new java.util.HashSet<>();
+    List<AmenityDto> uniqueAmenities = new java.util.ArrayList<>();
+    for (AmenityDto dto : allAmenities) {
+        String key = dto.getName() + ":" + dto.getAddress();
+        if (!seen.contains(key)) {
+            seen.add(key);
+            uniqueAmenities.add(dto);
+        }
+    }
+    // 6. 경로의 각 지점과 편의시설 간의 거리를 계산하여 200m 이내만 필터링
+    double thresholdDistance = 200.0;
+    List<AmenityDto> filtered = uniqueAmenities.stream()
         .filter(amenity -> pathPoints.stream()
-            .anyMatch(p -> distance(p.lat, p.lng, amenity.getLat(), amenity.getLng()) < threshold))
+            .anyMatch(p -> distance(p.lat, p.lng, amenity.getLat(), amenity.getLng()) < thresholdDistance))
         .collect(Collectors.toList());
 
+    // 7. 최종 결과 반환
     return filtered;
   }
 

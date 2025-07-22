@@ -7,7 +7,7 @@ import '../components/css/MapServicePage.css';
 
 const MapServicePage = () => {
     const { isLoaded } = useContext(KakaoMapsScriptContext);
-    const [mapCenter, setMapCenter] = useState({ lat: 37.5665, lng: 126.9780 });
+    const [mapCenter, setMapCenter] = useState({ lat: 37.4894, lng: 126.7243 });
     const [initialLoading, setInitialLoading] = useState(true);
     const [places, setPlaces] = useState([]);
     const [category, setCategory] = useState('동물병원');
@@ -86,7 +86,7 @@ const MapServicePage = () => {
                 console.error("Geolocation 에러:", error);
                 searchNearby(category, mapCenter);
                 setInitialLoading(false);
-                alert("위치 정보 접근이 거부되었습니다. 기본 위치(서울시청) 주변을 검색합니다.");
+                alert("위치 정보 접근이 거부되었습니다. 기본 위치(부평역) 주변을 검색합니다.");
             }
         );
     }, [isLoaded]);

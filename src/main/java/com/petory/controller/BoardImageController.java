@@ -45,24 +45,9 @@ public class BoardImageController {
     @PostMapping("/upload")
     public ResponseEntity<BoardImageUploadDto> uploadImage(
             @RequestParam("file") MultipartFile file,
-            @RequestParam("boardId") Long boardId,
+            @RequestParam(value = "boardId", required = false) Long boardId,
             @AuthenticationPrincipal UserDetails userDetails) {
-        
         try {
-            // 게시글 존재 확인
-            Board board = boardRepository.findById(boardId)
-                    .orElseThrow(() -> new IllegalArgumentException("해당 게시글을 찾을 수 없습니다."));
-
-            // 작성자 본인 확인
-            if (!board.getMember().getMember_Email().equals(userDetails.getUsername())) {
-                return ResponseEntity.badRequest().body(
-                    BoardImageUploadDto.builder()
-                        .success(false)
-                        .errorMessage("게시글을 수정할 권한이 없습니다.")
-                        .build()
-                );
-            }
-
             // 파일 검증
             String validationError = validateFile(file);
             if (validationError != null) {
@@ -92,38 +77,46 @@ public class BoardImageController {
             // 파일 URL 생성
             String fileUrl = "/uploads/board-images/" + storedFileName;
 
-            // 다음 displayOrder 계산
-            Integer nextDisplayOrder = boardImageRepository.findMaxDisplayOrderByBoardId(boardId);
-            if (nextDisplayOrder == null) {
-                nextDisplayOrder = 1;
-            } else {
-                nextDisplayOrder++;
+            BoardImage.BoardImageBuilder builder = BoardImage.builder()
+                .originalFileName(originalFilename)
+                .storedFileName(storedFileName)
+                .filePath(filePath.toString())
+                .fileUrl(fileUrl)
+                .fileSize(file.getSize())
+                .contentType(file.getContentType());
+
+            Integer nextDisplayOrder = 1;
+            if (boardId != null) {
+                Board board = boardRepository.findById(boardId)
+                    .orElseThrow(() -> new IllegalArgumentException("해당 게시글을 찾을 수 없습니다."));
+                if (!board.getMember().getMember_Email().equals(userDetails.getUsername())) {
+                    return ResponseEntity.badRequest().body(
+                        BoardImageUploadDto.builder()
+                            .success(false)
+                            .errorMessage("게시글을 수정할 권한이 없습니다.")
+                            .build()
+                    );
+                }
+                builder.board(board);
+                Integer maxOrder = boardImageRepository.findMaxDisplayOrderByBoardId(boardId);
+                nextDisplayOrder = (maxOrder == null) ? 1 : maxOrder + 1;
             }
+            builder.displayOrder(nextDisplayOrder);
 
-            // BoardImage 엔티티 생성 및 저장
-            BoardImage boardImage = BoardImage.builder()
-                    .board(board)
-                    .originalFileName(originalFilename)
-                    .storedFileName(storedFileName)
-                    .filePath(filePath.toString())
-                    .fileUrl(fileUrl)
-                    .fileSize(file.getSize())
-                    .contentType(file.getContentType())
-                    .displayOrder(nextDisplayOrder)
-                    .build();
-
+            // 저장
+            BoardImage boardImage = builder.build();
             boardImageRepository.save(boardImage);
 
             // 성공 응답
             BoardImageUploadDto response = BoardImageUploadDto.builder()
-                    .originalFileName(originalFilename)
-                    .storedFileName(storedFileName)
-                    .fileUrl(fileUrl)
-                    .fileSize(file.getSize())
-                    .contentType(file.getContentType())
-                    .displayOrder(nextDisplayOrder)
-                    .success(true)
-                    .build();
+                .originalFileName(originalFilename)
+                .storedFileName(storedFileName)
+                .fileUrl(fileUrl)
+                .fileSize(file.getSize())
+                .contentType(file.getContentType())
+                .displayOrder(nextDisplayOrder)
+                .success(true)
+                .build();
 
             return ResponseEntity.ok(response);
 

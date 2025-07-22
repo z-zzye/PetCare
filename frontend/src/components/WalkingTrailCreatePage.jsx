@@ -28,7 +28,7 @@ const WalkingTrailCreatePage = () => {
         const kakao = window.kakao;
         kakao.maps.load(() => {
             const options = {
-                center: new kakao.maps.LatLng(37.566826, 126.9786567),
+                center: new kakao.maps.LatLng(37.4894, 126.7243),
                 level: 5,
             };
             const mapInstance = new kakao.maps.Map(mapContainer.current, options);

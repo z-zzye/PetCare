@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import Header from './Header';
 
 const { kakao } = window; // 카카오맵 API 사용
@@ -21,29 +21,29 @@ const WalkingTrailDetailPage = () => {
     // ✅ 1. localStorage에서 토큰을 가져옵니다.
     const token = localStorage.getItem('token');
     const headers = {
-        'Content-Type': 'application/json',
+      'Content-Type': 'application/json',
     };
 
     // ✅ 2. 토큰이 존재하면 Authorization 헤더에 추가합니다.
     if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
+      headers['Authorization'] = `Bearer ${token}`;
     }
 
     // ✅ 3. 헤더를 fetch 요청에 포함합니다.
     fetch(`/api/trails/${trailId}`, { headers })
-      .then(res => {
+      .then((res) => {
         // ✅ 4. 응답이 실패(예: 401)했을 경우 에러를 발생시킵니다.
         if (!res.ok) {
-            throw new Error(`HTTP error! status: ${res.status}`);
+          throw new Error(`HTTP error! status: ${res.status}`);
         }
         return res.json();
       })
-      .then(data => {
+      .then((data) => {
         setTrail(data);
         setIsLoading(false);
       })
-      .catch(error => {
-        console.error("상세 정보를 불러오는 중 오류 발생:", error);
+      .catch((error) => {
+        console.error('상세 정보를 불러오는 중 오류 발생:', error);
         setIsLoading(false);
       });
   };
@@ -60,11 +60,21 @@ const WalkingTrailDetailPage = () => {
     }
     const kakao = window.kakao;
     const path = JSON.parse(trail.pathData);
-    const linePath = path.map(p => new kakao.maps.LatLng(p.lat, p.lng));
+    const linePath = path.map((p) => new kakao.maps.LatLng(p.lat, p.lng));
     //const mapCenter = linePath.length > 0 ? linePath[0] : new kakao.maps.LatLng(37.5665, 126.9780); // 경로가 없을 경우 기본 위치(서울시청)
 
+    let minLat = Math.min(...path.map((p) => p.lat));
+    let maxLat = Math.max(...path.map((p) => p.lat));
+    let minLng = Math.min(...path.map((p) => p.lng));
+    let maxLng = Math.max(...path.map((p) => p.lng));
+
+    // 바운딩 박스 중심 계산
+    let centerLat = (minLat + maxLat) / 2;
+    let centerLng = (minLng + maxLng) / 2;
+    const mapCenter = new kakao.maps.LatLng(centerLat, centerLng);
+
     const mapInstance = new kakao.maps.Map(mapRef.current, {
-      center: linePath[0],
+      center: mapCenter,
       level: 4,
     });
 
@@ -81,7 +91,7 @@ const WalkingTrailDetailPage = () => {
   useEffect(() => {
     if (!map || !Array.isArray(amenities)) return;
     // 기존 마커/인포윈도우 제거
-    markers.forEach(marker => marker.setMap(null));
+    markers.forEach((marker) => marker.setMap(null));
     if (currentInfoWindow) currentInfoWindow.close();
 
     const kakao = window.kakao;
@@ -126,61 +136,61 @@ const WalkingTrailDetailPage = () => {
     // ✅ 1. localStorage에서 토큰을 가져옵니다.
     const token = localStorage.getItem('token');
     const headers = {
-        'Content-Type': 'application/json',
+      'Content-Type': 'application/json',
     };
 
     // ✅ 2. 토큰이 존재하면 Authorization 헤더에 추가합니다.
     if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
+      headers['Authorization'] = `Bearer ${token}`;
     }
 
     // ✅ 3. 헤더를 fetch 요청에 포함합니다.
     fetch(`/api/trails/${trailId}/amenities?category=${category}`, { headers })
-      .then(res => {
+      .then((res) => {
         if (!res.ok) {
-            throw new Error(`HTTP error! status: ${res.status}`);
+          throw new Error(`HTTP error! status: ${res.status}`);
         }
         return res.json();
       })
-      .then(data => setAmenities(data))
-      .catch(error => console.error("주변 시설 검색 오류:", error));
+      .then((data) => setAmenities(data))
+      .catch((error) => console.error('주변 시설 검색 오류:', error));
   };
 
-    /**
-     * 댓글 작성 버튼 클릭 핸들러
-     */
-    const handleCommentSubmit = () => {
-        if (!newComment.trim()) {
-            alert('댓글 내용을 입력해주세요.');
-            return;
-        }
+  /**
+   * 댓글 작성 버튼 클릭 핸들러
+   */
+  const handleCommentSubmit = () => {
+    if (!newComment.trim()) {
+      alert('댓글 내용을 입력해주세요.');
+      return;
+    }
 
-        const token = localStorage.getItem('token');
-        if (!token) {
-            alert('로그인이 필요합니다.');
-            return;
-        }
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('로그인이 필요합니다.');
+      return;
+    }
 
-        fetch(`/api/trails/${trailId}/comments`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ content: newComment })
-        })
-        .then(res => {
-            if (res.ok) {
-                alert('댓글이 성공적으로 작성되었습니다.');
-                setNewComment('');
-                // ★★★★★ 3. 이제 정의된 함수를 여기서 호출할 수 있습니다. ★★★★★
-                fetchTrailData(); // 댓글 목록 새로고침
-            } else {
-                alert('댓글 작성에 실패했습니다.');
-            }
-        })
-        .catch(error => console.error("댓글 작성 중 오류 발생:", error));
-    };
+    fetch(`/api/trails/${trailId}/comments`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ content: newComment }),
+    })
+      .then((res) => {
+        if (res.ok) {
+          alert('댓글이 성공적으로 작성되었습니다.');
+          setNewComment('');
+          // ★★★★★ 3. 이제 정의된 함수를 여기서 호출할 수 있습니다. ★★★★★
+          fetchTrailData(); // 댓글 목록 새로고침
+        } else {
+          alert('댓글 작성에 실패했습니다.');
+        }
+      })
+      .catch((error) => console.error('댓글 작성 중 오류 발생:', error));
+  };
 
   // 추천 버튼 클릭 핸들러 추가
   const handleRecommend = () => {
@@ -192,10 +202,10 @@ const WalkingTrailDetailPage = () => {
     fetch(`/api/trails/${trailId}/recommend`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     })
-      .then(async res => {
+      .then(async (res) => {
         if (res.ok) {
           alert('추천이 완료되었습니다!');
           fetchTrailData(); // 추천수 갱신
@@ -208,7 +218,7 @@ const WalkingTrailDetailPage = () => {
           alert('추천 처리 중 오류가 발생했습니다.');
         }
       })
-      .catch(err => {
+      .catch((err) => {
         alert('네트워크 오류로 추천에 실패했습니다.');
         console.error(err);
       });
@@ -227,48 +237,126 @@ const WalkingTrailDetailPage = () => {
     <>
       <Header />
       <div className="common-container trail-list-container">
-        <Link to="/trails" className="trail-list-link" style={{ color: '#223A5E', fontWeight: 600 }}>{'< 목록으로 돌아가기'}</Link>
+        <Link
+          to="/trails"
+          className="trail-list-link"
+          style={{ color: '#223A5E', fontWeight: 600 }}
+        >
+          {'< 목록으로 돌아가기'}
+        </Link>
         <h1 className="common-title">산책로 상세 정보</h1>
-        <h3 className="trail-list-title" style={{ color: '#223A5E' }}>산책로 경로</h3>
-        <div ref={mapRef} style={{ width: '100%', height: '400px', border: '1.5px solid #e9ecef', borderRadius: '14px', marginBottom: '16px' }}></div>
-        <h2 className="trail-list-title" style={{ color: '#223A5E', marginTop: '18px' }}>{trail.name}</h2>
+        <h3 className="trail-list-title" style={{ color: '#223A5E' }}>
+          산책로 경로
+        </h3>
+        <div
+          ref={mapRef}
+          style={{
+            width: '100%',
+            height: '400px',
+            border: '1.5px solid #e9ecef',
+            borderRadius: '14px',
+            marginBottom: '16px',
+          }}
+        ></div>
+        <h2
+          className="trail-list-title"
+          style={{ color: '#223A5E', marginTop: '18px' }}
+        >
+          {trail.name}
+        </h2>
         <p className="trail-list-info">{trail.description}</p>
-        <h3 className="trail-list-title" style={{ color: '#223A5E', marginTop: '24px' }}>주변 편의시설 검색</h3>
+        <h3
+          className="trail-list-title"
+          style={{ color: '#223A5E', marginTop: '24px' }}
+        >
+          주변 편의시설 검색
+        </h3>
         <div style={{ display: 'flex', gap: '10px', marginBottom: '12px' }}>
-          <button className="common-btn trail-search-btn" onClick={() => handleAmenitySearch('동물병원')}>동물병원</button>
-          <button className="common-btn trail-search-btn" onClick={() => handleAmenitySearch('카페')}>카페</button>
-          <button className="common-btn trail-search-btn" onClick={() => handleAmenitySearch('편의점')}>편의점</button>
+          <button
+            className="common-btn trail-search-btn"
+            onClick={() => handleAmenitySearch('동물병원')}
+          >
+            동물병원
+          </button>
+          <button
+            className="common-btn trail-search-btn"
+            onClick={() => handleAmenitySearch('카페')}
+          >
+            카페
+          </button>
+          <button
+            className="common-btn trail-search-btn"
+            onClick={() => handleAmenitySearch('편의점')}
+          >
+            편의점
+          </button>
         </div>
         <ul className="trail-list-ul">
-          {Array.isArray(amenities) && amenities.map(place => (
-            <li key={place.name + place.address} className="trail-list-card">
-              <strong className="trail-list-title">{place.name}</strong> <span className="trail-list-info">({place.distance})</span><br/>
-              <span className="trail-list-info">{place.address}</span> <a href={place.placeUrl} target="_blank" rel="noopener noreferrer">상세보기</a>
-            </li>
-          ))}
+          {Array.isArray(amenities) &&
+            amenities.map((place) => (
+              <li key={place.name + place.address} className="trail-list-card">
+                <strong className="trail-list-title">{place.name}</strong>{' '}
+                <span className="trail-list-info">({place.distance})</span>
+                <br />
+                <span className="trail-list-info">{place.address}</span>{' '}
+                <a
+                  href={place.placeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  상세보기
+                </a>
+              </li>
+            ))}
         </ul>
-        <p className="trail-list-recommend" style={{ color: '#223A5E', marginTop: '18px' }}>❤️ 추천수: {trail.recommends}</p>
-        <button className="common-btn trail-create-btn" onClick={handleRecommend}>추천하기</button>
-        <h3 className="trail-list-title" style={{ color: '#223A5E', marginTop: '24px' }}>댓글 ({trail.comments.length})</h3>
+        <p
+          className="trail-list-recommend"
+          style={{ color: '#223A5E', marginTop: '18px' }}
+        >
+          ❤️ 추천수: {trail.recommends}
+        </p>
+        <button
+          className="common-btn trail-create-btn"
+          onClick={handleRecommend}
+        >
+          추천하기
+        </button>
+        <h3
+          className="trail-list-title"
+          style={{ color: '#223A5E', marginTop: '24px' }}
+        >
+          댓글 ({trail.comments.length})
+        </h3>
         <div style={{ marginBottom: '10px' }}>
-          {trail.comments.map(comment => (
-            <div key={comment.id} className="trail-list-info" style={{borderBottom: '1px solid #eee', padding: '5px 0'}}>
-              <strong style={{ color: '#223A5E' }}>{comment.authorNickName}: </strong>
+          {trail.comments.map((comment) => (
+            <div
+              key={comment.id}
+              className="trail-list-info"
+              style={{ borderBottom: '1px solid #eee', padding: '5px 0' }}
+            >
+              <strong style={{ color: '#223A5E' }}>
+                {comment.authorNickName}:{' '}
+              </strong>
               <span>{comment.content}</span>
             </div>
           ))}
         </div>
-        <div style={{marginTop: '10px', display: 'flex', gap: '8px'}}>
+        <div style={{ marginTop: '10px', display: 'flex', gap: '8px' }}>
           <input
-              type="text"
-              placeholder="댓글을 입력하세요"
-              className="trail-search-input"
-              style={{width: '80%'}}
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleCommentSubmit()}
+            type="text"
+            placeholder="댓글을 입력하세요"
+            className="trail-search-input"
+            style={{ width: '80%' }}
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleCommentSubmit()}
           />
-          <button className="common-btn trail-search-btn" onClick={handleCommentSubmit}>작성</button>
+          <button
+            className="common-btn trail-search-btn"
+            onClick={handleCommentSubmit}
+          >
+            작성
+          </button>
         </div>
       </div>
     </>

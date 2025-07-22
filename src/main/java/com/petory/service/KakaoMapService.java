@@ -1,16 +1,22 @@
 package com.petory.service;
 
-import com.petory.dto.walkingTrail.AmenityDto;
-import lombok.RequiredArgsConstructor;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import com.petory.dto.walkingTrail.AmenityDto;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -22,15 +28,23 @@ public class KakaoMapService {
     private final RestTemplate restTemplate = new RestTemplate();
 
     /**
-     * 카카오맵 바운딩 박스 내 장소(카테고리) 검색
+     * 카카오맵 바운딩 박스 내 장소(카테고리) 검색 (기존: page 파라미터 없음)
      */
     public List<AmenityDto> searchInBounds(String category, double minLat, double maxLat, double minLng, double maxLng) {
+        return searchInBounds(category, minLat, maxLat, minLng, maxLng, 1);
+    }
+
+    /**
+     * 카카오맵 바운딩 박스 내 장소(카테고리) 검색 (page 파라미터 추가)
+     */
+    public List<AmenityDto> searchInBounds(String category, double minLat, double maxLat, double minLng, double maxLng, int page) {
         String rect = String.format("%f,%f,%f,%f", minLng, minLat, maxLng, maxLat);
         String url;
         url = UriComponentsBuilder.fromHttpUrl("https://dapi.kakao.com/v2/local/search/keyword.json")
           .queryParam("query", category)
           .queryParam("rect", rect)
           .queryParam("size", 15)
+          .queryParam("page", page)
           .build().toUriString();
 
         System.out.println("카카오맵 API 요청 URL: " + url);

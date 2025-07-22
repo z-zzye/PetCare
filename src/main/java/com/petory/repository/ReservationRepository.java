@@ -1,15 +1,17 @@
 package com.petory.repository;
 
-import com.petory.constant.ReservationStatus;
-import com.petory.entity.Member;
-import com.petory.entity.Pet;
-import com.petory.entity.Reservation;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import com.petory.constant.ReservationStatus;
+import com.petory.entity.Pet;
+import com.petory.entity.Reservation;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
@@ -27,4 +29,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
   //
   @Query("SELECT r FROM Reservation r JOIN r.member m WHERE m.member_Id = :memberId ORDER BY r.reservationDateTime DESC")
   List<Reservation> findByMemberReservations(Long memberId);
+
+  // 배치로 예약 상태를 업데이트하는 메서드
+  @Modifying
+  @Query("UPDATE Reservation r SET r.reservationStatus = :status WHERE r.id IN :reservationIds")
+  int updateStatusBatch(@Param("reservationIds") List<Long> reservationIds, @Param("status") ReservationStatus status);
 }

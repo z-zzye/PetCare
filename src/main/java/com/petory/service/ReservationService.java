@@ -209,12 +209,9 @@ public class ReservationService {
    * @param adminEmail    요청자의 이메일 (로그 기록용)
    */
   public void cancelByClinic(Long reservationId, String adminEmail) {
-    log.info("예약 ID {}의 '관리자' 취소 처리를 시작합니다. 요청자: {}", adminEmail);
+    log.info("예약 ID {}의 '관리자' 취소 처리를 시작합니다. 요청자: {}", reservationId, adminEmail);
     Reservation reservation = reservationRepository.findById(reservationId)
       .orElseThrow(() -> new IllegalArgumentException("해당 예약을 찾을 수 없습니다."));
-
-    // ✅ [핵심] 관리자/병원은 소유권 검사를 하지 않습니다.
-    // TODO: 추후 adminEmail이 실제로 ADMIN/VET 권한을 가졌는지 확인하는 로직 추가 가능
 
     // 공통 취소 로직 호출
     processCancellation(reservation);
@@ -270,9 +267,9 @@ public class ReservationService {
   @Transactional(readOnly = true)
   public List<ReservationDetailDto> getAllAutoVaxReservations() {
     log.info("관리자용 자동 예약 목록을 조회합니다.");
-    
+
     List<Reservation> reservations = reservationRepository.findAll();
-    
+
     return reservations.stream()
       .map(ReservationDetailDto::new)
       .collect(Collectors.toList());
@@ -283,32 +280,32 @@ public class ReservationService {
    */
   public void updateReservationStatusByAdmin(Long reservationId, String newStatus) {
     log.info("관리자가 예약 ID {}의 상태를 {}로 변경합니다.", reservationId, newStatus);
-    
+
     Reservation reservation = reservationRepository.findById(reservationId)
       .orElseThrow(() -> new IllegalArgumentException("해당 예약을 찾을 수 없습니다."));
-    
+
     ReservationStatus status;
     try {
       status = ReservationStatus.valueOf(newStatus.toUpperCase());
     } catch (IllegalArgumentException e) {
       throw new IllegalArgumentException("유효하지 않은 상태값입니다: " + newStatus);
     }
-    
+
     // 완료 처리인 경우 관리자용 완료 처리 메서드 호출
     if (status == ReservationStatus.COMPLETED) {
       completeAndScheduleNextByAdmin(reservationId);
       return;
     }
-    
+
     // 취소 처리인 경우
     if (status == ReservationStatus.CANCELED) {
       // 이전 상태 저장
       ReservationStatus previousStatus = reservation.getReservationStatus();
-      
+
       // 상태 변경
       reservation.setReservationStatus(status);
       log.info("예약 ID: {} 상태를 {}에서 {}로 변경했습니다.", reservationId, previousStatus, status);
-      
+
       // 취소 알림 생성
       try {
         notificationService.createAutoVaxCancelNotification(
@@ -336,7 +333,7 @@ public class ReservationService {
       .orElseThrow(() -> new IllegalArgumentException("해당 예약을 찾을 수 없습니다."));
 
     // 관리자는 권한 체크 없이 상태만 확인
-    if (completedReservation.getReservationStatus() != ReservationStatus.CONFIRMED && 
+    if (completedReservation.getReservationStatus() != ReservationStatus.CONFIRMED &&
         completedReservation.getReservationStatus() != ReservationStatus.PENDING) {
       throw new IllegalArgumentException("확정(CONFIRMED) 또는 대기중(PENDING) 상태의 예약만 완료 처리할 수 있습니다.");
     }
